@@ -60,7 +60,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-screen bg-[#f5f8fa] text-[#163b58]">
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#dce8ee] bg-white lg:flex">
+        <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#dce8ee] bg-white lg:flex">
         <div className="flex h-20 items-center border-b border-[#edf2f5] px-7">
           <Link href="/dashboard" aria-label="Hasvik home">
             <Image
@@ -228,6 +228,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </footer>
       </div>
 
+      {/* 
+
+      
       <nav
         className="fixed inset-x-0 bottom-0 z-30 flex h-18 items-center justify-around border-t border-[#dce8ee] bg-white px-2 shadow-[0_-8px_24px_rgba(30,74,99,0.08)] lg:hidden"
         aria-label="Mobile bottom navigation"
@@ -253,7 +256,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <MoreHorizontal className="size-[19px]" strokeWidth={1.8} />
           More
         </Link>
-      </nav>
+      </nav> */}
     </div>
   );
 }
