@@ -1,7 +1,19 @@
 "use client";
 
 import React, { useState } from "react";
-import { Download, SlidersHorizontal, ChevronDown, Phone, MoreVertical, ChevronLeft, ChevronRight } from "lucide-react";
+import {
+  Download,
+  SlidersHorizontal,
+  ChevronDown,
+  Phone,
+  MoreVertical,
+  ChevronLeft,
+  ChevronRight,
+  MapPin,
+  Tag,
+  Clock,
+  Calendar,
+} from "lucide-react";
 import { BusinessItem } from "./types";
 
 // Official SVG WhatsApp Icon Component
@@ -35,30 +47,30 @@ export default function BusinessTable({
 
   return (
     <div className="overflow-hidden rounded-2xl border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
-      {/* Table Card Top Bar */}
-      <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] px-6 py-5 sm:flex-row sm:items-center sm:justify-between">
+      {/* Top Bar */}
+      <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] px-4 py-4 sm:px-6 sm:py-5 sm:flex-row sm:items-center sm:justify-between">
         <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
           Businesses <span className="font-medium text-[#64748b]">({displayCount})</span>
         </h2>
 
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-2.5 sm:gap-3">
           <button
             type="button"
             onClick={onExport}
-            className="flex h-10 items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc]"
+            className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:flex-initial sm:px-4"
           >
             <Download className="size-4 text-[#64748b]" />
             Export
           </button>
 
-          <div className="relative">
+          <div className="relative flex-1 sm:flex-initial">
             <button
               type="button"
               onClick={() => {
                 const nextSort = sortOrder === "Latest First" ? "Oldest First" : "Latest First";
                 if (onSortOrderChange) onSortOrderChange(nextSort);
               }}
-              className="flex h-10 items-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-4 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc]"
+              className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:w-auto sm:px-4"
             >
               <SlidersHorizontal className="size-4 text-[#64748b]" />
               <span>{sortOrder}</span>
@@ -68,8 +80,93 @@ export default function BusinessTable({
         </div>
       </div>
 
-      {/* Table */}
-      <div className="overflow-x-auto">
+      {/* MOBILE / TABLET VIEW: Card List (< lg) */}
+      <div className="block lg:hidden">
+        {businesses.length === 0 ? (
+          <div className="py-12 text-center text-sm text-[#64748b]">
+            No businesses found matching the current filters.
+          </div>
+        ) : (
+          <div className="space-y-3 p-3 sm:p-4">
+            {businesses.map((item) => (
+              <div
+                key={item.id}
+                className="flex items-start justify-between gap-3 rounded-2xl border border-[#eaf0f6] bg-white p-4 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all hover:shadow-md"
+              >
+                {/* Left Side: Avatar + Business Info */}
+                <div className="flex items-start gap-3 min-w-0">
+                  <div
+                    className={`flex size-11 shrink-0 items-center justify-center rounded-full text-sm font-bold ${item.avatarBg} ${item.avatarTextColor}`}
+                  >
+                    {item.initials}
+                  </div>
+                  <div className="min-w-0">
+                    <h3 className="truncate text-sm font-bold text-[#0f172a] sm:text-base">
+                      {item.name}
+                    </h3>
+                    <p className="mt-0.5 text-xs text-[#64748b]">
+                      {item.category} • {item.city}
+                    </p>
+                    <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
+                  </div>
+                </div>
+
+                {/* Right Side: Status Badge, Follow-up, Actions */}
+                <div className="flex flex-col items-end justify-between self-stretch shrink-0 gap-2">
+                  {/* Status Badge */}
+                  <div>
+                    {item.status === "Active" ? (
+                      <span className="inline-flex items-center rounded-md bg-[#ecfdf3] px-2.5 py-0.5 text-[11px] font-semibold text-[#027a48]">
+                        Active
+                      </span>
+                    ) : (
+                      <span className="inline-flex items-center rounded-md bg-[#f2f4f7] px-2.5 py-0.5 text-[11px] font-semibold text-[#667085]">
+                        Inactive
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Follow-up text */}
+                  <div className="text-[11px] font-medium text-[#64748b]">
+                    {item.nextFollowUpType === "today" ? (
+                      <span className="text-[#027a48] font-medium">Today</span>
+                    ) : item.nextFollowUpType === "tomorrow" ? (
+                      <span className="text-[#175cd3] font-medium">Tomorrow</span>
+                    ) : item.nextFollowUpType === "date" ? (
+                      <span className="text-[#175cd3] font-medium">{item.nextFollowUp}</span>
+                    ) : (
+                      <span>-</span>
+                    )}
+                  </div>
+
+                  {/* Action Icons (Phone + WhatsApp) */}
+                  <div className="flex items-center gap-3 pt-0.5">
+                    <a
+                      href={`tel:${item.phone}`}
+                      title={`Call ${item.name}`}
+                      className="flex size-7 items-center justify-center rounded-lg text-[#059669] transition-colors hover:bg-[#ecfdf3]"
+                    >
+                      <Phone className="size-4" />
+                    </a>
+                    <a
+                      href={`https://wa.me/91${item.phone}`}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      title={`WhatsApp ${item.name}`}
+                      className="flex size-7 items-center justify-center rounded-lg text-[#16a34a] transition-colors hover:bg-[#ecfdf3]"
+                    >
+                      <WhatsAppIcon className="size-4" />
+                    </a>
+                  </div>
+                </div>
+              </div>
+            ))}
+          </div>
+        )}
+      </div>
+
+      {/* DESKTOP VIEW: Table (>= lg) */}
+      <div className="hidden lg:block overflow-x-auto">
         <table className="w-full min-w-[900px] text-left">
           <thead className="bg-[#f8fafc] text-[13px] font-semibold text-[#475569]">
             <tr className="border-b border-[#f1f5f9]">
@@ -192,14 +289,14 @@ export default function BusinessTable({
       </div>
 
       {/* Pagination Footer */}
-      <div className="flex flex-col gap-4 border-t border-[#f1f5f9] px-6 py-4.5 sm:flex-row sm:items-center sm:justify-between">
-        <p className="text-sm font-medium text-[#64748b]">
+      <div className="flex flex-col gap-4 border-t border-[#f1f5f9] px-4 py-4 sm:px-6 sm:py-4.5 sm:flex-row sm:items-center sm:justify-between">
+        <p className="text-center text-sm font-medium text-[#64748b] sm:text-left">
           Showing <span className="font-semibold text-[#0f172a]">1</span> to{" "}
           <span className="font-semibold text-[#0f172a]">{Math.min(10, displayCount)}</span> of{" "}
           <span className="font-semibold text-[#0f172a]">{displayCount}</span> results
         </p>
 
-        <div className="flex items-center gap-4">
+        <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end sm:gap-4">
           <div className="flex items-center gap-1.5">
             <button
               type="button"

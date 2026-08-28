@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import { Plus } from "lucide-react";
 import {
   BusinessStats,
   BusinessFilters,
@@ -15,8 +16,8 @@ const INITIAL_BUSINESS_DATA: BusinessItem[] = [
     name: "Shree Balaji Traders",
     phone: "9876543210",
     initials: "SB",
-    avatarBg: "bg-[#fee4e2]",
-    avatarTextColor: "text-[#d92d20]",
+    avatarBg: "bg-[#e0eafe]",
+    avatarTextColor: "text-[#2e90fa]",
     category: "Furniture Shop",
     city: "Ballia",
     status: "Active",
@@ -57,8 +58,8 @@ const INITIAL_BUSINESS_DATA: BusinessItem[] = [
     name: "Gupta Construction",
     phone: "8877665544",
     initials: "GC",
-    avatarBg: "bg-[#fef0c7]",
-    avatarTextColor: "text-[#dc6803]",
+    avatarBg: "bg-[#fee4e2]",
+    avatarTextColor: "text-[#d92d20]",
     category: "Construction",
     city: "Varanasi",
     status: "Active",
@@ -158,11 +159,14 @@ export default function BusinessesPage() {
   }, [searchTerm, selectedCategory, selectedStatus, selectedCity]);
 
   return (
-    <div className="space-y-6 pb-12">
-      {/* 1. Metric / KPI Stats Cards */}
-      <BusinessStats stats={STATS_DATA} />
+    <div className="space-y-4 sm:space-y-6 pb-12">
+      {/* Mobile Heading */}
+      <div className="block lg:hidden">
+        <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">Businesses</h1>
+        <p className="mt-0.5 text-xs text-[#64748b]">Manage and track all your business leads.</p>
+      </div>
 
-      {/* 2. Search, Filters, and Add Business Button */}
+      {/* 1. Search & Filter Bar */}
       <BusinessFilters
         searchTerm={searchTerm}
         onSearchChange={setSearchTerm}
@@ -172,20 +176,31 @@ export default function BusinessesPage() {
         onStatusChange={setSelectedStatus}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
-        onAddBusiness={() => {
-          // Handle navigation or modal opening for adding business
-        }}
+        onAddBusiness={() => {}}
       />
 
-      {/* 3. Businesses Data Table & Pagination */}
+      {/* 2. Metric / KPI Stats Cards (2x2 on mobile) */}
+      <BusinessStats stats={STATS_DATA} />
+
+      {/* 3. Mobile Add Business Full Width Button */}
+      <div className="block sm:hidden">
+        <button
+          type="button"
+          onClick={() => {}}
+          className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0b63e5] text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0952be]"
+        >
+          <Plus className="size-4 stroke-[2.5]" />
+          Add Business
+        </button>
+      </div>
+
+      {/* 4. Businesses Cards (Mobile) / Data Table (Desktop) */}
       <BusinessTable
         businesses={filteredData}
         totalCount={STATS_DATA.total}
         sortOrder={sortOrder}
         onSortOrderChange={setSortOrder}
-        onExport={() => {
-          // Handle export logic
-        }}
+        onExport={() => {}}
       />
     </div>
   );
