@@ -3,6 +3,7 @@
 import { Trash2, type LucideIcon } from "lucide-react";
 import MobileInput from "@/components/common/MobileInput";
 import FieldLabel from "@/components/businesses/FieldLabel";
+import { cn } from "@/lib/utils";
 
 export default function NumberListField({
   label,
@@ -48,25 +49,32 @@ export default function NumberListField({
         {headerAction}
       </div>
       <div className="flex flex-col gap-2">
-        {values.map((value, index) => (
-          <div key={index} className="flex items-center gap-2">
-            <MobileInput
-              value={value}
-              onChange={(v) => updateAt(index, v)}
-              disabled={disabled}
-            />
-            {values.length > 1 && (
+        {values.map((value, index) => {
+          const canRemove = values.length > 1;
+          return (
+            <div key={index} className="flex items-center gap-2">
+              <MobileInput
+                value={value}
+                onChange={(v) => updateAt(index, v)}
+                disabled={disabled}
+              />
               <button
                 type="button"
                 aria-label="Remove number"
                 onClick={() => removeAt(index)}
-                className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-red-50 text-red-500 transition-colors hover:bg-red-100"
+                disabled={!canRemove}
+                className={cn(
+                  "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
+                  canRemove
+                    ? "bg-red-50 text-red-500 hover:bg-red-100"
+                    : "cursor-not-allowed bg-[#f3f5f6] text-[#c3ccd1]",
+                )}
               >
                 <Trash2 className="size-4" />
               </button>
-            )}
-          </div>
-        ))}
+            </div>
+          );
+        })}
         <button
           type="button"
           onClick={add}

@@ -16,7 +16,7 @@ export default function MobileInput({
 
   return (
     <div
-      className={`flex h-12 items-center rounded-xl border bg-background px-3 ${
+      className={`flex h-12 min-w-0 flex-1 items-center rounded-xl border bg-background px-3 ${
         disabled ? "opacity-60" : ""
       }`}
     >
