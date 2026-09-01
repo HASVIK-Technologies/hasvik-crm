@@ -218,7 +218,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         <main className="min-h-[calc(100vh-5rem)] px-5 pb-24 pt-7 sm:px-8 lg:px-10 lg:pb-8">
-          <div className="mx-auto max-w-350">{children}</div>
+          <div className="mx-auto">{children}</div>
         </main>
 
         <footer className="hidden border-t border-[#dce8ee] bg-white px-10 py-5 text-xs text-[#8a9eaa] lg:flex lg:items-center lg:justify-between">
