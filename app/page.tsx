@@ -28,7 +28,7 @@ export default function Login() {
 
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f4f8fb] px-4 py-8 sm:px-8">
+    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-[#f4f8fb] p-3 md:p-4 lg:p-5">
       <div className="pointer-events-none absolute -left-32 -top-32 h-80 w-80 rounded-full bg-[#dff3ee] blur-3xl" />
       <div className="pointer-events-none absolute -bottom-40 -right-24 h-96 w-96 rounded-full border-[54px] border-[#dceafa] blur-3xl" />
 
