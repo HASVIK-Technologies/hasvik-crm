@@ -12,13 +12,14 @@ import {
   User, Building2, Target, Store, Users, FolderOpen, Calendar,
   Tags, Building, Zap, FileText, Globe, Mail 
 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/common/WhatsAppIcon"
 
 export default function BusinessDetails() {
   return (
-    <div className="p-6 max-w-6xl mx-auto space-y-6">
+    <div className="mx-auto max-w-6xl space-y-3 md:space-y-4">
       
       {/* 1. Header Section */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
         <Button variant="outline">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Businesses
         </Button>
@@ -37,12 +38,12 @@ export default function BusinessDetails() {
       </div>
 
       {/* 2. Cards Grid Container */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         
         {/* === LEFT CARD === */}
-        <Card>
+        <Card className="p-3 md:p-4">
           {/* Top Section: Avatar & Titles */}
-          <CardHeader className="flex flex-row items-start gap-4">
+          <CardHeader className="flex flex-row items-start gap-3 md:gap-4 p-0">
             <Avatar className="h-16 w-16">
               <AvatarFallback className="bg-blue-50 text-blue-700 text-xl font-semibold">HT</AvatarFallback>
             </Avatar>
@@ -58,13 +59,13 @@ export default function BusinessDetails() {
           </CardHeader>
 
           {/* Middle Section: Contact Info Text */}
-          <CardContent>
-            <div className="flex flex-wrap justify-between text-sm text-gray-600 gap-4 mt-2">
+          <CardContent className="p-0 pt-3 md:pt-4">
+            <div className="flex flex-wrap justify-between text-sm text-gray-600 gap-3 md:gap-4">
               <div className="flex items-center gap-2">
                 <Phone className="h-4 w-4" /> 9876543210
               </div>
               <div className="flex items-center gap-2 text-emerald-600">
-                <MessageCircle className="h-4 w-4" /> 9876543210
+                <WhatsAppIcon className="h-4 w-4" /> 9876543210
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" /> Ballia, U.P.
@@ -73,12 +74,12 @@ export default function BusinessDetails() {
           </CardContent>
 
           {/* Bottom Section: Action Buttons */}
-          <CardFooter className="grid grid-cols-3 gap-3">
+          <CardFooter className="grid grid-cols-3 gap-3 p-0 pt-3 md:pt-4">
             <Button variant="outline" className="text-emerald-600 border-gray-200">
               <Phone className="mr-2 h-4 w-4" /> Call
             </Button>
             <Button variant="outline" className="text-emerald-600 border-gray-200">
-              <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+              <WhatsAppIcon className="mr-2 h-4 w-4" /> WhatsApp
             </Button>
             <Button variant="outline" className="text-blue-600 border-gray-200">
               <MapPin className="mr-2 h-4 w-4" /> Directions
@@ -87,10 +88,10 @@ export default function BusinessDetails() {
         </Card>
 
         {/* === RIGHT CARD === */}
-        <Card>
-          <CardContent className="p-6">
+        <Card className="p-3 md:p-4">
+          <CardContent className="p-0">
             {/* 2-Column Data Grid */}
-            <div className="grid grid-cols-2 gap-y-6 gap-x-4">
+            <div className="grid grid-cols-2 gap-y-4 md:gap-y-6 gap-x-3 md:gap-x-4">
               
               {/* Detail Item 1 */}
               <div className="flex gap-3">

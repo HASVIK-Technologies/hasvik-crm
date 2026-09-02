@@ -11,9 +11,9 @@ import {
   CircleHelp,
   Home,
   Menu,
-  MoreHorizontal,
   Search,
   Settings,
+  SlidersHorizontal,
   UsersRound,
   X,
 } from "lucide-react";
@@ -26,32 +26,41 @@ const navigation = [
   { label: "Contacts", href: "/businesses#contacts", icon: UsersRound },
 ];
 
-const pageDetails = {
+const toolNavigation = [
+  { label: "Help center", href: "/dashboard#help", icon: CircleHelp },
+  { label: "Settings", href: "/dashboard#settings", icon: Settings },
+];
+
+const pageDetails: Record<
+  string,
+  { eyebrow: string; title: string; subtitle?: string }
+> = {
   "/dashboard": {
     eyebrow: "Overview",
     title: "Good morning, Amit",
-    description: "Here is what is happening across your business today.",
+    subtitle: "Here is what is happening across your business today.",
   },
   "/businesses": {
-    eyebrow: "Workspace",
-    title: "Businesses",
-    description: "Keep every business and contact close at hand.",
+    eyebrow: "BUSINESSES",
+    title: "All Businesses",
+    subtitle: "Manage and track all your business leads in one place.",
   },
 };
 
 function isActivePath(pathname: string, href: string) {
   const basePath = href.split("#")[0];
-  return (
-    pathname === basePath ||
-    (basePath !== "/dashboard" && pathname.startsWith(`${basePath}/`))
-  );
+  if (basePath === "/businesses") {
+    return pathname.startsWith("/businesses");
+  }
+  return pathname === basePath;
 }
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const currentPage =
-    pageDetails[pathname as keyof typeof pageDetails] ??
+    pageDetails[pathname] ??
+    pageDetails["/businesses"] ??
     pageDetails["/dashboard"];
 
   if (pathname === "/") {
@@ -59,93 +68,114 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f5f8fa] text-[#163b58]">
-        <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#dce8ee] bg-white lg:flex">
-        <div className="flex h-20 items-center border-b border-[#edf2f5] px-7">
+    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
+      {/* Sidebar for Desktop */}
+      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#e4ecf2] bg-white lg:flex">
+        {/* Brand Logo Header */}
+        <div className="flex h-20 items-center border-b border-[#f1f5f9] px-6">
           <Link href="/dashboard" aria-label="Hasvik home">
             <Image
               src="/logo.png"
               alt="Hasvik"
-              width={148}
-              height={45}
+              width={140}
+              height={42}
               priority
-              className="h-auto w-37"
+              className="h-auto w-32"
             />
           </Link>
         </div>
 
-        <div className="flex flex-1 flex-col px-4 py-7">
-          <p className="px-3 text-[10px] font-semibold uppercase tracking-[0.18em] text-[#8a9eaa]">
-            Main menu
-          </p>
-          <nav className="mt-3 space-y-1" aria-label="Main navigation">
-            {navigation.map((item) => {
-              const Icon = item.icon;
-              const active = isActivePath(pathname, item.href);
-              return (
-                <Link
-                  key={item.label}
-                  href={item.href}
-                  className={`flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium transition-colors ${active ? "bg-[#e7f5f0] text-[#08765d]" : "text-[#667f8d] hover:bg-[#f3f8f9] hover:text-[#163b58]"}`}
-                >
-                  <Icon
-                    className="size-[18px]"
-                    strokeWidth={active ? 2.4 : 1.8}
-                  />
-                  {item.label}
-                  {item.label === "Follow-ups" && (
-                    <span className="ml-auto rounded-full bg-[#dff3eb] px-2 py-0.5 text-[10px] text-[#08765d]">
-                      3
-                    </span>
-                  )}
-                </Link>
-              );
-            })}
-          </nav>
+        {/* Sidebar Navigation */}
+        <div className="flex flex-1 flex-col justify-between px-4 py-6">
+          <div>
+            {/* MAIN MENU */}
+            <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#94a3b8]">
+              Main menu
+            </p>
+            <nav className="mt-3 space-y-1.5" aria-label="Main navigation">
+              {navigation.map((item) => {
+                const Icon = item.icon;
+                const active = isActivePath(pathname, item.href);
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
+                      active
+                        ? "bg-[#ecfdf3] text-[#027a48]"
+                        : "text-[#64748b] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+                    }`}
+                  >
+                    <Icon
+                      className="size-4"
+                      strokeWidth={active ? 2.5 : 2}
+                    />
+                    <span>{item.label}</span>
+                    {item.label === "Follow-ups" && (
+                      <span className="ml-auto rounded-full bg-[#d1fadf] px-2 py-0.5 text-[10px] font-bold text-[#027a48]">
+                        3
+                      </span>
+                    )}
+                  </Link>
+                );
+              })}
+            </nav>
 
-          <div className="mt-auto border-t border-[#edf2f5] pt-5">
-            <Link
-              href="/dashboard#help"
-              className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-[#667f8d] hover:bg-[#f3f8f9] hover:text-[#163b58]"
-            >
-              <CircleHelp className="size-[18px]" strokeWidth={1.8} />
-              Help center
-            </Link>
-            <Link
-              href="/dashboard#settings"
-              className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm text-[#667f8d] hover:bg-[#f3f8f9] hover:text-[#163b58]"
-            >
-              <Settings className="size-[18px]" strokeWidth={1.8} />
-              Settings
-            </Link>
+            {/* TOOLS & SETTINGS */}
+            <p className="mt-8 px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#94a3b8]">
+              Tools & settings
+            </p>
+            <nav className="mt-3 space-y-1.5" aria-label="Tools navigation">
+              {toolNavigation.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <Link
+                    key={item.label}
+                    href={item.href}
+                    className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium text-[#64748b] transition-all hover:bg-[#f8fafc] hover:text-[#0f172a]"
+                  >
+                    <Icon className="size-4" strokeWidth={2} />
+                    <span>{item.label}</span>
+                  </Link>
+                );
+              })}
+            </nav>
           </div>
-        </div>
 
-        <div className="border-t border-[#edf2f5] p-4">
-          <div className="flex items-center gap-3 rounded-lg bg-[#f5f8fa] p-3">
-            <div className="flex size-9 items-center justify-center rounded-full bg-[#dceafa] text-xs font-bold text-[#1b6493]">
-              AS
+          {/* User Profile Footer */}
+          <div className="border-t border-[#f1f5f9] pt-4">
+            <div className="flex items-center justify-between rounded-xl p-2 transition-colors hover:bg-[#f8fafc]">
+              <div className="flex items-center gap-3">
+                <div className="flex size-9 items-center justify-center rounded-full bg-[#1e293b] text-xs font-bold text-white">
+                  N
+                </div>
+                <div className="min-w-0">
+                  <p className="truncate text-xs font-bold text-[#0f172a]">
+                    Amit Sharma
+                  </p>
+                  <p className="truncate text-[11px] text-[#94a3b8]">
+                    Administrator
+                  </p>
+                </div>
+              </div>
+              <ChevronDown className="size-4 text-[#94a3b8]" />
             </div>
-            <div className="min-w-0 flex-1">
-              <p className="truncate text-sm font-semibold text-[#23445d]">
-                Amit Sharma
-              </p>
-              <p className="truncate text-xs text-[#8a9eaa]">Administrator</p>
-            </div>
-            <ChevronDown className="size-4 text-[#8a9eaa]" />
           </div>
         </div>
       </aside>
 
+      {/* Main Content Area */}
       <div className="lg:pl-64">
-        <header className="sticky top-0 z-20 border-b border-[#dce8ee] bg-white/95 backdrop-blur">
-          <div className="flex h-20 items-center justify-between px-5 sm:px-8 lg:px-10">
+        {/* Sticky Header matching screenshot */}
+        <header className="sticky top-0 z-20 border-b border-[#e4ecf2] bg-white/95 backdrop-blur">
+          <div className="flex h-20 items-center justify-between px-5 sm:px-8">
+            {/* Left Header Title / Eyebrow */}
             <div className="flex items-center gap-3">
               <button
                 type="button"
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="rounded-lg p-2 text-[#547080] hover:bg-[#f1f6f8] lg:hidden"
+                className="rounded-xl p-2 text-[#64748b] hover:bg-[#f1f5f9] lg:hidden"
               >
                 {mobileMenuOpen ? (
                   <X className="size-5" />
@@ -154,61 +184,90 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 )}
               </button>
               <div>
-                <p className="text-[10px] font-semibold uppercase tracking-[0.18em] text-[#168d6e]">
+                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#12b76a]">
                   {currentPage.eyebrow}
                 </p>
-                <h1 className="mt-1 text-lg font-semibold text-[#163b58] sm:text-xl">
+                <h1 className="text-xl font-bold tracking-tight text-[#0f172a] sm:text-2xl">
                   {currentPage.title}
                 </h1>
+                {currentPage.subtitle && (
+                  <p className="hidden text-xs text-[#64748b] sm:block">
+                    {currentPage.subtitle}
+                  </p>
+                )}
               </div>
             </div>
-            <div className="flex items-center gap-2 sm:gap-4">
-              <div className="hidden items-center gap-2 rounded-lg border border-[#e2ebef] bg-[#f9fbfc] px-3 py-2 text-sm text-[#8a9eaa] xl:flex">
-                <Search className="size-4" />
-                Search businesses...
+
+            {/* Right Header Tools: Global Search + Filter + Bell + User */}
+            <div className="flex items-center gap-2.5 sm:gap-3">
+              {/* Header Search Box */}
+              <div className="relative hidden md:block">
+                <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#94a3b8]" />
+                <input
+                  type="text"
+                  placeholder="Search businesses by name, category, city..."
+                  className="h-10 w-72 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] pl-10 pr-4 text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus:border-[#0b63e5] focus:bg-white focus:outline-none xl:w-84"
+                />
               </div>
+
+              {/* Header Filter Icon Button */}
               <button
                 type="button"
-                aria-label="Search"
-                className="rounded-lg p-2.5 text-[#547080] hover:bg-[#f1f6f8] xl:hidden"
+                aria-label="Filter"
+                className="flex size-10 items-center justify-center rounded-xl border border-[#e2e8f0] bg-white text-[#64748b] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a]"
               >
-                <Search className="size-[18px]" />
+                <SlidersHorizontal className="size-4" />
               </button>
+
+              {/* Notifications Button with Red Dot */}
               <button
                 type="button"
                 aria-label="Notifications"
-                className="relative rounded-lg p-2.5 text-[#547080] hover:bg-[#f1f6f8]"
+                className="relative flex size-10 items-center justify-center rounded-xl border border-[#e2e8f0] bg-white text-[#64748b] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a]"
               >
-                <Bell className="size-[18px]" />
-                <span className="absolute right-2 top-2 size-1.5 rounded-full bg-[#e46b57]" />
+                <Bell className="size-4" />
+                <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-[#ef4444] ring-2 ring-white" />
               </button>
-              <div className="hidden h-7 w-px bg-[#e5edf0] sm:block" />
-              <div className="hidden items-center gap-2 sm:flex">
-                <div className="flex size-9 items-center justify-center rounded-full bg-[#dceafa] text-xs font-bold text-[#1b6493]">
+
+              {/* User Profile in Header */}
+              <div className="flex items-center gap-2.5 pl-1 sm:pl-2">
+                <div className="flex size-9 items-center justify-center rounded-full bg-[#e0eafe] text-xs font-bold text-[#2563eb]">
                   AS
                 </div>
-                <span className="text-sm font-medium text-[#34586d]">
-                  Amit Sharma
-                </span>
-                <ChevronDown className="size-4 text-[#8a9eaa]" />
+                <div className="hidden text-left sm:block">
+                  <p className="text-xs font-bold text-[#0f172a]">
+                    Amit Sharma
+                  </p>
+                  <p className="text-[10px] text-[#94a3b8]">
+                    Administrator
+                  </p>
+                </div>
+                <ChevronDown className="hidden size-3.5 text-[#94a3b8] sm:block" />
               </div>
             </div>
           </div>
+
+          {/* Mobile Navigation Dropdown */}
           {mobileMenuOpen && (
             <nav
-              className="border-t border-[#edf2f5] bg-white px-5 py-3 lg:hidden"
+              className="border-t border-[#f1f5f9] bg-white px-5 py-3 lg:hidden"
               aria-label="Mobile navigation"
             >
               {navigation.map((item) => {
                 const Icon = item.icon;
+                const active = isActivePath(pathname, item.href);
                 return (
                   <Link
                     key={item.label}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className="flex items-center gap-3 rounded-lg px-3 py-3 text-sm font-medium text-[#547080] hover:bg-[#f1f6f8]"
+                    className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold ${
+                      active
+                        ? "bg-[#ecfdf3] text-[#027a48]"
+                        : "text-[#64748b] hover:bg-[#f8fafc]"
+                    }`}
                   >
-                    <Icon className="size-[18px]" />
+                    <Icon className="size-4" />
                     {item.label}
                   </Link>
                 );
@@ -217,46 +276,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </header>
 
-        <main className="min-h-[calc(100vh-5rem)] px-5 pb-24 pt-7 sm:px-8 lg:px-10 lg:pb-8">
-          <div className="mx-auto max-w-350">{children}</div>
+        {/* Main Content View */}
+        <main className="min-h-[calc(100vh-5rem)] p-3 md:p-4 lg:p-5">
+          <div className="mx-auto max-w-7xl">{children}</div>
         </main>
-
-        <footer className="hidden border-t border-[#dce8ee] bg-white px-10 py-5 text-xs text-[#8a9eaa] lg:flex lg:items-center lg:justify-between">
-          <span>Hasvik CRM</span>
-          <span>Business leads. Simple follow-ups. More sales.</span>
-          <span>© 2026 Hasvik</span>
-        </footer>
       </div>
-
-      {/* 
-
-      
-      <nav
-        className="fixed inset-x-0 bottom-0 z-30 flex h-18 items-center justify-around border-t border-[#dce8ee] bg-white px-2 shadow-[0_-8px_24px_rgba(30,74,99,0.08)] lg:hidden"
-        aria-label="Mobile bottom navigation"
-      >
-        {navigation.slice(0, 4).map((item) => {
-          const Icon = item.icon;
-          const active = isActivePath(pathname, item.href);
-          return (
-            <Link
-              key={item.label}
-              href={item.href}
-              className={`flex min-w-16 flex-col items-center gap-1 py-2 text-[10px] font-medium ${active ? "text-[#08765d]" : "text-[#8a9eaa]"}`}
-            >
-              <Icon className="size-[19px]" strokeWidth={active ? 2.4 : 1.8} />
-              {item.label}
-            </Link>
-          );
-        })}
-        <Link
-          href="/dashboard#more"
-          className="flex min-w-16 flex-col items-center gap-1 py-2 text-[10px] font-medium text-[#8a9eaa]"
-        >
-          <MoreHorizontal className="size-[19px]" strokeWidth={1.8} />
-          More
-        </Link>
-      </nav> */}
     </div>
   );
 }
