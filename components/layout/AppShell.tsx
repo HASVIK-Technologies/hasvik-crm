@@ -277,7 +277,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         {/* Main Content View */}
-        <main className="min-h-[calc(100vh-5rem)] px-5 pt-6 sm:px-8">
+        <main className="min-h-[calc(100vh-5rem)] p-3 md:p-4 lg:p-5">
           <div className="mx-auto max-w-7xl">{children}</div>
         </main>
       </div>

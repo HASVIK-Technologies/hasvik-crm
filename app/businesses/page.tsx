@@ -2,6 +2,7 @@
 
 import React, { useState, useMemo } from "react";
 import { Plus } from "lucide-react";
+import { Button } from "@/components/ui/button";
 import {
   BusinessStats,
   BusinessFilters,
@@ -159,7 +160,7 @@ export default function BusinessesPage() {
   }, [searchTerm, selectedCategory, selectedStatus, selectedCity]);
 
   return (
-    <div className="space-y-4 sm:space-y-6 pb-12">
+    <div className="space-y-3 md:space-y-4 pb-12">
       {/* Mobile Heading */}
       <div className="block lg:hidden">
         <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">Businesses</h1>
@@ -184,14 +185,14 @@ export default function BusinessesPage() {
 
       {/* 3. Mobile Add Business Full Width Button */}
       <div className="block sm:hidden">
-        <button
+        <Button
           type="button"
           onClick={() => {}}
           className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0b63e5] text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0952be]"
         >
           <Plus className="size-4 stroke-[2.5]" />
           Add Business
-        </button>
+        </Button>
       </div>
 
       {/* 4. Businesses Cards (Mobile) / Data Table (Desktop) */}
