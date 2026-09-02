@@ -1,11 +1,16 @@
+import BusinessForm from "@/components/businesses/BusinessForm";
+import Breadcrumb from "@/components/common/Breadcrumb";
+
 export default function BusinessFormPage() {
   return (
-    <div className="flex flex-col gap-3 md:gap-4">
-      <div className="flex items-center justify-between">
-        <h1 className="text-2xl font-semibold tracking-tight">
-          Business Form
-        </h1>
-      </div>
+    <div className="flex flex-col gap-5 pt-1">
+      <Breadcrumb
+        items={[
+          { label: "Businesses", href: "/businesses" },
+          { label: "Add Business" },
+        ]}
+      />
+      <BusinessForm />
     </div>
   );
 }
