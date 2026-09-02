@@ -4,9 +4,10 @@ import { Badge } from "@/components/ui/badge"
 import { Avatar, AvatarFallback } from "@/components/ui/avatar"
 import { 
   ArrowLeft, Edit2, Plus, MoreVertical, 
-  Phone, MessageCircle, MapPin, 
+  Phone, MapPin, 
   User, Building2, Target, Store, Users, FolderOpen, Calendar 
 } from "lucide-react"
+import { WhatsAppIcon } from "@/components/common/WhatsAppIcon"
 
 export default function BusinessDetails() {
   return (
@@ -59,7 +60,7 @@ export default function BusinessDetails() {
                 <Phone className="h-4 w-4" /> 9876543210
               </div>
               <div className="flex items-center gap-2 text-emerald-600">
-                <MessageCircle className="h-4 w-4" /> 9876543210
+                <WhatsAppIcon className="h-4 w-4" /> 9876543210
               </div>
               <div className="flex items-center gap-2">
                 <MapPin className="h-4 w-4" /> Ballia, U.P.
@@ -73,7 +74,7 @@ export default function BusinessDetails() {
               <Phone className="mr-2 h-4 w-4" /> Call
             </Button>
             <Button variant="outline" className="text-emerald-600 border-gray-200">
-              <MessageCircle className="mr-2 h-4 w-4" /> WhatsApp
+              <WhatsAppIcon className="mr-2 h-4 w-4" /> WhatsApp
             </Button>
             <Button variant="outline" className="text-blue-600 border-gray-200">
               <MapPin className="mr-2 h-4 w-4" /> Directions

@@ -9,8 +9,8 @@ import {
   MoreVertical,
   ChevronLeft,
   ChevronRight,
-  MessageCircle,
 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -210,7 +210,7 @@ export default function BusinessTable({
                             aria-label={`WhatsApp ${item.name}`}
                             className="flex size-7 items-center justify-center rounded-lg text-[#16a34a] transition-colors hover:bg-[#ecfdf3]"
                           >
-                            <MessageCircle className="size-4" />
+                            <WhatsAppIcon className="size-4" />
                           </a>
                         </TooltipTrigger>
                         <TooltipContent>WhatsApp {item.name}</TooltipContent>
@@ -354,7 +354,7 @@ export default function BusinessTable({
                               aria-label={`WhatsApp ${item.name}`}
                               className="flex size-8.5 items-center justify-center rounded-lg text-[#16a34a] transition-colors hover:bg-[#ecfdf3]"
                             >
-                              <MessageCircle className="size-4.5" />
+                              <WhatsAppIcon className="size-4.5" />
                             </a>
                           </TooltipTrigger>
                           <TooltipContent>WhatsApp {item.name}</TooltipContent>
