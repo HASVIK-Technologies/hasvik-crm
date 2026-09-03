@@ -7,11 +7,14 @@ import { Button } from "@/components/ui/button";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
+import businessData from "@/data/businessData.json";
 import { 
   ArrowLeft, Edit2, Plus, MoreVertical, 
   Phone, MapPin, 
   User, Building2, Target, Store, Users, FolderOpen, Calendar,
-  AlertCircle
+  AlertCircle,
+  Tags, Building, Zap, Globe, Mail 
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinesses } from "@/lib/business-store";
@@ -158,7 +161,7 @@ export default function BusinessDetails() {
                 <WhatsAppIcon className="h-4 w-4" /> {business.phone}
               </div>
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" /> {business.city}, U.P.
+                <MapPin className="h-4 w-4" /> {business.address || `${business.city}, U.P.`}
               </div>
             </div>
           </CardContent>
@@ -323,6 +326,85 @@ export default function BusinessDetails() {
           </CardContent>
         </Card>
       </div>
+
+      {/* 3. --- TABS SECTION --- (Full width) */}
+      <Tabs defaultValue="overview" className="w-full mt-8">
+        <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b border-slate-200 rounded-none gap-6">
+          {(businessData?.tabs || []).map((tab: any) => (
+            <TabsTrigger 
+              key={tab.id} 
+              value={tab.id}
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-green-600 data-[state=active]:text-green-700 data-[state=active]:shadow-none px-0 py-3 text-slate-500 font-medium text-sm"
+            >
+              {tab.label}
+            </TabsTrigger>
+          ))}
+        </TabsList>
+        
+        {/* Overview Tab Content */}
+        <TabsContent value="overview" className="mt-6">
+          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-800 mb-6">Business Information</h3>
+              
+              <div className="space-y-5">
+                <div className="flex items-start gap-3 text-sm">
+                  <Building2 className="w-5 h-5 text-slate-400 shrink-0" />
+                  <div className="w-32 shrink-0 text-slate-500">Business Name</div>
+                  <div className="text-slate-700 font-medium">{business.name || businessData.businessInfo.name}</div>
+                </div>
+
+                <div className="flex items-start gap-3 text-sm">
+                  <Tags className="w-5 h-5 text-slate-400 shrink-0" />
+                  <div className="w-32 shrink-0 text-slate-500">Category</div>
+                  <div className="text-slate-700 font-medium">{business.category || businessData.businessInfo.category}</div>
+                </div>
+
+                <div className="flex items-start gap-3 text-sm">
+                  <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
+                  <div className="w-32 shrink-0 text-slate-500">Address</div>
+                  <div className="text-slate-700 font-medium leading-relaxed">{business.address || businessData.businessInfo.address}</div>
+                </div>
+
+                <div className="flex items-start gap-3 text-sm">
+                  <Building className="w-5 h-5 text-slate-400 shrink-0" />
+                  <div className="w-32 shrink-0 text-slate-500">City</div>
+                  <div className="text-slate-700 font-medium">{business.city || businessData.businessInfo.city}</div>
+                </div>
+
+                <div className="flex items-center gap-3 text-sm">
+                  <Zap className="w-5 h-5 text-slate-400 shrink-0" />
+                  <div className="w-32 shrink-0 text-slate-500">Status</div>
+                  <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 font-medium">
+                    {business.status || businessData.businessInfo.status}
+                  </Badge>
+                </div>
+
+                <div className="flex items-center gap-3 text-sm">
+                  <Globe className="w-5 h-5 text-slate-400 shrink-0" />
+                  <div className="w-32 shrink-0 text-slate-500">Website</div>
+                  <a href={business.website || businessData.businessInfo.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium break-all">
+                    {business.website || businessData.businessInfo.website}
+                  </a>
+                </div>
+
+                <div className="flex items-center gap-3 text-sm">
+                  <Mail className="w-5 h-5 text-slate-400 shrink-0" />
+                  <div className="w-32 shrink-0 text-slate-500">Email</div>
+                  <a href={`mailto:${business.email || businessData.businessInfo.email}`} className="text-blue-600 hover:underline font-medium break-all">
+                    {business.email || businessData.businessInfo.email}
+                  </a>
+                </div>
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+        
+        <TabsContent value="contacts">Contacts Content</TabsContent>
+        <TabsContent value="follow-ups">Follow-ups Content</TabsContent>
+        <TabsContent value="notes">Notes Content</TabsContent>
+        <TabsContent value="activity-log">Activity Log Content</TabsContent>
+      </Tabs>
     </div>
   );
 }
