@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Download,
   SlidersHorizontal,
@@ -59,6 +60,7 @@ export default function BusinessTable({
   sortOrder = "Latest First",
   onSortOrderChange,
 }: BusinessTableProps) {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState("10 per page");
 
@@ -126,7 +128,8 @@ export default function BusinessTable({
               {businesses.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-start justify-between gap-3 md:gap-4 rounded-2xl border border-[#eaf0f6] bg-white p-3 md:p-4 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all hover:shadow-md"
+                  onClick={() => router.push(`/businesses/${item.id}`)}
+                  className="flex cursor-pointer items-start justify-between gap-3 md:gap-4 rounded-2xl border border-[#eaf0f6] bg-white p-3 md:p-4 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all hover:border-[#0b63e5]/40 hover:shadow-md"
                 >
                   {/* Left Side: Avatar + Business Info */}
                   <div className="flex items-start gap-3 min-w-0">
@@ -192,6 +195,7 @@ export default function BusinessTable({
                         <TooltipTrigger asChild>
                           <a
                             href={`tel:${item.phone}`}
+                            onClick={(e) => e.stopPropagation()}
                             aria-label={`Call ${item.name}`}
                             className="flex size-7 items-center justify-center rounded-lg text-[#059669] transition-colors hover:bg-[#ecfdf3]"
                           >
@@ -207,6 +211,7 @@ export default function BusinessTable({
                             href={`https://wa.me/91${item.phone}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             aria-label={`WhatsApp ${item.name}`}
                             className="flex size-7 items-center justify-center rounded-lg text-[#16a34a] transition-colors hover:bg-[#ecfdf3]"
                           >
@@ -248,7 +253,8 @@ export default function BusinessTable({
                 businesses.map((item) => (
                   <TableRow
                     key={item.id}
-                    className="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80"
+                    onClick={() => router.push(`/businesses/${item.id}`)}
+                    className="cursor-pointer border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80"
                   >
                     {/* Business Name + Avatar + Phone */}
                     <TableCell className="py-4.5 pl-6 pr-4">
@@ -335,6 +341,7 @@ export default function BusinessTable({
                           <TooltipTrigger asChild>
                             <a
                               href={`tel:${item.phone}`}
+                              onClick={(e) => e.stopPropagation()}
                               aria-label={`Call ${item.name}`}
                               className="flex size-8.5 items-center justify-center rounded-lg text-[#059669] transition-colors hover:bg-[#ecfdf3]"
                             >
@@ -351,6 +358,7 @@ export default function BusinessTable({
                               href={`https://wa.me/91${item.phone}`}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               aria-label={`WhatsApp ${item.name}`}
                               className="flex size-8.5 items-center justify-center rounded-lg text-[#16a34a] transition-colors hover:bg-[#ecfdf3]"
                             >
@@ -362,7 +370,7 @@ export default function BusinessTable({
 
                         {/* 3 Dots Menu */}
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <Button
                               variant="ghost"
                               size="icon-sm"
@@ -373,13 +381,30 @@ export default function BusinessTable({
                             </Button>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-36 bg-white">
-                            <DropdownMenuItem className="cursor-pointer text-xs">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/businesses/${item.id}`);
+                              }}
+                              className="cursor-pointer text-xs"
+                            >
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer text-xs">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/businesses/${item.id}`);
+                              }}
+                              className="cursor-pointer text-xs"
+                            >
                               Edit Business
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer text-xs text-destructive focus:text-destructive">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                              }}
+                              className="cursor-pointer text-xs text-destructive focus:text-destructive"
+                            >
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>

@@ -1,24 +1,108 @@
-import { Button } from "@/components/ui/button"
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card"
-import { Badge } from "@/components/ui/badge"
-import { Avatar, AvatarFallback } from "@/components/ui/avatar"
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import { Button } from "@/components/ui/button";
+import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
+import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { 
   ArrowLeft, Edit2, Plus, MoreVertical, 
   Phone, MapPin, 
-  User, Building2, Target, Store, Users, FolderOpen, Calendar 
-} from "lucide-react"
-import { WhatsAppIcon } from "@/components/common/WhatsAppIcon"
+  User, Building2, Target, Store, Users, FolderOpen, Calendar,
+  AlertCircle
+} from "lucide-react";
+import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
+import { useBusinesses } from "@/lib/business-store";
+import { BusinessItem } from "@/components/businesses/types";
+import { cn } from "@/lib/utils";
+
+const STATIC_BUSINESS_12: BusinessItem = {
+  id: 12,
+  name: "Hasvik Technology",
+  phone: "9876543210",
+  initials: "HT",
+  avatarBg: "bg-blue-50",
+  avatarTextColor: "text-blue-700",
+  category: "Furniture Shop",
+  city: "Ballia",
+  status: "Active",
+  lastFollowUp: "25 Aug 2026 at 11:30 AM",
+  nextFollowUp: "Today at 10:00 AM",
+  nextFollowUpType: "today",
+  owner: "Contact 1 (Owner)",
+  address: "Ballia, U.P.",
+  leadSource: "Website",
+  businessType: "Retailer",
+  assignedTo: "Amit Sharma",
+};
 
 export default function BusinessDetails() {
+  const params = useParams();
+  const router = useRouter();
+  const { businesses, isLoaded } = useBusinesses();
+
+  const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const numericId = typeof rawId === "string" ? parseInt(rawId, 10) : NaN;
+  const isValidNumericId =
+    !isNaN(numericId) &&
+    Number.isInteger(numericId) &&
+    numericId > 0 &&
+    String(numericId) === String(rawId).trim();
+
+  // For /businesses/12, always provide the static Hasvik Technology data as requested
+  const business =
+    numericId === 12
+      ? STATIC_BUSINESS_12
+      : isValidNumericId
+      ? businesses.find((b) => b.id === numericId)
+      : undefined;
+
+  // If business is not found or ID is invalid
+  if ((isLoaded || numericId === 12) && !business) {
+    return (
+      <div className="mx-auto max-w-xl py-16 text-center space-y-4">
+        <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+          <AlertCircle className="size-7" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
+          Business Not Found
+        </h1>
+        <p className="text-sm text-[#64748b]">
+          The business with ID{" "}
+          <span className="font-semibold text-[#0f172a]">#{rawId}</span> does not exist or has been removed.
+        </p>
+        <div className="pt-2">
+          <Button asChild variant="outline" className="gap-2">
+            <Link href="/businesses">
+              <ArrowLeft className="size-4" /> Back to Businesses
+            </Link>
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  // Loading state fallback before store hydrates
+  if (!business) {
+    return (
+      <div className="mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]">
+        Loading business details...
+      </div>
+    );
+  }
+
   return (
     <div className="mx-auto max-w-6xl space-y-3 md:space-y-4">
-      
       {/* 1. Header Section */}
       <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
-        <Button variant="outline">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Businesses
+        <Button asChild variant="outline">
+          <Link href="/businesses">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Businesses
+          </Link>
         </Button>
-        
+
         <div className="flex items-center gap-2">
           <Button variant="outline" className="text-[#004c9a]">
             <Edit2 className="mr-2 h-4 w-4" /> Edit Business
@@ -34,21 +118,32 @@ export default function BusinessDetails() {
 
       {/* 2. Cards Grid Container */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-        
         {/* === LEFT CARD === */}
         <Card className="p-3 md:p-4">
           {/* Top Section: Avatar & Titles */}
           <CardHeader className="flex flex-row items-start gap-3 md:gap-4 p-0">
             <Avatar className="h-16 w-16">
-              <AvatarFallback className="bg-blue-50 text-blue-700 text-xl font-semibold">HT</AvatarFallback>
+              <AvatarFallback className={cn("text-xl font-semibold", business.avatarBg || "bg-blue-50", business.avatarTextColor || "text-blue-700")}>
+                {business.initials}
+              </AvatarFallback>
             </Avatar>
             <div className="flex flex-col gap-2 mt-1">
               <div className="flex items-center gap-3">
-                <CardTitle className="text-xl">Hasvik Technology</CardTitle>
-                <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">Active</Badge>
+                <CardTitle className="text-xl">{business.name}</CardTitle>
+                <Badge
+                  variant="outline"
+                  className={cn(
+                    "border-0",
+                    business.status === "Active"
+                      ? "bg-emerald-50 text-emerald-700"
+                      : "bg-gray-100 text-gray-700"
+                  )}
+                >
+                  {business.status}
+                </Badge>
               </div>
               <Badge variant="secondary" className="w-fit bg-blue-50 text-blue-700 hover:bg-blue-50">
-                Furniture Shop
+                {business.category}
               </Badge>
             </div>
           </CardHeader>
@@ -57,27 +152,55 @@ export default function BusinessDetails() {
           <CardContent className="p-0 pt-3 md:pt-4">
             <div className="flex flex-wrap justify-between text-sm text-gray-600 gap-3 md:gap-4">
               <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" /> 9876543210
+                <Phone className="h-4 w-4" /> {business.phone}
               </div>
               <div className="flex items-center gap-2 text-emerald-600">
-                <WhatsAppIcon className="h-4 w-4" /> 9876543210
+                <WhatsAppIcon className="h-4 w-4" /> {business.phone}
               </div>
               <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" /> Ballia, U.P.
+                <MapPin className="h-4 w-4" /> {business.city}, U.P.
               </div>
             </div>
           </CardContent>
 
           {/* Bottom Section: Action Buttons */}
           <CardFooter className="grid grid-cols-3 gap-3 p-0 pt-3 md:pt-4">
-            <Button variant="outline" className="text-emerald-600 border-gray-200">
-              <Phone className="mr-2 h-4 w-4" /> Call
+            <Button
+              asChild
+              variant="outline"
+              className="text-emerald-600 border-gray-200"
+            >
+              <a href={`tel:${business.phone}`}>
+                <Phone className="mr-2 h-4 w-4" /> Call
+              </a>
             </Button>
-            <Button variant="outline" className="text-emerald-600 border-gray-200">
-              <WhatsAppIcon className="mr-2 h-4 w-4" /> WhatsApp
+            <Button
+              asChild
+              variant="outline"
+              className="text-emerald-600 border-gray-200"
+            >
+              <a
+                href={`https://wa.me/91${business.phone}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <WhatsAppIcon className="mr-2 h-4 w-4" /> WhatsApp
+              </a>
             </Button>
-            <Button variant="outline" className="text-blue-600 border-gray-200">
-              <MapPin className="mr-2 h-4 w-4" /> Directions
+            <Button
+              asChild
+              variant="outline"
+              className="text-blue-600 border-gray-200"
+            >
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(
+                  business.name + " " + (business.address || business.city)
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MapPin className="mr-2 h-4 w-4" /> Directions
+              </a>
             </Button>
           </CardFooter>
         </Card>
@@ -87,89 +210,119 @@ export default function BusinessDetails() {
           <CardContent className="p-0">
             {/* 2-Column Data Grid */}
             <div className="grid grid-cols-2 gap-y-4 md:gap-y-6 gap-x-3 md:gap-x-4">
-              
-              {/* Detail Item 1 */}
+              {/* Detail Item 1: Owner */}
               <div className="flex gap-3">
                 <User className="h-5 w-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Business Owner</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Contact 1 (Owner)</p>
+                  <p className="font-medium text-sm text-gray-900 mt-0.5">
+                    {business.owner || `${business.name} Owner`}
+                  </p>
                 </div>
               </div>
-              
-              {/* Detail Item 2 */}
+
+              {/* Detail Item 2: Category */}
               <div className="flex gap-3">
                 <Building2 className="h-5 w-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Category</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Furniture Shop</p>
+                  <p className="font-medium text-sm text-gray-900 mt-0.5">
+                    {business.category}
+                  </p>
                 </div>
               </div>
 
-              {/* Detail Item 3 */}
+              {/* Detail Item 3: Lead Source */}
               <div className="flex gap-3">
                 <Target className="h-5 w-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Lead Source</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Website</p>
+                  <p className="font-medium text-sm text-gray-900 mt-0.5">
+                    {business.leadSource || "Website"}
+                  </p>
                 </div>
               </div>
 
-              {/* Detail Item 4 */}
+              {/* Detail Item 4: Business Type */}
               <div className="flex gap-3">
                 <Store className="h-5 w-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Business Type</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Retailer</p>
+                  <p className="font-medium text-sm text-gray-900 mt-0.5">
+                    {business.businessType || "Retailer"}
+                  </p>
                 </div>
               </div>
 
-              {/* Detail Item 5 */}
+              {/* Detail Item 5: Assigned To */}
               <div className="flex gap-3">
                 <Users className="h-5 w-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Assigned To</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Amit Sharma</p>
+                  <p className="font-medium text-sm text-gray-900 mt-0.5">
+                    {business.assignedTo || "Amit Sharma"}
+                  </p>
                 </div>
               </div>
 
-              {/* Detail Item 6 (with Badge) */}
+              {/* Detail Item 6: Status */}
               <div className="flex gap-3">
                 <FolderOpen className="h-5 w-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Status</p>
                   <div className="mt-1">
-                     <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">Active</Badge>
+                    <Badge
+                      variant="outline"
+                      className={cn(
+                        "border-0",
+                        business.status === "Active"
+                          ? "bg-emerald-50 text-emerald-700"
+                          : "bg-gray-100 text-gray-700"
+                      )}
+                    >
+                      {business.status}
+                    </Badge>
                   </div>
                 </div>
               </div>
 
-              {/* Detail Item 7 (with inline Badge) */}
+              {/* Detail Item 7: Next Follow-up */}
               <div className="flex gap-3">
                 <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Next Follow-up</p>
                   <div className="flex items-center gap-2 mt-0.5">
-                    <p className="font-medium text-sm text-gray-900">Today at 10:00 AM</p>
-                    <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0 py-0 h-5 text-xs">Today</Badge>
+                    <p className="font-medium text-sm text-gray-900">
+                      {business.nextFollowUp}
+                    </p>
+                    {business.nextFollowUpType === "today" && (
+                      <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0 py-0 h-5 text-xs">
+                        Today
+                      </Badge>
+                    )}
+                    {business.nextFollowUpType === "tomorrow" && (
+                      <Badge className="bg-blue-50 text-blue-700 hover:bg-blue-50 border-0 py-0 h-5 text-xs">
+                        Tomorrow
+                      </Badge>
+                    )}
                   </div>
                 </div>
               </div>
 
-              {/* Detail Item 8 */}
+              {/* Detail Item 8: Last Follow-up */}
               <div className="flex gap-3">
                 <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
                 <div>
                   <p className="text-sm text-gray-500">Last Follow-up</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">25 Aug 2026 at 11:30 AM</p>
+                  <p className="font-medium text-sm text-gray-900 mt-0.5">
+                    {business.lastFollowUp}
+                  </p>
                 </div>
               </div>
-
             </div>
           </CardContent>
         </Card>
-
       </div>
     </div>
-  )
+  );
 }

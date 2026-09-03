@@ -1,5 +1,5 @@
 export interface BusinessItem {
-  id: string;
+  id: number;
   name: string;
   phone: string;
   initials: string;
@@ -11,6 +11,14 @@ export interface BusinessItem {
   lastFollowUp: string;
   nextFollowUp: string;
   nextFollowUpType: "today" | "tomorrow" | "date" | "none";
+  owner?: string;
+  address?: string;
+  email?: string;
+  website?: string;
+  leadSource?: string;
+  businessType?: string;
+  assignedTo?: string;
+  alternatePhone?: string;
 }
 
 export interface BusinessStatsData {
@@ -19,3 +27,4 @@ export interface BusinessStatsData {
   followUpToday: number;
   categoriesCount: number;
 }
+
