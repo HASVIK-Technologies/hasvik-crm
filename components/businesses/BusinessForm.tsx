@@ -11,7 +11,9 @@ import {
   UsersRound,
 } from "lucide-react";
 
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/common/PrimaryButton";
+import SecondaryButton from "@/components/common/SecondaryButton";
+import OutlinedButton from "@/components/common/OutlinedButton";
 import { Card, CardContent } from "@/components/ui/card";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Label } from "@/components/ui/label";
@@ -26,6 +28,7 @@ import {
   initialBusinessFormState,
   type BusinessFormState,
 } from "@/lib/business-form-types";
+import { createBusiness } from "@/lib/business-store";
 
 // Additional Information is built out but hidden from view for now - the
 // team plans to start using it in a future release. Flip this to `true`
@@ -135,15 +138,25 @@ export default function BusinessForm() {
     }
     setSubmitError(null);
 
-    // Persisting to the backend will be wired up separately - for now this
-    // captures the shape of the payload the API will expect.
-    console.log("Saving business", form);
+    const newBiz = createBusiness({
+      name: form.businessName.trim(),
+      phone: form.phoneNumbers.find((n) => n.trim().length > 0) || "9876543210",
+      category: form.category || "Furniture Shop",
+      city: form.city || "Ballia",
+      status: (form.status === "Inactive" ? "Inactive" : "Active"),
+      address: form.address?.trim() || undefined,
+      email: form.email?.trim() || undefined,
+      website: form.website?.trim() || undefined,
+      businessType: form.businessType || undefined,
+      leadSource: form.leadSource || undefined,
+      assignedTo: form.assignTo || undefined,
+    });
 
     if (form.addAnother) {
       setForm({ ...initialBusinessFormState });
       setCurrentStep(0);
     } else {
-      router.push("/businesses");
+      router.push(`/businesses/${newBiz.id}`);
     }
   };
 
@@ -252,15 +265,14 @@ export default function BusinessForm() {
           </FormSection>
 
           <div className="mt-6 flex flex-col-reverse gap-4 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
-            <Button
+            <OutlinedButton
               type="button"
-              variant="outline"
               size="lg"
               onClick={handleCancel}
               className="w-full border-[#dce8ee] text-[#547080] sm:w-auto"
             >
               Cancel
-            </Button>
+            </OutlinedButton>
 
             <div className="flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center">
               <Label className="justify-center gap-2 text-[#547080] sm:justify-start">
@@ -273,14 +285,14 @@ export default function BusinessForm() {
                 Add another business
               </Label>
 
-              <Button
+              <SecondaryButton
                 type="submit"
                 size="lg"
                 className="w-full bg-[#08765d] text-white hover:bg-[#066a53] sm:w-auto"
               >
                 <Save className="size-4" />
                 Save Business
-              </Button>
+              </SecondaryButton>
             </div>
           </div>
         </CardContent>
@@ -333,14 +345,13 @@ export default function BusinessForm() {
             {steps[currentStep].render("mobile-")}
 
             <div className="mt-6 flex flex-col-reverse gap-3 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <Button
+              <OutlinedButton
                 type="button"
-                variant="outline"
                 onClick={currentStep === 0 ? handleCancel : goBack}
                 className="w-full border-[#dce8ee] text-[#547080] sm:w-auto"
               >
                 {currentStep === 0 ? "Cancel" : "Back"}
-              </Button>
+              </OutlinedButton>
 
               {isLastStep ? (
                 <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
@@ -353,13 +364,13 @@ export default function BusinessForm() {
                     />
                     Add another business
                   </Label>
-                  <Button
+                  <SecondaryButton
                     type="submit"
                     className="w-full bg-[#08765d] text-white hover:bg-[#066a53] sm:w-auto"
                   >
                     <Save className="size-4" />
                     Save Business
-                  </Button>
+                  </SecondaryButton>
                 </div>
               ) : (
                 <div className="flex flex-col items-stretch gap-2 sm:items-end">
@@ -368,20 +379,18 @@ export default function BusinessForm() {
                       Fill in all required fields to continue.
                     </p>
                   )}
-                  <Button
+                  <PrimaryButton
                     type="button"
                     onClick={goNext}
                     disabled={!currentStepValidation.isValid}
                     className={cn(
                       "w-full sm:w-auto",
-                      currentStepValidation.isValid
-                        ? "bg-[#08765d] text-white hover:bg-[#066a53]"
-                        : "cursor-not-allowed bg-[#c9d6db] text-white hover:bg-[#c9d6db]",
+                      !currentStepValidation.isValid && "cursor-not-allowed opacity-60",
                     )}
                   >
                     Next
                     <ArrowRight className="size-4" />
-                  </Button>
+                  </PrimaryButton>
                 </div>
               )}
             </div>

@@ -1,152 +1,75 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
+import Link from "next/link";
+import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/common/PrimaryButton";
 import {
   BusinessStats,
   BusinessFilters,
   BusinessTable,
-  BusinessItem,
   BusinessStatsData,
 } from "@/components/businesses";
-
-const INITIAL_BUSINESS_DATA: BusinessItem[] = [
-  {
-    id: "1",
-    name: "Shree Balaji Traders",
-    phone: "9876543210",
-    initials: "SB",
-    avatarBg: "bg-[#e0eafe]",
-    avatarTextColor: "text-[#2e90fa]",
-    category: "Furniture Shop",
-    city: "Ballia",
-    status: "Active",
-    lastFollowUp: "Today at 10:00 AM",
-    nextFollowUp: "Today",
-    nextFollowUpType: "today",
-  },
-  {
-    id: "2",
-    name: "Maa Durga Enterprises",
-    phone: "9123456780",
-    initials: "MD",
-    avatarBg: "bg-[#d1fadf]",
-    avatarTextColor: "text-[#039855]",
-    category: "Hardware Store",
-    city: "Buxar",
-    status: "Active",
-    lastFollowUp: "Today at 11:30 AM",
-    nextFollowUp: "Today",
-    nextFollowUpType: "today",
-  },
-  {
-    id: "3",
-    name: "Akash Furniture",
-    phone: "9988776655",
-    initials: "AF",
-    avatarBg: "bg-[#e0eafe]",
-    avatarTextColor: "text-[#2e90fa]",
-    category: "Furniture Shop",
-    city: "Ghazipur",
-    status: "Active",
-    lastFollowUp: "Tomorrow 10:00 AM",
-    nextFollowUp: "Tomorrow",
-    nextFollowUpType: "tomorrow",
-  },
-  {
-    id: "4",
-    name: "Gupta Construction",
-    phone: "8877665544",
-    initials: "GC",
-    avatarBg: "bg-[#fee4e2]",
-    avatarTextColor: "text-[#d92d20]",
-    category: "Construction",
-    city: "Varanasi",
-    status: "Active",
-    lastFollowUp: "25 May 2024",
-    nextFollowUp: "25 May 2024",
-    nextFollowUpType: "date",
-  },
-  {
-    id: "5",
-    name: "Star Enterprises",
-    phone: "7766554433",
-    initials: "SE",
-    avatarBg: "bg-[#f4ebff]",
-    avatarTextColor: "text-[#7f56d9]",
-    category: "Electrical Shop",
-    city: "Ballia",
-    status: "Inactive",
-    lastFollowUp: "20 May 2024",
-    nextFollowUp: "-",
-    nextFollowUpType: "none",
-  },
-  {
-    id: "6",
-    name: "Rakesh Kirana Store",
-    phone: "9988774433",
-    initials: "RK",
-    avatarBg: "bg-[#d1fadf]",
-    avatarTextColor: "text-[#039855]",
-    category: "Kirana Store",
-    city: "Ballia",
-    status: "Active",
-    lastFollowUp: "24 May 2024",
-    nextFollowUp: "26 May 2024",
-    nextFollowUpType: "date",
-  },
-  {
-    id: "7",
-    name: "Vishal Services",
-    phone: "8899776655",
-    initials: "VS",
-    avatarBg: "bg-[#e0eafe]",
-    avatarTextColor: "text-[#2e90fa]",
-    category: "Service Center",
-    city: "Buxar",
-    status: "Active",
-    lastFollowUp: "23 May 2024",
-    nextFollowUp: "25 May 2024",
-    nextFollowUpType: "date",
-  },
-  {
-    id: "8",
-    name: "Prakash Pharmacy",
-    phone: "7788996655",
-    initials: "PK",
-    avatarBg: "bg-[#fef0c7]",
-    avatarTextColor: "text-[#dc6803]",
-    category: "Medical Store",
-    city: "Ghazipur",
-    status: "Inactive",
-    lastFollowUp: "15 May 2024",
-    nextFollowUp: "-",
-    nextFollowUpType: "none",
-  },
-];
-
-const STATS_DATA: BusinessStatsData = {
-  total: 156,
-  active: 128,
-  followUpToday: 18,
-  categoriesCount: 24,
-};
+import { useBusinesses } from "@/lib/business-store";
 
 export default function BusinessesPage() {
+  const router = useRouter();
+  const { businesses } = useBusinesses();
+
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedCategory, setSelectedCategory] = useState("All Categories");
   const [selectedStatus, setSelectedStatus] = useState("All Status");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [sortOrder, setSortOrder] = useState("Latest First");
 
+  // Dynamically derive categories and cities from data
+  const availableCategories = useMemo(() => {
+    const defaultCats = [
+      "All Categories",
+      "Furniture Shop",
+      "Hardware Store",
+      "Construction",
+      "Electrical Shop",
+      "Kirana Store",
+      "Service Center",
+      "Medical Store",
+    ];
+    const dataCats = businesses.map((b) => b.category).filter(Boolean);
+    return Array.from(new Set([...defaultCats, ...dataCats]));
+  }, [businesses]);
+
+  const availableCities = useMemo(() => {
+    const defaultCities = ["All Cities", "Ballia", "Buxar", "Ghazipur", "Varanasi"];
+    const dataCities = businesses.map((b) => b.city).filter(Boolean);
+    return Array.from(new Set([...defaultCities, ...dataCities]));
+  }, [businesses]);
+
+  // Compute live KPI stats directly from actual businesses in store
+  const statsData: BusinessStatsData = useMemo(() => {
+    const total = businesses.length;
+    const active = businesses.filter((b) => b.status === "Active").length;
+    const followUpToday = businesses.filter((b) => b.nextFollowUpType === "today").length;
+    const categoriesCount = new Set(businesses.map((b) => b.category)).size;
+
+    return {
+      total,
+      active,
+      followUpToday,
+      categoriesCount,
+    };
+  }, [businesses]);
+
+  // Filter & sort businesses
   const filteredData = useMemo(() => {
-    return INITIAL_BUSINESS_DATA.filter((item) => {
+    const result = businesses.filter((item) => {
+      const query = searchTerm.toLowerCase();
       const matchesSearch =
-        item.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+        item.name.toLowerCase().includes(query) ||
         item.phone.includes(searchTerm) ||
-        item.category.toLowerCase().includes(searchTerm.toLowerCase()) ||
-        item.city.toLowerCase().includes(searchTerm.toLowerCase());
+        item.category.toLowerCase().includes(query) ||
+        item.city.toLowerCase().includes(query) ||
+        String(item.id).includes(searchTerm);
 
       const matchesCategory =
         selectedCategory === "All Categories" || item.category === selectedCategory;
@@ -157,7 +80,19 @@ export default function BusinessesPage() {
 
       return matchesSearch && matchesCategory && matchesStatus && matchesCity;
     });
-  }, [searchTerm, selectedCategory, selectedStatus, selectedCity]);
+
+    // Sort by numeric ID
+    return result.sort((a, b) => {
+      if (sortOrder === "Latest First") {
+        return b.id - a.id;
+      }
+      return a.id - b.id;
+    });
+  }, [businesses, searchTerm, selectedCategory, selectedStatus, selectedCity, sortOrder]);
+
+  const handleAddBusiness = () => {
+    router.push("/businesses/form");
+  };
 
   return (
     <div className="space-y-3 md:space-y-4 pb-12">
@@ -177,28 +112,31 @@ export default function BusinessesPage() {
         onStatusChange={setSelectedStatus}
         selectedCity={selectedCity}
         onCityChange={setSelectedCity}
-        onAddBusiness={() => {}}
+        categories={availableCategories}
+        cities={availableCities}
+        onAddBusiness={handleAddBusiness}
       />
 
-      {/* 2. Metric / KPI Stats Cards (2x2 on mobile) */}
-      <BusinessStats stats={STATS_DATA} />
+      {/* 2. Metric / KPI Stats Cards */}
+      <BusinessStats stats={statsData} />
 
       {/* 3. Mobile Add Business Full Width Button */}
       <div className="block sm:hidden">
-        <Button
-          type="button"
-          onClick={() => {}}
+        <PrimaryButton
+          asChild
           className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0b63e5] text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0952be]"
         >
-          <Plus className="size-4 stroke-[2.5]" />
-          Add Business
-        </Button>
+          <Link href="/businesses/form">
+            <Plus className="size-4 stroke-[2.5]" />
+            Add Business
+          </Link>
+        </PrimaryButton>
       </div>
 
       {/* 4. Businesses Cards (Mobile) / Data Table (Desktop) */}
       <BusinessTable
         businesses={filteredData}
-        totalCount={STATS_DATA.total}
+        totalCount={statsData.total}
         sortOrder={sortOrder}
         onSortOrderChange={setSortOrder}
         onExport={() => {}}
