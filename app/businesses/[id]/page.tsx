@@ -3,7 +3,8 @@
 import React from "react";
 import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/common/PrimaryButton";
+import OutlinedButton from "@/components/common/OutlinedButton";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -85,11 +86,11 @@ export default function BusinessDetails() {
           <span className="font-semibold text-[#0f172a]">#{rawId}</span> does not exist or has been removed.
         </p>
         <div className="pt-2">
-          <Button asChild variant="outline" className="gap-2">
+          <OutlinedButton asChild className="gap-2">
             <Link href="/businesses">
               <ArrowLeft className="size-4" /> Back to Businesses
             </Link>
-          </Button>
+          </OutlinedButton>
         </div>
       </div>
     );
@@ -108,24 +109,24 @@ export default function BusinessDetails() {
     <div className="mx-auto max-w-6xl space-y-3 md:space-y-4">
       {/* 1. Header Section */}
       <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
-        <Button asChild variant="outline">
+        <OutlinedButton asChild>
           <Link href="/businesses">
             <ArrowLeft className="mr-2 h-4 w-4" /> Back to Businesses
           </Link>
-        </Button>
+        </OutlinedButton>
 
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="text-[#004c9a]">
+          <OutlinedButton className="text-primary border-gray-200">
             <Edit2 className="mr-2 h-4 w-4" /> Edit Business
-          </Button>
-          <Button className="bg-emerald-600 hover:bg-[#71c554] text-white">
+          </OutlinedButton>
+          <PrimaryButton>
             <Plus className="mr-2 h-4 w-4" /> Add Follow-Up
-          </Button>
+          </PrimaryButton>
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
-              <Button variant="outline" size="icon">
+              <OutlinedButton size="icon">
                 <MoreVertical className="h-4 w-4" />
-              </Button>
+              </OutlinedButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-36 bg-white">
               <DropdownMenuItem
@@ -188,18 +189,16 @@ export default function BusinessDetails() {
 
           {/* Bottom Section: Action Buttons */}
           <CardFooter className="grid grid-cols-3 gap-3 p-0 pt-3 md:pt-4">
-            <Button
+            <OutlinedButton
               asChild
-              variant="outline"
               className="text-emerald-600 border-gray-200"
             >
               <a href={`tel:${business.phone}`}>
                 <Phone className="mr-2 h-4 w-4" /> Call
               </a>
-            </Button>
-            <Button
+            </OutlinedButton>
+            <OutlinedButton
               asChild
-              variant="outline"
               className="text-emerald-600 border-gray-200"
             >
               <a
@@ -209,10 +208,9 @@ export default function BusinessDetails() {
               >
                 <WhatsAppIcon className="mr-2 h-4 w-4" /> WhatsApp
               </a>
-            </Button>
-            <Button
+            </OutlinedButton>
+            <OutlinedButton
               asChild
-              variant="outline"
               className="text-blue-600 border-gray-200"
             >
               <a
@@ -224,7 +222,7 @@ export default function BusinessDetails() {
               >
                 <MapPin className="mr-2 h-4 w-4" /> Directions
               </a>
-            </Button>
+            </OutlinedButton>
           </CardFooter>
         </Card>
 

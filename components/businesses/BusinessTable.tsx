@@ -12,7 +12,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
-import { Button } from "@/components/ui/button";
+import OutlinedButton from "@/components/common/OutlinedButton";
+import PlainButton from "@/components/common/PlainButton";
+import PrimaryButton from "@/components/common/PrimaryButton";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -89,27 +91,25 @@ export default function BusinessTable({
           </h2>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <Button
-              variant="outline"
+            <OutlinedButton
               type="button"
               onClick={onExport}
               className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:flex-initial sm:px-4"
             >
               <Download className="size-4 text-[#64748b]" />
               Export
-            </Button>
+            </OutlinedButton>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
+                <OutlinedButton
                   type="button"
                   className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:w-auto sm:px-4"
                 >
                   <SlidersHorizontal className="size-4 text-[#64748b]" />
                   <span>{sortOrder}</span>
                   <ChevronDown className="size-4 text-[#64748b]" />
-                </Button>
+                </OutlinedButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 bg-white">
                 <DropdownMenuItem
@@ -236,14 +236,13 @@ export default function BusinessTable({
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
-                          <Button
-                            variant="ghost"
+                          <PlainButton
                             size="icon"
                             onClick={(e) => e.stopPropagation()}
                             className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"
                           >
                             <MoreVertical className="size-4" />
-                          </Button>
+                          </PlainButton>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-36 bg-white">
                           <DropdownMenuItem
@@ -426,14 +425,13 @@ export default function BusinessTable({
                         {/* 3 Dots Menu */}
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <Button
-                              variant="ghost"
+                            <PlainButton
                               size="icon-sm"
                               aria-label={`More actions for ${item.name}`}
                               className="size-8.5 rounded-lg text-[#94a3b8] hover:bg-[#f1f5f9] hover:text-[#334155]"
                             >
                               <MoreVertical className="size-4.5" />
-                            </Button>
+                            </PlainButton>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-36 bg-white">
                             <DropdownMenuItem
@@ -484,8 +482,7 @@ export default function BusinessTable({
 
           <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end sm:gap-4">
             <div className="flex items-center gap-1.5">
-              <Button
-                variant="outline"
+              <OutlinedButton
                 size="icon-sm"
                 type="button"
                 disabled={currentPage === 1}
@@ -493,33 +490,38 @@ export default function BusinessTable({
                 className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] transition-colors disabled:opacity-50"
               >
                 <ChevronLeft className="size-4" />
-              </Button>
-              {[1, 2, 3, 4, 5].map((pageNum) => (
-                <Button
-                  key={pageNum}
-                  variant={currentPage === pageNum ? "default" : "outline"}
-                  size="icon-sm"
-                  type="button"
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={cn(
-                    "size-8.5 rounded-lg text-sm font-semibold shadow-sm",
-                    currentPage === pageNum
-                      ? "bg-[#0b63e5] text-white hover:bg-[#0952be]"
-                      : "border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc]"
-                  )}
-                >
-                  {pageNum}
-                </Button>
-              ))}
-              <Button
-                variant="outline"
+              </OutlinedButton>
+              {[1, 2, 3, 4, 5].map((pageNum) =>
+                currentPage === pageNum ? (
+                  <PrimaryButton
+                    key={pageNum}
+                    size="icon-sm"
+                    type="button"
+                    onClick={() => setCurrentPage(pageNum)}
+                    className="size-8.5 rounded-lg text-sm font-semibold shadow-sm p-0"
+                  >
+                    {pageNum}
+                  </PrimaryButton>
+                ) : (
+                  <OutlinedButton
+                    key={pageNum}
+                    size="icon-sm"
+                    type="button"
+                    onClick={() => setCurrentPage(pageNum)}
+                    className="size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc]"
+                  >
+                    {pageNum}
+                  </OutlinedButton>
+                )
+              )}
+              <OutlinedButton
                 size="icon-sm"
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.min(5, p + 1))}
                 className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc]"
               >
                 <ChevronRight className="size-4" />
-              </Button>
+              </OutlinedButton>
             </div>
 
             <Select value={itemsPerPage} onValueChange={setItemsPerPage}>

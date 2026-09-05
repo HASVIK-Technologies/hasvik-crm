@@ -4,7 +4,7 @@ import React, { useState, useMemo } from "react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/common/PrimaryButton";
 import {
   BusinessStats,
   BusinessFilters,
@@ -122,7 +122,7 @@ export default function BusinessesPage() {
 
       {/* 3. Mobile Add Business Full Width Button */}
       <div className="block sm:hidden">
-        <Button
+        <PrimaryButton
           asChild
           className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0b63e5] text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0952be]"
         >
@@ -130,7 +130,7 @@ export default function BusinessesPage() {
             <Plus className="size-4 stroke-[2.5]" />
             Add Business
           </Link>
-        </Button>
+        </PrimaryButton>
       </div>
 
       {/* 4. Businesses Cards (Mobile) / Data Table (Desktop) */}

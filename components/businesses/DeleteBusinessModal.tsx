@@ -3,6 +3,7 @@
 import * as React from "react";
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
 import { Trash2, X } from "lucide-react";
+import OutlinedButton from "@/components/common/OutlinedButton";
 import { Button } from "@/components/ui/button";
 
 interface DeleteBusinessModalProps {
@@ -69,14 +70,13 @@ export function DeleteBusinessModal({
 
           <div className="mt-6 flex items-center justify-end gap-2.5">
             <AlertDialogPrimitive.Cancel asChild>
-              <Button
+              <OutlinedButton
                 type="button"
-                variant="outline"
                 onClick={onCancel}
                 className="h-10 rounded-xl border border-[#e2e8f0] bg-white px-4 text-sm font-medium text-[#334155] shadow-xs transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a]"
               >
                 Cancel
-              </Button>
+              </OutlinedButton>
             </AlertDialogPrimitive.Cancel>
 
             <AlertDialogPrimitive.Action asChild>
