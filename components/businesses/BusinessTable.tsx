@@ -44,6 +44,8 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "./types";
+import { deleteBusiness } from "@/lib/business-store";
+import { DeleteBusinessModal } from "./DeleteBusinessModal";
 
 interface BusinessTableProps {
   businesses: BusinessItem[];
@@ -51,6 +53,7 @@ interface BusinessTableProps {
   onExport?: () => void;
   sortOrder?: string;
   onSortOrderChange?: (sort: string) => void;
+  onDelete?: (id: number) => void;
 }
 
 export default function BusinessTable({
@@ -59,10 +62,20 @@ export default function BusinessTable({
   onExport,
   sortOrder = "Latest First",
   onSortOrderChange,
+  onDelete,
 }: BusinessTableProps) {
   const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState("10 per page");
+  const [businessToDelete, setBusinessToDelete] = useState<BusinessItem | null>(null);
+
+  const handleConfirmDelete = () => {
+    if (businessToDelete) {
+      deleteBusiness(businessToDelete.id);
+      onDelete?.(businessToDelete.id);
+      setBusinessToDelete(null);
+    }
+  };
 
   const displayCount = totalCount !== undefined ? totalCount : businesses.length;
 
@@ -189,8 +202,8 @@ export default function BusinessTable({
                       )}
                     </div>
 
-                    {/* Action Icons (Phone + WhatsApp) */}
-                    <div className="flex items-center gap-3">
+                    {/* Action Icons (Phone + WhatsApp + More) */}
+                    <div className="flex items-center gap-2">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <a
@@ -220,6 +233,48 @@ export default function BusinessTable({
                         </TooltipTrigger>
                         <TooltipContent>WhatsApp {item.name}</TooltipContent>
                       </Tooltip>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button
+                            variant="ghost"
+                            size="icon"
+                            onClick={(e) => e.stopPropagation()}
+                            className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+                          >
+                            <MoreVertical className="size-4" />
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-36 bg-white">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/businesses/${item.id}`);
+                            }}
+                            className="cursor-pointer text-xs"
+                          >
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/businesses/${item.id}`);
+                            }}
+                            className="cursor-pointer text-xs"
+                          >
+                            Edit Business
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setBusinessToDelete(item);
+                            }}
+                            className="cursor-pointer text-xs text-destructive focus:text-destructive"
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
@@ -402,6 +457,7 @@ export default function BusinessTable({
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
+                                setBusinessToDelete(item);
                               }}
                               className="cursor-pointer text-xs text-destructive focus:text-destructive"
                             >
@@ -485,6 +541,13 @@ export default function BusinessTable({
           </div>
         </div>
       </div>
+
+      <DeleteBusinessModal
+        isOpen={businessToDelete !== null}
+        businessName={businessToDelete?.name}
+        onCancel={() => setBusinessToDelete(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </TooltipProvider>
   );
 }

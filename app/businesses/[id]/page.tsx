@@ -19,6 +19,13 @@ import {
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinesses } from "@/lib/business-store";
 import { BusinessItem } from "@/components/businesses/types";
+import { DeleteBusinessModal } from "@/components/businesses";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 
 const STATIC_BUSINESS_12: BusinessItem = {
@@ -44,7 +51,8 @@ const STATIC_BUSINESS_12: BusinessItem = {
 export default function BusinessDetails() {
   const params = useParams();
   const router = useRouter();
-  const { businesses, isLoaded } = useBusinesses();
+  const { businesses, isLoaded, deleteBusiness } = useBusinesses();
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const numericId = typeof rawId === "string" ? parseInt(rawId, 10) : NaN;
@@ -113,9 +121,21 @@ export default function BusinessDetails() {
           <Button className="bg-emerald-600 hover:bg-[#71c554] text-white">
             <Plus className="mr-2 h-4 w-4" /> Add Follow-Up
           </Button>
-          <Button variant="outline" size="icon">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <Button variant="outline" size="icon">
+                <MoreVertical className="h-4 w-4" />
+              </Button>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-36 bg-white">
+              <DropdownMenuItem
+                onClick={() => setShowDeleteModal(true)}
+                className="cursor-pointer text-xs text-destructive focus:text-destructive"
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -405,6 +425,19 @@ export default function BusinessDetails() {
         <TabsContent value="notes">Notes Content</TabsContent>
         <TabsContent value="activity-log">Activity Log Content</TabsContent>
       </Tabs>
+
+      <DeleteBusinessModal
+        isOpen={showDeleteModal}
+        businessName={business?.name}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          if (business) {
+            deleteBusiness(business.id);
+            setShowDeleteModal(false);
+            router.push("/businesses");
+          }
+        }}
+      />
     </div>
   );
 }

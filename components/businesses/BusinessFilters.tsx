@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Search, Plus, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Button } from "@/components/ui/button";
@@ -22,6 +23,7 @@ interface BusinessFiltersProps {
   selectedCity: string;
   onCityChange: (value: string) => void;
   onAddBusiness?: () => void;
+  addBusinessHref?: string;
   categories?: string[];
   statuses?: string[];
   cities?: string[];
@@ -37,6 +39,7 @@ export default function BusinessFilters({
   selectedCity,
   onCityChange,
   onAddBusiness,
+  addBusinessHref = "/businesses/form",
   categories = [
     "All Categories",
     "Furniture Shop",
@@ -184,12 +187,13 @@ export default function BusinessFilters({
 
         {/* Add Business Button (Desktop) */}
         <Button
-          type="button"
-          onClick={onAddBusiness}
+          asChild
           className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0b63e5] px-5.5 text-sm font-semibold text-white shadow-[0_2px_10px_rgba(11,99,229,0.28)] transition-all hover:bg-[#0952be]"
         >
-          <Plus className="size-4.5 stroke-[2.5]" />
-          Add Business
+          <Link href={addBusinessHref} onClick={onAddBusiness}>
+            <Plus className="size-4.5 stroke-[2.5]" />
+            Add Business
+          </Link>
         </Button>
       </div>
     </div>
