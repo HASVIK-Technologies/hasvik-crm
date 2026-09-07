@@ -3,7 +3,7 @@
 import { Eye, EyeOff, LockKeyhole, UserRound } from "lucide-react";
 import Image from "next/image";
 import { FormEvent, useState } from "react";
-import { Button } from "@/components/ui/button";
+import PrimaryButton from "@/components/common/PrimaryButton";
 import { Input } from "@/components/ui/input";
 
 export default function Login() {
@@ -85,7 +85,7 @@ export default function Login() {
                 <button type="button" className="font-medium text-[#0b6e8d] hover:text-[#168d6e]">Forgot password?</button>
               </div>
 
-              <Button type="submit" className="mt-3 h-12 w-full bg-[#0b6e8d] text-base text-white shadow-[0_8px_18px_rgba(11,110,141,0.2)] hover:bg-[#095b74]">Sign in</Button>
+              <PrimaryButton type="submit" className="mt-3 h-12 w-full text-base">Sign in</PrimaryButton>
             </form>
 
             <p className="mt-8 text-center text-xs text-slate-400">Your information is protected with secure authentication.</p>
