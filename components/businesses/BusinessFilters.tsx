@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Search, Plus, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -11,6 +11,9 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import PrimaryButton from "../common/PrimaryButton";
+import SecondaryButton from "../common/SecondaryButton";
+import OutlinedButton from "../common/OutlinedButton";
 
 interface BusinessFiltersProps {
   searchTerm: string;
@@ -22,6 +25,7 @@ interface BusinessFiltersProps {
   selectedCity: string;
   onCityChange: (value: string) => void;
   onAddBusiness?: () => void;
+  addBusinessHref?: string;
   categories?: string[];
   statuses?: string[];
   cities?: string[];
@@ -37,6 +41,7 @@ export default function BusinessFilters({
   selectedCity,
   onCityChange,
   onAddBusiness,
+  addBusinessHref = "/businesses/form",
   categories = [
     "All Categories",
     "Furniture Shop",
@@ -63,21 +68,20 @@ export default function BusinessFilters({
             placeholder="Search businesses..."
             value={searchTerm}
             onChange={(e) => onSearchChange(e.target.value)}
-            className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-white pl-10 pr-10 text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus-visible:border-[#0b63e5]"
+            className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-white pl-10 pr-10 text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus-visible:border-primary"
           />
           <Search className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-[#94a3b8]" />
         </div>
-        <Button
-          variant="outline"
+        <OutlinedButton
           size="icon"
           type="button"
           onClick={() => setShowMobileFilters(!showMobileFilters)}
           className={`flex size-11 shrink-0 items-center justify-center rounded-xl border border-[#e2e8f0] bg-white transition-colors hover:bg-[#f8fafc] ${
-            showMobileFilters ? "border-[#0b63e5] text-[#0b63e5]" : "text-[#64748b]"
+            showMobileFilters ? "border-primary text-primary" : "text-[#64748b]"
           }`}
         >
           <SlidersHorizontal className="size-4.5" />
-        </Button>
+        </OutlinedButton>
       </div>
 
       {/* Mobile Expandable Filters */}
@@ -134,14 +138,14 @@ export default function BusinessFilters({
               placeholder="Search businesses..."
               value={searchTerm}
               onChange={(e) => onSearchChange(e.target.value)}
-              className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-white pl-4.5 pr-11 text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus-visible:border-[#0b63e5] focus-visible:ring-1 focus-visible:ring-[#0b63e5]"
+              className="h-11 w-full rounded-xl border border-[#e2e8f0] bg-white pl-4.5 pr-11 text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary"
             />
             <Search className="pointer-events-none absolute right-4 top-1/2 size-4.5 -translate-y-1/2 text-[#94a3b8]" />
           </div>
 
           {/* Category Filter */}
           <Select value={selectedCategory} onValueChange={onCategoryChange}>
-            <SelectTrigger className="h-11 w-auto min-w-[145px] rounded-xl border border-[#e2e8f0] bg-white pl-4 pr-3.5 text-sm font-medium text-[#334155] hover:border-[#cbd5e1] focus:border-[#0b63e5] focus-visible:ring-1 focus-visible:ring-[#0b63e5]">
+            <SelectTrigger className="h-11 w-auto min-w-[145px] rounded-xl border border-[#e2e8f0] bg-white pl-4 pr-3.5 text-sm font-medium text-[#334155] hover:border-[#cbd5e1] focus:border-primary focus-visible:ring-1 focus-visible:ring-primary">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-white">
@@ -155,7 +159,7 @@ export default function BusinessFilters({
 
           {/* Status Filter */}
           <Select value={selectedStatus} onValueChange={onStatusChange}>
-            <SelectTrigger className="h-11 w-auto min-w-[125px] rounded-xl border border-[#e2e8f0] bg-white pl-4 pr-3.5 text-sm font-medium text-[#334155] hover:border-[#cbd5e1] focus:border-[#0b63e5] focus-visible:ring-1 focus-visible:ring-[#0b63e5]">
+            <SelectTrigger className="h-11 w-auto min-w-[125px] rounded-xl border border-[#e2e8f0] bg-white pl-4 pr-3.5 text-sm font-medium text-[#334155] hover:border-[#cbd5e1] focus:border-primary focus-visible:ring-1 focus-visible:ring-primary">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-white">
@@ -169,7 +173,7 @@ export default function BusinessFilters({
 
           {/* Cities Filter */}
           <Select value={selectedCity} onValueChange={onCityChange}>
-            <SelectTrigger className="h-11 w-auto min-w-[125px] rounded-xl border border-[#e2e8f0] bg-white pl-4 pr-3.5 text-sm font-medium text-[#334155] hover:border-[#cbd5e1] focus:border-[#0b63e5] focus-visible:ring-1 focus-visible:ring-[#0b63e5]">
+            <SelectTrigger className="h-11 w-auto min-w-[125px] rounded-xl border border-[#e2e8f0] bg-white pl-4 pr-3.5 text-sm font-medium text-[#334155] hover:border-[#cbd5e1] focus:border-primary focus-visible:ring-1 focus-visible:ring-primary">
               <SelectValue />
             </SelectTrigger>
             <SelectContent className="bg-white">
@@ -183,14 +187,16 @@ export default function BusinessFilters({
         </div>
 
         {/* Add Business Button (Desktop) */}
-        <Button
-          type="button"
-          onClick={onAddBusiness}
+        <PrimaryButton
+          asChild
           className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0b63e5] px-5.5 text-sm font-semibold text-white shadow-[0_2px_10px_rgba(11,99,229,0.28)] transition-all hover:bg-[#0952be]"
         >
-          <Plus className="size-4.5 stroke-[2.5]" />
-          Add Business
-        </Button>
+          <Link href={addBusinessHref} onClick={onAddBusiness}>
+            <Plus className="size-4.5 stroke-[2.5]" />
+            Add Business
+          </Link>
+        </PrimaryButton>
+
       </div>
     </div>
   );

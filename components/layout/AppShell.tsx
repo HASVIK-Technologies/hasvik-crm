@@ -102,7 +102,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
                       active
-                        ? "bg-[#ecfdf3] text-[#027a48]"
+                        ? "bg-[#ecfdf3] text-secondary"
                         : "text-[#64748b] hover:bg-[#f8fafc] hover:text-[#0f172a]"
                     }`}
                   >
@@ -112,7 +112,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     />
                     <span>{item.label}</span>
                     {item.label === "Follow-ups" && (
-                      <span className="ml-auto rounded-full bg-[#d1fadf] px-2 py-0.5 text-[10px] font-bold text-[#027a48]">
+                      <span className="ml-auto rounded-full bg-[#d1fadf] px-2 py-0.5 text-[10px] font-bold text-secondary">
                         3
                       </span>
                     )}
@@ -206,7 +206,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 <input
                   type="text"
                   placeholder="Search businesses by name, category, city..."
-                  className="h-10 w-72 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] pl-10 pr-4 text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus:border-[#0b63e5] focus:bg-white focus:outline-none xl:w-84"
+                  className="h-10 w-72 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] pl-10 pr-4 text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus:border-primary focus:bg-white focus:outline-none xl:w-84"
                 />
               </div>
 
@@ -263,7 +263,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     onClick={() => setMobileMenuOpen(false)}
                     className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold ${
                       active
-                        ? "bg-[#ecfdf3] text-[#027a48]"
+                        ? "bg-[#ecfdf3] text-secondary"
                         : "text-[#64748b] hover:bg-[#f8fafc]"
                     }`}
                   >
