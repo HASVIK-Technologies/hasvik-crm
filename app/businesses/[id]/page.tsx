@@ -1,41 +1,148 @@
-import { Button } from "@/components/ui/button";
+"use client";
+
+import React from "react";
+import Link from "next/link";
+import { useParams, useRouter } from "next/navigation";
+import PrimaryButton from "@/components/common/PrimaryButton";
+import OutlinedButton from "@/components/common/OutlinedButton";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import businessData from "@/data/businessData.json"; 
-import { WhatsAppIcon } from "@/components/common/WhatsAppIcon"; 
-
+import businessData from "@/data/businessData.json";
 import { 
   ArrowLeft, Edit2, Plus, MoreVertical, 
-  Phone, MessageCircle, MapPin, 
+  Phone, MapPin, 
   User, Building2, Target, Store, Users, FolderOpen, Calendar,
-  Tags, Building, Zap, FileText, Globe, Mail, Trash2, Slash, ExternalLink
+  AlertCircle,
+  Tags, Building, Zap, Globe, Mail, Trash2, Slash, ExternalLink,
+  FileText
 } from "lucide-react";
+import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
+import { useBusinesses } from "@/lib/business-store";
+import { BusinessItem } from "@/components/businesses/types";
+import { DeleteBusinessModal } from "@/components/businesses";
+import {
+  DropdownMenu,
+  DropdownMenuTrigger,
+  DropdownMenuContent,
+  DropdownMenuItem,
+} from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
+import { Button } from "@/components/ui/button";
+
+const STATIC_BUSINESS_12: BusinessItem = {
+  id: 12,
+  name: "Hasvik Technology",
+  phone: "9876543210",
+  initials: "HT",
+  avatarBg: "bg-blue-50",
+  avatarTextColor: "text-blue-700",
+  category: "Furniture Shop",
+  city: "Ballia",
+  status: "Active",
+  lastFollowUp: "25 Aug 2026 at 11:30 AM",
+  nextFollowUp: "Today at 10:00 AM",
+  nextFollowUpType: "today",
+  owner: "Contact 1 (Owner)",
+  address: "Ballia, U.P.",
+  leadSource: "Website",
+  businessType: "Retailer",
+  assignedTo: "Amit Sharma",
+};
 
 export default function BusinessDetails() {
   
   const cleanNumber = (num: string) => num.replace(/\D/g, '');
 
+  const params = useParams();
+  const router = useRouter();
+  const { businesses, isLoaded, deleteBusiness } = useBusinesses();
+  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+
+  const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const numericId = typeof rawId === "string" ? parseInt(rawId, 10) : NaN;
+  const isValidNumericId =
+    !isNaN(numericId) &&
+    Number.isInteger(numericId) &&
+    numericId > 0 &&
+    String(numericId) === String(rawId).trim();
+
+  // For /businesses/12, always provide the static Hasvik Technology data as requested
+  const business =
+    numericId === 12
+      ? STATIC_BUSINESS_12
+      : isValidNumericId
+      ? businesses.find((b) => b.id === numericId)
+      : undefined;
+
+  // If business is not found or ID is invalid
+  // if ((isLoaded || numericId === 12) && !business) {
+  //   return (
+  //     <div className="mx-auto max-w-xl py-16 text-center space-y-4">
+  //       <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
+  //         <AlertCircle className="size-7" />
+  //       </div>
+  //       <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
+  //         Business Not Found
+  //       </h1>
+  //       <p className="text-sm text-[#64748b]">
+  //         The business with ID{" "}
+  //         <span className="font-semibold text-[#0f172a]">#{rawId}</span> does not exist or has been removed.
+  //       </p>
+  //       <div className="pt-2">
+  //         <OutlinedButton asChild className="gap-2">
+  //           <Link href="/businesses">
+  //             <ArrowLeft className="size-4" /> Back to Businesses
+  //           </Link>
+  //         </OutlinedButton>
+  //       </div>
+  //     </div>
+  //   );
+  // }
+
+  // Loading state fallback before store hydrates
+  if (!business) {
+    return (
+      <div className="mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]">
+        Loading business details...
+      </div>
+    );
+  }
+
   return (
     <div className="p-6 max-w-full mx-auto space-y-6">
       
       {/* 1. Header Section */}
-      <div className="flex flex-wrap items-center justify-between gap-4">
-        <Button variant="outline">
-          <ArrowLeft className="mr-2 h-4 w-4" /> Back to Businesses
-        </Button>
-        
+      <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
+        <OutlinedButton asChild>
+          <Link href="/businesses">
+            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Businesses
+          </Link>
+        </OutlinedButton>
+
         <div className="flex items-center gap-2">
-          <Button variant="outline" className="text-[#004c9a]">
+          <OutlinedButton className="text-primary border-gray-200">
             <Edit2 className="mr-2 h-4 w-4" /> Edit Business
-          </Button>
-          <Button className="bg-emerald-600 hover:bg-[#71c554] text-white">
+          </OutlinedButton>
+          <PrimaryButton>
             <Plus className="mr-2 h-4 w-4" /> Add Follow-Up
-          </Button>
-          <Button variant="outline" size="icon">
-            <MoreVertical className="h-4 w-4" />
-          </Button>
+          </PrimaryButton>
+          <DropdownMenu>
+            <DropdownMenuTrigger asChild>
+              <OutlinedButton size="icon">
+                <MoreVertical className="h-4 w-4" />
+              </OutlinedButton>
+            </DropdownMenuTrigger>
+            <DropdownMenuContent align="end" className="w-36 bg-white">
+              <DropdownMenuItem
+                onClick={() => setShowDeleteModal(true)}
+                className="cursor-pointer text-xs text-destructive focus:text-destructive"
+              >
+                Delete
+              </DropdownMenuItem>
+            </DropdownMenuContent>
+          </DropdownMenu>
         </div>
       </div>
 
@@ -75,22 +182,47 @@ export default function BusinessDetails() {
           </div>
         </CardContent>
 
-        <div className="px-6 pb-5">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
-            <Button variant="outline" className="w-full text-emerald-600 border-gray-200 hover:bg-emerald-50">
-              <Phone className="mr-2 h-4 w-4" /> Call
-            </Button>
-            <Button variant="outline" className="w-full text-emerald-600 border-gray-200 hover:bg-emerald-50">
-              <WhatsAppIcon className="mr-2 h-4 w-4" /> WhatsApp
-            </Button>
-            <Button variant="outline" className="w-full text-blue-600 border-gray-200 hover:bg-blue-50">
-              <MapPin className="mr-2 h-4 w-4" /> Directions
-            </Button>
-          </div>
-        </div>
+          {/* Bottom Section: Action Buttons */}
+          <CardFooter className="grid grid-cols-3 gap-3 p-0 pt-3 md:pt-4">
+            <OutlinedButton
+              asChild
+              className="text-emerald-600 border-gray-200"
+            >
+              <a href={`tel:${business.phone}`}>
+                <Phone className="mr-2 h-4 w-4" /> Call
+              </a>
+            </OutlinedButton>
+            <OutlinedButton
+              asChild
+              className="text-emerald-600 border-gray-200"
+            >
+              <a
+                href={`https://wa.me/91${business.phone}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <WhatsAppIcon className="mr-2 h-4 w-4" /> WhatsApp
+              </a>
+            </OutlinedButton>
+            <OutlinedButton
+              asChild
+              className="text-blue-600 border-gray-200"
+            >
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(
+                  business.name + " " + (business.address || business.city)
+                )}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MapPin className="mr-2 h-4 w-4" /> Directions
+              </a>
+            </OutlinedButton>
+          </CardFooter>
+        </Card>
 
         <div className="border-t border-slate-100 mx-6"></div>
-
+      <Card>
         <CardContent className="pt-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4">
             <div className="flex gap-3">
@@ -185,12 +317,12 @@ export default function BusinessDetails() {
                 <div className="flex items-start gap-3 text-sm">
                   <Building2 className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Business Name</div>
-                  <div className="text-slate-700 font-medium">{businessData.businessInfo.name}</div>
+                  <div className="text-slate-700 font-medium">{business.name || businessData.businessInfo.name}</div>
                 </div>
                 <div className="flex items-start gap-3 text-sm">
                   <Tags className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Category</div>
-                  <div className="text-slate-700 font-medium">{businessData.businessInfo.category}</div>
+                  <div className="text-slate-700 font-medium">{business.category || businessData.businessInfo.category}</div>
                 </div>
                 <div className="flex items-start gap-3 text-sm">
                   <Store className="w-5 h-5 text-slate-400 shrink-0" />
@@ -200,12 +332,12 @@ export default function BusinessDetails() {
                 <div className="flex items-start gap-3 text-sm">
                   <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Address</div>
-                  <div className="text-slate-700 font-medium leading-relaxed">{businessData.businessInfo.address}</div>
+                  <div className="text-slate-700 font-medium leading-relaxed">{business.address || businessData.businessInfo.address}</div>
                 </div>
                 <div className="flex items-start gap-3 text-sm">
                   <Building className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">City</div>
-                  <div className="text-slate-700 font-medium">{businessData.businessInfo.city}</div>
+                  <div className="text-slate-700 font-medium">{business.city || businessData.businessInfo.city}</div>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Zap className="w-5 h-5 text-slate-400 shrink-0" />
@@ -222,15 +354,15 @@ export default function BusinessDetails() {
                 <div className="flex items-center gap-3 text-sm">
                   <Globe className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Website</div>
-                  <a href={businessData.businessInfo.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium break-all">
-                    {businessData.businessInfo.website}
+                  <a href={business.website || businessData.businessInfo.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium break-all">
+                    {business.website || businessData.businessInfo.website}
                   </a>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Mail className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Email</div>
-                  <a href={`mailto:${businessData.businessInfo.email}`} className="text-blue-600 hover:underline font-medium break-all">
-                    {businessData.businessInfo.email}
+                  <a href={`mailto:${business.email || businessData.businessInfo.email}`} className="text-blue-600 hover:underline font-medium break-all">
+                    {business.email || businessData.businessInfo.email}
                   </a>
                 </div>
               </div>
@@ -402,6 +534,19 @@ export default function BusinessDetails() {
         */}
 
       </Tabs>
+
+      <DeleteBusinessModal
+        isOpen={showDeleteModal}
+        businessName={business?.name}
+        onCancel={() => setShowDeleteModal(false)}
+        onConfirm={() => {
+          if (business) {
+            deleteBusiness(business.id);
+            setShowDeleteModal(false);
+            router.push("/businesses");
+          }
+        }}
+      />
     </div>
-  )
+  );
 }

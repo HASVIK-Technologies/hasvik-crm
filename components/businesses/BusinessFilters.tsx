@@ -1,9 +1,9 @@
 "use client";
 
 import React, { useState } from "react";
+import Link from "next/link";
 import { Search, Plus, SlidersHorizontal } from "lucide-react";
 import { Input } from "@/components/ui/input";
-import { Button } from "@/components/ui/button";
 import {
   Select,
   SelectContent,
@@ -13,6 +13,7 @@ import {
 } from "@/components/ui/select";
 import PrimaryButton from "../common/PrimaryButton";
 import SecondaryButton from "../common/SecondaryButton";
+import OutlinedButton from "../common/OutlinedButton";
 
 interface BusinessFiltersProps {
   searchTerm: string;
@@ -24,6 +25,7 @@ interface BusinessFiltersProps {
   selectedCity: string;
   onCityChange: (value: string) => void;
   onAddBusiness?: () => void;
+  addBusinessHref?: string;
   categories?: string[];
   statuses?: string[];
   cities?: string[];
@@ -39,6 +41,7 @@ export default function BusinessFilters({
   selectedCity,
   onCityChange,
   onAddBusiness,
+  addBusinessHref = "/businesses/form",
   categories = [
     "All Categories",
     "Furniture Shop",
@@ -69,8 +72,7 @@ export default function BusinessFilters({
           />
           <Search className="pointer-events-none absolute right-3.5 top-1/2 size-4 -translate-y-1/2 text-[#94a3b8]" />
         </div>
-        <Button
-          variant="outline"
+        <OutlinedButton
           size="icon"
           type="button"
           onClick={() => setShowMobileFilters(!showMobileFilters)}
@@ -79,7 +81,7 @@ export default function BusinessFilters({
           }`}
         >
           <SlidersHorizontal className="size-4.5" />
-        </Button>
+        </OutlinedButton>
       </div>
 
       {/* Mobile Expandable Filters */}
@@ -186,12 +188,15 @@ export default function BusinessFilters({
 
         {/* Add Business Button (Desktop) */}
         <PrimaryButton
-          type="button"
-          onClick={onAddBusiness}
+          asChild
+          className="flex h-11 items-center justify-center gap-2 rounded-xl bg-[#0b63e5] px-5.5 text-sm font-semibold text-white shadow-[0_2px_10px_rgba(11,99,229,0.28)] transition-all hover:bg-[#0952be]"
         >
-          <Plus className="size-4.5 stroke-[2.5]" />
-          Add Business
+          <Link href={addBusinessHref} onClick={onAddBusiness}>
+            <Plus className="size-4.5 stroke-[2.5]" />
+            Add Business
+          </Link>
         </PrimaryButton>
+
       </div>
     </div>
   );

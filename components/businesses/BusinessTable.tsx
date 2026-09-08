@@ -1,6 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
+import { useRouter } from "next/navigation";
 import {
   Download,
   SlidersHorizontal,
@@ -11,7 +12,9 @@ import {
   ChevronRight,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
-import { Button } from "@/components/ui/button";
+import OutlinedButton from "@/components/common/OutlinedButton";
+import PlainButton from "@/components/common/PlainButton";
+import PrimaryButton from "@/components/common/PrimaryButton";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
@@ -43,6 +46,8 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "./types";
+import { deleteBusiness } from "@/lib/business-store";
+import { DeleteBusinessModal } from "./DeleteBusinessModal";
 
 interface BusinessTableProps {
   businesses: BusinessItem[];
@@ -50,6 +55,7 @@ interface BusinessTableProps {
   onExport?: () => void;
   sortOrder?: string;
   onSortOrderChange?: (sort: string) => void;
+  onDelete?: (id: number) => void;
 }
 
 export default function BusinessTable({
@@ -58,9 +64,20 @@ export default function BusinessTable({
   onExport,
   sortOrder = "Latest First",
   onSortOrderChange,
+  onDelete,
 }: BusinessTableProps) {
+  const router = useRouter();
   const [currentPage, setCurrentPage] = useState(1);
   const [itemsPerPage, setItemsPerPage] = useState("10 per page");
+  const [businessToDelete, setBusinessToDelete] = useState<BusinessItem | null>(null);
+
+  const handleConfirmDelete = () => {
+    if (businessToDelete) {
+      deleteBusiness(businessToDelete.id);
+      onDelete?.(businessToDelete.id);
+      setBusinessToDelete(null);
+    }
+  };
 
   const displayCount = totalCount !== undefined ? totalCount : businesses.length;
 
@@ -74,27 +91,25 @@ export default function BusinessTable({
           </h2>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <Button
-              variant="outline"
+            <OutlinedButton
               type="button"
               onClick={onExport}
               className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:flex-initial sm:px-4"
             >
               <Download className="size-4 text-[#64748b]" />
               Export
-            </Button>
+            </OutlinedButton>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <Button
-                  variant="outline"
+                <OutlinedButton
                   type="button"
                   className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:w-auto sm:px-4"
                 >
                   <SlidersHorizontal className="size-4 text-[#64748b]" />
                   <span>{sortOrder}</span>
                   <ChevronDown className="size-4 text-[#64748b]" />
-                </Button>
+                </OutlinedButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 bg-white">
                 <DropdownMenuItem
@@ -126,7 +141,8 @@ export default function BusinessTable({
               {businesses.map((item) => (
                 <div
                   key={item.id}
-                  className="flex items-start justify-between gap-3 md:gap-4 rounded-2xl border border-[#eaf0f6] bg-white p-3 md:p-4 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all hover:shadow-md"
+                  onClick={() => router.push(`/businesses/${item.id}`)}
+                  className="flex cursor-pointer items-start justify-between gap-3 md:gap-4 rounded-2xl border border-[#eaf0f6] bg-white p-3 md:p-4 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all hover:border-[#0b63e5]/40 hover:shadow-md"
                 >
                   {/* Left Side: Avatar + Business Info */}
                   <div className="flex items-start gap-3 min-w-0">
@@ -186,12 +202,13 @@ export default function BusinessTable({
                       )}
                     </div>
 
-                    {/* Action Icons (Phone + WhatsApp) */}
-                    <div className="flex items-center gap-3">
+                    {/* Action Icons (Phone + WhatsApp + More) */}
+                    <div className="flex items-center gap-2">
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <a
                             href={`tel:${item.phone}`}
+                            onClick={(e) => e.stopPropagation()}
                             aria-label={`Call ${item.name}`}
                             className="flex size-7 items-center justify-center rounded-lg text-[#059669] transition-colors hover:bg-[#ecfdf3]"
                           >
@@ -207,6 +224,7 @@ export default function BusinessTable({
                             href={`https://wa.me/91${item.phone}`}
                             target="_blank"
                             rel="noopener noreferrer"
+                            onClick={(e) => e.stopPropagation()}
                             aria-label={`WhatsApp ${item.name}`}
                             className="flex size-7 items-center justify-center rounded-lg text-[#16a34a] transition-colors hover:bg-[#ecfdf3]"
                           >
@@ -215,6 +233,47 @@ export default function BusinessTable({
                         </TooltipTrigger>
                         <TooltipContent>WhatsApp {item.name}</TooltipContent>
                       </Tooltip>
+
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <PlainButton
+                            size="icon"
+                            onClick={(e) => e.stopPropagation()}
+                            className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+                          >
+                            <MoreVertical className="size-4" />
+                          </PlainButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end" className="w-36 bg-white">
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/businesses/${item.id}`);
+                            }}
+                            className="cursor-pointer text-xs"
+                          >
+                            View Details
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              router.push(`/businesses/${item.id}`);
+                            }}
+                            className="cursor-pointer text-xs"
+                          >
+                            Edit Business
+                          </DropdownMenuItem>
+                          <DropdownMenuItem
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setBusinessToDelete(item);
+                            }}
+                            className="cursor-pointer text-xs text-destructive focus:text-destructive"
+                          >
+                            Delete
+                          </DropdownMenuItem>
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </div>
@@ -248,7 +307,8 @@ export default function BusinessTable({
                 businesses.map((item) => (
                   <TableRow
                     key={item.id}
-                    className="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80"
+                    onClick={() => router.push(`/businesses/${item.id}`)}
+                    className="cursor-pointer border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80"
                   >
                     {/* Business Name + Avatar + Phone */}
                     <TableCell className="py-4.5 pl-6 pr-4">
@@ -335,6 +395,7 @@ export default function BusinessTable({
                           <TooltipTrigger asChild>
                             <a
                               href={`tel:${item.phone}`}
+                              onClick={(e) => e.stopPropagation()}
                               aria-label={`Call ${item.name}`}
                               className="flex size-8.5 items-center justify-center rounded-lg text-[#059669] transition-colors hover:bg-[#ecfdf3]"
                             >
@@ -351,6 +412,7 @@ export default function BusinessTable({
                               href={`https://wa.me/91${item.phone}`}
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               aria-label={`WhatsApp ${item.name}`}
                               className="flex size-8.5 items-center justify-center rounded-lg text-[#16a34a] transition-colors hover:bg-[#ecfdf3]"
                             >
@@ -362,24 +424,41 @@ export default function BusinessTable({
 
                         {/* 3 Dots Menu */}
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
-                            <Button
-                              variant="ghost"
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                            <PlainButton
                               size="icon-sm"
                               aria-label={`More actions for ${item.name}`}
                               className="size-8.5 rounded-lg text-[#94a3b8] hover:bg-[#f1f5f9] hover:text-[#334155]"
                             >
                               <MoreVertical className="size-4.5" />
-                            </Button>
+                            </PlainButton>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-36 bg-white">
-                            <DropdownMenuItem className="cursor-pointer text-xs">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/businesses/${item.id}`);
+                              }}
+                              className="cursor-pointer text-xs"
+                            >
                               View Details
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer text-xs">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                router.push(`/businesses/${item.id}`);
+                              }}
+                              className="cursor-pointer text-xs"
+                            >
                               Edit Business
                             </DropdownMenuItem>
-                            <DropdownMenuItem className="cursor-pointer text-xs text-destructive focus:text-destructive">
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setBusinessToDelete(item);
+                              }}
+                              className="cursor-pointer text-xs text-destructive focus:text-destructive"
+                            >
                               Delete
                             </DropdownMenuItem>
                           </DropdownMenuContent>
@@ -403,8 +482,7 @@ export default function BusinessTable({
 
           <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end sm:gap-4">
             <div className="flex items-center gap-1.5">
-              <Button
-                variant="outline"
+              <OutlinedButton
                 size="icon-sm"
                 type="button"
                 disabled={currentPage === 1}
@@ -412,33 +490,38 @@ export default function BusinessTable({
                 className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] transition-colors disabled:opacity-50"
               >
                 <ChevronLeft className="size-4" />
-              </Button>
-              {[1, 2, 3, 4, 5].map((pageNum) => (
-                <Button
-                  key={pageNum}
-                  variant={currentPage === pageNum ? "default" : "outline"}
-                  size="icon-sm"
-                  type="button"
-                  onClick={() => setCurrentPage(pageNum)}
-                  className={cn(
-                    "size-8.5 rounded-lg text-sm font-semibold shadow-sm",
-                    currentPage === pageNum
-                      ? "bg-[#0b63e5] text-white hover:bg-[#0952be]"
-                      : "border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc]"
-                  )}
-                >
-                  {pageNum}
-                </Button>
-              ))}
-              <Button
-                variant="outline"
+              </OutlinedButton>
+              {[1, 2, 3, 4, 5].map((pageNum) =>
+                currentPage === pageNum ? (
+                  <PrimaryButton
+                    key={pageNum}
+                    size="icon-sm"
+                    type="button"
+                    onClick={() => setCurrentPage(pageNum)}
+                    className="size-8.5 rounded-lg text-sm font-semibold shadow-sm p-0"
+                  >
+                    {pageNum}
+                  </PrimaryButton>
+                ) : (
+                  <OutlinedButton
+                    key={pageNum}
+                    size="icon-sm"
+                    type="button"
+                    onClick={() => setCurrentPage(pageNum)}
+                    className="size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc]"
+                  >
+                    {pageNum}
+                  </OutlinedButton>
+                )
+              )}
+              <OutlinedButton
                 size="icon-sm"
                 type="button"
                 onClick={() => setCurrentPage((p) => Math.min(5, p + 1))}
                 className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc]"
               >
                 <ChevronRight className="size-4" />
-              </Button>
+              </OutlinedButton>
             </div>
 
             <Select value={itemsPerPage} onValueChange={setItemsPerPage}>
@@ -460,6 +543,13 @@ export default function BusinessTable({
           </div>
         </div>
       </div>
+
+      <DeleteBusinessModal
+        isOpen={businessToDelete !== null}
+        businessName={businessToDelete?.name}
+        onCancel={() => setBusinessToDelete(null)}
+        onConfirm={handleConfirmDelete}
+      />
     </TooltipProvider>
   );
 }

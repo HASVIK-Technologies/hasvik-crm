@@ -1,6 +1,6 @@
 "use client";
 
-import { Trash2, type LucideIcon } from "lucide-react";
+import { CircleMinus, type LucideIcon } from "lucide-react";
 import MobileInput from "@/components/common/MobileInput";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import { cn } from "@/lib/utils";
@@ -66,11 +66,11 @@ export default function NumberListField({
                 className={cn(
                   "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
                   canRemove
-                    ? "bg-red-50 text-red-500 hover:bg-red-100"
+                    ? "bg-[#f3f5f6] text-[#667f8d] hover:bg-[#e5edf1] hover:text-[#163b58]"
                     : "cursor-not-allowed bg-[#f3f5f6] text-[#c3ccd1]",
                 )}
               >
-                <Trash2 className="size-4" />
+                <CircleMinus className="size-4" />
               </button>
             </div>
           );
