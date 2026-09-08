@@ -3,23 +3,25 @@ import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/componen
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import businessData from "@/data/businessData.json"; // Adjust path if needed
+import businessData from "@/data/businessData.json"; 
+import { WhatsAppIcon } from "@/components/common/WhatsAppIcon"; 
 
-// Combined all icon imports into a single statement
 import { 
   ArrowLeft, Edit2, Plus, MoreVertical, 
   Phone, MessageCircle, MapPin, 
   User, Building2, Target, Store, Users, FolderOpen, Calendar,
-  Tags, Building, Zap, FileText, Globe, Mail 
+  Tags, Building, Zap, FileText, Globe, Mail, Trash2, Slash, ExternalLink
 } from "lucide-react";
-import { WhatsAppIcon } from "@/components/common/WhatsAppIcon"
 
 export default function BusinessDetails() {
+  
+  const cleanNumber = (num: string) => num.replace(/\D/g, '');
+
   return (
-    <div className="mx-auto max-w-6xl space-y-3 md:space-y-4">
+    <div className="p-6 max-w-full mx-auto space-y-6">
       
       {/* 1. Header Section */}
-      <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
+      <div className="flex flex-wrap items-center justify-between gap-4">
         <Button variant="outline">
           <ArrowLeft className="mr-2 h-4 w-4" /> Back to Businesses
         </Button>
@@ -37,210 +39,186 @@ export default function BusinessDetails() {
         </div>
       </div>
 
-      {/* 2. Cards Grid Container */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
+      {/* 2. SINGLE MERGED CARD (Full Width) */}
+      <Card className="w-full shadow-sm border-slate-200">
         
-        {/* === LEFT CARD === */}
-        <Card className="p-3 md:p-4">
-          {/* Top Section: Avatar & Titles */}
-          <CardHeader className="flex flex-row items-start gap-3 md:gap-4 p-0">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="bg-blue-50 text-blue-700 text-xl font-semibold">HT</AvatarFallback>
-            </Avatar>
-            <div className="flex flex-col gap-2 mt-1">
-              <div className="flex items-center gap-3">
-                <CardTitle className="text-xl">Hasvik Technology</CardTitle>
-                <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">Active</Badge>
-              </div>
-              <Badge variant="secondary" className="w-fit bg-blue-50 text-blue-700 hover:bg-blue-50">
-                Furniture Shop
+        <CardHeader className="flex flex-row items-start gap-4 pb-2">
+          <Avatar className="h-16 w-16">
+            <AvatarFallback className="bg-blue-50 text-blue-700 text-xl font-semibold">
+              {businessData.headerInfo.initials}
+            </AvatarFallback>
+          </Avatar>
+          <div className="flex flex-col gap-2 mt-1">
+            <div className="flex flex-wrap items-center gap-3">
+              <CardTitle className="text-xl">{businessData.headerInfo.name}</CardTitle>
+              <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">
+                {businessData.headerInfo.status}
               </Badge>
             </div>
-          </CardHeader>
+            <Badge variant="secondary" className="w-fit bg-blue-50 text-blue-700 hover:bg-blue-50">
+              {businessData.headerInfo.category}
+            </Badge>
+          </div>
+        </CardHeader>
 
-          {/* Middle Section: Contact Info Text */}
-          <CardContent className="p-0 pt-3 md:pt-4">
-            <div className="flex flex-wrap justify-between text-sm text-gray-600 gap-3 md:gap-4">
-              <div className="flex items-center gap-2">
-                <Phone className="h-4 w-4" /> 9876543210
-              </div>
-              <div className="flex items-center gap-2 text-emerald-600">
-                <WhatsAppIcon className="h-4 w-4" /> 9876543210
-              </div>
-              <div className="flex items-center gap-2">
-                <MapPin className="h-4 w-4" /> Ballia, U.P.
-              </div>
+        <CardContent className="pb-4">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600 mt-2">
+            <div className="flex items-center gap-2">
+              <Phone className="h-4 w-4" /> {businessData.headerInfo.phones[0]}
             </div>
-          </CardContent>
+            <div className="flex items-center gap-2 sm:justify-center text-emerald-600">
+              <WhatsAppIcon className="h-4 w-4" /> {businessData.headerInfo.phones[0]}
+            </div>
+            <div className="flex items-center gap-2 sm:justify-end">
+              <MapPin className="h-4 w-4" /> {businessData.headerInfo.location}
+            </div>
+          </div>
+        </CardContent>
 
-          {/* Bottom Section: Action Buttons */}
-          <CardFooter className="grid grid-cols-3 gap-3 p-0 pt-3 md:pt-4">
-            <Button variant="outline" className="text-emerald-600 border-gray-200">
+        <div className="px-6 pb-5">
+          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
+            <Button variant="outline" className="w-full text-emerald-600 border-gray-200 hover:bg-emerald-50">
               <Phone className="mr-2 h-4 w-4" /> Call
             </Button>
-            <Button variant="outline" className="text-emerald-600 border-gray-200">
+            <Button variant="outline" className="w-full text-emerald-600 border-gray-200 hover:bg-emerald-50">
               <WhatsAppIcon className="mr-2 h-4 w-4" /> WhatsApp
             </Button>
-            <Button variant="outline" className="text-blue-600 border-gray-200">
+            <Button variant="outline" className="w-full text-blue-600 border-gray-200 hover:bg-blue-50">
               <MapPin className="mr-2 h-4 w-4" /> Directions
             </Button>
-          </CardFooter>
-        </Card>
+          </div>
+        </div>
 
-        {/* === RIGHT CARD === */}
-        <Card className="p-3 md:p-4">
-          <CardContent className="p-0">
-            {/* 2-Column Data Grid */}
-            <div className="grid grid-cols-2 gap-y-4 md:gap-y-6 gap-x-3 md:gap-x-4">
-              
-              {/* Detail Item 1 */}
-              <div className="flex gap-3">
-                <User className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Business Owner</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Contact 1 (Owner)</p>
-                </div>
-              </div>
-              
-              {/* Detail Item 2 */}
-              <div className="flex gap-3">
-                <Building2 className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Category</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Furniture Shop</p>
-                </div>
-              </div>
+        <div className="border-t border-slate-100 mx-6"></div>
 
-              {/* Detail Item 3 */}
-              <div className="flex gap-3">
-                <Target className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Lead Source</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Website</p>
-                </div>
+        <CardContent className="pt-5">
+          <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4">
+            <div className="flex gap-3">
+              <User className="h-5 w-5 text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Business Owner</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.owner}</p>
               </div>
-
-              {/* Detail Item 4 */}
-              <div className="flex gap-3">
-                <Store className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Business Type</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Retailer</p>
-                </div>
-              </div>
-
-              {/* Detail Item 5 */}
-              <div className="flex gap-3">
-                <Users className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Assigned To</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">Amit Sharma</p>
-                </div>
-              </div>
-
-              {/* Detail Item 6 (with Badge) */}
-              <div className="flex gap-3">
-                <FolderOpen className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Status</p>
-                  <div className="mt-1">
-                     <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">Active</Badge>
-                  </div>
-                </div>
-              </div>
-
-              {/* Detail Item 7 (with inline Badge) */}
-              <div className="flex gap-3">
-                <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Next Follow-up</p>
-                  <div className="flex items-center gap-2 mt-0.5">
-                    <p className="font-medium text-sm text-gray-900">Today at 10:00 AM</p>
-                    <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0 py-0 h-5 text-xs">Today</Badge>
-                  </div>
-                </div>
-              </div>
-
-              {/* Detail Item 8 */}
-              <div className="flex gap-3">
-                <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
-                <div>
-                  <p className="text-sm text-gray-500">Last Follow-up</p>
-                  <p className="font-medium text-sm text-gray-900 mt-0.5">25 Aug 2026 at 11:30 AM</p>
-                </div>
-              </div>
-
             </div>
-          </CardContent>
-        </Card>
-      </div> {/* <-- NOTE: The grid container closes here now! */}
+            <div className="flex gap-3">
+              <Building2 className="h-5 w-5 text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Category</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.category}</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Target className="h-5 w-5 text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Lead Source</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.leadSource}</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Store className="h-5 w-5 text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Business Type</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.businessType}</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Users className="h-5 w-5 text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Assigned To</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.assignedTo}</p>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <FolderOpen className="h-5 w-5 text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Status</p>
+                <div className="mt-1">
+                   <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">{businessData.detailsGrid.status}</Badge>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Next Follow-up</p>
+                <div className="flex items-center gap-2 mt-0.5">
+                  <p className="font-medium text-sm text-gray-900">{businessData.detailsGrid.nextFollowUp}</p>
+                  <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0 py-0 h-5 text-xs">{businessData.detailsGrid.nextFollowUpBadge}</Badge>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-3">
+              <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Last Follow-up</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.lastFollowUp}</p>
+              </div>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
 
-      {/* 3. --- TABS SECTION --- (Now outside the grid, full width) */}
+      {/* 3. --- TABS SECTION --- */}
       <Tabs defaultValue="overview" className="w-full mt-8">
         
-        {/* Tab Headers with custom underline styling */}
-        <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b border-slate-200 rounded-none gap-6">
-          {businessData.tabs.map((tab: any) => (
+        <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b border-slate-200 rounded-none gap-6 flex-wrap">
+          {businessData.tabs
+            .filter((tab: any) => tab.id !== 'notes' && tab.id !== 'activity-log')
+            .map((tab: any) => (
             <TabsTrigger 
               key={tab.id} 
               value={tab.id}
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-green-600 data-[state=active]:text-green-700 data-[state=active]:shadow-none px-0 py-3 text-slate-500 font-medium text-sm"
+              className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:shadow-none px-0 py-3 text-slate-500 font-medium text-sm"
             >
               {tab.label}
             </TabsTrigger>
           ))}
         </TabsList>
         
-        {/* Overview Tab Content */}
+        {/* OVERVIEW TAB */}
         <TabsContent value="overview" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-3 gap-6">
+          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
             
-            {/* 1. Business Information Card */}
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-slate-800 mb-6">Business Information</h3>
-              
               <div className="space-y-5">
-                {/* Name */}
                 <div className="flex items-start gap-3 text-sm">
                   <Building2 className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Business Name</div>
                   <div className="text-slate-700 font-medium">{businessData.businessInfo.name}</div>
                 </div>
-
-                {/* Category */}
                 <div className="flex items-start gap-3 text-sm">
                   <Tags className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Category</div>
                   <div className="text-slate-700 font-medium">{businessData.businessInfo.category}</div>
                 </div>
-
-              
-
-                {/* Address */}
+                <div className="flex items-start gap-3 text-sm">
+                  <Store className="w-5 h-5 text-slate-400 shrink-0" />
+                  <div className="w-32 shrink-0 text-slate-500">Business Type</div>
+                  <div className="text-slate-700 font-medium">{businessData.businessInfo.businessType}</div>
+                </div>
                 <div className="flex items-start gap-3 text-sm">
                   <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Address</div>
                   <div className="text-slate-700 font-medium leading-relaxed">{businessData.businessInfo.address}</div>
                 </div>
-
-                {/* City */}
                 <div className="flex items-start gap-3 text-sm">
                   <Building className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">City</div>
                   <div className="text-slate-700 font-medium">{businessData.businessInfo.city}</div>
                 </div>
-
-                {/* Status */}
                 <div className="flex items-center gap-3 text-sm">
                   <Zap className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Status</div>
-                  <Badge variant="secondary" className="bg-green-100 text-green-700 hover:bg-green-100 font-medium">
+                  <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 font-medium">
                     {businessData.businessInfo.status}
                   </Badge>
                 </div>
-
-
-                {/* Website */}
+                <div className="flex items-start gap-3 text-sm">
+                  <FileText className="w-5 h-5 text-slate-400 shrink-0" />
+                  <div className="w-32 shrink-0 text-slate-500">Description</div>
+                  <div className="text-slate-600 leading-relaxed">{businessData.businessInfo.description}</div>
+                </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Globe className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Website</div>
@@ -248,8 +226,6 @@ export default function BusinessDetails() {
                     {businessData.businessInfo.website}
                   </a>
                 </div>
-
-                {/* Email */}
                 <div className="flex items-center gap-3 text-sm">
                   <Mail className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Email</div>
@@ -259,20 +235,173 @@ export default function BusinessDetails() {
                 </div>
               </div>
             </div>
-            
-            {/* We can add the Contact Info and Quick Actions cards here later in lg:col-span-1 or lg:col-span-2! */}
 
+            <div className="space-y-6">
+              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
+                <div className="flex flex-col gap-3">
+                  <Button variant="outline" className="justify-start text-emerald-600"><Calendar className="w-4 h-4 mr-3" /> Add Follow-up</Button>
+                  <Button variant="outline" className="justify-start text-blue-600"><Edit2 className="w-4 h-4 mr-3" /> Edit Business</Button>
+                  <Button variant="outline" className="justify-start text-amber-500"><FileText className="w-4 h-4 mr-3" /> Add Note</Button>
+                  <Button variant="outline" className="justify-start text-emerald-600"><Phone className="w-4 h-4 mr-3" /> Call Business</Button>
+                  <Button variant="outline" className="justify-start text-emerald-600"><WhatsAppIcon className="w-4 h-4 mr-3" /> WhatsApp Business</Button>
+                  <Button variant="outline" className="justify-start text-red-500 bg-red-50 hover:bg-red-100 border-red-200"><Slash className="w-4 h-4 mr-3" /> Deactivate Business</Button>
+                </div>
+              </div>
+
+              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+                <h3 className="text-lg font-bold text-slate-800 mb-4">Location</h3>
+                <div className="bg-slate-100 rounded-lg h-32 mb-4 relative overflow-hidden flex items-center justify-center border border-slate-200">
+                  <MapPin className="text-red-500 w-8 h-8 absolute z-10" />
+                  <div className="absolute inset-0 opacity-20 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=Ballia&zoom=13&size=400x200&sensor=false')] bg-cover bg-center"></div>
+                  <div className="absolute right-2 top-2 bg-white p-2 rounded shadow-sm border border-slate-100 text-xs font-medium w-44 z-10 text-slate-700 leading-snug">
+                    {businessData.businessInfo.address}
+                  </div>
+                </div>
+                <Button variant="secondary" className="w-full text-blue-600 bg-blue-50 hover:bg-blue-100"><ExternalLink className="w-4 h-4 mr-2" /> Open in Maps</Button>
+              </div>
+            </div>
           </div>
         </TabsContent>
         
-        {/* Empty Tabs for now */}
-        <TabsContent value="contacts">Contacts Content</TabsContent>
-        <TabsContent value="follow-ups">Follow-ups Content</TabsContent>
-        <TabsContent value="notes">Notes Content</TabsContent>
-        <TabsContent value="activity-log">Activity Log Content</TabsContent>
+        {/* CONTACTS TAB (Now Horizontal) */}
+        <TabsContent value="contacts" className="mt-6">
+          {/* STEP 1: Changed max-w-xl to w-full so the card spans the full screen width */}
+          <div className="w-full">
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+              <h3 className="text-lg font-bold text-slate-800 mb-6">Contact Information</h3>
+              
+              {/* STEP 2: Added this grid wrapper to put the 3 lists side-by-side */}
+              <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+                
+                {/* Phone List */}
+                {/* STEP 3: Removed mb-6 spacing since the grid gap handles it now */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-slate-700">Phone Numbers</h4>
+                  {businessData.contactInfo.phones.map((phone: any) => (
+                    <div key={phone.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
+                      <span className="text-sm font-medium text-slate-700">{phone.number}</span>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary" className={`${phone.badgeClass} font-normal border-0`}>{phone.type}</Badge>
+                        <a href={`tel:${cleanNumber(phone.number)}`}><Phone className="w-4 h-4 text-emerald-600 hover:text-emerald-700" /></a>
+                        <button><Trash2 className="w-4 h-4 text-red-500 hover:text-red-600" /></button>
+                      </div>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full text-blue-600 border-dashed hover:text-blue-700"><Plus className="w-4 h-4 mr-2" /> Add Phone Number</Button>
+                </div>
+
+                {/* WhatsApp List */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-slate-700">WhatsApp Numbers</h4>
+                  {businessData.contactInfo.whatsapps.map((wa: any) => (
+                    <div key={wa.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
+                      <span className="text-sm font-medium text-slate-700">{wa.number}</span>
+                      <div className="flex items-center gap-3">
+                        <Badge variant="secondary" className={`${wa.badgeClass} font-normal border-0`}>{wa.type}</Badge>
+                        <a href={`https://wa.me/${cleanNumber(wa.number)}`} target="_blank" rel="noopener noreferrer">
+                           <WhatsAppIcon className="w-4 h-4 text-emerald-600 hover:text-emerald-700" />
+                        </a>
+                        <button><Trash2 className="w-4 h-4 text-red-500 hover:text-red-600" /></button>
+                      </div>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full text-blue-600 border-dashed hover:text-blue-700"><Plus className="w-4 h-4 mr-2" /> Add WhatsApp Number</Button>
+                </div>
+                
+                {/* Email List */}
+                <div className="space-y-3">
+                  <h4 className="text-sm font-semibold text-slate-700">Email</h4>
+                  {businessData.contactInfo.emails.map((emailObj: any) => (
+                    <div key={emailObj.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
+                      <div className="flex items-center gap-2 overflow-hidden">
+                        <Mail className="w-4 h-4 text-slate-400 shrink-0" />
+                        <span className="text-sm font-medium text-slate-700 truncate">{emailObj.email}</span>
+                      </div>
+                      <button><Trash2 className="w-4 h-4 text-red-500 hover:text-red-600 shrink-0" /></button>
+                    </div>
+                  ))}
+                  <Button variant="outline" className="w-full text-blue-600 border-dashed hover:text-blue-700"><Plus className="w-4 h-4 mr-2" /> Add Email</Button>
+                </div>
+
+              </div>
+            </div>
+          </div>
+        </TabsContent>
+
+        {/* FOLLOW-UPS TAB */}
+        <TabsContent value="follow-ups" className="mt-6">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <div className="flex justify-between items-center mb-6">
+              <h3 className="text-lg font-bold text-slate-800">Recent Follow-ups</h3>
+              <a href="#" className="text-sm font-medium text-blue-600 hover:underline">View All</a>
+            </div>
+
+            <div className="hidden md:block overflow-x-auto">
+              <table className="w-full text-sm text-left">
+                <tbody>
+                  {businessData.recentFollowUps.map((item: any) => (
+                    <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
+                      <td className="py-4 pr-4 font-medium text-slate-900 whitespace-nowrap">{item.date}</td>
+                      <td className="py-4 pr-4">
+                        <Badge variant="secondary" className={`${item.badgeClass} font-normal border-0`}>{item.badge}</Badge>
+                      </td>
+                      <td className="py-4 pr-4 text-slate-600">{item.type}</td>
+                      <td className="py-4 pr-4 text-slate-900 font-medium">{item.summary}</td>
+                      <td className="py-4 pr-4 text-slate-500 w-1/3">{item.details}</td>
+                      <td className="py-4 pr-4 text-slate-600">{item.assignee}</td>
+                      <td className="py-4 pl-4 text-right">
+                        <div className="flex items-center justify-end gap-3">
+                          <a href={`tel:${cleanNumber(item.phone)}`}><Phone className="w-4 h-4 text-emerald-600 hover:text-emerald-700" /></a>
+                          <a href={`https://wa.me/${cleanNumber(item.phone)}`} target="_blank" rel="noopener noreferrer"><WhatsAppIcon className="w-4 h-4 text-emerald-600 hover:text-emerald-700" /></a>
+                          <button><MoreVertical className="w-4 h-4 text-slate-400 hover:text-slate-600" /></button>
+                        </div>
+                      </td>
+                    </tr>
+                  ))}
+                </tbody>
+              </table>
+            </div>
+
+            <div className="md:hidden space-y-4">
+              {businessData.recentFollowUps.map((item: any) => (
+                <div key={item.id} className="border border-slate-200 rounded-lg p-4 space-y-3">
+                  <div className="flex justify-between items-start">
+                    <div>
+                      <p className="font-medium text-slate-900 text-sm">{item.date}</p>
+                      <Badge variant="secondary" className={`mt-1 ${item.badgeClass} font-normal border-0`}>
+                        {item.badge}
+                      </Badge>
+                    </div>
+                    <div className="flex gap-3">
+                      <a href={`tel:${cleanNumber(item.phone)}`}><Phone className="w-4 h-4 text-emerald-600" /></a>
+                      <a href={`https://wa.me/${cleanNumber(item.phone)}`} target="_blank" rel="noopener noreferrer"><WhatsAppIcon className="w-4 h-4 text-emerald-600" /></a>
+                    </div>
+                  </div>
+                  
+                  <div>
+                    <p className="text-sm font-medium text-slate-900">{item.summary} <span className="text-slate-500 font-normal">({item.type})</span></p>
+                    <p className="text-sm text-slate-600 mt-1">{item.details}</p>
+                  </div>
+                  
+                  <div className="flex justify-between items-center pt-3 border-t border-slate-100 text-sm text-slate-500">
+                    <span>{item.assignee}</span>
+                    <button><MoreVertical className="w-4 h-4 text-slate-400" /></button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        </TabsContent>
+        
+        {/* Activity Log commented out for future use */}
+        {/* 
+        <TabsContent value="activity-log">
+          Activity Log Content
+        </TabsContent> 
+        */}
 
       </Tabs>
-
     </div>
   )
 }

@@ -1,31 +1,75 @@
 {
-    "tabs": [
-      { "id": "overview", "label": "Overview" },
-      { "id": "contacts", "label": "Contacts " },
-      { "id": "follow-ups", "label": "Follow-ups " },
-      { "id": "notes", "label": "Notes " },
-      { "id": "activity-log", "label": "Activity Log" }
+  "tabs": [
+    { "id": "overview", "label": "Overview" },
+    { "id": "contacts", "label": "Contacts" },
+    { "id": "follow-ups", "label": "Follow-ups" },
+    { "id": "activity-log", "label": "Activity Log" }
+  ],
+  "headerInfo": {
+    "initials": "SB",
+    "name": "Shree Balaji Traders",
+    "status": "Active",
+    "category": "Furniture Shop",
+    "phones": ["9876543210"],
+    "location": "Ballia, U.P."
+  },
+  "detailsGrid": {
+    "owner": "Contact 1 (Owner)",
+    "category": "Furniture Shop",
+    "leadSource": "Website",
+    "businessType": "Retailer",
+    "assignedTo": "Amit Sharma",
+    "status": "Active",
+    "nextFollowUp": "Today at 10:00 AM",
+    "nextFollowUpBadge": "Today",
+    "lastFollowUp": "20 May 2024 at 11:30 AM"
+  },
+  "businessInfo": {
+    "name": "Shree Balaji Traders",
+    "category": "Furniture Shop",
+    "businessType": "Retailer",
+    "address": "Near Main Market, Station Road, Ballia, Uttar Pradesh - 277001",
+    "city": "Ballia",
+    "status": "Active",
+    "description": "We provide all types of furniture including office, home and custom furniture.",
+    "website": "https://www.shreebalajitraders.com",
+    "email": "balajitraders@gmail.com"
+  },
+  "contactInfo": {
+    "phones": [
+      { "id": 1, "number": "9876543210", "type": "Primary", "badgeClass": "bg-green-50 text-green-700" },
+      { "id": 2, "number": "9123456780", "type": "Secondary", "badgeClass": "bg-slate-100 text-slate-700" }
     ],
-    "businessInfo": {
-      "name": "Shree Balaji Traders",
-      "category": "Furniture Shop",
-      "address": "Near Main Market, Station Road, Ballia, Uttar Pradesh - 277001",
-      "city": "Ballia",
-      "status": "Active",
-      "website": "https://www.shreebalajitraders.com",
-      "email": "balajitraders@gmail.com"
+    "whatsapps": [
+      { "id": 1, "number": "9876543210", "type": "Primary", "badgeClass": "bg-green-50 text-green-700" },
+      { "id": 2, "number": "9123456780", "type": "Secondary", "badgeClass": "bg-slate-100 text-slate-700" }
+    ],
+    "emails": [
+      { "id": 1, "email": "balajitraders@gmail.com" }
+    ]
+  },
+  "recentFollowUps": [
+    {
+      "id": 1,
+      "date": "Today at 10:00 AM",
+      "badge": "Today",
+      "badgeClass": "bg-emerald-50 text-emerald-700",
+      "type": "Call",
+      "summary": "Talked to Owner",
+      "details": "Discussed about furniture requirements. Will send catalog.",
+      "assignee": "Amit Sharma",
+      "phone": "9876543210"
     },
-    "contactInfo": {
-      "phoneNumbers": [
-        { "number": "9876543210", "label": "Primary" },
-        { "number": "9123456780", "label": "Secondary" }
-      ],
-      "whatsappNumbers": [
-        { "number": "9876543210", "label": "Primary" },
-        { "number": "9123456780", "label": "Secondary" }
-      ],
-      "emails": [
-        "balajitraders@gmail.com"
-      ]
+    {
+      "id": 2,
+      "date": "20 May 2024 at 11:30 AM",
+      "badge": "Completed",
+      "badgeClass": "bg-slate-100 text-slate-700",
+      "type": "WhatsApp",
+      "summary": "Sent Product Catalog",
+      "details": "Sent catalog on WhatsApp. Waiting for response.",
+      "assignee": "Amit Sharma",
+      "phone": "9876543210"
     }
-  }
+  ]
+}
