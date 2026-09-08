@@ -11,7 +11,6 @@ import {
   UsersRound,
 } from "lucide-react";
 
-import PrimaryButton from "@/components/common/PrimaryButton";
 import SecondaryButton from "@/components/common/SecondaryButton";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import { Card, CardContent } from "@/components/ui/card";
@@ -269,7 +268,7 @@ export default function BusinessForm() {
               type="button"
               size="lg"
               onClick={handleCancel}
-              className="w-full border-[#dce8ee] text-[#547080] sm:w-auto"
+              className="w-full sm:w-auto"
             >
               Cancel
             </OutlinedButton>
@@ -288,7 +287,7 @@ export default function BusinessForm() {
               <SecondaryButton
                 type="submit"
                 size="lg"
-                className="w-full bg-[#08765d] text-white hover:bg-[#066a53] sm:w-auto"
+                className="w-full sm:w-auto"
               >
                 <Save className="size-4" />
                 Save Business
@@ -348,7 +347,7 @@ export default function BusinessForm() {
               <OutlinedButton
                 type="button"
                 onClick={currentStep === 0 ? handleCancel : goBack}
-                className="w-full border-[#dce8ee] text-[#547080] sm:w-auto"
+                className="w-full sm:w-auto"
               >
                 {currentStep === 0 ? "Cancel" : "Back"}
               </OutlinedButton>
@@ -366,7 +365,7 @@ export default function BusinessForm() {
                   </Label>
                   <SecondaryButton
                     type="submit"
-                    className="w-full bg-[#08765d] text-white hover:bg-[#066a53] sm:w-auto"
+                    className="w-full sm:w-auto"
                   >
                     <Save className="size-4" />
                     Save Business
@@ -379,18 +378,15 @@ export default function BusinessForm() {
                       Fill in all required fields to continue.
                     </p>
                   )}
-                  <PrimaryButton
+                  <SecondaryButton
                     type="button"
                     onClick={goNext}
                     disabled={!currentStepValidation.isValid}
-                    className={cn(
-                      "w-full sm:w-auto",
-                      !currentStepValidation.isValid && "cursor-not-allowed opacity-60",
-                    )}
+                    className="w-full sm:w-auto"
                   >
                     Next
                     <ArrowRight className="size-4" />
-                  </PrimaryButton>
+                  </SecondaryButton>
                 </div>
               )}
             </div>
