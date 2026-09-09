@@ -1,10 +1,9 @@
 "use client";
 
 import React from "react";
-import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
-import PrimaryButton from "@/components/common/PrimaryButton";
 import OutlinedButton from "@/components/common/OutlinedButton";
+import Actions from "@/components/common/Actions";
 import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -22,14 +21,9 @@ import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinesses } from "@/lib/business-store";
 import { BusinessItem } from "@/components/businesses/types";
 import { DeleteBusinessModal } from "@/components/businesses";
-import {
-  DropdownMenu,
-  DropdownMenuTrigger,
-  DropdownMenuContent,
-  DropdownMenuItem,
-} from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
+import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 
 const STATIC_BUSINESS_12: BusinessItem = {
   id: 12,
@@ -111,40 +105,28 @@ export default function BusinessDetails() {
   }
 
   return (
-    <div className="p-6 max-w-full mx-auto space-y-6">
-      
-      {/* 1. Header Section */}
-      <div className="flex flex-wrap items-center justify-between gap-3 md:gap-4">
-        <OutlinedButton asChild>
-          <Link href="/businesses">
-            <ArrowLeft className="mr-2 h-4 w-4" /> Back to Businesses
-          </Link>
-        </OutlinedButton>
-
-        <div className="flex items-center gap-2">
-          <OutlinedButton className="text-primary border-gray-200">
-            <Edit2 className="mr-2 h-4 w-4" /> Edit Business
-          </OutlinedButton>
-          <PrimaryButton>
-            <Plus className="mr-2 h-4 w-4" /> Add Follow-Up
-          </PrimaryButton>
-          <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <OutlinedButton size="icon">
-                <MoreVertical className="h-4 w-4" />
-              </OutlinedButton>
-            </DropdownMenuTrigger>
-            <DropdownMenuContent align="end" className="w-36 bg-white">
-              <DropdownMenuItem
-                onClick={() => setShowDeleteModal(true)}
-                className="cursor-pointer text-xs text-destructive focus:text-destructive"
-              >
-                Delete
-              </DropdownMenuItem>
-            </DropdownMenuContent>
-          </DropdownMenu>
-        </div>
-      </div>
+    <DetailsPageLayout
+      actions={
+        <Actions
+          primary={{
+            label: "Add Follow-Up",
+            icon: <Plus className="size-4" />,
+          }}
+          secondary={[
+            {
+              label: "Edit Business",
+              icon: <Edit2 className="size-4" />,
+            },
+            {
+              label: "Delete",
+              onSelect: () => setShowDeleteModal(true),
+              destructive: true,
+            },
+          ]}
+        />
+      }
+      content={
+        <>
 
       {/* 2. SINGLE MERGED CARD (Full Width) */}
       <Card className="w-full shadow-sm border-slate-200">
@@ -547,6 +529,8 @@ export default function BusinessDetails() {
           }
         }}
       />
-    </div>
+        </>
+      }
+    />
   );
 }

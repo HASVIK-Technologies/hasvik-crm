@@ -129,9 +129,7 @@ export default function BusinessTable({
           </div>
         </div>
 
-        {/* MOBILE / TABLET VIEW: Card List (< lg) */}
-        {/* v0.2 after fixing gapping for mobile componentsin a Card */}
-        <div className="block lg:hidden">
+        <div data-layout-mobile>
           {businesses.length === 0 ? (
             <div className="py-12 text-center text-sm text-[#64748b]">
               No businesses found matching the current filters.
@@ -282,8 +280,8 @@ export default function BusinessTable({
           )}
         </div>
 
-        {/* DESKTOP VIEW: Table (>= lg) */}
-        <div className="hidden lg:block overflow-x-auto">
+        <div data-layout-desktop>
+        <div className="overflow-x-auto">
           <Table className="w-full min-w-[900px] text-left">
             <TableHeader className="bg-[#f8fafc] text-[13px] font-semibold text-[#475569]">
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
@@ -470,6 +468,7 @@ export default function BusinessTable({
               )}
             </TableBody>
           </Table>
+        </div>
         </div>
 
         {/* Pagination Footer */}

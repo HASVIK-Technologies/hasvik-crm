@@ -11,19 +11,19 @@ import {
   CircleHelp,
   Home,
   Menu,
-  Search,
   Settings,
   SlidersHorizontal,
   UsersRound,
   X,
 } from "lucide-react";
 import { useState } from "react";
+import SearchInput from "@/components/common/SearchInput";
 
 const navigation = [
   { label: "Home", href: "/dashboard", icon: Home },
   { label: "Businesses", href: "/businesses", icon: Building2 },
-  { label: "Follow-ups", href: "/dashboard#follow-ups", icon: CalendarCheck2 },
-  { label: "Contacts", href: "/businesses#contacts", icon: UsersRound },
+  { label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2 },
+  { label: "Contacts", href: "/contacts", icon: UsersRound },
 ];
 
 const toolNavigation = [
@@ -55,13 +55,30 @@ function isActivePath(pathname: string, href: string) {
   return pathname === basePath;
 }
 
+function getPageDetails(pathname: string) {
+  if (pathname === "/businesses/form") {
+    return {
+      eyebrow: "BUSINESSES",
+      title: "Add Business",
+      subtitle: "Create a new business lead and set up its first follow-up.",
+    };
+  }
+
+  if (pathname.startsWith("/businesses/") && pathname !== "/businesses/form") {
+    return {
+      eyebrow: "BUSINESS DETAILS",
+      title: "Business Details",
+      subtitle: "Review contact information, activity, and next steps.",
+    };
+  }
+
+  return pageDetails[pathname] ?? pageDetails["/dashboard"];
+}
+
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
-  const currentPage =
-    pageDetails[pathname] ??
-    pageDetails["/businesses"] ??
-    pageDetails["/dashboard"];
+  const currentPage = getPageDetails(pathname);
 
   if (pathname === "/") {
     return <>{children}</>;
@@ -184,31 +201,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 )}
               </button>
               <div>
-                <p className="text-[11px] font-bold uppercase tracking-[0.18em] text-[#12b76a]">
-                  {currentPage.eyebrow}
-                </p>
                 <h1 className="text-xl font-bold tracking-tight text-[#0f172a] sm:text-2xl">
                   {currentPage.title}
                 </h1>
-                {currentPage.subtitle && (
-                  <p className="hidden text-xs text-[#64748b] sm:block">
-                    {currentPage.subtitle}
-                  </p>
-                )}
               </div>
             </div>
 
             {/* Right Header Tools: Global Search + Filter + Bell + User */}
             <div className="flex items-center gap-2.5 sm:gap-3">
               {/* Header Search Box */}
-              <div className="relative hidden md:block">
-                <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#94a3b8]" />
-                <input
-                  type="text"
-                  placeholder="Search businesses by name, category, city..."
-                  className="h-10 w-72 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] pl-10 pr-4 text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus:border-primary focus:bg-white focus:outline-none xl:w-84"
-                />
-              </div>
+              <SearchInput
+                wrapperClassName="hidden md:block"
+                placeholder="Search businesses by name, category, city..."
+                className="h-10 w-72 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] pr-4 text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus:border-primary focus:bg-white focus:outline-none xl:w-84"
+              />
 
               {/* Header Filter Icon Button */}
               <button
@@ -276,8 +282,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           )}
         </header>
 
-        <main className="min-h-[calc(100vh-5rem)] px-5 pb-24 pt-7 sm:px-8 lg:px-10 lg:pb-8">
-          <div className="mx-auto">{children}</div>
+        <main className="min-h-[calc(100vh-5rem)] px-3 py-4 sm:px-5 sm:py-5 lg:px-7 lg:py-6">
+          <div className="mx-auto w-full">{children}</div>
         </main>
       </div>
     </div>

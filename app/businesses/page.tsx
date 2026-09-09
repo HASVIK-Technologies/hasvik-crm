@@ -1,10 +1,8 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
 import { Plus } from "lucide-react";
-import PrimaryButton from "@/components/common/PrimaryButton";
+import Actions from "@/components/common/Actions";
 import {
   BusinessStats,
   BusinessFilters,
@@ -12,9 +10,9 @@ import {
   BusinessStatsData,
 } from "@/components/businesses";
 import { useBusinesses } from "@/lib/business-store";
+import ListPageLayout from "@/components/layout/ListPageLayout";
 
 export default function BusinessesPage() {
-  const router = useRouter();
   const { businesses } = useBusinesses();
 
   const [searchTerm, setSearchTerm] = useState("");
@@ -40,7 +38,13 @@ export default function BusinessesPage() {
   }, [businesses]);
 
   const availableCities = useMemo(() => {
-    const defaultCities = ["All Cities", "Ballia", "Buxar", "Ghazipur", "Varanasi"];
+    const defaultCities = [
+      "All Cities",
+      "Ballia",
+      "Buxar",
+      "Ghazipur",
+      "Varanasi",
+    ];
     const dataCities = businesses.map((b) => b.city).filter(Boolean);
     return Array.from(new Set([...defaultCities, ...dataCities]));
   }, [businesses]);
@@ -49,7 +53,9 @@ export default function BusinessesPage() {
   const statsData: BusinessStatsData = useMemo(() => {
     const total = businesses.length;
     const active = businesses.filter((b) => b.status === "Active").length;
-    const followUpToday = businesses.filter((b) => b.nextFollowUpType === "today").length;
+    const followUpToday = businesses.filter(
+      (b) => b.nextFollowUpType === "today",
+    ).length;
     const categoriesCount = new Set(businesses.map((b) => b.category)).size;
 
     return {
@@ -72,7 +78,8 @@ export default function BusinessesPage() {
         String(item.id).includes(searchTerm);
 
       const matchesCategory =
-        selectedCategory === "All Categories" || item.category === selectedCategory;
+        selectedCategory === "All Categories" ||
+        item.category === selectedCategory;
       const matchesStatus =
         selectedStatus === "All Status" || item.status === selectedStatus;
       const matchesCity =
@@ -88,59 +95,50 @@ export default function BusinessesPage() {
       }
       return a.id - b.id;
     });
-  }, [businesses, searchTerm, selectedCategory, selectedStatus, selectedCity, sortOrder]);
-
-  const handleAddBusiness = () => {
-    router.push("/businesses/form");
-  };
+  }, [
+    businesses,
+    searchTerm,
+    selectedCategory,
+    selectedStatus,
+    selectedCity,
+    sortOrder,
+  ]);
 
   return (
-    <div className="space-y-3 md:space-y-4 pb-12">
-      {/* Mobile Heading */}
-      <div className="block lg:hidden">
-        <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">Businesses</h1>
-        <p className="mt-0.5 text-xs text-[#64748b]">Manage and track all your business leads.</p>
-      </div>
-
-      {/* 1. Search & Filter Bar */}
-      <BusinessFilters
-        searchTerm={searchTerm}
-        onSearchChange={setSearchTerm}
-        selectedCategory={selectedCategory}
-        onCategoryChange={setSelectedCategory}
-        selectedStatus={selectedStatus}
-        onStatusChange={setSelectedStatus}
-        selectedCity={selectedCity}
-        onCityChange={setSelectedCity}
-        categories={availableCategories}
-        cities={availableCities}
-        onAddBusiness={handleAddBusiness}
-      />
-
-      {/* 2. Metric / KPI Stats Cards */}
-      <BusinessStats stats={statsData} />
-
-      {/* 3. Mobile Add Business Full Width Button */}
-      <div className="block sm:hidden">
-        <PrimaryButton
-          asChild
-          className="flex h-11 w-full items-center justify-center gap-2 rounded-xl bg-[#0b63e5] text-sm font-semibold text-white shadow-sm transition-all hover:bg-[#0952be]"
-        >
-          <Link href="/businesses/form">
-            <Plus className="size-4 stroke-[2.5]" />
-            Add Business
-          </Link>
-        </PrimaryButton>
-      </div>
-
-      {/* 4. Businesses Cards (Mobile) / Data Table (Desktop) */}
-      <BusinessTable
-        businesses={filteredData}
-        totalCount={statsData.total}
-        sortOrder={sortOrder}
-        onSortOrderChange={setSortOrder}
-        onExport={() => {}}
-      />
-    </div>
+    <ListPageLayout
+      filters={
+        <BusinessFilters
+          searchTerm={searchTerm}
+          onSearchChange={setSearchTerm}
+          selectedCategory={selectedCategory}
+          onCategoryChange={setSelectedCategory}
+          selectedStatus={selectedStatus}
+          onStatusChange={setSelectedStatus}
+          selectedCity={selectedCity}
+          onCityChange={setSelectedCity}
+          categories={availableCategories}
+          cities={availableCities}
+        />
+      }
+      actions={
+        <Actions
+          primary={{
+            label: "Add Business",
+            href: "/businesses/form",
+            icon: <Plus className="size-4" />,
+          }}
+        />
+      }
+      stats={<BusinessStats stats={statsData} />}
+      content={
+        <BusinessTable
+          businesses={filteredData}
+          totalCount={statsData.total}
+          sortOrder={sortOrder}
+          onSortOrderChange={setSortOrder}
+          onExport={() => {}}
+        />
+      }
+    />
   );
 }
