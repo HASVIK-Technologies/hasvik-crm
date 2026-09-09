@@ -20,7 +20,7 @@ export default function BusinessStats({
   const activePercentage = stats.total > 0 ? ((stats.active / stats.total) * 100).toFixed(1) : "0.0";
 
   return (
-    <div className="grid grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
+    <div className="grid sm:grid-cols-2 gap-3 md:gap-4 lg:grid-cols-4">
       {/* Card 1: Total Businesses */}
       <Card className="flex flex-col justify-between rounded-2xl border border-[#e4ecf2] bg-white p-3 md:p-4 shadow-[0_2px_10px_rgba(20,40,60,0.02)] transition-all hover:shadow-md">
         <div className="flex items-start gap-3 sm:gap-3.5">

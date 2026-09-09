@@ -11,6 +11,7 @@ import {
 } from "@/components/businesses";
 import { useBusinesses } from "@/lib/business-store";
 import ListPageLayout from "@/components/layout/ListPageLayout";
+import Breadcrumb from "@/components/common/Breadcrumb";
 
 export default function BusinessesPage() {
   const { businesses } = useBusinesses();
@@ -106,6 +107,7 @@ export default function BusinessesPage() {
 
   return (
     <ListPageLayout
+      breadcrumb={<Breadcrumb items={[{ label: "Businesses" }]} />}
       filters={
         <BusinessFilters
           searchTerm={searchTerm}

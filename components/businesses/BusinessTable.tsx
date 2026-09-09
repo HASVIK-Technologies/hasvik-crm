@@ -104,7 +104,7 @@ export default function BusinessTable({
               <DropdownMenuTrigger asChild>
                 <OutlinedButton
                   type="button"
-                  className="flex h-10 w-full items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:w-auto sm:px-4"
+                  className="flex h-10 items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:w-auto sm:px-4"
                 >
                   <SlidersHorizontal className="size-4 text-[#64748b]" />
                   <span>{sortOrder}</span>

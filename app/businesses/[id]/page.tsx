@@ -10,7 +10,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import businessData from "@/data/businessData.json";
 import { 
-  ArrowLeft, Edit2, Plus, MoreVertical, 
+  Edit2, Plus, MoreVertical, 
   Phone, MapPin, 
   User, Building2, Target, Store, Users, FolderOpen, Calendar,
   AlertCircle,
@@ -24,6 +24,7 @@ import { DeleteBusinessModal } from "@/components/businesses";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
+import Breadcrumb from "@/components/common/Breadcrumb";
 
 const STATIC_BUSINESS_12: BusinessItem = {
   id: 12,
@@ -106,8 +107,14 @@ export default function BusinessDetails() {
 
   return (
     <DetailsPageLayout
-      backHref="/businesses"
-      backLabel="Back to Businesses"
+      breadcrumb={
+        <Breadcrumb
+          items={[
+            { label: "Businesses", href: "/businesses" },
+            { label: "Business Details" },
+          ]}
+        />
+      }
       actions={
         <Actions
           primary={{
