@@ -10,7 +10,7 @@ export default function FormsPageLayout({
   breadcrumb,
 }: FormsPageLayoutProps) {
   return (
-    <PageContainer className="max-w-6xl space-y-4 px-1 sm:space-y-5 sm:px-2 lg:space-y-6">
+    <PageContainer className="flex flex-col gap-6">
       {breadcrumb}
       {content}
     </PageContainer>

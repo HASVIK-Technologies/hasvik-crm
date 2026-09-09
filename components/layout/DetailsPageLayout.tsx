@@ -12,8 +12,8 @@ export default function DetailsPageLayout({
   actions,
 }: DetailsPageLayoutProps) {
   return (
-    <PageContainer className="space-y-4 px-1 sm:space-y-5 sm:px-2 lg:space-y-6">
-      <section className="flex flex-row items-center justify-between gap-4">
+    <PageContainer className="flex flex-col gap-6">
+      <section className="flex flex-col gap-4 sm:flex-row sm:items-center sm:justify-between">
         {breadcrumb}
         {actions && <div className="shrink-0">{actions}</div>}
       </section>

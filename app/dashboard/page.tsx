@@ -1,3 +1,5 @@
+import ListPageLayout from "@/components/layout/ListPageLayout";
+
 export default function HomeDashboard() {
-  return <div className="flex flex-col gap-4">Home Dashboard</div>;
+  return <ListPageLayout content={<div>Home Dashboard</div>} />;
 }
