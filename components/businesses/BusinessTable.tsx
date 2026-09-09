@@ -282,16 +282,16 @@ export default function BusinessTable({
 
         <div data-layout-desktop>
         <div className="overflow-x-auto">
-          <Table className="w-full min-w-[900px] text-left">
-            <TableHeader className="bg-[#f8fafc] text-[13px] font-semibold text-[#475569]">
+          <Table className="w-full min-w-225 text-left">
+            <TableHeader className="text-[13px] font-semibold">
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
-                <TableHead className="py-4 pl-6 pr-4 font-semibold text-[#475569]">Business Name</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">Category</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">City</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">Status</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">Last Follow-up</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">Next Follow-up</TableHead>
-                <TableHead className="py-4 pl-4 pr-6 text-right font-semibold text-[#475569]">Actions</TableHead>
+                <TableHead className="py-4 pl-6 pr-4 font-semibold">Business Name</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Category</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">City</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Status</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>
+                <TableHead className="py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
@@ -330,10 +330,10 @@ export default function BusinessTable({
                     </TableCell>
 
                     {/* Category */}
-                    <TableCell className="px-4 py-4.5 text-sm text-[#475569]">{item.category}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">{item.category}</TableCell>
 
                     {/* City */}
-                    <TableCell className="px-4 py-4.5 text-sm text-[#475569]">{item.city}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">{item.city}</TableCell>
 
                     {/* Status */}
                     <TableCell className="px-4 py-4.5">
@@ -355,7 +355,7 @@ export default function BusinessTable({
                     </TableCell>
 
                     {/* Last Follow-up */}
-                    <TableCell className="px-4 py-4.5 text-sm text-[#475569]">{item.lastFollowUp}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">{item.lastFollowUp}</TableCell>
 
                     {/* Next Follow-up */}
                     <TableCell className="px-4 py-4.5">
