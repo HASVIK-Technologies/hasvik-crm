@@ -106,6 +106,8 @@ export default function BusinessDetails() {
 
   return (
     <DetailsPageLayout
+      backHref="/businesses"
+      backLabel="Back to Businesses"
       actions={
         <Actions
           primary={{
