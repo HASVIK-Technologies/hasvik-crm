@@ -22,6 +22,7 @@ export interface ActionItem {
 interface ActionsProps {
   primary: ActionItem;
   secondary?: ActionItem[];
+  menuItems?: ActionItem[];
   className?: string;
 }
 
@@ -71,15 +72,17 @@ function ActionButton({ action }: { action: ActionItem }) {
 export default function Actions({
   primary,
   secondary = [],
+  menuItems = [],
   className = "",
 }: ActionsProps) {
-  const allActions = [primary, ...secondary];
+  const secondaryActions = [...secondary, ...menuItems];
+  const allActions = [primary, ...secondaryActions];
 
   return (
     <div className={`flex items-center justify-end gap-2 ${className}`}>
       <div className="hidden items-center gap-2 lg:flex">
         <ActionButton action={primary} />
-        {secondary.length > 0 && (
+        {secondaryActions.length > 0 && (
           <DropdownMenu>
             <DropdownMenuTrigger asChild>
               <OutlinedButton size="icon" aria-label="More actions">
@@ -87,7 +90,7 @@ export default function Actions({
               </OutlinedButton>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-44 bg-white">
-              {secondary.map((action) => (
+              {secondaryActions.map((action) => (
                 <ActionMenuItem key={action.label} action={action} />
               ))}
             </DropdownMenuContent>

@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { Plus } from "lucide-react";
+import { ChartNoAxesCombined, Plus, SlidersHorizontal } from "lucide-react";
 import Actions from "@/components/common/Actions";
 import {
   BusinessStats,
@@ -21,6 +21,8 @@ export default function BusinessesPage() {
   const [selectedStatus, setSelectedStatus] = useState("All Status");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [sortOrder, setSortOrder] = useState("Latest First");
+  const [showFilters, setShowFilters] = useState(true);
+  const [showStats, setShowStats] = useState(true);
 
   // Dynamically derive categories and cities from data
   const availableCategories = useMemo(() => {
@@ -122,6 +124,8 @@ export default function BusinessesPage() {
           cities={availableCities}
         />
       }
+      showFilters={showFilters}
+      showStats={showStats}
       actions={
         <Actions
           primary={{
@@ -129,6 +133,18 @@ export default function BusinessesPage() {
             href: "/businesses/form",
             icon: <Plus className="size-4" />,
           }}
+          menuItems={[
+            {
+              label: `${showFilters ? "Hide" : "Show"} Filters`,
+              icon: <SlidersHorizontal className="size-4" />,
+              onSelect: () => setShowFilters((visible) => !visible),
+            },
+            {
+              label: `${showStats ? "Hide" : "Show"} KPIs`,
+              icon: <ChartNoAxesCombined className="size-4" />,
+              onSelect: () => setShowStats((visible) => !visible),
+            },
+          ]}
         />
       }
       stats={<BusinessStats stats={statsData} />}

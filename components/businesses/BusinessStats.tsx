@@ -45,7 +45,7 @@ export default function BusinessStats({
             <h3 className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tracking-tight text-[#0f172a]">{stats.active}</h3>
           </div>
         </div>
-        <div className="mt-2.5 flex justify-end">
+        <div className="flex justify-end">
           <span className="inline-flex items-center text-[11px] sm:text-xs font-semibold text-[#16a34a]">
             <ArrowUpRight className="mr-0.5 size-3.5" />
             {activePercentage}%
@@ -64,7 +64,7 @@ export default function BusinessStats({
             <h3 className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tracking-tight text-[#0f172a]">{stats.followUpToday}</h3>
           </div>
         </div>
-        <div className="mt-2.5">
+        <div>
           <span className="text-[11px] sm:text-xs font-medium text-[#d97706]">Needs attention</span>
         </div>
       </Card>
@@ -80,7 +80,7 @@ export default function BusinessStats({
             <h3 className="mt-0.5 sm:mt-1 text-xl sm:text-2xl font-bold tracking-tight text-[#0f172a]">{stats.categoriesCount}</h3>
           </div>
         </div>
-        <div className="mt-2.5">
+        <div>
           <span className="text-[11px] sm:text-xs font-medium text-[#64748b]">Business categories</span>
         </div>
       </Card>
