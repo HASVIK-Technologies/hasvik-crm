@@ -1,7 +1,6 @@
 "use client";
 
 import React from "react";
-import SearchInput from "@/components/common/SearchInput";
 import {
   Select,
   SelectContent,
@@ -11,8 +10,6 @@ import {
 } from "@/components/ui/select";
 
 interface BusinessFiltersProps {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
   selectedCategory: string;
   onCategoryChange: (value: string) => void;
   selectedStatus: string;
@@ -25,8 +22,6 @@ interface BusinessFiltersProps {
 }
 
 export default function BusinessFilters({
-  searchTerm,
-  onSearchChange,
   selectedCategory,
   onCategoryChange,
   selectedStatus,
@@ -49,17 +44,10 @@ export default function BusinessFilters({
   return (
     <div
       data-filter-controls
-      className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 lg:gap-4"
+      className="flex flex-col gap-5 lg:gap-4 lg:flex-row lg:items-center"
     >
-      <SearchInput
-        value={searchTerm}
-        onChange={(event) => onSearchChange(event.target.value)}
-        placeholder="Search businesses..."
-        wrapperClassName="min-w-75 w-full"
-        className="h-11 rounded-lg border border-[#e2e8f0] bg-white text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary"
-      />
       <Select value={selectedCategory} onValueChange={onCategoryChange}>
-        <SelectTrigger className="h-11 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm font-medium text-[#334155]">
+        <SelectTrigger className="w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="bg-white">
@@ -71,7 +59,7 @@ export default function BusinessFilters({
         </SelectContent>
       </Select>
       <Select value={selectedStatus} onValueChange={onStatusChange}>
-        <SelectTrigger className="h-11 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm font-medium text-[#334155]">
+        <SelectTrigger className="w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="bg-white">
@@ -83,7 +71,7 @@ export default function BusinessFilters({
         </SelectContent>
       </Select>
       <Select value={selectedCity} onValueChange={onCityChange}>
-        <SelectTrigger className="h-11 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm font-medium text-[#334155]">
+        <SelectTrigger className="w-full">
           <SelectValue />
         </SelectTrigger>
         <SelectContent className="bg-white">

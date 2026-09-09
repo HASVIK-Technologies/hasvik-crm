@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState, useMemo } from "react";
-import { ChartNoAxesCombined, Plus, SlidersHorizontal } from "lucide-react";
+import { ChartNoAxesCombined, Plus } from "lucide-react";
 import Actions from "@/components/common/Actions";
 import {
   BusinessStats,
@@ -21,7 +21,6 @@ export default function BusinessesPage() {
   const [selectedStatus, setSelectedStatus] = useState("All Status");
   const [selectedCity, setSelectedCity] = useState("All Cities");
   const [sortOrder, setSortOrder] = useState("Latest First");
-  const [showFilters, setShowFilters] = useState(true);
   const [showStats, setShowStats] = useState(true);
 
   // Dynamically derive categories and cities from data
@@ -107,56 +106,55 @@ export default function BusinessesPage() {
     sortOrder,
   ]);
 
-  return (
-    <ListPageLayout
-      breadcrumb={<Breadcrumb items={[{ label: "Businesses" }]} />}
-      filters={
-        <BusinessFilters
-          searchTerm={searchTerm}
-          onSearchChange={setSearchTerm}
-          selectedCategory={selectedCategory}
-          onCategoryChange={setSelectedCategory}
-          selectedStatus={selectedStatus}
-          onStatusChange={setSelectedStatus}
-          selectedCity={selectedCity}
-          onCityChange={setSelectedCity}
-          categories={availableCategories}
-          cities={availableCities}
-        />
-      }
-      showFilters={showFilters}
-      showStats={showStats}
-      actions={
-        <Actions
-          primary={{
-            label: "Add Business",
-            href: "/businesses/form",
-            icon: <Plus className="size-4" />,
-          }}
-          menuItems={[
-            {
-              label: `${showFilters ? "Hide" : "Show"} Filters`,
-              icon: <SlidersHorizontal className="size-4" />,
-              onSelect: () => setShowFilters((visible) => !visible),
-            },
-            {
-              label: `${showStats ? "Hide" : "Show"} KPIs`,
-              icon: <ChartNoAxesCombined className="size-4" />,
-              onSelect: () => setShowStats((visible) => !visible),
-            },
-          ]}
-        />
-      }
-      stats={<BusinessStats stats={statsData} />}
-      content={
-        <BusinessTable
-          businesses={filteredData}
-          totalCount={statsData.total}
-          sortOrder={sortOrder}
-          onSortOrderChange={setSortOrder}
-          onExport={() => {}}
-        />
-      }
+  const filterControls = (
+    <BusinessFilters
+      selectedCategory={selectedCategory}
+      onCategoryChange={setSelectedCategory}
+      selectedStatus={selectedStatus}
+      onStatusChange={setSelectedStatus}
+      selectedCity={selectedCity}
+      onCityChange={setSelectedCity}
+      categories={availableCategories}
+      cities={availableCities}
     />
+  );
+
+  return (
+    <>
+      <ListPageLayout
+        breadcrumb={<Breadcrumb items={[{ label: "Businesses" }]} />}
+        searchValue={searchTerm}
+        onSearchChange={setSearchTerm}
+        searchPlaceholder="Search businesses..."
+        filters={filterControls}
+        showStats={showStats}
+        actions={
+          <Actions
+            primary={{
+              label: "Add Business",
+              href: "/businesses/form",
+              icon: <Plus className="size-4" />,
+            }}
+            menuItems={[
+              {
+                label: `${showStats ? "Hide" : "Show"} KPIs`,
+                icon: <ChartNoAxesCombined className="size-4" />,
+                onSelect: () => setShowStats((visible) => !visible),
+              },
+            ]}
+          />
+        }
+        stats={<BusinessStats stats={statsData} />}
+        content={
+          <BusinessTable
+            businesses={filteredData}
+            totalCount={statsData.total}
+            sortOrder={sortOrder}
+            onSortOrderChange={setSortOrder}
+            onExport={() => {}}
+          />
+        }
+      />
+    </>
   );
 }
