@@ -1,5 +1,5 @@
 export interface BusinessItem {
-  id: number;
+  id: number | string;
   name: string;
   phone: string;
   initials: string;
@@ -27,4 +27,3 @@ export interface BusinessStatsData {
   followUpToday: number;
   categoriesCount: number;
 }
-

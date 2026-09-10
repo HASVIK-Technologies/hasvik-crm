@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { BusinessItem } from "@/components/businesses/types";
+import { BusinessItem } from "@/types/business";
 
 export const INITIAL_BUSINESSES: BusinessItem[] = [
   {
@@ -182,7 +182,6 @@ export const INITIAL_BUSINESSES: BusinessItem[] = [
     nextFollowUp: "Today at 10:00 AM",
     nextFollowUpType: "today",
     owner: "Contact 1 (Owner)",
-    address: "Ballia, U.P.",
     email: "contact@hasviktechnology.com",
     leadSource: "Website",
     businessType: "Retailer",

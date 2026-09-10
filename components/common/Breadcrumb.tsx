@@ -10,12 +10,12 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   if (!items || items.length === 0) return null;
 
   return (
-    <nav className="flex flex-wrap items-center gap-1.5 text-sm">
+    <nav className="flex flex-wrap items-center gap-1.5 text-base sm:text-lg md:text-xl">
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
           <span key={index} className="flex items-center gap-1.5">
-            {index > 0 && <ChevronRight className="size-3.5 text-[#b7c5cd]" />}
+            {index > 0 && <ChevronRight className="size-4 sm:size-5 md:size-6 text-gray-300" />}
             {item.href && !isLast ? (
               <Link
                 href={item.href}
