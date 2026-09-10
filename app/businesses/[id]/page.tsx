@@ -25,6 +25,12 @@ import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const STATIC_BUSINESS_12: BusinessItem = {
   id: 12,
@@ -63,7 +69,6 @@ export default function BusinessDetails() {
     numericId > 0 &&
     String(numericId) === String(rawId).trim();
 
-  // For /businesses/12, always provide the static Hasvik Technology data as requested
   const business =
     numericId === 12
       ? STATIC_BUSINESS_12
@@ -71,32 +76,6 @@ export default function BusinessDetails() {
       ? businesses.find((b) => b.id === numericId)
       : undefined;
 
-  // If business is not found or ID is invalid
-  // if ((isLoaded || numericId === 12) && !business) {
-  //   return (
-  //     <div className="mx-auto max-w-xl py-16 text-center space-y-4">
-  //       <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-  //         <AlertCircle className="size-7" />
-  //       </div>
-  //       <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
-  //         Business Not Found
-  //       </h1>
-  //       <p className="text-sm text-[#64748b]">
-  //         The business with ID{" "}
-  //         <span className="font-semibold text-[#0f172a]">#{rawId}</span> does not exist or has been removed.
-  //       </p>
-  //       <div className="pt-2">
-  //         <OutlinedButton asChild className="gap-2">
-  //           <Link href="/businesses">
-  //             <ArrowLeft className="size-4" /> Back to Businesses
-  //           </Link>
-  //         </OutlinedButton>
-  //       </div>
-  //     </div>
-  //   );
-  // }
-
-  // Loading state fallback before store hydrates
   if (!business) {
     return (
       <div className="mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]">
@@ -140,22 +119,88 @@ export default function BusinessDetails() {
       {/* 2. SINGLE MERGED CARD (Full Width) */}
       <Card className="w-full shadow-sm border-slate-200">
         
-        <CardHeader className="flex flex-row items-start gap-4 pb-2">
-          <Avatar className="h-16 w-16">
-            <AvatarFallback className="bg-blue-50 text-blue-700 text-xl font-semibold">
-              {businessData.headerInfo.initials}
-            </AvatarFallback>
-          </Avatar>
-          <div className="flex flex-col gap-2 mt-1">
-            <div className="flex flex-wrap items-center gap-3">
-              <CardTitle className="text-xl">{businessData.headerInfo.name}</CardTitle>
-              <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">
-                {businessData.headerInfo.status}
+        <CardHeader className="flex flex-row items-start justify-between gap-4 pb-2">
+          
+          <div className="flex items-start gap-4">
+            <Avatar className="h-16 w-16">
+              <AvatarFallback className="bg-blue-50 text-blue-700 text-xl font-semibold">
+                {businessData.headerInfo.initials}
+              </AvatarFallback>
+            </Avatar>
+            <div className="flex flex-col gap-2 mt-1">
+              <div className="flex flex-wrap items-center gap-3">
+                <CardTitle className="text-xl">{businessData.headerInfo.name}</CardTitle>
+                <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">
+                  {businessData.headerInfo.status}
+                </Badge>
+              </div>
+              <Badge variant="secondary" className="w-fit bg-blue-50 text-blue-700 hover:bg-blue-50">
+                {businessData.headerInfo.category}
               </Badge>
             </div>
-            <Badge variant="secondary" className="w-fit bg-blue-50 text-blue-700 hover:bg-blue-50">
-              {businessData.headerInfo.category}
-            </Badge>
+          </div>
+
+          <div className="flex items-center gap-2">
+            
+            {businessData.contactInfo.phones?.length > 1 ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <OutlinedButton className="h-9 w-9 p-0 flex items-center justify-center text-emerald-600 border-gray-200 hover:bg-emerald-50">
+                    <Phone className="h-4 w-4" />
+                  </OutlinedButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {businessData.contactInfo.phones.map((p: any) => (
+                    <DropdownMenuItem key={p.id} asChild className="cursor-pointer">
+                      <a href={`tel:${cleanNumber(p.number)}`} className="w-full">
+                        {p.number} ({p.type})
+                      </a>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : businessData.contactInfo.phones?.length === 1 ? (
+              <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-emerald-600 border-gray-200 hover:bg-emerald-50">
+                <a href={`tel:${cleanNumber(businessData.contactInfo.phones[0].number)}`}>
+                  <Phone className="h-4 w-4" />
+                </a>
+              </OutlinedButton>
+            ) : null}
+
+            {businessData.contactInfo.whatsapps?.length > 1 ? (
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <OutlinedButton className="h-9 w-9 p-0 flex items-center justify-center text-emerald-600 border-gray-200 hover:bg-emerald-50">
+                    <WhatsAppIcon className="h-4 w-4" />
+                  </OutlinedButton>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end">
+                  {businessData.contactInfo.whatsapps.map((w: any) => (
+                    <DropdownMenuItem key={w.id} asChild className="cursor-pointer">
+                      <a href={`https://wa.me/91${cleanNumber(w.number)}`} target="_blank" rel="noopener noreferrer" className="w-full">
+                        {w.number} ({w.type})
+                      </a>
+                    </DropdownMenuItem>
+                  ))}
+                </DropdownMenuContent>
+              </DropdownMenu>
+            ) : businessData.contactInfo.whatsapps?.length === 1 ? (
+              <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-emerald-600 border-gray-200 hover:bg-emerald-50">
+                <a href={`https://wa.me/91${cleanNumber(businessData.contactInfo.whatsapps[0].number)}`} target="_blank" rel="noopener noreferrer">
+                  <WhatsAppIcon className="h-4 w-4" />
+                </a>
+              </OutlinedButton>
+            ) : null}
+
+            <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-blue-600 border-gray-200 hover:bg-blue-50">
+              <a
+                href={`https://maps.google.com/?q=${encodeURIComponent(business.name + " " + (business.address || business.city))}`}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <MapPin className="h-4 w-4" />
+              </a>
+            </OutlinedButton>
           </div>
         </CardHeader>
 
@@ -173,47 +218,8 @@ export default function BusinessDetails() {
           </div>
         </CardContent>
 
-          {/* Bottom Section: Action Buttons */}
-          <CardFooter className="grid grid-cols-3 gap-3 p-0 pt-3 md:pt-4">
-            <OutlinedButton
-              asChild
-              className="text-emerald-600 border-gray-200"
-            >
-              <a href={`tel:${business.phone}`}>
-                <Phone className="mr-2 h-4 w-4" /> Call
-              </a>
-            </OutlinedButton>
-            <OutlinedButton
-              asChild
-              className="text-emerald-600 border-gray-200"
-            >
-              <a
-                href={`https://wa.me/91${business.phone}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <WhatsAppIcon className="mr-2 h-4 w-4" /> WhatsApp
-              </a>
-            </OutlinedButton>
-            <OutlinedButton
-              asChild
-              className="text-blue-600 border-gray-200"
-            >
-              <a
-                href={`https://maps.google.com/?q=${encodeURIComponent(
-                  business.name + " " + (business.address || business.city)
-                )}`}
-                target="_blank"
-                rel="noopener noreferrer"
-              >
-                <MapPin className="mr-2 h-4 w-4" /> Directions
-              </a>
-            </OutlinedButton>
-          </CardFooter>
-        </Card>
-
         <div className="border-t border-slate-100 mx-6"></div>
-      <Card>
+
         <CardContent className="pt-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4">
             <div className="flex gap-3">
@@ -300,7 +306,7 @@ export default function BusinessDetails() {
         
         {/* OVERVIEW TAB */}
         <TabsContent value="overview" className="mt-6">
-          <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-6">
             
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-slate-800 mb-6">Business Information</h3>
@@ -359,46 +365,45 @@ export default function BusinessDetails() {
               </div>
             </div>
 
-            <div className="space-y-6">
-              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
-                <div className="flex flex-col gap-3">
-                  <Button variant="outline" className="justify-start text-emerald-600"><Calendar className="w-4 h-4 mr-3" /> Add Follow-up</Button>
-                  <Button variant="outline" className="justify-start text-blue-600"><Edit2 className="w-4 h-4 mr-3" /> Edit Business</Button>
-                  <Button variant="outline" className="justify-start text-amber-500"><FileText className="w-4 h-4 mr-3" /> Add Note</Button>
-                  <Button variant="outline" className="justify-start text-emerald-600"><Phone className="w-4 h-4 mr-3" /> Call Business</Button>
-                  <Button variant="outline" className="justify-start text-emerald-600"><WhatsAppIcon className="w-4 h-4 mr-3" /> WhatsApp Business</Button>
-                  <Button variant="outline" className="justify-start text-red-500 bg-red-50 hover:bg-red-100 border-red-200"><Slash className="w-4 h-4 mr-3" /> Deactivate Business</Button>
-                </div>
-              </div>
-
-              <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-                <h3 className="text-lg font-bold text-slate-800 mb-4">Location</h3>
-                <div className="bg-slate-100 rounded-lg h-32 mb-4 relative overflow-hidden flex items-center justify-center border border-slate-200">
-                  <MapPin className="text-red-500 w-8 h-8 absolute z-10" />
-                  <div className="absolute inset-0 opacity-20 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=Ballia&zoom=13&size=400x200&sensor=false')] bg-cover bg-center"></div>
-                  <div className="absolute right-2 top-2 bg-white p-2 rounded shadow-sm border border-slate-100 text-xs font-medium w-44 z-10 text-slate-700 leading-snug">
-                    {businessData.businessInfo.address}
-                  </div>
-                </div>
-                <Button variant="secondary" className="w-full text-blue-600 bg-blue-50 hover:bg-blue-100"><ExternalLink className="w-4 h-4 mr-2" /> Open in Maps</Button>
+            {/* STEP 2: Quick Actions is now a direct child, so it equals the height of Business Info */}
+            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
+              <h3 className="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
+              
+              {/* STEP 3: flex-1 and justify-between added so buttons fill the remaining space to the bottom */}
+              <div className="flex flex-col flex-1 justify-between gap-3">
+                <Button variant="outline" className="justify-start text-emerald-600"><Calendar className="w-4 h-4 mr-3" /> Add Follow-up</Button>
+                <Button variant="outline" className="justify-start text-blue-600"><Edit2 className="w-4 h-4 mr-3" /> Edit Business</Button>
+                <Button variant="outline" className="justify-start text-amber-500"><FileText className="w-4 h-4 mr-3" /> Add Note</Button>
+                <Button variant="outline" className="justify-start text-emerald-600"><Phone className="w-4 h-4 mr-3" /> Call Business</Button>
+                <Button variant="outline" className="justify-start text-emerald-600"><WhatsAppIcon className="w-4 h-4 mr-3" /> WhatsApp Business</Button>
+                <Button variant="outline" className="justify-start text-red-500 bg-red-50 hover:bg-red-100 border-red-200"><Slash className="w-4 h-4 mr-3" /> Deactivate Business</Button>
               </div>
             </div>
           </div>
+
+          {/* STEP 1: Location Card moved down here below the grid so it spans 100% width */}
+          <div className="mt-6 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">Location</h3>
+            <div className="bg-slate-100 rounded-lg h-32 mb-4 relative overflow-hidden flex items-center justify-center border border-slate-200">
+              <MapPin className="text-red-500 w-8 h-8 absolute z-10" />
+              <div className="absolute inset-0 opacity-20 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=Ballia&zoom=13&size=400x200&sensor=false')] bg-cover bg-center"></div>
+              <div className="absolute right-2 top-2 bg-white p-2 rounded shadow-sm border border-slate-100 text-xs font-medium w-44 z-10 text-slate-700 leading-snug">
+                {businessData.businessInfo.address}
+              </div>
+            </div>
+            <Button variant="secondary" className="w-full text-blue-600 bg-blue-50 hover:bg-blue-100"><ExternalLink className="w-4 h-4 mr-2" /> Open in Maps</Button>
+          </div>
         </TabsContent>
         
-        {/* CONTACTS TAB (Now Horizontal) */}
+        {/* CONTACTS TAB */}
         <TabsContent value="contacts" className="mt-6">
-          {/* STEP 1: Changed max-w-xl to w-full so the card spans the full screen width */}
           <div className="w-full">
             <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
               <h3 className="text-lg font-bold text-slate-800 mb-6">Contact Information</h3>
               
-              {/* STEP 2: Added this grid wrapper to put the 3 lists side-by-side */}
               <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
                 
                 {/* Phone List */}
-                {/* STEP 3: Removed mb-6 spacing since the grid gap handles it now */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-semibold text-slate-700">Phone Numbers</h4>
                   {businessData.contactInfo.phones.map((phone: any) => (
@@ -422,7 +427,7 @@ export default function BusinessDetails() {
                       <span className="text-sm font-medium text-slate-700">{wa.number}</span>
                       <div className="flex items-center gap-3">
                         <Badge variant="secondary" className={`${wa.badgeClass} font-normal border-0`}>{wa.type}</Badge>
-                        <a href={`https://wa.me/${cleanNumber(wa.number)}`} target="_blank" rel="noopener noreferrer">
+                        <a href={`https://wa.me/91${cleanNumber(wa.number)}`} target="_blank" rel="noopener noreferrer">
                            <WhatsAppIcon className="w-4 h-4 text-emerald-600 hover:text-emerald-700" />
                         </a>
                         <button><Trash2 className="w-4 h-4 text-red-500 hover:text-red-600" /></button>
@@ -476,7 +481,7 @@ export default function BusinessDetails() {
                       <td className="py-4 pl-4 text-right">
                         <div className="flex items-center justify-end gap-3">
                           <a href={`tel:${cleanNumber(item.phone)}`}><Phone className="w-4 h-4 text-emerald-600 hover:text-emerald-700" /></a>
-                          <a href={`https://wa.me/${cleanNumber(item.phone)}`} target="_blank" rel="noopener noreferrer"><WhatsAppIcon className="w-4 h-4 text-emerald-600 hover:text-emerald-700" /></a>
+                          <a href={`https://wa.me/91${cleanNumber(item.phone)}`} target="_blank" rel="noopener noreferrer"><WhatsAppIcon className="w-4 h-4 text-emerald-600 hover:text-emerald-700" /></a>
                           <button><MoreVertical className="w-4 h-4 text-slate-400 hover:text-slate-600" /></button>
                         </div>
                       </td>
@@ -498,7 +503,7 @@ export default function BusinessDetails() {
                     </div>
                     <div className="flex gap-3">
                       <a href={`tel:${cleanNumber(item.phone)}`}><Phone className="w-4 h-4 text-emerald-600" /></a>
-                      <a href={`https://wa.me/${cleanNumber(item.phone)}`} target="_blank" rel="noopener noreferrer"><WhatsAppIcon className="w-4 h-4 text-emerald-600" /></a>
+                      <a href={`https://wa.me/91${cleanNumber(item.phone)}`} target="_blank" rel="noopener noreferrer"><WhatsAppIcon className="w-4 h-4 text-emerald-600" /></a>
                     </div>
                   </div>
                   
@@ -516,14 +521,6 @@ export default function BusinessDetails() {
             </div>
           </div>
         </TabsContent>
-        
-        {/* Activity Log commented out for future use */}
-        {/* 
-        <TabsContent value="activity-log">
-          Activity Log Content
-        </TabsContent> 
-        */}
-
       </Tabs>
 
       <DeleteBusinessModal
