@@ -18,8 +18,9 @@ import {
   FileText
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
-import { useBusinesses } from "@/lib/business-store";
-import { BusinessItem } from "@/components/businesses/types";
+import { useBusinessQuery } from "@/hooks/use-businesses";
+import { deleteBusiness } from "@/lib/business-store";
+import { BusinessItem } from "@/types/business";
 import { DeleteBusinessModal } from "@/components/businesses";
 import { cn } from "@/lib/utils";
 import { Button } from "@/components/ui/button";
@@ -52,24 +53,15 @@ export default function BusinessDetails() {
 
   const params = useParams();
   const router = useRouter();
-  const { businesses, isLoaded, deleteBusiness } = useBusinesses();
   const [showDeleteModal, setShowDeleteModal] = React.useState(false);
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const { data: apiBusiness, isError, isLoading } = useBusinessQuery(
+    typeof rawId === "string" ? rawId : undefined,
+  );
   const numericId = typeof rawId === "string" ? parseInt(rawId, 10) : NaN;
-  const isValidNumericId =
-    !isNaN(numericId) &&
-    Number.isInteger(numericId) &&
-    numericId > 0 &&
-    String(numericId) === String(rawId).trim();
-
   // For /businesses/12, always provide the static Hasvik Technology data as requested
-  const business =
-    numericId === 12
-      ? STATIC_BUSINESS_12
-      : isValidNumericId
-      ? businesses.find((b) => b.id === numericId)
-      : undefined;
+  const business = apiBusiness ?? (numericId === 12 ? STATIC_BUSINESS_12 : undefined);
 
   // If business is not found or ID is invalid
   // if ((isLoaded || numericId === 12) && !business) {
@@ -96,7 +88,22 @@ export default function BusinessDetails() {
   //   );
   // }
 
-  // Loading state fallback before store hydrates
+  if (isError) {
+    return (
+      <div className="mx-auto max-w-6xl py-12 text-center text-sm text-red-600">
+        Unable to load this business. Please try again.
+      </div>
+    );
+  }
+
+  if (isLoading) {
+    return (
+      <div className="mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]">
+        Loading business details...
+      </div>
+    );
+  }
+
   if (!business) {
     return (
       <div className="mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]">
@@ -143,18 +150,18 @@ export default function BusinessDetails() {
         <CardHeader className="flex flex-row items-start gap-4 pb-2">
           <Avatar className="h-16 w-16">
             <AvatarFallback className="bg-blue-50 text-blue-700 text-xl font-semibold">
-              {businessData.headerInfo.initials}
+              {business.initials}
             </AvatarFallback>
           </Avatar>
           <div className="flex flex-col gap-2 mt-1">
             <div className="flex flex-wrap items-center gap-3">
-              <CardTitle className="text-xl">{businessData.headerInfo.name}</CardTitle>
+              <CardTitle className="text-xl">{business.name}</CardTitle>
               <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">
-                {businessData.headerInfo.status}
+                {business.status}
               </Badge>
             </div>
             <Badge variant="secondary" className="w-fit bg-blue-50 text-blue-700 hover:bg-blue-50">
-              {businessData.headerInfo.category}
+              {business.category}
             </Badge>
           </div>
         </CardHeader>
@@ -162,13 +169,13 @@ export default function BusinessDetails() {
         <CardContent className="pb-4">
           <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600 mt-2">
             <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4" /> {businessData.headerInfo.phones[0]}
+              <Phone className="h-4 w-4" /> {business.phone}
             </div>
             <div className="flex items-center gap-2 sm:justify-center text-emerald-600">
-              <WhatsAppIcon className="h-4 w-4" /> {businessData.headerInfo.phones[0]}
+              <WhatsAppIcon className="h-4 w-4" /> {business.alternatePhone || business.phone}
             </div>
             <div className="flex items-center gap-2 sm:justify-end">
-              <MapPin className="h-4 w-4" /> {businessData.headerInfo.location}
+              <MapPin className="h-4 w-4" /> {business.city}
             </div>
           </div>
         </CardContent>
@@ -220,35 +227,35 @@ export default function BusinessDetails() {
               <User className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm text-gray-500">Business Owner</p>
-                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.owner}</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{business.owner || "-"}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Building2 className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm text-gray-500">Category</p>
-                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.category}</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{business.category}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Target className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm text-gray-500">Lead Source</p>
-                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.leadSource}</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{business.leadSource || "-"}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Store className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm text-gray-500">Business Type</p>
-                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.businessType}</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{business.businessType || "-"}</p>
               </div>
             </div>
             <div className="flex gap-3">
               <Users className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm text-gray-500">Assigned To</p>
-                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.assignedTo}</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{business.assignedTo || "-"}</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -256,7 +263,7 @@ export default function BusinessDetails() {
               <div>
                 <p className="text-sm text-gray-500">Status</p>
                 <div className="mt-1">
-                   <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">{businessData.detailsGrid.status}</Badge>
+                   <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">{business.status}</Badge>
                 </div>
               </div>
             </div>
@@ -265,8 +272,8 @@ export default function BusinessDetails() {
               <div>
                 <p className="text-sm text-gray-500">Next Follow-up</p>
                 <div className="flex items-center gap-2 mt-0.5">
-                  <p className="font-medium text-sm text-gray-900">{businessData.detailsGrid.nextFollowUp}</p>
-                  <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0 py-0 h-5 text-xs">{businessData.detailsGrid.nextFollowUpBadge}</Badge>
+                    <p className="font-medium text-sm text-gray-900">{business.nextFollowUp}</p>
+                    <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0 py-0 h-5 text-xs">{business.nextFollowUpType}</Badge>
                 </div>
               </div>
             </div>
@@ -274,7 +281,7 @@ export default function BusinessDetails() {
               <Calendar className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
                 <p className="text-sm text-gray-500">Last Follow-up</p>
-                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.lastFollowUp}</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">{business.lastFollowUp}</p>
               </div>
             </div>
           </div>
@@ -318,7 +325,7 @@ export default function BusinessDetails() {
                 <div className="flex items-start gap-3 text-sm">
                   <Store className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Business Type</div>
-                  <div className="text-slate-700 font-medium">{businessData.businessInfo.businessType}</div>
+                  <div className="text-slate-700 font-medium">{business.businessType || "-"}</div>
                 </div>
                 <div className="flex items-start gap-3 text-sm">
                   <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
@@ -334,13 +341,13 @@ export default function BusinessDetails() {
                   <Zap className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Status</div>
                   <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 font-medium">
-                    {businessData.businessInfo.status}
+                    {business.status}
                   </Badge>
                 </div>
                 <div className="flex items-start gap-3 text-sm">
                   <FileText className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Description</div>
-                  <div className="text-slate-600 leading-relaxed">{businessData.businessInfo.description}</div>
+                  <div className="text-slate-600 leading-relaxed">No description available.</div>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Globe className="w-5 h-5 text-slate-400 shrink-0" />
@@ -378,7 +385,7 @@ export default function BusinessDetails() {
                   <MapPin className="text-red-500 w-8 h-8 absolute z-10" />
                   <div className="absolute inset-0 opacity-20 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=Ballia&zoom=13&size=400x200&sensor=false')] bg-cover bg-center"></div>
                   <div className="absolute right-2 top-2 bg-white p-2 rounded shadow-sm border border-slate-100 text-xs font-medium w-44 z-10 text-slate-700 leading-snug">
-                    {businessData.businessInfo.address}
+                    {business.address || business.city}
                   </div>
                 </div>
                 <Button variant="secondary" className="w-full text-blue-600 bg-blue-50 hover:bg-blue-100"><ExternalLink className="w-4 h-4 mr-2" /> Open in Maps</Button>
@@ -531,7 +538,7 @@ export default function BusinessDetails() {
         businessName={business?.name}
         onCancel={() => setShowDeleteModal(false)}
         onConfirm={() => {
-          if (business) {
+          if (business && typeof business.id === "number") {
             deleteBusiness(business.id);
             setShowDeleteModal(false);
             router.push("/businesses");

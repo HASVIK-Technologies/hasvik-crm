@@ -45,7 +45,7 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { BusinessItem } from "./types";
+import { BusinessItem } from "@/types/business";
 import { deleteBusiness } from "@/lib/business-store";
 import { DeleteBusinessModal } from "./DeleteBusinessModal";
 
@@ -54,7 +54,12 @@ interface BusinessTableProps {
   totalCount?: number;
   onExport?: () => void;
   sortOrder?: string;
-  onSortOrderChange?: (sort: string) => void;
+  onSortOrderChange?: (sort: "Latest First" | "Oldest First") => void;
+  currentPage: number;
+  totalPages: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange: (limit: number) => void;
   onDelete?: (id: number) => void;
 }
 
@@ -64,22 +69,34 @@ export default function BusinessTable({
   onExport,
   sortOrder = "Latest First",
   onSortOrderChange,
+  currentPage,
+  totalPages,
+  itemsPerPage,
+  onPageChange,
+  onItemsPerPageChange,
   onDelete,
 }: BusinessTableProps) {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState("10 per page");
   const [businessToDelete, setBusinessToDelete] = useState<BusinessItem | null>(null);
 
   const handleConfirmDelete = () => {
     if (businessToDelete) {
-      deleteBusiness(businessToDelete.id);
-      onDelete?.(businessToDelete.id);
+      if (typeof businessToDelete.id === "number") {
+        deleteBusiness(businessToDelete.id);
+        onDelete?.(businessToDelete.id);
+      }
       setBusinessToDelete(null);
     }
   };
 
   const displayCount = totalCount !== undefined ? totalCount : businesses.length;
+  const firstResult = displayCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const lastResult = Math.min(currentPage * itemsPerPage, displayCount);
+  const firstVisiblePage = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+  const visiblePages = Array.from(
+    { length: Math.min(5, totalPages) },
+    (_, index) => firstVisiblePage + index,
+  );
 
   return (
     <TooltipProvider>
@@ -474,8 +491,8 @@ export default function BusinessTable({
         {/* Pagination Footer */}
         <div className="flex flex-col gap-3 md:gap-4 border-t border-[#f1f5f9] p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-center text-sm font-medium text-[#64748b] sm:text-left">
-            Showing <span className="font-semibold text-[#0f172a]">1</span> to{" "}
-            <span className="font-semibold text-[#0f172a]">{Math.min(10, displayCount)}</span> of{" "}
+            Showing <span className="font-semibold text-[#0f172a]">{firstResult}</span> to{" "}
+            <span className="font-semibold text-[#0f172a]">{lastResult}</span> of{" "}
             <span className="font-semibold text-[#0f172a]">{displayCount}</span> results
           </p>
 
@@ -485,18 +502,18 @@ export default function BusinessTable({
                 size="icon-sm"
                 type="button"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                 className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] transition-colors disabled:opacity-50"
               >
                 <ChevronLeft className="size-4" />
               </OutlinedButton>
-              {[1, 2, 3, 4, 5].map((pageNum) =>
+              {visiblePages.map((pageNum) =>
                 currentPage === pageNum ? (
                   <PrimaryButton
                     key={pageNum}
                     size="icon-sm"
                     type="button"
-                    onClick={() => setCurrentPage(pageNum)}
+                    onClick={() => onPageChange(pageNum)}
                     className="size-8.5 rounded-lg text-sm font-semibold shadow-sm p-0"
                   >
                     {pageNum}
@@ -506,7 +523,7 @@ export default function BusinessTable({
                     key={pageNum}
                     size="icon-sm"
                     type="button"
-                    onClick={() => setCurrentPage(pageNum)}
+                    onClick={() => onPageChange(pageNum)}
                     className="size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc]"
                   >
                     {pageNum}
@@ -516,14 +533,18 @@ export default function BusinessTable({
               <OutlinedButton
                 size="icon-sm"
                 type="button"
-                onClick={() => setCurrentPage((p) => Math.min(5, p + 1))}
+                disabled={totalPages === 0 || currentPage >= totalPages}
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                 className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc]"
               >
                 <ChevronRight className="size-4" />
               </OutlinedButton>
             </div>
 
-            <Select value={itemsPerPage} onValueChange={setItemsPerPage}>
+            <Select
+              value={`${itemsPerPage} per page`}
+              onValueChange={(value) => onItemsPerPageChange(Number.parseInt(value, 10))}
+            >
               <SelectTrigger className="h-8.5 w-auto rounded-lg border border-[#e2e8f0] bg-white pl-3.5 pr-2.5 text-xs font-medium text-[#334155] hover:border-[#cbd5e1] focus-visible:ring-1 focus-visible:ring-[#0b63e5]">
                 <SelectValue />
               </SelectTrigger>

@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { BusinessItem } from "@/components/businesses/types";
+import { BusinessItem } from "@/types/business";
 
 export const INITIAL_BUSINESSES: BusinessItem[] = [
   {

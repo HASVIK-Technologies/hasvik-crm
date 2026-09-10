@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useState, useMemo } from "react";
+import React, { useMemo } from "react";
 import { ChartNoAxesCombined, Plus } from "lucide-react";
 import Actions from "@/components/common/Actions";
 import {
@@ -9,32 +9,59 @@ import {
   BusinessTable,
   BusinessStatsData,
 } from "@/components/businesses";
-import { useBusinesses } from "@/lib/business-store";
+import type { BusinessItem } from "@/types/business";
+import { useBusinessesQuery } from "@/hooks/use-businesses";
+import { useBusinessListStore } from "@/store/business-list-store";
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
 
+const EMPTY_BUSINESSES: BusinessItem[] = [];
+
 export default function BusinessesPage() {
-  const { businesses } = useBusinesses();
+  const {
+    searchTerm,
+    selectedCategory,
+    selectedStatus,
+    selectedCity,
+    sortOrder,
+    page,
+    limit,
+    showStats,
+    setSearchTerm,
+    setSelectedCategory,
+    setSelectedStatus,
+    setSelectedCity,
+    setSortOrder,
+    setPage,
+    setLimit,
+    toggleStats,
+  } = useBusinessListStore();
 
-  const [searchTerm, setSearchTerm] = useState("");
-  const [selectedCategory, setSelectedCategory] = useState("All Categories");
-  const [selectedStatus, setSelectedStatus] = useState("All Status");
-  const [selectedCity, setSelectedCity] = useState("All Cities");
-  const [sortOrder, setSortOrder] = useState("Latest First");
-  const [showStats, setShowStats] = useState(true);
+  const queryParams = useMemo(
+    () => ({
+      search: searchTerm || undefined,
+      status:
+        selectedStatus === "All Status"
+          ? undefined
+          : selectedStatus === "Active"
+            ? "ACTIVE"
+            : "INACTIVE",
+      categoryId:
+        /^[a-f\d]{24}$/i.test(selectedCategory) ? selectedCategory : undefined,
+      city: selectedCity === "All Cities" ? undefined : selectedCity,
+      page,
+      limit,
+      sortBy: sortOrder === "Latest First" ? "-createdAt" : "createdAt",
+    }),
+    [page, limit, searchTerm, selectedCategory, selectedCity, selectedStatus, sortOrder],
+  );
 
-  // Dynamically derive categories and cities from data
+  const { data, isError, isLoading, refetch } = useBusinessesQuery(queryParams);
+  const businesses = data?.businesses ?? EMPTY_BUSINESSES;
+
+  // Keep the filter options useful while categories are still represented by API IDs.
   const availableCategories = useMemo(() => {
-    const defaultCats = [
-      "All Categories",
-      "Furniture Shop",
-      "Hardware Store",
-      "Construction",
-      "Electrical Shop",
-      "Kirana Store",
-      "Service Center",
-      "Medical Store",
-    ];
+    const defaultCats = ["All Categories"];
     const dataCats = businesses.map((b) => b.category).filter(Boolean);
     return Array.from(new Set([...defaultCats, ...dataCats]));
   }, [businesses]);
@@ -67,44 +94,6 @@ export default function BusinessesPage() {
       categoriesCount,
     };
   }, [businesses]);
-
-  // Filter & sort businesses
-  const filteredData = useMemo(() => {
-    const result = businesses.filter((item) => {
-      const query = searchTerm.toLowerCase();
-      const matchesSearch =
-        item.name.toLowerCase().includes(query) ||
-        item.phone.includes(searchTerm) ||
-        item.category.toLowerCase().includes(query) ||
-        item.city.toLowerCase().includes(query) ||
-        String(item.id).includes(searchTerm);
-
-      const matchesCategory =
-        selectedCategory === "All Categories" ||
-        item.category === selectedCategory;
-      const matchesStatus =
-        selectedStatus === "All Status" || item.status === selectedStatus;
-      const matchesCity =
-        selectedCity === "All Cities" || item.city === selectedCity;
-
-      return matchesSearch && matchesCategory && matchesStatus && matchesCity;
-    });
-
-    // Sort by numeric ID
-    return result.sort((a, b) => {
-      if (sortOrder === "Latest First") {
-        return b.id - a.id;
-      }
-      return a.id - b.id;
-    });
-  }, [
-    businesses,
-    searchTerm,
-    selectedCategory,
-    selectedStatus,
-    selectedCity,
-    sortOrder,
-  ]);
 
   const filterControls = (
     <BusinessFilters
@@ -139,20 +128,42 @@ export default function BusinessesPage() {
               {
                 label: `${showStats ? "Hide" : "Show"} KPIs`,
                 icon: <ChartNoAxesCombined className="size-4" />,
-                onSelect: () => setShowStats((visible) => !visible),
+                onSelect: toggleStats,
               },
             ]}
           />
         }
         stats={<BusinessStats stats={statsData} />}
         content={
-          <BusinessTable
-            businesses={filteredData}
-            totalCount={statsData.total}
-            sortOrder={sortOrder}
-            onSortOrderChange={setSortOrder}
-            onExport={() => {}}
-          />
+          isLoading ? (
+            <div className="rounded-2xl border border-[#e4ecf2] bg-white p-12 text-center text-sm text-[#64748b]">
+              Loading businesses...
+            </div>
+          ) : isError ? (
+            <div className="rounded-2xl border border-red-200 bg-red-50 p-12 text-center text-sm text-red-700">
+              Unable to load businesses.
+              <button
+                type="button"
+                onClick={() => refetch()}
+                className="ml-2 font-semibold underline"
+              >
+                Try again
+              </button>
+            </div>
+          ) : (
+            <BusinessTable
+              businesses={businesses}
+              totalCount={data?.total ?? 0}
+              sortOrder={sortOrder}
+              onSortOrderChange={setSortOrder}
+              currentPage={page}
+              totalPages={data?.totalPages ?? 0}
+              itemsPerPage={limit}
+              onPageChange={setPage}
+              onItemsPerPageChange={setLimit}
+              onExport={() => {}}
+            />
+          )
         }
       />
     </>

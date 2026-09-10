@@ -2,7 +2,7 @@
 
 import { Building2, CalendarCheck2, Tag, Store, ArrowUpRight } from "lucide-react";
 import { Card } from "@/components/ui/card";
-import { BusinessStatsData } from "./types";
+import { BusinessStatsData } from "@/types/business";
 
 interface BusinessStatsProps {
   stats?: BusinessStatsData;

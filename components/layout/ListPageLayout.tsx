@@ -58,7 +58,6 @@ export default function ListPageLayout({
 
   return (
     <PageContainer className={`flex flex-col gap-6 ${className ?? ""}`}>
-      {showStats && stats && <section className="shrink-0">{stats}</section>}
       <section className="flex gap-4 flex-row items-center justify-between">
         {breadcrumb}
         <div className="flex shrink-0 items-center gap-2">
@@ -89,6 +88,7 @@ export default function ListPageLayout({
         </Card>
       )}
 
+      {showStats && stats && <section className="shrink-0">{stats}</section>}
       {content && (
         <section className="layout-content min-w-0">{content}</section>
       )}
