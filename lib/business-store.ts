@@ -182,7 +182,6 @@ export const INITIAL_BUSINESSES: BusinessItem[] = [
     nextFollowUp: "Today at 10:00 AM",
     nextFollowUpType: "today",
     owner: "Contact 1 (Owner)",
-    address: "Ballia, U.P.",
     email: "contact@hasviktechnology.com",
     leadSource: "Website",
     businessType: "Retailer",

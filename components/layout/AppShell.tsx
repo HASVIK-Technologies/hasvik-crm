@@ -85,7 +85,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
+    <div className="min-h-screen bg-[#f8fafc] text-[#374151]">
       {/* Sidebar for Desktop */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#e4ecf2] bg-white lg:flex">
         {/* Brand Logo Header */}
