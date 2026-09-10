@@ -1,16 +1,17 @@
 "use client";
 
 import React from "react";
+import Link from "next/link";
 import { useParams, useRouter } from "next/navigation";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import Actions from "@/components/common/Actions";
-import { Card, CardHeader, CardTitle, CardContent, CardFooter } from "@/components/ui/card";
+import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import businessData from "@/data/businessData.json";
 import { 
-  Edit2, Plus, MoreVertical, 
+  Edit2, Plus, MoreVertical, ArrowLeft,
   Phone, MapPin, 
   User, Building2, Target, Store, Users, FolderOpen, Calendar,
   AlertCircle,
@@ -112,8 +113,19 @@ export default function BusinessDetails() {
 
   if (!business) {
     return (
-      <div className="mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]">
-        Loading business details...
+      <div className="mx-auto flex max-w-xl flex-col items-center py-16 text-center">
+        <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-[#fff1f2] text-[#e11d48]">
+          <AlertCircle className="size-7" />
+        </div>
+        <h1 className="text-2xl font-bold tracking-tight text-[#334155]">Business not found</h1>
+        <p className="mt-2 max-w-sm text-sm leading-6 text-[#64748b]">
+          The business with ID #{rawId} does not exist or has been removed.
+        </p>
+        <OutlinedButton asChild className="mt-6 gap-2">
+          <Link href="/businesses">
+            <ArrowLeft className="size-4" /> Back to Businesses
+          </Link>
+        </OutlinedButton>
       </div>
     );
   }
@@ -151,26 +163,27 @@ export default function BusinessDetails() {
         <>
 
       {/* 2. SINGLE MERGED CARD (Full Width) */}
-      <Card className="w-full shadow-sm border-slate-200">
+      <Card className="w-full overflow-hidden rounded-2xl border-[#e4ecf2] shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
         
-        <CardHeader className="flex flex-row items-start justify-between gap-4 pb-2">
+        <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-[#eef2f6] bg-[#fbfdff] px-5 py-5 sm:px-7">
           
           <div className="flex items-start gap-4">
-            <Avatar className="h-16 w-16">
-              <AvatarFallback className="bg-blue-50 text-blue-700 text-xl font-semibold">
-                {businessData.headerInfo.initials}
+            <Avatar className="size-16 rounded-2xl">
+              <AvatarFallback className="bg-blue-50 text-xl font-semibold text-blue-700">
+                {business.initials}
               </AvatarFallback>
             </Avatar>
-            <div className="flex flex-col gap-2 mt-1">
+            <div className="mt-0.5 flex min-w-0 flex-col gap-2">
               <div className="flex flex-wrap items-center gap-3">
-                <CardTitle className="text-xl">{businessData.headerInfo.name}</CardTitle>
+                <CardTitle className="truncate text-xl tracking-tight text-[#334155] sm:text-2xl">{business.name}</CardTitle>
                 <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">
-                  {businessData.headerInfo.status}
+                  {business.status}
                 </Badge>
               </div>
-              <Badge variant="secondary" className="w-fit bg-blue-50 text-blue-700 hover:bg-blue-50">
-                {businessData.headerInfo.category}
-              </Badge>
+              <p className="flex items-center gap-2 text-sm text-[#64748b]">
+                <Building2 className="size-4 text-[#94a3b8]" />
+                {business.category} <span className="text-[#cbd5e1]">/</span> {business.city}
+              </p>
             </div>
           </div>
 
@@ -324,14 +337,14 @@ export default function BusinessDetails() {
       {/* 3. --- TABS SECTION --- */}
       <Tabs defaultValue="overview" className="w-full mt-8">
         
-        <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b border-slate-200 rounded-none gap-6 flex-wrap">
+        <TabsList className="w-full justify-start gap-6 rounded-none border-b border-slate-200 bg-transparent p-0">
           {businessData.tabs
             .filter((tab: any) => tab.id !== 'notes' && tab.id !== 'activity-log')
             .map((tab: any) => (
             <TabsTrigger 
               key={tab.id} 
               value={tab.id}
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:shadow-none px-0 py-3 text-slate-500 font-medium text-sm"
+              className="rounded-none border-b-2 border-transparent px-0 py-3 text-sm font-medium text-slate-500 data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:shadow-none"
             >
               {tab.label}
             </TabsTrigger>
@@ -342,8 +355,8 @@ export default function BusinessDetails() {
         <TabsContent value="overview" className="mt-6">
           <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-6">
             
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-800 mb-6">Business Information</h3>
+            <div className="rounded-2xl border border-[#e4ecf2] bg-white p-5 shadow-[0_4px_20px_rgba(20,40,60,0.03)] sm:p-6">
+              <h3 className="mb-6 text-lg font-bold tracking-tight text-slate-800">Business Information</h3>
               <div className="space-y-5">
                 <div className="flex items-start gap-3 text-sm">
                   <Building2 className="w-5 h-5 text-slate-400 shrink-0" />
@@ -400,24 +413,24 @@ export default function BusinessDetails() {
             </div>
 
             {/* STEP 2: Quick Actions is now a direct child, so it equals the height of Business Info */}
-            <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm flex flex-col">
-              <h3 className="text-lg font-bold text-slate-800 mb-4">Quick Actions</h3>
+            <div className="flex flex-col rounded-2xl border border-[#e4ecf2] bg-white p-5 shadow-[0_4px_20px_rgba(20,40,60,0.03)] sm:p-6">
+              <h3 className="mb-4 text-lg font-bold tracking-tight text-slate-800">Quick Actions</h3>
               
               {/* STEP 3: flex-1 and justify-between added so buttons fill the remaining space to the bottom */}
-              <div className="flex flex-col flex-1 justify-between gap-3">
-                <Button variant="outline" className="justify-start text-emerald-600"><Calendar className="w-4 h-4 mr-3" /> Add Follow-up</Button>
-                <Button variant="outline" className="justify-start text-blue-600"><Edit2 className="w-4 h-4 mr-3" /> Edit Business</Button>
-                <Button variant="outline" className="justify-start text-amber-500"><FileText className="w-4 h-4 mr-3" /> Add Note</Button>
-                <Button variant="outline" className="justify-start text-emerald-600"><Phone className="w-4 h-4 mr-3" /> Call Business</Button>
-                <Button variant="outline" className="justify-start text-emerald-600"><WhatsAppIcon className="w-4 h-4 mr-3" /> WhatsApp Business</Button>
-                <Button variant="outline" className="justify-start text-red-500 bg-red-50 hover:bg-red-100 border-red-200"><Slash className="w-4 h-4 mr-3" /> Deactivate Business</Button>
+              <div className="flex flex-1 flex-col justify-between gap-3">
+                <Button variant="outline" className="h-11 justify-start border-slate-200 text-emerald-600"><Calendar className="mr-3 size-4" /> Add Follow-up</Button>
+                <Button variant="outline" className="h-11 justify-start border-slate-200 text-blue-600"><Edit2 className="mr-3 size-4" /> Edit Business</Button>
+                <Button variant="outline" className="h-11 justify-start border-slate-200 text-amber-500"><FileText className="mr-3 size-4" /> Add Note</Button>
+                <Button variant="outline" className="h-11 justify-start border-slate-200 text-emerald-600"><Phone className="mr-3 size-4" /> Call Business</Button>
+                <Button variant="outline" className="h-11 justify-start border-slate-200 text-emerald-600"><WhatsAppIcon className="mr-3 size-4" /> WhatsApp Business</Button>
+                <Button variant="outline" className="h-11 justify-start border-red-200 bg-red-50 text-red-500 hover:bg-red-100"><Slash className="mr-3 size-4" /> Deactivate Business</Button>
               </div>
             </div>
           </div>
 
           {/* STEP 1: Location Card moved down here below the grid so it spans 100% width */}
-          <div className="mt-6 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Location</h3>
+          <div className="mt-6 rounded-2xl border border-[#e4ecf2] bg-white p-5 shadow-[0_4px_20px_rgba(20,40,60,0.03)] sm:p-6">
+            <h3 className="mb-4 text-lg font-bold tracking-tight text-slate-800">Location</h3>
             <div className="bg-slate-100 rounded-lg h-32 mb-4 relative overflow-hidden flex items-center justify-center border border-slate-200">
               <MapPin className="text-red-500 w-8 h-8 absolute z-10" />
               <div className="absolute inset-0 opacity-20 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=Ballia&zoom=13&size=400x200&sensor=false')] bg-cover bg-center"></div>
