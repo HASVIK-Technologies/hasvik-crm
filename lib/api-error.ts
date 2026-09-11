@@ -54,7 +54,12 @@ export function getApiErrorMessage(error: unknown): string {
   }
 
   const payload = error.response.data as unknown;
-  if (typeof payload === "string" && payload.trim()) return payload;
+  if (typeof payload === "string" && payload.trim()) {
+    const trimmed = payload.trim();
+    if (!trimmed.startsWith("<") && !trimmed.toLowerCase().includes("<!doctype html")) {
+      return trimmed;
+    }
+  }
   if (payload && typeof payload === "object") {
     const message = getPayloadMessage(payload as ApiErrorPayload);
     if (message) return message;

@@ -2,7 +2,7 @@
 
 import * as React from "react";
 import { AlertDialog as AlertDialogPrimitive } from "radix-ui";
-import { Trash2, X } from "lucide-react";
+import { OctagonAlert, X } from "lucide-react";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import { Button } from "@/components/ui/button";
 
@@ -41,7 +41,7 @@ export function DeleteBusinessModal({
 
           <div className="flex items-start gap-4">
             <div className="flex size-11 shrink-0 items-center justify-center rounded-xl bg-red-50 text-red-600 border border-red-100">
-              <Trash2 className="size-5 text-[#d92d20]" />
+              <OctagonAlert className="size-5 text-[#d92d20]" />
             </div>
 
             <div className="min-w-0 flex-1 pt-0.5">
