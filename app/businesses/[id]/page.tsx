@@ -204,31 +204,10 @@ export default function BusinessDetails() {
           </div>
         </CardHeader>
 
-        <CardContent className="pb-4">
-          <div className="grid grid-cols-1 sm:grid-cols-3 gap-4 text-sm text-gray-600 mt-2">
-            <div className="flex items-center gap-2">
-              <Phone className="h-4 w-4" /> {businessData.headerInfo.phones[0]}
-            </div>
-            <div className="flex items-center gap-2 sm:justify-center text-emerald-600">
-              <WhatsAppIcon className="h-4 w-4" /> {businessData.headerInfo.phones[0]}
-            </div>
-            <div className="flex items-center gap-2 sm:justify-end">
-              <MapPin className="h-4 w-4" /> {businessData.headerInfo.location}
-            </div>
-          </div>
-        </CardContent>
-
         <div className="border-t border-slate-100 mx-6"></div>
 
         <CardContent className="pt-5">
           <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-y-6 gap-x-4">
-            <div className="flex gap-3">
-              <User className="h-5 w-5 text-gray-400 mt-0.5" />
-              <div>
-                <p className="text-sm text-gray-500">Business Owner</p>
-                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.owner}</p>
-              </div>
-            </div>
             <div className="flex gap-3">
               <Building2 className="h-5 w-5 text-gray-400 mt-0.5" />
               <div>
@@ -241,13 +220,6 @@ export default function BusinessDetails() {
               <div>
                 <p className="text-sm text-gray-500">Lead Source</p>
                 <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.leadSource}</p>
-              </div>
-            </div>
-            <div className="flex gap-3">
-              <Store className="h-5 w-5 text-gray-400 mt-0.5" />
-              <div>
-                <p className="text-sm text-gray-500">Business Type</p>
-                <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.businessType}</p>
               </div>
             </div>
             <div className="flex gap-3">
@@ -283,6 +255,16 @@ export default function BusinessDetails() {
                 <p className="font-medium text-sm text-gray-900 mt-0.5">{businessData.detailsGrid.lastFollowUp}</p>
               </div>
             </div>
+
+            <div className ="flex gap-3">
+            <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
+              <div>
+                <p className="text-sm text-gray-500">Address</p>
+                <p className="font-medium text-sm text-gray-900 mt-0.5">
+                   {business.address || businessData.businessInfo.address}
+                </p>
+              </div>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -290,16 +272,19 @@ export default function BusinessDetails() {
       {/* 3. --- TABS SECTION --- */}
       <Tabs defaultValue="overview" className="w-full mt-8">
         
-        <TabsList className="w-full justify-start h-auto p-0 bg-transparent border-b border-slate-200 rounded-none gap-6 flex-wrap">
+      <TabsList className="flex w-full justify-start items-center h-auto px-6 py-3 bg-grey border border-slate-200 rounded-xl gap-12 shadow-sm flex-wrap">
           {businessData.tabs
-            .filter((tab: any) => tab.id !== 'notes' && tab.id !== 'activity-log')
+            .filter((tab: any) =>  tab.id !== 'activity-log')
             .map((tab: any) => (
-            <TabsTrigger 
+              <TabsTrigger 
               key={tab.id} 
               value={tab.id}
-              className="rounded-none border-b-2 border-transparent data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 data-[state=active]:shadow-none px-0 py-3 text-slate-500 font-medium text-sm"
+              className="flex-none !px-0 py-2 !bg-transparent !shadow-none border-0 border-b-2 border-transparent rounded-none text-slate-500 font-medium text-base data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 outline-none focus-visible:ring-0"
             >
               {tab.label}
+              {tab.id === 'contacts' && ` (${businessData.contactInfo.phones.length + businessData.contactInfo.whatsapps.length})`}
+              {tab.id === 'follow-ups' && ` (${businessData.recentFollowUps.length})`}
+              {tab.id === 'notes' && ` (2)`}
             </TabsTrigger>
           ))}
         </TabsList>
@@ -322,11 +307,6 @@ export default function BusinessDetails() {
                   <div className="text-slate-700 font-medium">{business.category || businessData.businessInfo.category}</div>
                 </div>
                 <div className="flex items-start gap-3 text-sm">
-                  <Store className="w-5 h-5 text-slate-400 shrink-0" />
-                  <div className="w-32 shrink-0 text-slate-500">Business Type</div>
-                  <div className="text-slate-700 font-medium">{businessData.businessInfo.businessType}</div>
-                </div>
-                <div className="flex items-start gap-3 text-sm">
                   <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
                   <div className="w-32 shrink-0 text-slate-500">Address</div>
                   <div className="text-slate-700 font-medium leading-relaxed">{business.address || businessData.businessInfo.address}</div>
@@ -342,11 +322,6 @@ export default function BusinessDetails() {
                   <Badge variant="secondary" className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 font-medium">
                     {businessData.businessInfo.status}
                   </Badge>
-                </div>
-                <div className="flex items-start gap-3 text-sm">
-                  <FileText className="w-5 h-5 text-slate-400 shrink-0" />
-                  <div className="w-32 shrink-0 text-slate-500">Description</div>
-                  <div className="text-slate-600 leading-relaxed">{businessData.businessInfo.description}</div>
                 </div>
                 <div className="flex items-center gap-3 text-sm">
                   <Globe className="w-5 h-5 text-slate-400 shrink-0" />
@@ -384,14 +359,26 @@ export default function BusinessDetails() {
           {/* STEP 1: Location Card moved down here below the grid so it spans 100% width */}
           <div className="mt-6 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
             <h3 className="text-lg font-bold text-slate-800 mb-4">Location</h3>
-            <div className="bg-slate-100 rounded-lg h-32 mb-4 relative overflow-hidden flex items-center justify-center border border-slate-200">
-              <MapPin className="text-red-500 w-8 h-8 absolute z-10" />
-              <div className="absolute inset-0 opacity-20 bg-[url('https://maps.googleapis.com/maps/api/staticmap?center=Ballia&zoom=13&size=400x200&sensor=false')] bg-cover bg-center"></div>
-              <div className="absolute right-2 top-2 bg-white p-2 rounded shadow-sm border border-slate-100 text-xs font-medium w-44 z-10 text-slate-700 leading-snug">
-                {businessData.businessInfo.address}
-              </div>
+            <div className="bg-slate-100 rounded-lg h-90 mb-4 relative overflow-hidden border border-slate-200">
+              <iframe
+              src={`https://maps.google.com/maps?q=${encodeURIComponent(business.name + " " + (business.address || business.city))}&t=&z=14&ie=UTF8&iwloc=&output=embed`}
+              width="100%"
+              height="100%"
+              style={{ border: 0 }}
+              allowFullScreen
+              loading="lazy"
+              referrerPolicy="no-referrer-when-downgrade"
+              ></iframe>
             </div>
-            <Button variant="secondary" className="w-full text-blue-600 bg-blue-50 hover:bg-blue-100"><ExternalLink className="w-4 h-4 mr-2" /> Open in Maps</Button>
+            <Button variant="secondary" className="w-full text-blue-600 bg-blue-50 hover:bg-blue-100">
+              <a 
+                href={`https://maps.google.com/?q=${encodeURIComponent(business.name + " " + (business.address || business.city))}`} 
+                target="_blank" 
+                rel="noopener noreferrer"
+              >
+                <ExternalLink className="w-4 h-4 mr-2"/> Open in Maps
+              </a>
+            </Button>
           </div>
         </TabsContent>
         
@@ -464,7 +451,6 @@ export default function BusinessDetails() {
               <h3 className="text-lg font-bold text-slate-800">Recent Follow-ups</h3>
               <a href="#" className="text-sm font-medium text-blue-600 hover:underline">View All</a>
             </div>
-
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <tbody>
@@ -519,6 +505,13 @@ export default function BusinessDetails() {
                 </div>
               ))}
             </div>
+          </div>
+        </TabsContent>
+        {/* NOTES TAB */}
+        <TabsContent value="notes" className="mt-6">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">Notes</h3>
+            <p className="text-gray-500 text-sm">You can build your notes section here!</p>
           </div>
         </TabsContent>
       </Tabs>

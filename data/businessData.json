@@ -3,6 +3,7 @@
     { "id": "overview", "label": "Overview" },
     { "id": "contacts", "label": "Contacts" },
     { "id": "follow-ups", "label": "Follow-ups" },
+    { "id": "Notes", "label": "Notes" },
     { "id": "activity-log", "label": "Activity Log" }
   ],
   "headerInfo": {
@@ -27,11 +28,9 @@
   "businessInfo": {
     "name": "Shree Balaji Traders",
     "category": "Furniture Shop",
-    "businessType": "Retailer",
     "address": "Near Main Market, Station Road, Ballia, Uttar Pradesh - 277001",
     "city": "Ballia",
     "status": "Active",
-    "description": "We provide all types of furniture including office, home and custom furniture.",
     "website": "https://www.shreebalajitraders.com",
     "email": "balajitraders@gmail.com"
   },
