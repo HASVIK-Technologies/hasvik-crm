@@ -230,13 +230,18 @@ export default function BusinessDetails() {
         <TabsList className="inline-flex h-auto p-0 bg-transparent gap-6">
           {businessData.tabs
             .filter((tab: any) =>  tab.id !== 'activity-log')
+            .filter((tab: any) =>  tab.id !== 'activity-log')
             .map((tab: any) => (
-            <TabsTrigger 
+              <TabsTrigger 
               key={tab.id} 
               value={tab.id}
               className="flex-none !px-0 py-2 !bg-transparent !shadow-none border-0 border-b-2 border-transparent rounded-none text-slate-500 font-medium text-base data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 outline-none focus-visible:ring-0"
+              className="flex-none !px-0 py-2 !bg-transparent !shadow-none border-0 border-b-2 border-transparent rounded-none text-slate-500 font-medium text-base data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 outline-none focus-visible:ring-0"
             >
               {tab.label}
+              {tab.id === 'contacts' && ` (${businessData.contactInfo.phones.length + businessData.contactInfo.whatsapps.length})`}
+              {tab.id === 'follow-ups' && ` (${businessData.recentFollowUps.length})`}
+              {tab.id === 'notes' && ` (2)`}
               {tab.id === 'contacts' && ` (${businessData.contactInfo.phones.length + businessData.contactInfo.whatsapps.length})`}
               {tab.id === 'follow-ups' && ` (${businessData.recentFollowUps.length})`}
               {tab.id === 'notes' && ` (2)`}
@@ -274,6 +279,13 @@ export default function BusinessDetails() {
         {/* NOTES TAB */}
         <TabsContent value="notes" className="mt-6">
           
+        </TabsContent>
+        {/* NOTES TAB */}
+        <TabsContent value="notes" className="mt-6">
+          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
+            <h3 className="text-lg font-bold text-slate-800 mb-4">Notes</h3>
+            <p className="text-gray-500 text-sm">You can build your notes section here!</p>
+          </div>
         </TabsContent>
       </Tabs>
 
