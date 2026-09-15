@@ -11,6 +11,7 @@ export type ApiBusiness = {
   categoryId?: string | null;
   businessType?: string;
   status?: string;
+  isActive?: boolean;
   phoneNumbers?: PhoneNumber[];
   whatsappNumbers?: PhoneNumber[];
   email?: string;
@@ -35,6 +36,7 @@ export type BusinessesResponse = {
 export type BusinessQueryParams = {
   search?: string;
   status?: string;
+  isActive?: boolean;
   businessType?: string;
   categoryId?: string;
   assignedTo?: string;

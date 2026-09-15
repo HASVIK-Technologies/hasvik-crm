@@ -21,16 +21,20 @@ export default function BusinessesPage() {
   const {
     searchTerm,
     selectedCategory,
-    selectedStatus,
+    selectedLeadStatus,
+    selectedActivityStatus,
     selectedCity,
+    selectedState,
     sortOrder,
     page,
     limit,
     showStats,
     setSearchTerm,
     setSelectedCategory,
-    setSelectedStatus,
+    setSelectedLeadStatus,
+    setSelectedActivityStatus,
     setSelectedCity,
+    setSelectedState,
     setSortOrder,
     setPage,
     setLimit,
@@ -40,30 +44,35 @@ export default function BusinessesPage() {
   const queryParams = useMemo(
     () => ({
       search: searchTerm || undefined,
-      status:
-        selectedStatus === "All Status"
+      status: selectedLeadStatus === "All Lead Statuses" ? undefined : selectedLeadStatus,
+      isActive:
+        selectedActivityStatus === "All Status"
           ? undefined
-          : selectedStatus === "Active"
-            ? "ACTIVE"
-            : "INACTIVE",
+          : selectedActivityStatus === "Active",
       categoryId:
         /^[a-f\d]{24}$/i.test(selectedCategory) ? selectedCategory : undefined,
       city: selectedCity === "All Cities" ? undefined : selectedCity,
+      state: selectedState === "All States" ? undefined : selectedState,
       page,
       limit,
       sortBy: sortOrder === "Latest First" ? "-createdAt" : "createdAt",
     }),
-    [page, limit, searchTerm, selectedCategory, selectedCity, selectedStatus, sortOrder],
+    [page, limit, searchTerm, selectedCategory, selectedCity, selectedState, selectedLeadStatus, selectedActivityStatus, sortOrder],
   );
 
   const { data, isError, isLoading, refetch } = useBusinessesQuery(queryParams);
   const businesses = data?.businesses ?? EMPTY_BUSINESSES;
 
-  // Keep the filter options useful while categories are still represented by API IDs.
   const availableCategories = useMemo(() => {
-    const defaultCats = ["All Categories"];
     const dataCats = businesses.map((b) => b.category).filter(Boolean);
-    return Array.from(new Set([...defaultCats, ...dataCats]));
+    return Array.from(new Set(dataCats)).map((category) => ({ id: category, name: category }));
+  }, [businesses]);
+
+  const availableStates = useMemo(() => {
+    const dataStates = businesses.flatMap((business) =>
+      business.state ? [business.state] : [],
+    );
+    return Array.from(new Set(["All States", ...dataStates]));
   }, [businesses]);
 
   const availableCities = useMemo(() => {
@@ -99,12 +108,17 @@ export default function BusinessesPage() {
     <BusinessFilters
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
-      selectedStatus={selectedStatus}
-      onStatusChange={setSelectedStatus}
+      selectedLeadStatus={selectedLeadStatus}
+      onLeadStatusChange={setSelectedLeadStatus}
+      selectedActivityStatus={selectedActivityStatus}
+      onActivityStatusChange={setSelectedActivityStatus}
       selectedCity={selectedCity}
       onCityChange={setSelectedCity}
+      selectedState={selectedState}
+      onStateChange={setSelectedState}
       categories={availableCategories}
       cities={availableCities}
+      states={availableStates}
     />
   );
 
