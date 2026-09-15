@@ -3,6 +3,11 @@ import { apiClient } from "@/lib/api-client";
 import type { ApiBusiness, BusinessesResponse, BusinessQueryParams, BusinessesResult } from "@/types/business-api";
 import type { BusinessItem } from "@/types/business";
 
+export type CategoryOption = {
+  id: string;
+  name: string;
+};
+
 const defaultQueryParams: Required<Pick<BusinessQueryParams, "page" | "limit" | "sortBy">> = {
   page: 1,
   limit: 10,
@@ -40,6 +45,7 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     avatarTextColor: "text-[#2e90fa]",
     category: business.categoryId ?? "Uncategorized",
     city: business.city ?? "-",
+    state: business.state ?? "-",
     status: business.status === "INACTIVE" ? "Inactive" : "Active",
     lastFollowUp: formatCreatedAt(business.createdAt),
     nextFollowUp: "-",
@@ -67,6 +73,26 @@ export async function getBusinesses(params: BusinessQueryParams = {}): Promise<B
   };
 }
 
+export async function getCategoryOptions(search: string): Promise<CategoryOption[]> {
+  const response = await apiClient.get<unknown>("/categories/autocomplete", {
+    params: { search },
+  });
+  const payload = response.data as { data?: unknown } | unknown[];
+  const options = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload.data)
+      ? payload.data
+      : [];
+
+  return options.flatMap((option) => {
+    if (!option || typeof option !== "object") return [];
+    const item = option as { _id?: unknown; id?: unknown; name?: unknown; label?: unknown };
+    const id = item._id ?? item.id;
+    const name = item.name ?? item.label;
+    return typeof id === "string" && typeof name === "string" ? [{ id, name }] : [];
+  });
+}
+
 export async function getBusiness(id: string): Promise<BusinessItem> {
   const response = await apiClient.get<ApiBusiness>(`/businesses/${id}`);
   return toBusinessItem(response.data);
@@ -77,6 +103,15 @@ export function useBusinessesQuery(params: BusinessQueryParams) {
     queryKey: ["businesses", params],
     queryFn: () => getBusinesses(params),
     placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useCategoryAutocomplete(search: string) {
+  return useQuery({
+    queryKey: ["categories", "autocomplete", search],
+    queryFn: () => getCategoryOptions(search),
+    enabled: search.trim().length > 0,
+    staleTime: 60_000,
   });
 }
 
