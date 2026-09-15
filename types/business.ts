@@ -7,6 +7,7 @@ export interface BusinessItem {
   avatarTextColor: string;
   category: string;
   city: string;
+  state?: string;
   status: "Active" | "Inactive";
   lastFollowUp: string;
   nextFollowUp: string;

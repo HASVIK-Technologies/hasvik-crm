@@ -109,23 +109,18 @@ export default function BusinessTable({
 
           <div className="flex items-center gap-2.5 sm:gap-3">
             <OutlinedButton
-              type="button"
               onClick={onExport}
-              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:flex-initial sm:px-4"
             >
-              <Download className="size-4 text-[#64748b]" />
+              <Download />
               Export
             </OutlinedButton>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <OutlinedButton
-                  type="button"
-                  className="flex h-10 items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:w-auto sm:px-4"
-                >
-                  <SlidersHorizontal className="size-4 text-[#64748b]" />
+                <OutlinedButton>
+                  <SlidersHorizontal />
                   <span>{sortOrder}</span>
-                  <ChevronDown className="size-4 text-[#64748b]" />
+                  <ChevronDown />
                 </OutlinedButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 bg-white">
