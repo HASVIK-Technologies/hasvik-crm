@@ -1,7 +1,7 @@
 "use client";
 
-import { CircleMinus, type LucideIcon } from "lucide-react";
-import MobileInput from "@/components/common/MobileInput";
+import { CircleMinus } from "lucide-react";
+import PlainButton from "@/components/common/PlainButton";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import { cn } from "@/lib/utils";
 
@@ -9,37 +9,30 @@ export default function NumberListField({
   label,
   addLabel,
   addIcon: AddIcon,
-  values,
-  onChange,
   required = false,
-  disabled = false,
   headerAction,
+  rowKeys,
+  onAdd,
+  onRemove,
+  renderRow,
+  renderRowActions,
 }: {
   label: string;
   addLabel: string;
-  addIcon: LucideIcon;
-  values: string[];
-  onChange: (values: string[]) => void;
+  addIcon: React.ComponentType<{ className?: string }>;
   required?: boolean;
-  /** Greys out and locks the number inputs (used while a field is synced
-   * from elsewhere, e.g. WhatsApp mirroring Phone). Add/remove buttons stay
-   * usable regardless, so the number of rows can still be adjusted. */
-  disabled?: boolean;
   headerAction?: React.ReactNode;
+  /** Stable keys for each row - use each field's `id` from useFieldArray. */
+  rowKeys: string[];
+  onAdd: () => void;
+  onRemove: (index: number) => void;
+  /** Renders the actual input for a given row index (owned by the caller,
+   * typically a react-hook-form Controller wrapping MobileInput). */
+  renderRow: (index: number) => React.ReactNode;
+  /** Optional extra button(s) per row, rendered between the input and the
+   * remove button - e.g. the "mark as WhatsApp number" toggle on Phone rows. */
+  renderRowActions?: (index: number) => React.ReactNode;
 }) {
-  const updateAt = (index: number, value: string) => {
-    onChange(values.map((v, i) => (i === index ? value : v)));
-  };
-
-  const removeAt = (index: number) => {
-    if (values.length === 1) return;
-    onChange(values.filter((_, i) => i !== index));
-  };
-
-  const add = () => {
-    onChange([...values, ""]);
-  };
-
   return (
     <div>
       <div className="mb-2 flex items-center justify-between gap-2">
@@ -49,19 +42,16 @@ export default function NumberListField({
         {headerAction}
       </div>
       <div className="flex flex-col gap-2">
-        {values.map((value, index) => {
-          const canRemove = values.length > 1;
+        {rowKeys.map((key, index) => {
+          const canRemove = rowKeys.length > 1;
           return (
-            <div key={index} className="flex items-center gap-2">
-              <MobileInput
-                value={value}
-                onChange={(v) => updateAt(index, v)}
-                disabled={disabled}
-              />
+            <div key={key} className="flex items-center gap-2">
+              {renderRow(index)}
+              {renderRowActions?.(index)}
               <button
                 type="button"
                 aria-label="Remove number"
-                onClick={() => removeAt(index)}
+                onClick={() => onRemove(index)}
                 disabled={!canRemove}
                 className={cn(
                   "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
@@ -75,14 +65,14 @@ export default function NumberListField({
             </div>
           );
         })}
-        <button
+        <PlainButton
           type="button"
-          onClick={add}
-          className="flex h-10 items-center justify-center gap-1.5 rounded-lg border border-dashed border-[#cfe0e6] text-sm font-medium text-[#08765d] transition-colors hover:bg-[#f3faf7]"
+          onClick={onAdd}
+          className="h-10 justify-center gap-1.5 rounded-lg border border-dashed border-[#cfe0e6] text-sm font-medium text-[#08765d] hover:bg-[#f3faf7] hover:text-[#08765d]"
         >
           <AddIcon className="size-4" />
           {addLabel}
-        </button>
+        </PlainButton>
       </div>
     </div>
   );

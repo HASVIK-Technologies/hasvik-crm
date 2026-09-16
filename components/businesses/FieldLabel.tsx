@@ -5,19 +5,25 @@ export default function FieldLabel({
   htmlFor,
   required = false,
   optional = false,
+  invalid = false,
   className,
   children,
 }: {
   htmlFor?: string;
   required?: boolean;
   optional?: boolean;
+  invalid?: boolean;
   className?: string;
   children: React.ReactNode;
 }) {
   return (
     <Label
       htmlFor={htmlFor}
-      className={cn("mb-1.5 font-semibold text-[#163b58]", className)}
+      className={cn(
+        "mb-1.5 font-semibold text-[#163b58]",
+        invalid && "text-red-600",
+        className,
+      )}
     >
       {children}
       {required && <span className="text-red-500">*</span>}

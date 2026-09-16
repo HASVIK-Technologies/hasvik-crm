@@ -15,6 +15,7 @@ export default function LabeledSelect({
   onChange,
   required = false,
   optional = false,
+  invalid = false,
 }: {
   label: string;
   placeholder: string;
@@ -23,6 +24,7 @@ export default function LabeledSelect({
   onChange: (value: string) => void;
   required?: boolean;
   optional?: boolean;
+  invalid?: boolean;
 }) {
   return (
     <div>
@@ -30,7 +32,7 @@ export default function LabeledSelect({
         {label}
       </FieldLabel>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger className="w-full">
+        <SelectTrigger className="w-full" aria-invalid={invalid}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>
