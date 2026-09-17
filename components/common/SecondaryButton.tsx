@@ -10,7 +10,7 @@ export default function SecondaryButton({ className, ...props }: SecondaryButton
     <Button
       variant="secondary"
       className={cn(
-        "bg-[#08765d] text-white hover:bg-[#066a53] shadow-sm",
+        "bg-secondary text-white border-secondary hover:bg-secondary/90 rounded-sm p-4 text-base font-normal",
         className
       )}
       {...props}

@@ -1,6 +1,6 @@
 "use client";
 
-import React from "react";
+import React, { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -27,6 +27,7 @@ interface BusinessFiltersProps {
   categories?: string[];
   statuses?: string[];
   cities?: string[];
+  states?: string[];
 }
 
 export default function BusinessFilters({
@@ -53,6 +54,7 @@ export default function BusinessFilters({
   ],
   statuses = ["All Status", "Active", "Inactive"],
   cities = ["All Cities", "Ballia", "Buxar", "Ghazipur", "Varanasi"],
+  states = ["All States"],
 }: BusinessFiltersProps) {
   const handleCategoriesChange = (cats: string[]) => {
     onCategoriesChange?.(cats);

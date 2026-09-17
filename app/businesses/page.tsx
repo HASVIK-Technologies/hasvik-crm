@@ -21,12 +21,11 @@ const EMPTY_BUSINESSES: BusinessItem[] = [];
 export default function BusinessesPage() {
   const {
     searchTerm,
-    searchChips,
     selectedCategory,
-    selectedCategories,
-    selectedStatus,
+    selectedLeadStatus,
+    selectedActivityStatus,
     selectedCity,
-    selectedCities,
+    selectedState,
     sortOrder,
     page,
     limit,
@@ -34,9 +33,10 @@ export default function BusinessesPage() {
     setSearchTerm,
     setSelectedCategory,
     setSelectedCategories,
-    setSelectedStatus,
-    setSelectedCity,
+    setSelectedLeadStatus,
+    setSelectedActivityStatus,
     setSelectedCities,
+    setSelectedState,
     setSortOrder,
     setPage,
     setLimit,
@@ -61,11 +61,21 @@ export default function BusinessesPage() {
   // 2. Fetch businesses from backend API
   const queryParams = useMemo(
     () => ({
-      page: 1,
-      limit: 100,
+      search: searchTerm || undefined,
+      status: selectedLeadStatus === "All Lead Statuses" ? undefined : selectedLeadStatus,
+      isActive:
+        selectedActivityStatus === "All Status"
+          ? undefined
+          : selectedActivityStatus === "Active",
+      categoryId:
+        /^[a-f\d]{24}$/i.test(selectedCategory) ? selectedCategory : undefined,
+      city: selectedCity === "All Cities" ? undefined : selectedCity,
+      state: selectedState === "All States" ? undefined : selectedState,
+      page,
+      limit,
       sortBy: sortOrder === "Latest First" ? "-createdAt" : "createdAt",
     }),
-    [sortOrder],
+    [page, limit, searchTerm, selectedCategory, selectedCity, selectedState, selectedLeadStatus, selectedActivityStatus, sortOrder],
   );
 
   const { data: apiData, isError, isLoading, refetch } = useBusinessesQuery(queryParams);
@@ -267,18 +277,22 @@ export default function BusinessesPage() {
     <BusinessFilters
       selectedCategory={selectedCategory}
       onCategoryChange={setSelectedCategory}
-      selectedCategories={selectedCategories}
       onCategoriesChange={setSelectedCategories}
       categoryCounts={categoryCounts}
-      selectedStatus={selectedStatus}
-      onStatusChange={setSelectedStatus}
+      selectedLeadStatus={selectedLeadStatus}
+      onLeadStatusChange={setSelectedLeadStatus}
+      selectedActivityStatus={selectedActivityStatus}
+      onActivityStatusChange={setSelectedActivityStatus}
       selectedCity={selectedCity}
       onCityChange={setSelectedCity}
       selectedCities={selectedCities}
       onCitiesChange={setSelectedCities}
       cityCounts={cityCounts}
+      selectedState={selectedState}
+      onStateChange={setSelectedState}
       categories={availableCategories}
       cities={availableCities}
+      states={availableStates}
     />
   );
 

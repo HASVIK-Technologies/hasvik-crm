@@ -1,3 +1,6 @@
+"use client";
+
+import { Controller, useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import LabeledSelect from "@/components/businesses/LabeledSelect";
@@ -6,36 +9,43 @@ import {
   REMINDER_OPTIONS,
   TEAM_MEMBER_OPTIONS,
 } from "@/lib/business-form-options";
-import type {
-  BusinessFormState,
-  UpdateFormField,
-} from "@/lib/business-form-types";
+import type { BusinessFormValues } from "@/lib/business-form-types";
 
 export default function FollowUpSection({
-  form,
-  update,
   idPrefix = "",
 }: {
-  form: BusinessFormState;
-  update: UpdateFormField;
   idPrefix?: string;
 }) {
+  const { control, register } = useFormContext<BusinessFormValues>();
+
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
-      <LabeledSelect
-        label="Lead Source"
-        placeholder="Select lead source"
-        options={LEAD_SOURCE_OPTIONS}
-        value={form.leadSource}
-        onChange={(v) => update("leadSource", v)}
+      <Controller
+        control={control}
+        name="leadSource"
+        render={({ field }) => (
+          <LabeledSelect
+            label="Lead Source"
+            placeholder="Select lead source"
+            options={LEAD_SOURCE_OPTIONS}
+            value={field.value}
+            onChange={field.onChange}
+          />
+        )}
       />
 
-      <LabeledSelect
-        label="Assign To"
-        placeholder="Select team member"
-        options={TEAM_MEMBER_OPTIONS}
-        value={form.assignTo}
-        onChange={(v) => update("assignTo", v)}
+      <Controller
+        control={control}
+        name="assignTo"
+        render={({ field }) => (
+          <LabeledSelect
+            label="Assign To"
+            placeholder="Select team member"
+            options={TEAM_MEMBER_OPTIONS}
+            value={field.value}
+            onChange={field.onChange}
+          />
+        )}
       />
 
       <div>
@@ -45,17 +55,22 @@ export default function FollowUpSection({
         <Input
           id={`${idPrefix}nextFollowupDate`}
           type="date"
-          value={form.nextFollowupDate}
-          onChange={(e) => update("nextFollowupDate", e.target.value)}
+          {...register("nextFollowupDate")}
         />
       </div>
 
-      <LabeledSelect
-        label="Reminder"
-        placeholder="Select reminder"
-        options={REMINDER_OPTIONS}
-        value={form.reminder}
-        onChange={(v) => update("reminder", v)}
+      <Controller
+        control={control}
+        name="reminder"
+        render={({ field }) => (
+          <LabeledSelect
+            label="Reminder"
+            placeholder="Select reminder"
+            options={REMINDER_OPTIONS}
+            value={field.value}
+            onChange={field.onChange}
+          />
+        )}
       />
     </div>
   );
