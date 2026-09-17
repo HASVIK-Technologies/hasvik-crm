@@ -94,3 +94,4 @@ export function DeleteBusinessModal({
     </AlertDialogPrimitive.Root>
   );
 }
+
