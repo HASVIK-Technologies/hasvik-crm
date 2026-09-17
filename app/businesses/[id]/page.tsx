@@ -15,12 +15,7 @@ import BusinessDetailsQuickActions from "../../../components/business-details/Bu
 import PhoneButton from "../../../components/business-details/business-details-header/PhoneButton";
 import BusinessDetailsContacts from "../../../components/business-details/BusinessDetailsContacts";
 import BusinessDetailsFollowups from "../../../components/business-details/BusinessDetailsFollowups";
-import BusinessDetailsMap from "../../../components/business-details/BusinessDetailsMap";
-import BusinessDetailsOverview from "../../../components/business-details/BusinessDetailsOverview";
-import BusinessDetailsQuickActions from "../../../components/business-details/BusinessDetailsQuickActions";
-import PhoneButton from "../../../components/business-details/business-details-header/PhoneButton";
-import BusinessDetailsContacts from "../../../components/business-details/BusinessDetailsContacts";
-import BusinessDetailsFollowups from "../../../components/business-details/BusinessDetailsFollowups";
+
 import { 
   Edit2, Plus, MoreVertical, 
   Phone, MapPin, 
