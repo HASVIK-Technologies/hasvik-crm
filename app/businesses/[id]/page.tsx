@@ -2,7 +2,7 @@
 
 import React from "react";
 import Link from "next/link";
-import { useParams, useRouter } from "next/navigation";
+import { useParams } from "next/navigation";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import Actions from "@/components/common/Actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
@@ -13,17 +13,15 @@ import businessData from "@/data/businessData.json";
 import { 
   Edit2, Plus, MoreVertical, ArrowLeft,
   Phone, MapPin, 
-  User, Building2, Target, Store, Users, FolderOpen, Calendar,
+  Building2, Target, Users, FolderOpen, Calendar,
   AlertCircle,
   Tags, Building, Zap, Globe, Mail, Trash2, Slash, ExternalLink,
   FileText
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
-import { useBusinessQuery } from "@/hooks/use-businesses";
-import { deleteBusiness } from "@/lib/business-store";
+import { useBusinessQuery, useUpdateBusinessStatus } from "@/hooks/use-businesses";
 import { BusinessItem } from "@/types/business";
-import { DeleteBusinessModal } from "@/components/businesses";
-import { cn } from "@/lib/utils";
+import { ChangeBusinessStatusModal } from "@/components/businesses";
 import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
@@ -33,6 +31,35 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+
+type ContactItem = {
+  id: number | string;
+  number: string;
+  type: string;
+  badgeClass?: string;
+};
+
+type EmailItem = {
+  id: number | string;
+  email: string;
+};
+
+type TabItem = {
+  id: string;
+  label: string;
+};
+
+type FollowUpItem = {
+  id: number | string;
+  date: string;
+  badgeClass?: string;
+  badge?: string;
+  type: string;
+  summary: string;
+  details: string;
+  assignee: string;
+  phone: string;
+};
 
 const STATIC_BUSINESS_12: BusinessItem = {
   id: 12,
@@ -59,8 +86,8 @@ export default function BusinessDetails() {
   const cleanNumber = (num: string) => num.replace(/\D/g, '');
 
   const params = useParams();
-  const router = useRouter();
-  const [showDeleteModal, setShowDeleteModal] = React.useState(false);
+  const [showStatusModal, setShowStatusModal] = React.useState(false);
+  const updateStatusMutation = useUpdateBusinessStatus();
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const { data: apiBusiness, isError, isLoading } = useBusinessQuery(
@@ -150,11 +177,11 @@ export default function BusinessDetails() {
             {
               label: "Edit Business",
               icon: <Edit2 className="size-4" />,
+              disabled: business?.status?.toLowerCase() !== "active",
             },
             {
-              label: "Delete",
-              onSelect: () => setShowDeleteModal(true),
-              destructive: true,
+              label: business?.status?.toLowerCase() === "active" ? "Deactivate" : "Activate",
+              onSelect: () => setShowStatusModal(true),
             },
           ]}
         />
@@ -197,7 +224,7 @@ export default function BusinessDetails() {
                   </OutlinedButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {businessData.contactInfo.phones.map((p: any) => (
+                  {businessData.contactInfo.phones.map((p: ContactItem) => (
                     <DropdownMenuItem key={p.id} asChild className="cursor-pointer">
                       <a href={`tel:${cleanNumber(p.number)}`} className="w-full">
                         {p.number} ({p.type})
@@ -222,7 +249,7 @@ export default function BusinessDetails() {
                   </OutlinedButton>
                 </DropdownMenuTrigger>
                 <DropdownMenuContent align="end">
-                  {businessData.contactInfo.whatsapps.map((w: any) => (
+                  {businessData.contactInfo.whatsapps.map((w: ContactItem) => (
                     <DropdownMenuItem key={w.id} asChild className="cursor-pointer">
                       <a href={`https://wa.me/91${cleanNumber(w.number)}`} target="_blank" rel="noopener noreferrer" className="w-full">
                         {w.number} ({w.type})
@@ -331,8 +358,8 @@ export default function BusinessDetails() {
         
       <TabsList className="inline-flex h-auto p-0 bg-transparent gap-6">
           {businessData.tabs
-            .filter((tab: any) =>  tab.id !== 'activity-log')
-            .map((tab: any) => (
+            .filter((tab: TabItem) =>  tab.id !== 'activity-log')
+            .map((tab: TabItem) => (
               <TabsTrigger 
               key={tab.id} 
               value={tab.id}
@@ -450,7 +477,7 @@ export default function BusinessDetails() {
                 {/* Phone List */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-semibold text-slate-700">Phone Numbers</h4>
-                  {businessData.contactInfo.phones.map((phone: any) => (
+                  {businessData.contactInfo.phones.map((phone: ContactItem) => (
                     <div key={phone.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
                       <span className="text-sm font-medium text-slate-700">{phone.number}</span>
                       <div className="flex items-center gap-3">
@@ -466,7 +493,7 @@ export default function BusinessDetails() {
                 {/* WhatsApp List */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-semibold text-slate-700">WhatsApp Numbers</h4>
-                  {businessData.contactInfo.whatsapps.map((wa: any) => (
+                  {businessData.contactInfo.whatsapps.map((wa: ContactItem) => (
                     <div key={wa.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
                       <span className="text-sm font-medium text-slate-700">{wa.number}</span>
                       <div className="flex items-center gap-3">
@@ -484,7 +511,7 @@ export default function BusinessDetails() {
                 {/* Email List */}
                 <div className="space-y-3">
                   <h4 className="text-sm font-semibold text-slate-700">Email</h4>
-                  {businessData.contactInfo.emails.map((emailObj: any) => (
+                  {businessData.contactInfo.emails.map((emailObj: EmailItem) => (
                     <div key={emailObj.id} className="flex items-center justify-between p-3 border border-slate-200 rounded-lg">
                       <div className="flex items-center gap-2 overflow-hidden">
                         <Mail className="w-4 h-4 text-slate-400 shrink-0" />
@@ -511,7 +538,7 @@ export default function BusinessDetails() {
             <div className="hidden md:block overflow-x-auto">
               <table className="w-full text-sm text-left">
                 <tbody>
-                  {businessData.recentFollowUps.map((item: any) => (
+                  {businessData.recentFollowUps.map((item: FollowUpItem) => (
                     <tr key={item.id} className="border-b border-slate-100 hover:bg-slate-50">
                       <td className="py-4 pr-4 font-medium text-slate-900 whitespace-nowrap">{item.date}</td>
                       <td className="py-4 pr-4">
@@ -535,7 +562,7 @@ export default function BusinessDetails() {
             </div>
 
             <div className="md:hidden space-y-4">
-              {businessData.recentFollowUps.map((item: any) => (
+              {businessData.recentFollowUps.map((item: FollowUpItem) => (
                 <div key={item.id} className="border border-slate-200 rounded-lg p-4 space-y-3">
                   <div className="flex justify-between items-start">
                     <div>
@@ -573,15 +600,31 @@ export default function BusinessDetails() {
         </TabsContent>
       </Tabs>
 
-      <DeleteBusinessModal
-        isOpen={showDeleteModal}
-        businessName={business?.name}
-        onCancel={() => setShowDeleteModal(false)}
-        onConfirm={() => {
-          if (business && typeof business.id === "number") {
-            deleteBusiness(business.id);
-            setShowDeleteModal(false);
-            router.push("/businesses");
+      <ChangeBusinessStatusModal
+        isOpen={showStatusModal}
+        business={business ?? null}
+        targetStatus={
+          business?.status?.toLowerCase() === "active" ? "Inactive" : "Active"
+        }
+        isLoading={updateStatusMutation.isPending}
+        onCancel={() => {
+          if (!updateStatusMutation.isPending) {
+            setShowStatusModal(false);
+          }
+        }}
+        onConfirm={async () => {
+          if (business) {
+            const nextStatus: "Active" | "Inactive" =
+              business.status?.toLowerCase() === "active" ? "Inactive" : "Active";
+            try {
+              await updateStatusMutation.mutateAsync({
+                id: business.id,
+                status: nextStatus,
+              });
+              setShowStatusModal(false);
+            } catch {
+              setShowStatusModal(false);
+            }
           }
         }}
       />

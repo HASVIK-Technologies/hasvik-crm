@@ -49,8 +49,8 @@ import {
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "@/types/business";
-import { deleteBusiness } from "@/lib/business-store";
-import { DeleteBusinessModal } from "./DeleteBusinessModal";
+import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
+import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 
 interface BusinessTableProps {
   businesses: BusinessItem[];
@@ -63,7 +63,6 @@ interface BusinessTableProps {
   itemsPerPage: number;
   onPageChange: (page: number) => void;
   onItemsPerPageChange: (limit: number) => void;
-  onDelete?: (id: number) => void;
   onClearFilters?: () => void;
 }
 
@@ -78,11 +77,15 @@ export default function BusinessTable({
   itemsPerPage,
   onPageChange,
   onItemsPerPageChange,
-  onDelete,
   onClearFilters,
 }: BusinessTableProps) {
   const router = useRouter();
-  const [businessToDelete, setBusinessToDelete] = useState<BusinessItem | null>(null);
+  const [statusModalBusiness, setStatusModalBusiness] = useState<BusinessItem | null>(null);
+  const updateStatusMutation = useUpdateBusinessStatus();
+
+  const handleOpenStatusModal = (item: BusinessItem) => {
+    setStatusModalBusiness(item);
+  };
   const [selectedRowIds, setSelectedRowIds] = useState<(string | number)[]>([]);
 
   const handleToggleRow = (id: string | number) => {
@@ -99,13 +102,19 @@ export default function BusinessTable({
     }
   };
 
-  const handleConfirmDelete = () => {
-    if (businessToDelete) {
-      if (typeof businessToDelete.id === "number") {
-        deleteBusiness(businessToDelete.id);
-        onDelete?.(businessToDelete.id);
-      }
-      setBusinessToDelete(null);
+  const handleConfirmStatusChange = async () => {
+    if (!statusModalBusiness) return;
+    const isCurrentlyActive = statusModalBusiness.status?.toLowerCase() === "active";
+    const nextStatus: "Active" | "Inactive" = isCurrentlyActive ? "Inactive" : "Active";
+
+    try {
+      await updateStatusMutation.mutateAsync({
+        id: statusModalBusiness.id,
+        status: nextStatus,
+      });
+      setStatusModalBusiness(null);
+    } catch {
+      setStatusModalBusiness(null);
     }
   };
 
@@ -328,20 +337,28 @@ export default function BusinessTable({
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/businesses/${item.id}`);
+                              if (item.status?.toLowerCase() === "active") {
+                                router.push(`/businesses/${item.id}`);
+                              }
                             }}
-                            className="cursor-pointer text-xs"
+                            disabled={item.status?.toLowerCase() !== "active"}
+                            className={cn(
+                              "text-xs",
+                              item.status?.toLowerCase() === "active"
+                                ? "cursor-pointer"
+                                : "cursor-not-allowed opacity-40 text-slate-400 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
+                            )}
                           >
                             Edit Business
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              setBusinessToDelete(item);
+                              handleOpenStatusModal(item);
                             }}
-                            className="cursor-pointer text-xs text-destructive focus:text-destructive"
+                            className="cursor-pointer text-xs"
                           >
-                            Delete
+                            {item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -558,20 +575,28 @@ export default function BusinessTable({
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/businesses/${item.id}`);
+                                if (item.status?.toLowerCase() === "active") {
+                                  router.push(`/businesses/${item.id}`);
+                                }
                               }}
-                              className="cursor-pointer text-xs"
+                              disabled={item.status?.toLowerCase() !== "active"}
+                              className={cn(
+                                "text-xs",
+                                item.status?.toLowerCase() === "active"
+                                  ? "cursor-pointer"
+                                  : "cursor-not-allowed opacity-40 text-slate-400 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
+                              )}
                             >
                               Edit Business
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setBusinessToDelete(item);
+                                handleOpenStatusModal(item);
                               }}
-                              className="cursor-pointer text-xs text-destructive focus:text-destructive"
+                              className="cursor-pointer text-xs"
                             >
-                              Delete
+                              {item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -661,11 +686,21 @@ export default function BusinessTable({
         </div>
       </div>
 
-      <DeleteBusinessModal
-        isOpen={businessToDelete !== null}
-        businessName={businessToDelete?.name}
-        onCancel={() => setBusinessToDelete(null)}
-        onConfirm={handleConfirmDelete}
+      <ChangeBusinessStatusModal
+        isOpen={statusModalBusiness !== null}
+        business={statusModalBusiness}
+        targetStatus={
+          statusModalBusiness?.status?.toLowerCase() === "active"
+            ? "Inactive"
+            : "Active"
+        }
+        isLoading={updateStatusMutation.isPending}
+        onCancel={() => {
+          if (!updateStatusMutation.isPending) {
+            setStatusModalBusiness(null);
+          }
+        }}
+        onConfirm={handleConfirmStatusChange}
       />
     </TooltipProvider>
   );

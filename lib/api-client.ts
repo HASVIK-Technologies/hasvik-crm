@@ -4,7 +4,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { getApiErrorMessage } from "@/lib/api-error";
 
 const apiBaseUrl =
-  process.env.NEXT_PUBLIC_API_BASE_URL || "https://hasvik-crm-backend-ko1k.vercel.app";
+  process.env.NEXT_PUBLIC_API_BASE_URL || "https://crm-backend-three-phi.vercel.app";
 
 export const apiClient = axios.create({
   baseURL: `${apiBaseUrl.replace(/\/+$/, "")}/api`,
