@@ -1,4 +1,4 @@
-import { useQuery, useMutation, useQueryClient } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
@@ -81,26 +81,6 @@ export async function getBusinesses(params: BusinessQueryParams = {}): Promise<B
   };
 }
 
-export async function getCategoryOptions(search: string): Promise<CategoryOption[]> {
-  const response = await apiClient.get<unknown>("/categories/autocomplete", {
-    params: { search },
-  });
-  const payload = response.data as { data?: unknown } | unknown[];
-  const options = Array.isArray(payload)
-    ? payload
-    : Array.isArray(payload.data)
-      ? payload.data
-      : [];
-
-  return options.flatMap((option) => {
-    if (!option || typeof option !== "object") return [];
-    const item = option as { _id?: unknown; id?: unknown; name?: unknown; label?: unknown };
-    const id = item._id ?? item.id;
-    const name = item.name ?? item.label;
-    return typeof id === "string" && typeof name === "string" ? [{ id, name }] : [];
-  });
-}
-
 export async function getBusiness(id: string): Promise<BusinessItem> {
   const response = await apiClient.get<ApiBusiness>(`/businesses/${id}`);
   return toBusinessItem(response.data);
@@ -111,15 +91,6 @@ export function useBusinessesQuery(params: BusinessQueryParams) {
     queryKey: ["businesses", params],
     queryFn: () => getBusinesses(params),
     placeholderData: (previousData) => previousData,
-  });
-}
-
-export function useCategoryAutocomplete(search: string) {
-  return useQuery({
-    queryKey: ["categories", "autocomplete", search],
-    queryFn: () => getCategoryOptions(search),
-    enabled: search.trim().length > 0,
-    staleTime: 60_000,
   });
 }
 
@@ -228,6 +199,35 @@ export function useUpdateBusinessStatus() {
         );
       }
     },
+  });
+}
+
+export async function getCategoryOptions(search: string): Promise<CategoryOption[]> {
+  const response = await apiClient.get<unknown>("/categories/autocomplete", {
+    params: { search },
+  });
+  const payload = response.data as { data?: unknown } | unknown[];
+  const options = Array.isArray(payload)
+    ? payload
+    : Array.isArray(payload.data)
+      ? payload.data
+      : [];
+
+  return options.flatMap((option) => {
+    if (!option || typeof option !== "object") return [];
+    const item = option as { _id?: unknown; id?: unknown; name?: unknown; label?: unknown };
+    const id = item._id ?? item.id;
+    const name = item.name ?? item.label;
+    return typeof id === "string" && typeof name === "string" ? [{ id, name }] : [];
+  });
+}
+
+export function useCategoryAutocomplete(search: string) {
+  return useQuery({
+    queryKey: ["categories", "autocomplete", search],
+    queryFn: () => getCategoryOptions(search),
+    enabled: search.trim().length > 0,
+    staleTime: 60_000,
   });
 }
 
