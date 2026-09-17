@@ -10,6 +10,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { cn } from "@/lib/utils";
 
 export interface ActionItem {
   label: string;
@@ -17,6 +18,7 @@ export interface ActionItem {
   onSelect?: () => void;
   icon?: React.ReactNode;
   destructive?: boolean;
+  disabled?: boolean;
 }
 
 interface ActionsProps {
@@ -27,13 +29,18 @@ interface ActionsProps {
 }
 
 function ActionMenuItem({ action }: { action: ActionItem }) {
-  const className = action.destructive
-    ? "cursor-pointer text-xs text-destructive focus:text-destructive"
-    : "cursor-pointer text-xs";
+  const className = cn(
+    "text-xs",
+    action.destructive
+      ? "cursor-pointer text-destructive focus:text-destructive"
+      : "cursor-pointer",
+    action.disabled &&
+      "cursor-not-allowed text-slate-400 opacity-40 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
+  );
 
-  if (action.href) {
+  if (action.href && !action.disabled) {
     return (
-      <DropdownMenuItem asChild className={className}>
+      <DropdownMenuItem asChild className={className} disabled={action.disabled}>
         <Link href={action.href}>
           {action.icon && <span className="mr-2">{action.icon}</span>}
           {action.label}
@@ -43,7 +50,11 @@ function ActionMenuItem({ action }: { action: ActionItem }) {
   }
 
   return (
-    <DropdownMenuItem onSelect={action.onSelect} className={className}>
+    <DropdownMenuItem
+      onSelect={action.disabled ? undefined : action.onSelect}
+      disabled={action.disabled}
+      className={className}
+    >
       {action.icon && <span className="mr-2">{action.icon}</span>}
       {action.label}
     </DropdownMenuItem>
