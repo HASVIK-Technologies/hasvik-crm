@@ -15,6 +15,12 @@ import BusinessDetailsQuickActions from "../../../components/business-details/Bu
 import PhoneButton from "../../../components/business-details/business-details-header/PhoneButton";
 import BusinessDetailsContacts from "../../../components/business-details/BusinessDetailsContacts";
 import BusinessDetailsFollowups from "../../../components/business-details/BusinessDetailsFollowups";
+import BusinessDetailsMap from "../../../components/business-details/BusinessDetailsMap";
+import BusinessDetailsOverview from "../../../components/business-details/BusinessDetailsOverview";
+import BusinessDetailsQuickActions from "../../../components/business-details/BusinessDetailsQuickActions";
+import PhoneButton from "../../../components/business-details/business-details-header/PhoneButton";
+import BusinessDetailsContacts from "../../../components/business-details/BusinessDetailsContacts";
+import BusinessDetailsFollowups from "../../../components/business-details/BusinessDetailsFollowups";
 import { 
   Edit2, Plus, MoreVertical, 
   Phone, MapPin, 
@@ -232,7 +238,7 @@ export default function BusinessDetails() {
             .filter((tab: any) =>  tab.id !== 'activity-log')
             .filter((tab: any) =>  tab.id !== 'activity-log')
             .map((tab: any) => (
-              <TabsTrigger 
+            <TabsTrigger 
               key={tab.id} 
               value={tab.id}
               className="flex-none !px-0 py-2 !bg-transparent !shadow-none border-0 border-b-2 border-transparent rounded-none text-slate-500 font-medium text-base data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 outline-none focus-visible:ring-0"
@@ -282,10 +288,7 @@ export default function BusinessDetails() {
         </TabsContent>
         {/* NOTES TAB */}
         <TabsContent value="notes" className="mt-6">
-          <div className="bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-            <h3 className="text-lg font-bold text-slate-800 mb-4">Notes</h3>
-            <p className="text-gray-500 text-sm">You can build your notes section here!</p>
-          </div>
+          
         </TabsContent>
       </Tabs>
 
