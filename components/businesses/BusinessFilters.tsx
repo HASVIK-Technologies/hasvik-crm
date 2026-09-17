@@ -2,146 +2,121 @@
 
 import React, { useState } from "react";
 import {
-  Combobox,
-  ComboboxContent,
-  ComboboxEmpty,
-  ComboboxInput,
-  ComboboxItem,
-  ComboboxList,
-  ComboboxValue,
-} from "@/components/ui/combobox";
-import type { CategoryOption } from "@/hooks/use-businesses";
-
-type FilterOption = { value: string; label: string };
-
-function FilterCombobox({
-  value,
-  onChange,
-  options,
-  placeholder,
-}: {
-  value: string;
-  onChange: (value: string) => void;
-  options: FilterOption[];
-  placeholder: string;
-  searchPlaceholder: string;
-}) {
-  return (
-    <Combobox
-      value={value}
-      items={options}
-      onValueChange={(nextValue) => onChange(nextValue ?? "")}
-    >
-      <ComboboxInput
-        className="w-full lg:min-w-40"
-        placeholder={placeholder}
-        showClear={value !== options[0]?.value}
-      />
-      <ComboboxContent>
-        <ComboboxEmpty>No matches found.</ComboboxEmpty>
-        <ComboboxList>
-          {options.map((option) => (
-            <ComboboxItem key={option.value} value={option.value}>
-              {option.label}
-            </ComboboxItem>
-          ))}
-        </ComboboxList>
-      </ComboboxContent>
-    </Combobox>
-  );
-}
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import CategoryMultiSelect from "./CategoryMultiSelect";
+import CityMultiSelect from "./CityMultiSelect";
 
 interface BusinessFiltersProps {
-  selectedCategory: string;
-  onCategoryChange: (value: string) => void;
-  selectedLeadStatus: string;
-  onLeadStatusChange: (value: string) => void;
-  selectedActivityStatus: string;
-  onActivityStatusChange: (value: string) => void;
-  selectedCity: string;
-  onCityChange: (value: string) => void;
-  selectedState: string;
-  onStateChange: (value: string) => void;
-  categories?: CategoryOption[];
+  selectedCategory?: string;
+  onCategoryChange?: (value: string) => void;
+  selectedCategories?: string[];
+  onCategoriesChange?: (categories: string[]) => void;
+  categoryCounts?: Record<string, number>;
+  selectedStatus: string;
+  onStatusChange: (value: string) => void;
+  selectedCity?: string;
+  onCityChange?: (value: string) => void;
+  selectedCities?: string[];
+  onCitiesChange?: (cities: string[]) => void;
+  cityCounts?: Record<string, number>;
+  categories?: string[];
+  statuses?: string[];
   cities?: string[];
   states?: string[];
 }
 
 export default function BusinessFilters({
-  selectedCategory,
+  selectedCategory = "All Categories",
   onCategoryChange,
-  selectedLeadStatus,
-  onLeadStatusChange,
-  selectedActivityStatus,
-  onActivityStatusChange,
-  selectedCity,
+  selectedCategories = [],
+  onCategoriesChange,
+  categoryCounts,
+  selectedStatus,
+  onStatusChange,
+  selectedCity = "All Cities",
   onCityChange,
-  selectedState,
-  onStateChange,
-  categories = [{ id: "", name: "All Categories" }],
+  selectedCities = [],
+  onCitiesChange,
+  cityCounts,
+  categories = [
+    "Furniture Shop",
+    "Hardware Store",
+    "Construction",
+    "Electrical Shop",
+    "Kirana Store",
+    "Service Center",
+    "Medical Store",
+  ],
+  statuses = ["All Status", "Active", "Inactive"],
   cities = ["All Cities", "Ballia", "Buxar", "Ghazipur", "Varanasi"],
   states = ["All States"],
 }: BusinessFiltersProps) {
-  const [categorySearch, setCategorySearch] = useState("");
-  const categoryOptions = categories.map((category) => ({
-    value: category.id || "All Categories",
-    label: category.name,
-  }));
+  const handleCategoriesChange = (cats: string[]) => {
+    onCategoriesChange?.(cats);
+  };
+
+  const handleCitiesChange = (cits: string[]) => {
+    onCitiesChange?.(cits);
+  };
+
+  const activeCategories =
+    selectedCategories.length > 0
+      ? selectedCategories
+      : selectedCategory && selectedCategory !== "All Categories"
+        ? [selectedCategory]
+        : [];
+
+  const activeCities =
+    selectedCities.length > 0
+      ? selectedCities
+      : selectedCity && selectedCity !== "All Cities"
+        ? [selectedCity]
+        : [];
 
   return (
     <div
       data-filter-controls
-      className="flex flex-col gap-5 lg:gap-4 lg:flex-row lg:items-center"
+      className="flex flex-col gap-3 lg:gap-3 lg:flex-row lg:items-start w-full"
     >
-      <FilterCombobox
-        value={selectedCategory}
-        onChange={onCategoryChange}
-        options={categoryOptions}
-        placeholder="All Categories"
-        searchPlaceholder="Search categories..."
-      />
-      <FilterCombobox
-        value={selectedLeadStatus}
-        onChange={onLeadStatusChange}
-        options={[
-          "All Lead Statuses",
-          "NEW",
-          "FOLLOWUP",
-          "NOT INTERESTED",
-          "INVALID",
-          "DEMO",
-          "INTERESTED",
-          "PROPOSAL",
-          "WON",
-          "LOST",
-        ].map((status) => ({ value: status, label: status }))}
-        placeholder="All Lead Statuses"
-        searchPlaceholder="Search statuses..."
-      />
-      <FilterCombobox
-        value={selectedCity}
-        onChange={onCityChange}
-        options={cities.map((city) => ({ value: city, label: city }))}
-        placeholder="All Cities"
-        searchPlaceholder="Search cities..."
-      />
-      <FilterCombobox
-        value={selectedState}
-        onChange={onStateChange}
-        options={states.map((state) => ({ value: state, label: state }))}
-        placeholder="All States"
-        searchPlaceholder="Search states..."
-      />
-      <FilterCombobox
-        value={selectedActivityStatus}
-        onChange={onActivityStatusChange}
-        options={["All Status", "Active", "Inactive"].map((status) => ({
-          value: status,
-          label: status,
-        }))}
-        placeholder="All Status"
-        searchPlaceholder="Search activity..."
-      />
+      <div className="w-full lg:w-64 shrink-0">
+        <CategoryMultiSelect
+          selectedCategories={activeCategories}
+          onCategoriesChange={handleCategoriesChange}
+          categories={categories}
+          categoryCounts={categoryCounts}
+          placeholder="All Categories"
+        />
+      </div>
+
+      <div className="w-full lg:w-44 shrink-0">
+        <Select value={selectedStatus} onValueChange={onStatusChange}>
+          <SelectTrigger className="w-full h-10 rounded-xl bg-white border-[#e2e8f0]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            {statuses.map((status) => (
+              <SelectItem key={status} value={status}>
+                {status}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="w-full lg:w-56 shrink-0">
+        <CityMultiSelect
+          selectedCities={activeCities}
+          onCitiesChange={handleCitiesChange}
+          cities={cities}
+          cityCounts={cityCounts}
+          placeholder="All Cities"
+        />
+      </div>
     </div>
   );
 }

@@ -131,6 +131,35 @@ export function useBusinessQuery(id: string | undefined) {
   });
 }
 
+export type ApiCategory = {
+  _id: string;
+  name: string;
+  description?: string;
+  isActive?: boolean;
+};
+
+export type CategoriesResponse = {
+  data: ApiCategory[];
+};
+
+export async function getCategories(): Promise<ApiCategory[]> {
+  try {
+    const response = await apiClient.get<CategoriesResponse>("/categories");
+    return response.data.data || [];
+  } catch {
+    return [];
+  }
+}
+
+export function useCategoriesQuery() {
+  return useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+
 export async function updateBusinessStatus(
   id: string | number,
   status: "Active" | "Inactive",

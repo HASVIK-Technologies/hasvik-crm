@@ -13,6 +13,7 @@ interface LayoutProps {
   searchValue?: string;
   onSearchChange?: (value: string) => void;
   searchPlaceholder?: string;
+  customSearch?: React.ReactNode;
   filters?: React.ReactNode;
   stats?: React.ReactNode;
   showStats?: boolean;
@@ -27,6 +28,7 @@ export default function ListPageLayout({
   searchValue,
   onSearchChange,
   searchPlaceholder = "Search...",
+  customSearch,
   filters,
   stats,
   showStats = true,
@@ -46,7 +48,9 @@ export default function ListPageLayout({
   };
 
   const search =
-    searchValue !== undefined && onSearchChange ? (
+    customSearch !== undefined ? (
+      customSearch
+    ) : searchValue !== undefined && onSearchChange ? (
       <SearchInput
         value={searchValue}
         onChange={(event) => onSearchChange(event.target.value)}
@@ -79,13 +83,13 @@ export default function ListPageLayout({
         </div>
       </section>
       <div className="w-full lg:hidden">{search}</div>
-      {showFilters && filters && (
-        <Card className="hidden grow lg:flex lg:items-center px-4">
-          <div className="flex w-full gap-6">
-            {search}
-            <div className="min-w-0 flex-1">{filters}</div>
+      {showFilters && (filters || search) && (
+        <div className="hidden grow lg:flex p-4 rounded-2xl border border-[#e4ecf2] shadow-[0_2px_12px_rgba(20,40,60,0.03)] bg-white overflow-visible">
+          <div className="flex w-full flex-col lg:flex-row gap-5 items-start">
+            {search && <div className="w-full lg:max-w-sm shrink-0">{search}</div>}
+            {filters && <div className="min-w-0 flex-1">{filters}</div>}
           </div>
-        </Card>
+        </div>
       )}
 
       {showStats && stats && <section className="shrink-0">{stats}</section>}
