@@ -10,7 +10,10 @@ import {
   MoreVertical,
   ChevronLeft,
   ChevronRight,
+  Building2,
+  X,
 } from "lucide-react";
+import { Checkbox } from "@/components/ui/checkbox";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PlainButton from "@/components/common/PlainButton";
@@ -45,17 +48,22 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
-import { BusinessItem } from "./types";
-import { deleteBusiness } from "@/lib/business-store";
-import { DeleteBusinessModal } from "./DeleteBusinessModal";
+import { BusinessItem } from "@/types/business";
+import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
+import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 
 interface BusinessTableProps {
   businesses: BusinessItem[];
   totalCount?: number;
   onExport?: () => void;
   sortOrder?: string;
-  onSortOrderChange?: (sort: string) => void;
-  onDelete?: (id: number) => void;
+  onSortOrderChange?: (sort: "Latest First" | "Oldest First") => void;
+  currentPage: number;
+  totalPages: number;
+  itemsPerPage: number;
+  onPageChange: (page: number) => void;
+  onItemsPerPageChange: (limit: number) => void;
+  onClearFilters?: () => void;
 }
 
 export default function BusinessTable({
@@ -64,51 +72,99 @@ export default function BusinessTable({
   onExport,
   sortOrder = "Latest First",
   onSortOrderChange,
-  onDelete,
+  currentPage,
+  totalPages,
+  itemsPerPage,
+  onPageChange,
+  onItemsPerPageChange,
+  onClearFilters,
 }: BusinessTableProps) {
   const router = useRouter();
-  const [currentPage, setCurrentPage] = useState(1);
-  const [itemsPerPage, setItemsPerPage] = useState("10 per page");
-  const [businessToDelete, setBusinessToDelete] = useState<BusinessItem | null>(null);
+  const [statusModalBusiness, setStatusModalBusiness] = useState<BusinessItem | null>(null);
+  const updateStatusMutation = useUpdateBusinessStatus();
 
-  const handleConfirmDelete = () => {
-    if (businessToDelete) {
-      deleteBusiness(businessToDelete.id);
-      onDelete?.(businessToDelete.id);
-      setBusinessToDelete(null);
+  const handleOpenStatusModal = (item: BusinessItem) => {
+    setStatusModalBusiness(item);
+  };
+  const [selectedRowIds, setSelectedRowIds] = useState<(string | number)[]>([]);
+
+  const handleToggleRow = (id: string | number) => {
+    setSelectedRowIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  };
+
+  const handleToggleSelectAll = () => {
+    if (businesses.length > 0 && selectedRowIds.length === businesses.length) {
+      setSelectedRowIds([]);
+    } else {
+      setSelectedRowIds(businesses.map((b) => b.id));
+    }
+  };
+
+  const handleConfirmStatusChange = async () => {
+    if (!statusModalBusiness) return;
+    const isCurrentlyActive = statusModalBusiness.status?.toLowerCase() === "active";
+    const nextStatus: "Active" | "Inactive" = isCurrentlyActive ? "Inactive" : "Active";
+
+    try {
+      await updateStatusMutation.mutateAsync({
+        id: statusModalBusiness.id,
+        status: nextStatus,
+      });
+      setStatusModalBusiness(null);
+    } catch {
+      setStatusModalBusiness(null);
     }
   };
 
   const displayCount = totalCount !== undefined ? totalCount : businesses.length;
+  const firstResult = displayCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const lastResult = Math.min(currentPage * itemsPerPage, displayCount);
+  const firstVisiblePage = Math.max(1, Math.min(currentPage - 2, totalPages - 4));
+  const visiblePages = Array.from(
+    { length: Math.min(5, totalPages) },
+    (_, index) => firstVisiblePage + index,
+  );
 
   return (
     <TooltipProvider>
       <div className="overflow-hidden rounded-2xl border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
         {/* Top Bar */}
         <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
-          <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
-            Businesses <span className="font-medium text-[#64748b]">({displayCount})</span>
-          </h2>
+          <div className="flex items-center gap-2.5">
+            <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
+              Businesses <span className="font-medium text-[#64748b]">({displayCount})</span>
+            </h2>
+            {selectedRowIds.length > 0 && (
+              <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#eff6ff] px-2.5 py-1 text-xs font-semibold text-[#0b63e5]">
+                {selectedRowIds.length} selected
+                <button
+                  type="button"
+                  onClick={() => setSelectedRowIds([])}
+                  className="rounded p-0.5 hover:bg-[#dbeafe] text-[#1e40af]"
+                  title="Clear selection"
+                >
+                  <X className="size-3" />
+                </button>
+              </span>
+            )}
+          </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
             <OutlinedButton
-              type="button"
               onClick={onExport}
-              className="flex h-10 flex-1 items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:flex-initial sm:px-4"
             >
-              <Download className="size-4 text-[#64748b]" />
+              <Download />
               Export
             </OutlinedButton>
 
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
-                <OutlinedButton
-                  type="button"
-                  className="flex h-10 items-center justify-center gap-2 rounded-xl border border-[#e2e8f0] bg-white px-3.5 text-sm font-medium text-[#334155] transition-colors hover:bg-[#f8fafc] sm:w-auto sm:px-4"
-                >
-                  <SlidersHorizontal className="size-4 text-[#64748b]" />
+                <OutlinedButton>
+                  <SlidersHorizontal />
                   <span>{sortOrder}</span>
-                  <ChevronDown className="size-4 text-[#64748b]" />
+                  <ChevronDown />
                 </OutlinedButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 bg-white">
@@ -131,8 +187,23 @@ export default function BusinessTable({
 
         <div data-layout-mobile>
           {businesses.length === 0 ? (
-            <div className="py-12 text-center text-sm text-[#64748b]">
-              No businesses found matching the current filters.
+            <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
+                <Building2 className="size-6 text-[#94a3b8]" />
+              </div>
+              <h3 className="text-base font-semibold text-[#0f172a]">No businesses found</h3>
+              <p className="mt-1 text-xs text-[#64748b] max-w-xs">
+                No businesses match your current search and filter criteria. Try clearing some filters.
+              </p>
+              {onClearFilters && (
+                <button
+                  type="button"
+                  onClick={onClearFilters}
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2 text-xs font-semibold text-[#0f172a] shadow-sm hover:bg-[#f8fafc] transition-colors"
+                >
+                  Clear all filters
+                </button>
+              )}
             </div>
           ) : (
             <div className="flex flex-col gap-3 md:gap-4 p-3 md:p-4">
@@ -142,8 +213,19 @@ export default function BusinessTable({
                   onClick={() => router.push(`/businesses/${item.id}`)}
                   className="flex cursor-pointer items-start justify-between gap-3 md:gap-4 rounded-2xl border border-[#eaf0f6] bg-white p-3 md:p-4 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all hover:border-[#0b63e5]/40 hover:shadow-md"
                 >
-                  {/* Left Side: Avatar + Business Info */}
+                  {/* Left Side: Checkbox + Avatar + Business Info */}
                   <div className="flex items-start gap-3 min-w-0">
+                    <div
+                      onClick={(e) => e.stopPropagation()}
+                      className="mt-2.5 shrink-0 flex items-center justify-center"
+                    >
+                      <Checkbox
+                        checked={selectedRowIds.includes(item.id)}
+                        onCheckedChange={() => handleToggleRow(item.id)}
+                        aria-label={`Select ${item.name}`}
+                        className="size-4 rounded border-[#cbd5e1] data-[state=checked]:bg-[#0b63e5] data-[state=checked]:border-[#0b63e5]"
+                      />
+                    </div>
                     <Avatar
                       className={cn(
                         "size-11 shrink-0 rounded-full text-sm font-bold",
@@ -255,20 +337,28 @@ export default function BusinessTable({
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              router.push(`/businesses/${item.id}`);
+                              if (item.status?.toLowerCase() === "active") {
+                                router.push(`/businesses/${item.id}`);
+                              }
                             }}
-                            className="cursor-pointer text-xs"
+                            disabled={item.status?.toLowerCase() !== "active"}
+                            className={cn(
+                              "text-xs",
+                              item.status?.toLowerCase() === "active"
+                                ? "cursor-pointer"
+                                : "cursor-not-allowed opacity-40 text-slate-400 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
+                            )}
                           >
                             Edit Business
                           </DropdownMenuItem>
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              setBusinessToDelete(item);
+                              handleOpenStatusModal(item);
                             }}
-                            className="cursor-pointer text-xs text-destructive focus:text-destructive"
+                            className="cursor-pointer text-xs"
                           >
-                            Delete
+                            {item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -282,23 +372,53 @@ export default function BusinessTable({
 
         <div data-layout-desktop>
         <div className="overflow-x-auto">
-          <Table className="w-full min-w-[900px] text-left">
-            <TableHeader className="bg-[#f8fafc] text-[13px] font-semibold text-[#475569]">
+          <Table className="w-full min-w-225 text-left">
+            <TableHeader className="text-[13px] font-semibold">
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
-                <TableHead className="py-4 pl-6 pr-4 font-semibold text-[#475569]">Business Name</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">Category</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">City</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">Status</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">Last Follow-up</TableHead>
-                <TableHead className="px-4 py-4 font-semibold text-[#475569]">Next Follow-up</TableHead>
-                <TableHead className="py-4 pl-4 pr-6 text-right font-semibold text-[#475569]">Actions</TableHead>
+                <TableHead className="py-4 pl-6 pr-4 font-semibold">
+                  <div className="flex items-center gap-3">
+                    <Checkbox
+                      checked={
+                        businesses.length > 0 &&
+                        selectedRowIds.length === businesses.length
+                      }
+                      onCheckedChange={handleToggleSelectAll}
+                      aria-label="Select all businesses"
+                      className="size-4 rounded border-[#cbd5e1] data-[state=checked]:bg-[#0b63e5] data-[state=checked]:border-[#0b63e5]"
+                    />
+                    <span>Business Name</span>
+                  </div>
+                </TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Category</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">City</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Status</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>
+                <TableHead className="py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
               {businesses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-12 text-center text-sm text-[#64748b]">
-                    No businesses found matching the current filters.
+                  <TableCell colSpan={7} className="py-0">
+                    <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
+                      <div className="flex size-14 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
+                        <Building2 className="size-7 text-[#94a3b8]" />
+                      </div>
+                      <h3 className="text-base font-semibold text-[#0f172a]">No businesses found</h3>
+                      <p className="mt-1 text-sm text-[#64748b] max-w-sm">
+                        No businesses match your current search and filter criteria. Try clearing some filters or searching for something else.
+                      </p>
+                      {onClearFilters && (
+                        <button
+                          type="button"
+                          onClick={onClearFilters}
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2 text-xs font-semibold text-[#0f172a] shadow-sm hover:bg-[#f8fafc] transition-colors"
+                        >
+                          Clear all filters
+                        </button>
+                      )}
+                    </div>
                   </TableCell>
                 </TableRow>
               ) : (
@@ -308,9 +428,20 @@ export default function BusinessTable({
                     onClick={() => router.push(`/businesses/${item.id}`)}
                     className="cursor-pointer border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80"
                   >
-                    {/* Business Name + Avatar + Phone */}
+                    {/* Business Name + Checkbox + Avatar + Phone */}
                     <TableCell className="py-4.5 pl-6 pr-4">
                       <div className="flex items-center gap-3.5">
+                        <div
+                          onClick={(e) => e.stopPropagation()}
+                          className="flex items-center justify-center shrink-0"
+                        >
+                          <Checkbox
+                            checked={selectedRowIds.includes(item.id)}
+                            onCheckedChange={() => handleToggleRow(item.id)}
+                            aria-label={`Select ${item.name}`}
+                            className="size-4 rounded border-[#cbd5e1] data-[state=checked]:bg-[#0b63e5] data-[state=checked]:border-[#0b63e5]"
+                          />
+                        </div>
                         <Avatar
                           className={cn(
                             "size-10.5 shrink-0 rounded-full text-xs font-bold",
@@ -330,10 +461,10 @@ export default function BusinessTable({
                     </TableCell>
 
                     {/* Category */}
-                    <TableCell className="px-4 py-4.5 text-sm text-[#475569]">{item.category}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">{item.category}</TableCell>
 
                     {/* City */}
-                    <TableCell className="px-4 py-4.5 text-sm text-[#475569]">{item.city}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">{item.city}</TableCell>
 
                     {/* Status */}
                     <TableCell className="px-4 py-4.5">
@@ -355,7 +486,7 @@ export default function BusinessTable({
                     </TableCell>
 
                     {/* Last Follow-up */}
-                    <TableCell className="px-4 py-4.5 text-sm text-[#475569]">{item.lastFollowUp}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">{item.lastFollowUp}</TableCell>
 
                     {/* Next Follow-up */}
                     <TableCell className="px-4 py-4.5">
@@ -444,20 +575,28 @@ export default function BusinessTable({
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                router.push(`/businesses/${item.id}`);
+                                if (item.status?.toLowerCase() === "active") {
+                                  router.push(`/businesses/${item.id}`);
+                                }
                               }}
-                              className="cursor-pointer text-xs"
+                              disabled={item.status?.toLowerCase() !== "active"}
+                              className={cn(
+                                "text-xs",
+                                item.status?.toLowerCase() === "active"
+                                  ? "cursor-pointer"
+                                  : "cursor-not-allowed opacity-40 text-slate-400 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
+                              )}
                             >
                               Edit Business
                             </DropdownMenuItem>
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                setBusinessToDelete(item);
+                                handleOpenStatusModal(item);
                               }}
-                              className="cursor-pointer text-xs text-destructive focus:text-destructive"
+                              className="cursor-pointer text-xs"
                             >
-                              Delete
+                              {item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
@@ -474,8 +613,8 @@ export default function BusinessTable({
         {/* Pagination Footer */}
         <div className="flex flex-col gap-3 md:gap-4 border-t border-[#f1f5f9] p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
           <p className="text-center text-sm font-medium text-[#64748b] sm:text-left">
-            Showing <span className="font-semibold text-[#0f172a]">1</span> to{" "}
-            <span className="font-semibold text-[#0f172a]">{Math.min(10, displayCount)}</span> of{" "}
+            Showing <span className="font-semibold text-[#0f172a]">{firstResult}</span> to{" "}
+            <span className="font-semibold text-[#0f172a]">{lastResult}</span> of{" "}
             <span className="font-semibold text-[#0f172a]">{displayCount}</span> results
           </p>
 
@@ -485,18 +624,18 @@ export default function BusinessTable({
                 size="icon-sm"
                 type="button"
                 disabled={currentPage === 1}
-                onClick={() => setCurrentPage((p) => Math.max(1, p - 1))}
+                onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                 className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] transition-colors disabled:opacity-50"
               >
                 <ChevronLeft className="size-4" />
               </OutlinedButton>
-              {[1, 2, 3, 4, 5].map((pageNum) =>
+              {visiblePages.map((pageNum) =>
                 currentPage === pageNum ? (
                   <PrimaryButton
                     key={pageNum}
                     size="icon-sm"
                     type="button"
-                    onClick={() => setCurrentPage(pageNum)}
+                    onClick={() => onPageChange(pageNum)}
                     className="size-8.5 rounded-lg text-sm font-semibold shadow-sm p-0"
                   >
                     {pageNum}
@@ -506,7 +645,7 @@ export default function BusinessTable({
                     key={pageNum}
                     size="icon-sm"
                     type="button"
-                    onClick={() => setCurrentPage(pageNum)}
+                    onClick={() => onPageChange(pageNum)}
                     className="size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc]"
                   >
                     {pageNum}
@@ -516,14 +655,18 @@ export default function BusinessTable({
               <OutlinedButton
                 size="icon-sm"
                 type="button"
-                onClick={() => setCurrentPage((p) => Math.min(5, p + 1))}
+                disabled={totalPages === 0 || currentPage >= totalPages}
+                onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                 className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc]"
               >
                 <ChevronRight className="size-4" />
               </OutlinedButton>
             </div>
 
-            <Select value={itemsPerPage} onValueChange={setItemsPerPage}>
+            <Select
+              value={`${itemsPerPage} per page`}
+              onValueChange={(value) => onItemsPerPageChange(Number.parseInt(value, 10))}
+            >
               <SelectTrigger className="h-8.5 w-auto rounded-lg border border-[#e2e8f0] bg-white pl-3.5 pr-2.5 text-xs font-medium text-[#334155] hover:border-[#cbd5e1] focus-visible:ring-1 focus-visible:ring-[#0b63e5]">
                 <SelectValue />
               </SelectTrigger>
@@ -543,11 +686,21 @@ export default function BusinessTable({
         </div>
       </div>
 
-      <DeleteBusinessModal
-        isOpen={businessToDelete !== null}
-        businessName={businessToDelete?.name}
-        onCancel={() => setBusinessToDelete(null)}
-        onConfirm={handleConfirmDelete}
+      <ChangeBusinessStatusModal
+        isOpen={statusModalBusiness !== null}
+        business={statusModalBusiness}
+        targetStatus={
+          statusModalBusiness?.status?.toLowerCase() === "active"
+            ? "Inactive"
+            : "Active"
+        }
+        isLoading={updateStatusMutation.isPending}
+        onCancel={() => {
+          if (!updateStatusMutation.isPending) {
+            setStatusModalBusiness(null);
+          }
+        }}
+        onConfirm={handleConfirmStatusChange}
       />
     </TooltipProvider>
   );

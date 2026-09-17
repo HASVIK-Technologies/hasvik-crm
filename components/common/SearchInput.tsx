@@ -20,7 +20,7 @@ export default function SearchInput({
       <Input
         type="search"
         placeholder={placeholder}
-        className={cn("pl-10", className)}
+        className={cn("pl-10 bg-white min-h-9", className)}
         {...props}
       />
     </div>

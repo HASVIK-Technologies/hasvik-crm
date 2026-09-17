@@ -85,7 +85,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#0f172a]">
+    <div className="min-h-screen bg-[#f8fafc] text-[#374151]">
       {/* Sidebar for Desktop */}
       <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#e4ecf2] bg-white lg:flex">
         {/* Brand Logo Header */}
@@ -215,15 +215,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 placeholder="Search businesses by name, category, city..."
                 className="h-10 w-72 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] pr-4 text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus:border-primary focus:bg-white focus:outline-none xl:w-84"
               />
-
-              {/* Header Filter Icon Button */}
-              <button
-                type="button"
-                aria-label="Filter"
-                className="flex size-10 items-center justify-center rounded-xl border border-[#e2e8f0] bg-white text-[#64748b] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a]"
-              >
-                <SlidersHorizontal className="size-4" />
-              </button>
 
               {/* Notifications Button with Red Dot */}
               <button

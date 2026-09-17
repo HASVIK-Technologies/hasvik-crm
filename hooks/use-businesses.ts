@@ -1,5 +1,8 @@
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
+import axios from "axios";
+import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
+import { updateBusiness } from "@/lib/business-store";
 import type { ApiBusiness, BusinessesResponse, BusinessQueryParams, BusinessesResult } from "@/types/business-api";
 import type { BusinessItem } from "@/types/business";
 
@@ -46,7 +49,7 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     category: business.categoryId ?? "Uncategorized",
     city: business.city ?? "-",
     state: business.state ?? "-",
-    status: business.status === "INACTIVE" ? "Inactive" : "Active",
+    status: business.isActive === false || business.status === "INACTIVE" ? "Inactive" : "Active",
     lastFollowUp: formatCreatedAt(business.createdAt),
     nextFollowUp: "-",
     nextFollowUpType: "none",
@@ -66,11 +69,137 @@ export async function getBusinesses(params: BusinessQueryParams = {}): Promise<B
     params: { ...defaultQueryParams, isDeleted: false, ...params },
   });
 
+  const limit = params.limit ?? defaultQueryParams.limit;
+  const total = response.data.total ?? response.data.data?.length ?? 0;
+  const totalPages =
+    response.data.totalPages ?? Math.max(1, Math.ceil(total / limit));
+
   return {
-    businesses: response.data.data.map(toBusinessItem),
-    total: response.data.total,
-    totalPages: response.data.totalPages,
+    businesses: (response.data.data || []).map(toBusinessItem),
+    total,
+    totalPages,
   };
+}
+
+export async function getBusiness(id: string): Promise<BusinessItem> {
+  const response = await apiClient.get<ApiBusiness>(`/businesses/${id}`);
+  return toBusinessItem(response.data);
+}
+
+export function useBusinessesQuery(params: BusinessQueryParams) {
+  return useQuery({
+    queryKey: ["businesses", params],
+    queryFn: () => getBusinesses(params),
+    placeholderData: (previousData) => previousData,
+  });
+}
+
+export function useBusinessQuery(id: string | undefined) {
+  return useQuery({
+    queryKey: ["business", id],
+    queryFn: () => getBusiness(id as string),
+    enabled: Boolean(id),
+  });
+}
+
+export type ApiCategory = {
+  _id: string;
+  name: string;
+  description?: string;
+  isActive?: boolean;
+};
+
+export type CategoriesResponse = {
+  data: ApiCategory[];
+};
+
+export async function getCategories(): Promise<ApiCategory[]> {
+  try {
+    const response = await apiClient.get<CategoriesResponse>("/categories");
+    return response.data.data || [];
+  } catch {
+    return [];
+  }
+}
+
+export function useCategoriesQuery() {
+  return useQuery({
+    queryKey: ["categories"],
+    queryFn: getCategories,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+
+export async function updateBusinessStatus(
+  id: string | number,
+  status: "Active" | "Inactive",
+): Promise<unknown> {
+  const isNowActive = status === "Active";
+  const payload = {
+    isActive: isNowActive,
+  };
+
+  try {
+    const response = await apiClient.patch(`/businesses/${id}`, payload);
+    return response.data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err) && (err.response?.status === 405 || err.response?.status === 404)) {
+      const response = await apiClient.put(`/businesses/${id}`, payload);
+      return response.data;
+    }
+    throw err;
+  }
+}
+
+export function useUpdateBusinessStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: async ({
+      id,
+      status,
+    }: {
+      id: string | number;
+      status: "Active" | "Inactive";
+    }) => {
+      const result = await updateBusinessStatus(id, status);
+      updateBusiness(id, { status });
+      return result;
+    },
+    onSuccess: (_, variables) => {
+      queryClient.setQueriesData(
+        { queryKey: ["businesses"] },
+        (oldData: BusinessesResult | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            businesses: oldData.businesses.map((item) =>
+              String(item.id) === String(variables.id)
+                ? { ...item, status: variables.status }
+                : item,
+            ),
+          };
+        },
+      );
+
+      queryClient.invalidateQueries({ queryKey: ["businesses"] });
+      queryClient.invalidateQueries({ queryKey: ["business", String(variables.id)] });
+
+      toast.success(
+        variables.status === "Active"
+          ? "Business activated successfully."
+          : "Business deactivated successfully.",
+      );
+    },
+    onError: (error) => {
+      if (!axios.isAxiosError(error)) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to update business status.",
+        );
+      }
+    },
+  });
 }
 
 export async function getCategoryOptions(search: string): Promise<CategoryOption[]> {
@@ -93,33 +222,12 @@ export async function getCategoryOptions(search: string): Promise<CategoryOption
   });
 }
 
-export async function getBusiness(id: string): Promise<BusinessItem> {
-  const response = await apiClient.get<ApiBusiness>(`/businesses/${id}`);
-  return toBusinessItem(response.data);
-}
-
-export function useBusinessesQuery(params: BusinessQueryParams) {
-  return useQuery({
-    queryKey: ["businesses", params],
-    queryFn: () => getBusinesses(params),
-    placeholderData: (previousData) => previousData,
-  });
-}
-
 export function useCategoryAutocomplete(search: string) {
   return useQuery({
     queryKey: ["categories", "autocomplete", search],
     queryFn: () => getCategoryOptions(search),
     enabled: search.trim().length > 0,
     staleTime: 60_000,
-  });
-}
-
-export function useBusinessQuery(id: string | undefined) {
-  return useQuery({
-    queryKey: ["business", id],
-    queryFn: () => getBusiness(id as string),
-    enabled: Boolean(id),
   });
 }
 

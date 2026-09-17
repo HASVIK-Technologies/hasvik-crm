@@ -1,5 +1,5 @@
 export interface BusinessItem {
-  id: number;
+  id: number | string;
   name: string;
   phone: string;
   initials: string;
@@ -7,6 +7,7 @@ export interface BusinessItem {
   avatarTextColor: string;
   category: string;
   city: string;
+  state?: string;
   status: "Active" | "Inactive";
   lastFollowUp: string;
   nextFollowUp: string;
@@ -27,4 +28,3 @@ export interface BusinessStatsData {
   followUpToday: number;
   categoriesCount: number;
 }
-

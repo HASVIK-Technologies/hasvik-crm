@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState, useCallback } from "react";
-import { BusinessItem } from "@/components/businesses/types";
+import { BusinessItem } from "@/types/business";
 
 export const INITIAL_BUSINESSES: BusinessItem[] = [
   {
@@ -328,11 +328,11 @@ export function createBusiness(
  * Modifying the business will NEVER change its ID.
  */
 export function updateBusiness(
-  id: number,
+  id: number | string,
   data: Partial<Omit<BusinessItem, "id">>
 ): BusinessItem | null {
   const businesses = getStoredBusinesses();
-  const index = businesses.findIndex((b) => b.id === id);
+  const index = businesses.findIndex((b) => String(b.id) === String(id));
 
   if (index === -1) {
     return null;
@@ -366,8 +366,10 @@ export function deleteBusiness(id: number): boolean {
  * React hook to access and subscribe to businesses from the store.
  */
 export function useBusinesses() {
-  const [businesses, setBusinesses] = useState<BusinessItem[]>(INITIAL_BUSINESSES);
-  const [isLoaded, setIsLoaded] = useState(false);
+  const [businesses, setBusinesses] = useState<BusinessItem[]>(() =>
+    typeof window !== "undefined" ? getStoredBusinesses() : INITIAL_BUSINESSES,
+  );
+  const [isLoaded, setIsLoaded] = useState(() => typeof window !== "undefined");
 
   const refresh = useCallback(() => {
     const data = getStoredBusinesses();
@@ -376,8 +378,6 @@ export function useBusinesses() {
   }, []);
 
   useEffect(() => {
-    refresh();
-
     const handleStorageChange = () => refresh();
     window.addEventListener("storage", handleStorageChange);
     window.addEventListener(CHANGE_EVENT, handleStorageChange);

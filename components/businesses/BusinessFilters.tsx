@@ -1,7 +1,6 @@
 "use client";
 
-import React from "react";
-import SearchInput from "@/components/common/SearchInput";
+import React, { useState } from "react";
 import {
   Select,
   SelectContent,
@@ -9,32 +8,42 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import CategoryMultiSelect from "./CategoryMultiSelect";
+import CityMultiSelect from "./CityMultiSelect";
 
 interface BusinessFiltersProps {
-  searchTerm: string;
-  onSearchChange: (value: string) => void;
-  selectedCategory: string;
-  onCategoryChange: (value: string) => void;
+  selectedCategory?: string;
+  onCategoryChange?: (value: string) => void;
+  selectedCategories?: string[];
+  onCategoriesChange?: (categories: string[]) => void;
+  categoryCounts?: Record<string, number>;
   selectedStatus: string;
   onStatusChange: (value: string) => void;
-  selectedCity: string;
-  onCityChange: (value: string) => void;
+  selectedCity?: string;
+  onCityChange?: (value: string) => void;
+  selectedCities?: string[];
+  onCitiesChange?: (cities: string[]) => void;
+  cityCounts?: Record<string, number>;
   categories?: string[];
   statuses?: string[];
   cities?: string[];
+  states?: string[];
 }
 
 export default function BusinessFilters({
-  searchTerm,
-  onSearchChange,
-  selectedCategory,
+  selectedCategory = "All Categories",
   onCategoryChange,
+  selectedCategories = [],
+  onCategoriesChange,
+  categoryCounts,
   selectedStatus,
   onStatusChange,
-  selectedCity,
+  selectedCity = "All Cities",
   onCityChange,
+  selectedCities = [],
+  onCitiesChange,
+  cityCounts,
   categories = [
-    "All Categories",
     "Furniture Shop",
     "Hardware Store",
     "Construction",
@@ -45,55 +54,69 @@ export default function BusinessFilters({
   ],
   statuses = ["All Status", "Active", "Inactive"],
   cities = ["All Cities", "Ballia", "Buxar", "Ghazipur", "Varanasi"],
+  states = ["All States"],
 }: BusinessFiltersProps) {
+  const handleCategoriesChange = (cats: string[]) => {
+    onCategoriesChange?.(cats);
+  };
+
+  const handleCitiesChange = (cits: string[]) => {
+    onCitiesChange?.(cits);
+  };
+
+  const activeCategories =
+    selectedCategories.length > 0
+      ? selectedCategories
+      : selectedCategory && selectedCategory !== "All Categories"
+        ? [selectedCategory]
+        : [];
+
+  const activeCities =
+    selectedCities.length > 0
+      ? selectedCities
+      : selectedCity && selectedCity !== "All Cities"
+        ? [selectedCity]
+        : [];
+
   return (
     <div
       data-filter-controls
-      className="flex flex-col gap-2 sm:flex-row sm:items-center sm:gap-3 lg:gap-4"
+      className="flex flex-col gap-3 lg:gap-3 lg:flex-row lg:items-start w-full"
     >
-      <SearchInput
-        value={searchTerm}
-        onChange={(event) => onSearchChange(event.target.value)}
-        placeholder="Search businesses..."
-        wrapperClassName="min-w-75 w-full"
-        className="h-11 rounded-lg border border-[#e2e8f0] bg-white text-sm text-[#0f172a] placeholder:text-[#94a3b8] focus-visible:border-primary focus-visible:ring-1 focus-visible:ring-primary"
-      />
-      <Select value={selectedCategory} onValueChange={onCategoryChange}>
-        <SelectTrigger className="h-11 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm font-medium text-[#334155]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-white">
-          {categories.map((category) => (
-            <SelectItem key={category} value={category}>
-              {category}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select value={selectedStatus} onValueChange={onStatusChange}>
-        <SelectTrigger className="h-11 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm font-medium text-[#334155]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-white">
-          {statuses.map((status) => (
-            <SelectItem key={status} value={status}>
-              {status}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-      <Select value={selectedCity} onValueChange={onCityChange}>
-        <SelectTrigger className="h-11 w-full rounded-lg border border-[#e2e8f0] bg-white px-3 text-sm font-medium text-[#334155]">
-          <SelectValue />
-        </SelectTrigger>
-        <SelectContent className="bg-white">
-          {cities.map((city) => (
-            <SelectItem key={city} value={city}>
-              {city}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <div className="w-full lg:w-64 shrink-0">
+        <CategoryMultiSelect
+          selectedCategories={activeCategories}
+          onCategoriesChange={handleCategoriesChange}
+          categories={categories}
+          categoryCounts={categoryCounts}
+          placeholder="All Categories"
+        />
+      </div>
+
+      <div className="w-full lg:w-44 shrink-0">
+        <Select value={selectedStatus} onValueChange={onStatusChange}>
+          <SelectTrigger className="w-full h-10 rounded-xl bg-white border-[#e2e8f0]">
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent className="bg-white">
+            {statuses.map((status) => (
+              <SelectItem key={status} value={status}>
+                {status}
+              </SelectItem>
+            ))}
+          </SelectContent>
+        </Select>
+      </div>
+
+      <div className="w-full lg:w-56 shrink-0">
+        <CityMultiSelect
+          selectedCities={activeCities}
+          onCitiesChange={handleCitiesChange}
+          cities={cities}
+          cityCounts={cityCounts}
+          placeholder="All Cities"
+        />
+      </div>
     </div>
   );
 }
