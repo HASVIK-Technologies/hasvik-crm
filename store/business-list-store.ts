@@ -8,6 +8,7 @@ type BusinessListState = {
   selectedCategory: string;
   selectedCategories: string[];
   selectedStatus: string;
+  selectedFollowUpDate: string;
   selectedCity: string;
   selectedCities: string[];
   sortOrder: "Latest First" | "Oldest First";
@@ -24,6 +25,7 @@ type BusinessListState = {
   toggleCategory: (category: string) => void;
   clearCategories: () => void;
   setSelectedStatus: (selectedStatus: string) => void;
+  setSelectedFollowUpDate: (selectedFollowUpDate: string) => void;
   setSelectedCity: (selectedCity: string) => void;
   setSelectedCities: (selectedCities: string[]) => void;
   toggleCity: (city: string) => void;
@@ -43,6 +45,7 @@ export const useBusinessListStore = create<BusinessListState>((set) => ({
   selectedCategory: "All Categories",
   selectedCategories: [],
   selectedStatus: "All Status",
+  selectedFollowUpDate: "All Dates",
   selectedCity: "All Cities",
   selectedCities: [],
   sortOrder: "Latest First",
@@ -109,6 +112,8 @@ export const useBusinessListStore = create<BusinessListState>((set) => ({
       ...resetPage,
     }),
   setSelectedStatus: (selectedStatus) => set({ selectedStatus, ...resetPage }),
+  setSelectedFollowUpDate: (selectedFollowUpDate) =>
+    set({ selectedFollowUpDate, ...resetPage }),
   setSelectedCity: (selectedCity: string) =>
     set((state) => ({
       selectedCity,
@@ -165,6 +170,7 @@ export const useBusinessListStore = create<BusinessListState>((set) => ({
       selectedCategory: "All Categories",
       selectedCategories: [],
       selectedStatus: "All Status",
+      selectedFollowUpDate: "All Dates",
       selectedCity: "All Cities",
       selectedCities: [],
       page: 1,

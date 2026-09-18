@@ -56,15 +56,18 @@ function isActivePath(pathname: string, href: string) {
 }
 
 function getPageDetails(pathname: string) {
-  if (pathname === "/businesses/form") {
+  if (pathname === "/businesses/form" || pathname.startsWith("/businesses/form/")) {
+    const isEdit = pathname.startsWith("/businesses/form/");
     return {
       eyebrow: "BUSINESSES",
-      title: "Add Business",
-      subtitle: "Create a new business lead and set up its first follow-up.",
+      title: isEdit ? "Edit Business" : "Add Business",
+      subtitle: isEdit
+        ? "Update business lead details and follow-up settings."
+        : "Create a new business lead and set up its first follow-up.",
     };
   }
 
-  if (pathname.startsWith("/businesses/") && pathname !== "/businesses/form") {
+  if (pathname.startsWith("/businesses/") && !pathname.startsWith("/businesses/form")) {
     return {
       eyebrow: "BUSINESS DETAILS",
       title: "Business Details",
@@ -220,6 +223,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 aria-label="Notifications"
+                suppressHydrationWarning
                 className="relative flex size-10 items-center justify-center rounded-xl border border-[#e2e8f0] bg-white text-[#64748b] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a]"
               >
                 <Bell className="size-4" />

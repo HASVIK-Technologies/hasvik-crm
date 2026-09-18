@@ -30,6 +30,41 @@ function formatCreatedAt(createdAt: string | undefined): string {
   }).format(new Date(createdAt));
 }
 
+function parseFollowUp(dateStr: string | undefined): {
+  nextFollowUp: string;
+  nextFollowUpType: BusinessItem["nextFollowUpType"];
+} {
+  if (!dateStr) {
+    return { nextFollowUp: "-", nextFollowUpType: "none" };
+  }
+
+  const d = new Date(dateStr);
+  if (isNaN(d.getTime())) {
+    return { nextFollowUp: dateStr, nextFollowUpType: "none" };
+  }
+
+  const now = new Date();
+  const today = new Date(now.getFullYear(), now.getMonth(), now.getDate());
+  const target = new Date(d.getFullYear(), d.getMonth(), d.getDate());
+  const diffDays = Math.round((target.getTime() - today.getTime()) / (1000 * 60 * 60 * 24));
+
+  const formattedDate = new Intl.DateTimeFormat("en-IN", {
+    day: "numeric",
+    month: "short",
+    year: "numeric",
+  }).format(d);
+
+  if (diffDays === 0) {
+    return { nextFollowUp: "Today", nextFollowUpType: "today" };
+  } else if (diffDays === 1) {
+    return { nextFollowUp: "Tomorrow", nextFollowUpType: "tomorrow" };
+  } else if (diffDays < 0) {
+    return { nextFollowUp: formattedDate, nextFollowUpType: "overdue" };
+  } else {
+    return { nextFollowUp: formattedDate, nextFollowUpType: "date" };
+  }
+}
+
 export function toBusinessItem(business: ApiBusiness): BusinessItem {
   const initials = business.name
     .split(" ")
@@ -39,6 +74,18 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     .join("")
     .toUpperCase();
 
+  const followUpInfo = parseFollowUp(business.nextFollowupDate);
+
+  let resolvedCategory = "Uncategorized";
+  const catObj = business.category as unknown;
+  if (typeof catObj === "object" && catObj !== null && "name" in (catObj as Record<string, unknown>)) {
+    resolvedCategory = String((catObj as { name?: string }).name || "Uncategorized");
+  } else if (typeof business.category === "string" && business.category) {
+    resolvedCategory = business.category;
+  } else if (typeof business.categoryId === "string" && business.categoryId) {
+    resolvedCategory = business.categoryId;
+  }
+
   return {
     id: business._id,
     name: business.name,
@@ -46,13 +93,17 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     initials: initials || "NB",
     avatarBg: "bg-[#e0eafe]",
     avatarTextColor: "text-[#2e90fa]",
-    category: business.categoryId ?? "Uncategorized",
+    category: resolvedCategory,
     city: business.city ?? "-",
     state: business.state ?? "-",
     status: business.isActive === false || business.status === "INACTIVE" ? "Inactive" : "Active",
     lastFollowUp: formatCreatedAt(business.createdAt),
-    nextFollowUp: "-",
-    nextFollowUpType: "none",
+    nextFollowUp: followUpInfo.nextFollowUp,
+    nextFollowUpType: followUpInfo.nextFollowUpType,
+    nextFollowupDate: business.nextFollowupDate,
+    reminder: business.reminder,
+    description: business.description,
+    notes: business.notes,
     owner: business.assignedTo,
     address: business.address,
     email: business.email,
@@ -228,6 +279,80 @@ export function useCategoryAutocomplete(search: string) {
     queryFn: () => getCategoryOptions(search),
     enabled: search.trim().length > 0,
     staleTime: 60_000,
+  });
+}
+
+export async function getBusinessRaw(id: string): Promise<ApiBusiness> {
+  const response = await apiClient.get<ApiBusiness>(`/businesses/${id}`);
+  return response.data;
+}
+
+export async function updateBusinessData(
+  id: string,
+  payload: Partial<ApiBusiness> & Record<string, unknown>,
+): Promise<ApiBusiness> {
+  try {
+    const response = await apiClient.patch<ApiBusiness>(`/businesses/${id}`, payload);
+    return response.data;
+  } catch (err: unknown) {
+    if (axios.isAxiosError(err) && (err.response?.status === 405 || err.response?.status === 404)) {
+      const response = await apiClient.put<ApiBusiness>(`/businesses/${id}`, payload);
+      return response.data;
+    }
+    throw err;
+  }
+}
+
+export async function createBusinessData(
+  payload: Partial<ApiBusiness> & Record<string, unknown>,
+): Promise<ApiBusiness> {
+  const response = await apiClient.post<ApiBusiness>("/businesses", payload);
+  return response.data;
+}
+
+export function useUpdateBusinessMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      payload,
+    }: {
+      id: string;
+      payload: Partial<ApiBusiness> & Record<string, unknown>;
+    }) => updateBusinessData(id, payload),
+    onSuccess: (_, variables) => {
+      queryClient.invalidateQueries({ queryKey: ["businesses"] });
+      queryClient.invalidateQueries({ queryKey: ["business", String(variables.id)] });
+      toast.success("Business updated successfully.");
+    },
+    onError: (error) => {
+      if (!axios.isAxiosError(error)) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to update business.",
+        );
+      }
+    },
+  });
+}
+
+export function useCreateBusinessMutation() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: (payload: Partial<ApiBusiness> & Record<string, unknown>) =>
+      createBusinessData(payload),
+    onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["businesses"] });
+      toast.success("Business created successfully.");
+    },
+    onError: (error) => {
+      if (!axios.isAxiosError(error)) {
+        toast.error(
+          error instanceof Error ? error.message : "Failed to create business.",
+        );
+      }
+    },
   });
 }
 

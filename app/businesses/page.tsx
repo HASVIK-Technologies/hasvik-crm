@@ -25,6 +25,7 @@ export default function BusinessesPage() {
     selectedCategory,
     selectedCategories,
     selectedStatus,
+    selectedFollowUpDate,
     selectedCity,
     selectedCities,
     sortOrder,
@@ -35,6 +36,7 @@ export default function BusinessesPage() {
     setSelectedCategory,
     setSelectedCategories,
     setSelectedStatus,
+    setSelectedFollowUpDate,
     setSelectedCity,
     setSelectedCities,
     setSortOrder,
@@ -74,11 +76,22 @@ export default function BusinessesPage() {
   // 3. Strictly use API businesses only, resolving any category IDs to readable names
   const businesses = useMemo(() => {
     return rawBusinesses.map((item) => {
-      const resolvedCat =
-        categoryMap.get(item.category) ||
-        (item.category && !/^[a-f\d]{24}$/i.test(item.category)
-          ? item.category
-          : "Uncategorized");
+      let resolvedCat = "Uncategorized";
+      const rawCat = item.category as unknown;
+
+      if (
+        typeof rawCat === "object" &&
+        rawCat !== null &&
+        "name" in (rawCat as Record<string, unknown>)
+      ) {
+        resolvedCat = String(
+          (rawCat as { name?: string }).name || "Uncategorized",
+        );
+      } else if (typeof rawCat === "string" && rawCat.trim()) {
+        resolvedCat =
+          categoryMap.get(rawCat) ||
+          (!/^[a-f\d]{24}$/i.test(rawCat) ? rawCat : "Uncategorized");
+      }
 
       return {
         ...item,
@@ -193,7 +206,26 @@ export default function BusinessesPage() {
         return false;
       }
 
-      // (e) City Filter: item must match one of the selected cities
+      // (e) Follow-up Date Filter
+      if (selectedFollowUpDate !== "All Dates") {
+        if (selectedFollowUpDate === "Today") {
+          if (item.nextFollowUpType !== "today") return false;
+        } else if (selectedFollowUpDate === "Upcoming") {
+          if (
+            item.nextFollowUpType !== "today" &&
+            item.nextFollowUpType !== "tomorrow" &&
+            item.nextFollowUpType !== "date"
+          ) {
+            return false;
+          }
+        } else if (selectedFollowUpDate === "Overdue") {
+          if (item.nextFollowUpType !== "overdue") return false;
+        } else if (selectedFollowUpDate === "No Follow-up") {
+          if (item.nextFollowUpType !== "none") return false;
+        }
+      }
+
+      // (f) City Filter: item must match one of the selected cities
       if (activeCities.length > 0) {
         const itemCity = item.city.toLowerCase().trim();
         const matchesCity = activeCities.some((c) => {
@@ -216,6 +248,7 @@ export default function BusinessesPage() {
     searchChips,
     searchTerm,
     selectedStatus,
+    selectedFollowUpDate,
   ]);
 
   // 7. Sorting
@@ -241,6 +274,9 @@ export default function BusinessesPage() {
   const statsData: BusinessStatsData = useMemo(() => {
     const total = businesses.length;
     const active = businesses.filter((b) => b.status === "Active").length;
+    const deactivated = businesses.filter(
+      (b) => b.status === "Inactive" || b.status?.toLowerCase() === "deactivated",
+    ).length;
     const followUpToday = businesses.filter(
       (b) => b.nextFollowUpType === "today",
     ).length;
@@ -249,6 +285,7 @@ export default function BusinessesPage() {
     return {
       total,
       active,
+      deactivated,
       followUpToday,
       categoriesCount,
     };
@@ -263,6 +300,17 @@ export default function BusinessesPage() {
     />
   );
 
+  const hasActiveFilters = Boolean(
+    searchTerm.trim() ||
+      searchChips.length > 0 ||
+      (selectedCategory && selectedCategory !== "All Categories") ||
+      selectedCategories.length > 0 ||
+      (selectedStatus && selectedStatus !== "All Status") ||
+      (selectedFollowUpDate && selectedFollowUpDate !== "All Dates") ||
+      (selectedCity && selectedCity !== "All Cities") ||
+      selectedCities.length > 0,
+  );
+
   const filterControls = (
     <BusinessFilters
       selectedCategory={selectedCategory}
@@ -272,14 +320,17 @@ export default function BusinessesPage() {
       categoryCounts={categoryCounts}
       selectedStatus={selectedStatus}
       onStatusChange={setSelectedStatus}
+      selectedFollowUpDate={selectedFollowUpDate}
+      onFollowUpDateChange={setSelectedFollowUpDate}
       selectedCity={selectedCity}
       onCityChange={setSelectedCity}
       selectedCities={selectedCities}
       onCitiesChange={setSelectedCities}
       cityCounts={cityCounts}
-
       categories={availableCategories}
       cities={availableCities}
+      hasActiveFilters={hasActiveFilters}
+      onResetFilters={resetAllFilters}
     />
   );
 

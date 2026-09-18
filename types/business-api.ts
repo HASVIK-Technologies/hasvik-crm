@@ -20,8 +20,13 @@ export type ApiBusiness = {
   city?: string;
   state?: string;
   pincode?: string;
+  category?: string | null;
   assignedTo?: string;
   leadSource?: string;
+  nextFollowupDate?: string;
+  reminder?: string;
+  description?: string;
+  notes?: string;
   createdAt?: string;
 };
 

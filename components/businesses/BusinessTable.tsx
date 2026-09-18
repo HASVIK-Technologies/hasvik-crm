@@ -52,6 +52,19 @@ import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 
+function formatDisplayString(val: unknown, fallback: string = "-"): string {
+  if (!val) return fallback;
+  if (typeof val === "string") return val;
+  if (
+    typeof val === "object" &&
+    val !== null &&
+    "name" in (val as Record<string, unknown>)
+  ) {
+    return String((val as { name?: unknown }).name || fallback);
+  }
+  return String(val);
+}
+
 interface BusinessTableProps {
   businesses: BusinessItem[];
   totalCount?: number;
@@ -242,7 +255,7 @@ export default function BusinessTable({
                         {item.name}
                       </h3>
                       <p className="mt-0.5 text-xs text-[#64748b]">
-                        {item.category} • {item.city}
+                        {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
                     </div>
@@ -337,17 +350,9 @@ export default function BusinessTable({
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (item.status?.toLowerCase() === "active") {
-                                router.push(`/businesses/${item.id}`);
-                              }
+                              router.push(`/businesses/form/${item.id}`);
                             }}
-                            disabled={item.status?.toLowerCase() !== "active"}
-                            className={cn(
-                              "text-xs",
-                              item.status?.toLowerCase() === "active"
-                                ? "cursor-pointer"
-                                : "cursor-not-allowed opacity-40 text-slate-400 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
-                            )}
+                            className="cursor-pointer text-xs"
                           >
                             Edit Business
                           </DropdownMenuItem>
@@ -461,10 +466,14 @@ export default function BusinessTable({
                     </TableCell>
 
                     {/* Category */}
-                    <TableCell className="px-4 py-4.5 text-sm">{item.category}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">
+                      {formatDisplayString(item.category, "Uncategorized")}
+                    </TableCell>
 
                     {/* City */}
-                    <TableCell className="px-4 py-4.5 text-sm">{item.city}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">
+                      {formatDisplayString(item.city, "-")}
+                    </TableCell>
 
                     {/* Status */}
                     <TableCell className="px-4 py-4.5">
@@ -575,17 +584,9 @@ export default function BusinessTable({
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (item.status?.toLowerCase() === "active") {
-                                  router.push(`/businesses/${item.id}`);
-                                }
+                                router.push(`/businesses/form/${item.id}`);
                               }}
-                              disabled={item.status?.toLowerCase() !== "active"}
-                              className={cn(
-                                "text-xs",
-                                item.status?.toLowerCase() === "active"
-                                  ? "cursor-pointer"
-                                  : "cursor-not-allowed opacity-40 text-slate-400 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
-                              )}
+                              className="cursor-pointer text-xs"
                             >
                               Edit Business
                             </DropdownMenuItem>
