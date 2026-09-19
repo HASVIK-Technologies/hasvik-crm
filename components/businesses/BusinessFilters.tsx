@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { SlidersHorizontal, RotateCcw, Calendar, MapPin } from "lucide-react";
+import { SlidersHorizontal, RotateCcw, Activity } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -16,188 +16,156 @@ import {
 } from "@/components/ui/popover";
 import CategoryMultiSelect from "./CategoryMultiSelect";
 import CityMultiSelect from "./CityMultiSelect";
-
-export const FOLLOW_UP_DATE_OPTIONS = [
-  "All Dates",
-  "Today",
-  "Upcoming",
-  "Overdue",
-  "No Follow-up",
-];
+import { useBusinessStatusesQuery } from "@/hooks/use-businesses";
 
 interface BusinessFiltersProps {
-  selectedCategory?: string;
-  onCategoryChange?: (value: string) => void;
-  selectedCategories?: string[];
-  onCategoriesChange?: (categories: string[]) => void;
-  categoryCounts?: Record<string, number>;
-  selectedStatus: string;
-  onStatusChange: (value: string) => void;
-  selectedFollowUpDate?: string;
-  onFollowUpDateChange?: (value: string) => void;
+  // Category
+  selectedCategoryId?: string;
+  selectedCategoryName?: string;
+  onCategorySelect?: (categoryId: string, categoryName?: string) => void;
+
+  // Status
+  selectedStatus?: string;
+  onStatusChange?: (status: string) => void;
+
+  // City
   selectedCity?: string;
-  onCityChange?: (value: string) => void;
-  selectedCities?: string[];
-  onCitiesChange?: (cities: string[]) => void;
-  cityCounts?: Record<string, number>;
-  categories?: string[];
-  statuses?: string[];
-  cities?: string[];
-  states?: string[];
+  onCityChange?: (city: string) => void;
+
+  // Active / Inactive (isDeleted)
+  isDeleted?: boolean;
+  onIsDeletedChange?: (isDeleted: boolean | undefined) => void;
+
+  // Reset
   onResetFilters?: () => void;
   hasActiveFilters?: boolean;
+
+  // Backward-compat props (if any remaining callers pass them)
+  selectedCategory?: string;
+  onCategoryChange?: (val: string) => void;
+  selectedCategories?: string[];
+  onCategoriesChange?: (cats: string[]) => void;
+  selectedCities?: string[];
+  onCitiesChange?: (cits: string[]) => void;
+  selectedFollowUpDate?: string;
+  onFollowUpDateChange?: (val: string) => void;
 }
 
 export default function BusinessFilters({
-  selectedCategory = "All Categories",
-  onCategoryChange,
-  selectedCategories = [],
-  onCategoriesChange,
-  categoryCounts,
-  selectedStatus = "All Status",
+  selectedCategoryId = "",
+  selectedCategoryName = "",
+  onCategorySelect,
+  selectedStatus = "",
   onStatusChange,
-  selectedFollowUpDate = "All Dates",
-  onFollowUpDateChange,
-  selectedCity = "All Cities",
+  selectedCity = "",
   onCityChange,
-  selectedCities = [],
-  onCitiesChange,
-  cityCounts,
-  categories = [
-    "Furniture Shop",
-    "Hardware Store",
-    "Construction",
-    "Electrical Shop",
-    "Kirana Store",
-    "Service Center",
-    "Medical Store",
-  ],
-  statuses = ["All Status", "Active", "Inactive"],
-  cities = ["All Cities", "Ballia", "Buxar", "Ghazipur", "Varanasi"],
-  states = ["All States"],
+  isDeleted,
+  onIsDeletedChange,
   onResetFilters,
   hasActiveFilters = false,
 }: BusinessFiltersProps) {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
 
-  const handleCategoriesChange = (cats: string[]) => {
-    onCategoriesChange?.(cats);
+  // Dynamic server-side Lead Status options from GET /api/businesses/status
+  const { data: statusOptions = [] } = useBusinessStatusesQuery();
+
+  // Active count for "More Filters" (Active/Inactive)
+  const isMoreFiltersActive = typeof isDeleted === "boolean";
+  const extraFiltersCount = isMoreFiltersActive ? 1 : 0;
+
+  // Format the active/inactive state for the dropdown
+  const activeInactiveValue =
+    isDeleted === false ? "active" : isDeleted === true ? "inactive" : "all";
+
+  const handleActiveInactiveChange = (val: string) => {
+    if (val === "active") {
+      onIsDeletedChange?.(false);
+    } else if (val === "inactive") {
+      onIsDeletedChange?.(true);
+    } else {
+      onIsDeletedChange?.(undefined);
+    }
   };
-
-  const handleCitiesChange = (cits: string[]) => {
-    onCitiesChange?.(cits);
-  };
-
-  const activeCategories =
-    selectedCategories.length > 0
-      ? selectedCategories
-      : selectedCategory && selectedCategory !== "All Categories"
-        ? [selectedCategory]
-        : [];
-
-  const activeCities =
-    selectedCities.length > 0
-      ? selectedCities
-      : selectedCity && selectedCity !== "All Cities"
-        ? [selectedCity]
-        : [];
-
-  const extraFiltersActiveCount = activeCities.length;
 
   return (
     <div
       data-filter-controls
-      className="flex flex-col gap-2.5 lg:gap-3 lg:flex-row lg:items-center w-full flex-wrap"
+      className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:flex-nowrap"
     >
-      {/* 1. Business Categories */}
-      <div className="w-full lg:w-56 shrink-0">
+      {/* 1. Category Filter (Debounced Server Autocomplete: GET /api/businesses/autocomplete?search=<text>) */}
+      <div className="w-full sm:w-48 lg:w-44 xl:w-48 shrink-0">
         <CategoryMultiSelect
-          selectedCategories={activeCategories}
-          onCategoriesChange={handleCategoriesChange}
-          categories={categories}
-          categoryCounts={categoryCounts}
+          selectedCategoryId={selectedCategoryId}
+          selectedCategoryName={selectedCategoryName}
+          onCategorySelect={onCategorySelect}
           placeholder="All Categories"
         />
       </div>
 
-      {/* 2. Lead Status */}
-      <div className="w-full lg:w-40 shrink-0">
-        <Select value={selectedStatus} onValueChange={onStatusChange}>
-          <SelectTrigger className="w-full h-10 rounded-xl bg-white border-[#e2e8f0] text-xs font-medium text-[#334155]">
+      {/* 2. Lead Status Filter (Server-side GET /api/businesses/status) */}
+      <div className="w-full sm:w-36 lg:w-36 shrink-0">
+        <Select
+          value={selectedStatus || "ALL"}
+          onValueChange={(val) => onStatusChange?.(val === "ALL" ? "" : val)}
+        >
+          <SelectTrigger className="w-full h-10 rounded-xl bg-white border-[#e2e8f0] text-xs font-medium text-[#334155] shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all hover:border-[#cbd5e1] focus:ring-[#0b63e5]/20 focus:border-[#0b63e5]">
             <SelectValue placeholder="All Status" />
           </SelectTrigger>
           <SelectContent className="bg-white">
-            {statuses.map((status) => (
-              <SelectItem key={status} value={status} className="text-xs">
-                {status}
+            <SelectItem value="ALL" className="text-xs">
+              All Status
+            </SelectItem>
+            {statusOptions.map((opt) => (
+              <SelectItem key={opt.key} value={opt.key} className="text-xs">
+                {opt.title}
               </SelectItem>
             ))}
           </SelectContent>
         </Select>
       </div>
 
-      {/* 3. Follow-up Date */}
-      <div className="w-full lg:w-44 shrink-0">
-        <Select
-          value={selectedFollowUpDate}
-          onValueChange={(val) => onFollowUpDateChange?.(val)}
-        >
-          <SelectTrigger className="w-full h-10 rounded-xl bg-white border-[#e2e8f0] text-xs font-medium text-[#334155] gap-2">
-            <div className="flex items-center gap-1.5 truncate">
-              <Calendar className="size-3.5 text-[#64748b] shrink-0" />
-              <span className="truncate">
-                {selectedFollowUpDate === "All Dates"
-                  ? "Follow-up Date"
-                  : selectedFollowUpDate}
-              </span>
-            </div>
-          </SelectTrigger>
-          <SelectContent className="bg-white">
-            {FOLLOW_UP_DATE_OPTIONS.map((opt) => (
-              <SelectItem key={opt} value={opt} className="text-xs">
-                {opt}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+      {/* 3. City Filter (Debounced Server Autocomplete: GET /api/businesses/city/autocomplete?search=<city>) */}
+      <div className="w-full sm:w-40 lg:w-40 xl:w-44 shrink-0">
+        <CityMultiSelect
+          selectedCity={selectedCity}
+          onCitySelect={onCityChange}
+          placeholder="All Cities"
+        />
       </div>
 
-      {/* 4. More Filters Popover (City, etc.) */}
+      {/* 4. More Filters Popover (Active / Inactive mapped to isDeleted) */}
       <Popover open={moreFiltersOpen} onOpenChange={setMoreFiltersOpen}>
         <PopoverTrigger asChild>
           <button
             type="button"
-            className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition-colors shrink-0 ${
-              extraFiltersActiveCount > 0
+            className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition-colors shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)] ${
+              isMoreFiltersActive
                 ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]"
                 : "border-[#e2e8f0] bg-white text-[#334155] hover:bg-[#f8fafc]"
             }`}
           >
             <SlidersHorizontal className="size-3.5 text-[#64748b]" />
             <span>More Filters</span>
-            {extraFiltersActiveCount > 0 && (
+            {extraFiltersCount > 0 && (
               <span className="flex size-4.5 items-center justify-center rounded-full bg-[#2563eb] text-[10px] font-bold text-white">
-                {extraFiltersActiveCount}
+                {extraFiltersCount}
               </span>
             )}
           </button>
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-80 p-4 space-y-3.5 bg-white border border-[#e2e8f0] shadow-xl rounded-2xl"
+          className="w-72 p-4 space-y-3.5 bg-white border border-[#e2e8f0] shadow-xl rounded-2xl z-50"
         >
           <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-2.5">
             <div className="flex items-center gap-1.5">
               <SlidersHorizontal className="size-4 text-[#2563eb]" />
               <h4 className="text-xs font-bold text-[#0f172a]">More Filters</h4>
             </div>
-            {extraFiltersActiveCount > 0 && (
+            {isMoreFiltersActive && (
               <button
                 type="button"
-                onClick={() => {
-                  handleCitiesChange([]);
-                  onCityChange?.("All Cities");
-                }}
+                onClick={() => onIsDeletedChange?.(undefined)}
                 className="text-[11px] font-medium text-[#2563eb] hover:underline"
               >
                 Reset Extra
@@ -207,16 +175,28 @@ export default function BusinessFilters({
 
           <div>
             <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#475569]">
-              <MapPin className="size-3.5 text-[#94a3b8]" />
-              City / Location
+              <Activity className="size-3.5 text-[#94a3b8]" />
+              Record Status
             </label>
-            <CityMultiSelect
-              selectedCities={activeCities}
-              onCitiesChange={handleCitiesChange}
-              cities={cities}
-              cityCounts={cityCounts}
-              placeholder="All Cities"
-            />
+            <Select
+              value={activeInactiveValue}
+              onValueChange={handleActiveInactiveChange}
+            >
+              <SelectTrigger className="w-full h-9 rounded-lg bg-[#f8fafc] border-[#e2e8f0] text-xs font-medium text-[#334155]">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                <SelectItem value="all" className="text-xs">
+                  All Records
+                </SelectItem>
+                <SelectItem value="active" className="text-xs">
+                  Active Only (isDeleted=false)
+                </SelectItem>
+                <SelectItem value="inactive" className="text-xs">
+                  Inactive Only (isDeleted=true)
+                </SelectItem>
+              </SelectContent>
+            </Select>
           </div>
         </PopoverContent>
       </Popover>
@@ -236,4 +216,3 @@ export default function BusinessFilters({
     </div>
   );
 }
-

@@ -39,17 +39,51 @@ export type BusinessesResponse = {
 };
 
 export type BusinessQueryParams = {
-  search?: string;
-  status?: string;
-  isActive?: boolean;
-  businessType?: string;
-  categoryId?: string;
-  assignedTo?: string;
-  city?: string;
-  state?: string;
   page?: number;
   limit?: number;
   sortBy?: string;
+  search?: string;
+  categoryId?: string;
+  city?: string;
+  status?: string;
+  isDeleted?: boolean;
+  isActive?: boolean;
+  businessType?: string;
+  assignedTo?: string;
+  state?: string;
+};
+
+export type BusinessKpiParams = {
+  search?: string;
+  status?: string;
+  categoryId?: string;
+  city?: string;
+  isDeleted?: boolean;
+};
+
+export type BusinessKpisResponse = {
+  total: number;
+  active: number;
+  new: number;
+  interested: number;
+  won: number;
+  deactivated?: number;
+  followUpToday?: number;
+  categoriesCount?: number;
+};
+
+export type BusinessStatusOption = {
+  key: string;
+  title: string;
+};
+
+export type CategoryAutocompleteItem = {
+  _id: string;
+  name: string;
+};
+
+export type CityAutocompleteItem = {
+  city: string;
 };
 
 export type BusinessesResult = {

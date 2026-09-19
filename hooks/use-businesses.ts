@@ -3,7 +3,17 @@ import axios from "axios";
 import { toast } from "sonner";
 import { apiClient } from "@/lib/api-client";
 import { updateBusiness } from "@/lib/business-store";
-import type { ApiBusiness, BusinessesResponse, BusinessQueryParams, BusinessesResult } from "@/types/business-api";
+import type {
+  ApiBusiness,
+  BusinessesResponse,
+  BusinessQueryParams,
+  BusinessesResult,
+  BusinessKpiParams,
+  BusinessKpisResponse,
+  BusinessStatusOption,
+  CategoryAutocompleteItem,
+  CityAutocompleteItem,
+} from "@/types/business-api";
 import type { BusinessItem } from "@/types/business";
 
 export type CategoryOption = {
@@ -13,7 +23,7 @@ export type CategoryOption = {
 
 const defaultQueryParams: Required<Pick<BusinessQueryParams, "page" | "limit" | "sortBy">> = {
   page: 1,
-  limit: 10,
+  limit: 20,
   sortBy: "-createdAt",
 };
 
@@ -115,12 +125,17 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
   };
 }
 
-export async function getBusinesses(params: BusinessQueryParams = {}): Promise<BusinessesResult> {
+export async function getBusinesses(
+  params: BusinessQueryParams = {},
+  signal?: AbortSignal,
+): Promise<BusinessesResult> {
+  const mergedParams = { ...defaultQueryParams, ...params };
   const response = await apiClient.get<BusinessesResponse>("/businesses", {
-    params: { ...defaultQueryParams, isDeleted: false, ...params },
+    params: mergedParams,
+    signal,
   });
 
-  const limit = params.limit ?? defaultQueryParams.limit;
+  const limit = mergedParams.limit ?? defaultQueryParams.limit;
   const total = response.data.total ?? response.data.data?.length ?? 0;
   const totalPages =
     response.data.totalPages ?? Math.max(1, Math.ceil(total / limit));
@@ -132,6 +147,124 @@ export async function getBusinesses(params: BusinessQueryParams = {}): Promise<B
   };
 }
 
+export async function getBusinessKpis(
+  params: BusinessKpiParams = {},
+  signal?: AbortSignal,
+): Promise<BusinessKpisResponse> {
+  const response = await apiClient.get<BusinessKpisResponse>("/businesses/kpis", {
+    params,
+    signal,
+  });
+  return response.data;
+}
+
+export function useBusinessKpisQuery(params: BusinessKpiParams) {
+  return useQuery({
+    queryKey: ["businesses", "kpis", params],
+    queryFn: ({ signal }) => getBusinessKpis(params, signal),
+    placeholderData: (previousData) => previousData,
+    staleTime: 10_000,
+    retry: 2,
+    retryDelay: 1000,
+  });
+}
+
+export function formatStatusTitle(key: string): string {
+  if (!key) return "";
+  return key
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
+export async function getBusinessStatuses(): Promise<BusinessStatusOption[]> {
+  try {
+    const response = await apiClient.get<unknown>("/businesses/status");
+    const data = response.data;
+    if (Array.isArray(data)) {
+      return data.map((item) => {
+        if (typeof item === "string") {
+          return { key: item, title: formatStatusTitle(item) };
+        }
+        if (item && typeof item === "object") {
+          const rec = item as Record<string, unknown>;
+          const key = String(rec.key || rec.value || rec.id || "");
+          const title = String(rec.title || rec.label || rec.name || formatStatusTitle(key));
+          return { key, title };
+        }
+        return { key: String(item), title: String(item) };
+      });
+    }
+    return [];
+  } catch {
+    return [
+      { key: "NEW", title: "New" },
+      { key: "CONTACTED", title: "Contacted" },
+      { key: "PROPOSAL_AND_NEGOTIATION", title: "Proposal & Negotiation" },
+      { key: "INTERESTED", title: "Interested" },
+      { key: "WON", title: "Won" },
+      { key: "LOST", title: "Lost" },
+    ];
+  }
+}
+
+export function useBusinessStatusesQuery() {
+  return useQuery({
+    queryKey: ["businesses", "statuses"],
+    queryFn: getBusinessStatuses,
+    staleTime: 5 * 60 * 1000,
+  });
+}
+
+export async function getBusinessCategoryAutocomplete(
+  search: string,
+): Promise<CategoryAutocompleteItem[]> {
+  try {
+    const response = await apiClient.get<CategoryAutocompleteItem[]>(
+      "/businesses/autocomplete",
+      {
+        params: { search: search.trim() },
+      },
+    );
+    return Array.isArray(response.data) ? response.data : [];
+  } catch {
+    return [];
+  }
+}
+
+export function useBusinessCategoryAutocomplete(search: string) {
+  return useQuery({
+    queryKey: ["businesses", "category-autocomplete", search],
+    queryFn: () => getBusinessCategoryAutocomplete(search),
+    staleTime: 60_000,
+  });
+}
+
+export async function getBusinessCityAutocomplete(
+  search: string,
+): Promise<CityAutocompleteItem[]> {
+  try {
+    const response = await apiClient.get<CityAutocompleteItem[]>(
+      "/businesses/city/autocomplete",
+      {
+        params: { search: search.trim() },
+      },
+    );
+    return Array.isArray(response.data) ? response.data : [];
+  } catch {
+    return [];
+  }
+}
+
+export function useBusinessCityAutocomplete(search: string) {
+  return useQuery({
+    queryKey: ["businesses", "city-autocomplete", search],
+    queryFn: () => getBusinessCityAutocomplete(search),
+    staleTime: 60_000,
+  });
+}
+
 export async function getBusiness(id: string): Promise<BusinessItem> {
   const response = await apiClient.get<ApiBusiness>(`/businesses/${id}`);
   return toBusinessItem(response.data);
@@ -140,8 +273,10 @@ export async function getBusiness(id: string): Promise<BusinessItem> {
 export function useBusinessesQuery(params: BusinessQueryParams) {
   return useQuery({
     queryKey: ["businesses", params],
-    queryFn: () => getBusinesses(params),
+    queryFn: ({ signal }) => getBusinesses(params, signal),
     placeholderData: (previousData) => previousData,
+    retry: 2,
+    retryDelay: 1000,
   });
 }
 

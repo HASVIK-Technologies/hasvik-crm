@@ -29,7 +29,18 @@ export interface BusinessItem {
 export interface BusinessStatsData {
   total: number;
   active: number;
-  deactivated: number;
-  followUpToday: number;
-  categoriesCount: number;
+  deactivated?: number;
+  followUpToday?: number;
+  categoriesCount?: number;
+  new?: number;
+  interested?: number;
+  won?: number;
+}
+
+export interface BusinessKpisData {
+  total: number;
+  active: number;
+  new: number;
+  interested: number;
+  won: number;
 }
