@@ -52,3 +52,22 @@ export type BusinessesResult = {
   total: number;
   totalPages: number;
 };
+
+// Matches the request body documented for POST /businesses.
+export type CreateBusinessPayload = {
+  name: string;
+  categoryId: string;
+  status: string;
+  phoneNumbers: { number: string; name: string; isPrimary: boolean }[];
+  whatsappNumbers: { number: string; name: string; isPrimary: boolean }[];
+  email?: string;
+  website?: string;
+  address: string;
+  city: string;
+  state: string;
+  pincode: string;
+  latitude?: number;
+  longitude?: number;
+  assignedTo?: string;
+  leadSource?: string;
+};

@@ -1,12 +1,12 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Controller,
   FormProvider,
   useFieldArray,
   useForm,
+  useWatch,
   type FieldErrors,
 } from "react-hook-form";
 import {
@@ -14,13 +14,12 @@ import {
   Check,
   FileText,
   Phone,
+  RotateCcw,
   Save,
   UsersRound,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import SecondaryButton from "@/components/common/SecondaryButton";
 
@@ -31,9 +30,10 @@ import AdditionalInfoSection from "@/components/businesses/sections/AdditionalIn
 import FollowUpSection from "@/components/businesses/sections/FollowUpSection";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/lib/use-is-desktop";
+import { useCreateBusiness } from "@/hooks/use-businesses";
+import { getApiErrorMessage } from "@/lib/api-error";
 import {
   defaultBusinessFormValues,
-  STEP_FIELD_NAMES,
   type BusinessFormValues,
 } from "@/lib/business-form-types";
 
@@ -62,26 +62,67 @@ const describeErrors = (errors: FieldErrors<BusinessFormValues>): string[] =>
     .filter((key) => Boolean(errors[key]))
     .map((key) => FIELD_LABELS[key] as string);
 
-export default function BusinessForm() {
+// These mirror each field's actual validation rules (see BusinessInfoSection
+// / ContactInfoSection), but computed live off watched values so the
+// Save/Next buttons can be disabled proactively - before the person has
+// tried to submit - rather than only rejecting a click after the fact.
+const isBusinessInfoComplete = (values: BusinessFormValues) =>
+  Boolean(values.businessName?.trim()) &&
+  Boolean(values.category) &&
+  Boolean(values.city) &&
+  Boolean(values.state?.trim()) &&
+  /^\d{6}$/.test(values.pincode ?? "") &&
+  Boolean(values.address?.trim()) &&
+  Boolean(values.status);
+
+const isContactInfoComplete = (values: BusinessFormValues) =>
+  (values.phoneNumbers ?? []).some((p) => p.value.trim().length > 0) &&
+  (values.whatsappNumbers ?? []).some((w) => w.value.trim().length > 0);
+
+export default function BusinessForm({
+  initialValues,
+}: {
+  /** Pass the fetched-and-transformed record here for edit mode; omit for
+   * a fresh "Add Business" form. Whatever is passed in is what "Reset"
+   * restores the form to. */
+  initialValues?: BusinessFormValues;
+}) {
   const router = useRouter();
   const isDesktop = useIsDesktop();
 
+  // Captured once on mount - this is the snapshot Reset restores to,
+  // independent of anything the person types afterward.
+  const [initialSnapshot] = useState<BusinessFormValues>(
+    () => initialValues ?? defaultBusinessFormValues,
+  );
+
   const methods = useForm<BusinessFormValues>({
-    defaultValues: defaultBusinessFormValues,
+    defaultValues: initialSnapshot,
     mode: "onChange",
     shouldUnregister: false,
   });
-  const { control, handleSubmit, trigger, getValues, reset } = methods;
+  const { control, handleSubmit, reset } = methods;
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [stepAttempted, setStepAttempted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
 
   const phoneArray = useFieldArray({ control, name: "phoneNumbers" });
   const whatsappArray = useFieldArray({ control, name: "whatsappNumbers" });
 
+  const createBusinessMutation = useCreateBusiness();
 
-  const handleCancel = () => router.push("/businesses");
+  const watchedValues = useWatch({ control }) as BusinessFormValues;
+  const isFormComplete =
+    isBusinessInfoComplete(watchedValues) &&
+    isContactInfoComplete(watchedValues);
+
+  const handleBackToBusinesses = () => router.push("/businesses");
+
+  const handleReset = () => {
+    reset(initialSnapshot);
+    setSubmitError(null);
+    setCurrentStep(0);
+  };
 
   const steps = [
     {
@@ -120,53 +161,32 @@ export default function BusinessForm() {
 
   const isLastStep = currentStep === steps.length - 1;
 
-  const fieldsForStep = (stepKey: string): string[] => {
-    if (stepKey === "business") return [...STEP_FIELD_NAMES.business];
-    if (stepKey === "contact") {
-      return [
-        ...getValues("phoneNumbers").map((_, i) => `phoneNumbers.${i}.value`),
-        ...getValues("whatsappNumbers").map(
-          (_, i) => `whatsappNumbers.${i}.value`,
-        ),
-      ];
-    }
-    if (stepKey === "additional") return [...STEP_FIELD_NAMES.additional];
-    return [...STEP_FIELD_NAMES.followup];
-  };
+  const isCurrentStepComplete = (() => {
+    const key = steps[currentStep].key;
+    if (key === "business") return isBusinessInfoComplete(watchedValues);
+    if (key === "contact") return isContactInfoComplete(watchedValues);
+    return true;
+  })();
 
-  const goNext = async () => {
-    // Dynamic array-index paths (e.g. "phoneNumbers.0.value") aren't fully
-    // expressible in react-hook-form's static Path<T> type, hence the cast.
-    const isStepValid = await trigger(
-      fieldsForStep(steps[currentStep].key) as never,
-    );
-    if (!isStepValid) {
-      setStepAttempted(true);
-      return;
-    }
-    setStepAttempted(false);
+  const goNext = () => {
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
 
   const goBack = () => {
-    setStepAttempted(false);
     setCurrentStep((step) => Math.max(step - 1, 0));
   };
 
   const onValid = (values: BusinessFormValues) => {
     setSubmitError(null);
 
-    // Persisting to the backend will be wired up separately - for now this
-    // captures the shape of the payload the API will expect. Note the
-    // shape: phoneNumbers/whatsappNumbers are `{ value: string }[]`.
-    console.log("Saving business", values);
-
-    if (values.addAnother) {
-      reset(defaultBusinessFormValues);
-      setCurrentStep(0);
-    } else {
-      router.push("/businesses");
-    }
+    createBusinessMutation.mutate(values, {
+      onSuccess: () => {
+        router.push("/businesses");
+      },
+      onError: (error) => {
+        setSubmitError(getApiErrorMessage(error));
+      },
+    });
   };
 
   const onInvalid = (formErrors: FieldErrors<BusinessFormValues>) => {
@@ -225,36 +245,35 @@ export default function BusinessForm() {
                 <OutlinedButton
                   type="button"
                   size="lg"
-                  onClick={handleCancel}
+                  onClick={handleBackToBusinesses}
                   className="w-full sm:w-auto"
                 >
-                  Cancel
+                  Back to Business
                 </OutlinedButton>
 
-                <div className="flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center">
-                  <Controller
-                    control={control}
-                    name="addAnother"
-                    render={({ field }) => (
-                      <Label className="justify-center gap-2 text-[#547080] sm:justify-start">
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={(checked) =>
-                            field.onChange(checked === true)
-                          }
-                        />
-                        Add another business
-                      </Label>
-                    )}
-                  />
+                <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
+                  <OutlinedButton
+                    type="button"
+                    size="lg"
+                    onClick={handleReset}
+                    className="w-full sm:w-auto"
+                  >
+                    <RotateCcw className="size-4" />
+                    Reset
+                  </OutlinedButton>
 
                   <SecondaryButton
                     type="submit"
                     size="lg"
+                    disabled={
+                      !isFormComplete || createBusinessMutation.isPending
+                    }
                     className="w-full sm:w-auto"
                   >
                     <Save className="size-4" />
-                    Save Business
+                    {createBusinessMutation.isPending
+                      ? "Saving..."
+                      : "Save Business"}
                   </SecondaryButton>
                 </div>
               </div>
@@ -311,47 +330,48 @@ export default function BusinessForm() {
                 <div className="mt-6 flex flex-col-reverse gap-3 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <OutlinedButton
                     type="button"
-                    onClick={currentStep === 0 ? handleCancel : goBack}
+                    onClick={
+                      currentStep === 0 ? handleBackToBusinesses : goBack
+                    }
                     className="w-full sm:w-auto"
                   >
-                    {currentStep === 0 ? "Cancel" : "Back"}
+                    {currentStep === 0 ? "Back to Business" : "Back"}
                   </OutlinedButton>
 
                   {isLastStep ? (
                     <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
-                      <Controller
-                        control={control}
-                        name="addAnother"
-                        render={({ field }) => (
-                          <Label className="justify-center gap-2 text-[#547080] sm:justify-start">
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={(checked) =>
-                                field.onChange(checked === true)
-                              }
-                            />
-                            Add another business
-                          </Label>
-                        )}
-                      />
+                      <OutlinedButton
+                        type="button"
+                        onClick={handleReset}
+                        className="w-full sm:w-auto"
+                      >
+                        <RotateCcw className="size-4" />
+                        Reset
+                      </OutlinedButton>
                       <SecondaryButton
                         type="submit"
+                        disabled={
+                          !isFormComplete || createBusinessMutation.isPending
+                        }
                         className="w-full sm:w-auto"
                       >
                         <Save className="size-4" />
-                        Save Business
+                        {createBusinessMutation.isPending
+                          ? "Saving..."
+                          : "Save Business"}
                       </SecondaryButton>
                     </div>
                   ) : (
                     <div className="flex flex-col items-stretch gap-2 sm:items-end">
-                      {stepAttempted && (
-                        <p className="text-xs text-red-500">
+                      {!isCurrentStepComplete && (
+                        <p className="text-xs text-[#8a9eaa]">
                           Fill in all required fields to continue.
                         </p>
                       )}
                       <SecondaryButton
                         type="button"
                         onClick={goNext}
+                        disabled={!isCurrentStepComplete}
                         className="w-full sm:w-auto"
                       >
                         Next
