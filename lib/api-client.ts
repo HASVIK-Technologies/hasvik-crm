@@ -8,7 +8,7 @@ const apiBaseUrl =
 
 export const apiClient = axios.create({
   baseURL: `${apiBaseUrl.replace(/\/+$/, "")}/api`,
-  timeout: 15_000,
+  timeout: 45_000,
   headers: {
     "Content-Type": "application/json",
   },
@@ -27,6 +27,11 @@ apiClient.interceptors.request.use((config) => {
 apiClient.interceptors.response.use(
   (response) => response,
   (error: unknown) => {
+    // If request was aborted/cancelled (e.g. by new search keystroke), do not display error toast
+    if (axios.isCancel(error)) {
+      return Promise.reject(error);
+    }
+
     if (axios.isAxiosError(error) && error.response?.status === 401) {
       useAuthStore.getState().clearAuth();
     }
