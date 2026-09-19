@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { SlidersHorizontal, RotateCcw, Activity } from "lucide-react";
+import { SlidersHorizontal, RotateCcw, Activity, Users } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -16,7 +16,7 @@ import {
 } from "@/components/ui/popover";
 import CategoryMultiSelect from "./CategoryMultiSelect";
 import CityMultiSelect from "./CityMultiSelect";
-import { useBusinessStatusesQuery } from "@/hooks/use-businesses";
+import { useBusinessStatusesQuery, getStatusLabel } from "@/hooks/use-businesses";
 
 interface BusinessFiltersProps {
   // Category
@@ -39,16 +39,6 @@ interface BusinessFiltersProps {
   // Reset
   onResetFilters?: () => void;
   hasActiveFilters?: boolean;
-
-  // Backward-compat props (if any remaining callers pass them)
-  selectedCategory?: string;
-  onCategoryChange?: (val: string) => void;
-  selectedCategories?: string[];
-  onCategoriesChange?: (cats: string[]) => void;
-  selectedCities?: string[];
-  onCitiesChange?: (cits: string[]) => void;
-  selectedFollowUpDate?: string;
-  onFollowUpDateChange?: (val: string) => void;
 }
 
 export default function BusinessFilters({
@@ -69,7 +59,7 @@ export default function BusinessFilters({
   // Dynamic server-side Lead Status options from GET /api/businesses/status
   const { data: statusOptions = [] } = useBusinessStatusesQuery();
 
-  // Active count for "More Filters" (Active/Inactive)
+  // Active count for "More Filters" (Active/Inactive mapped to isDeleted)
   const isMoreFiltersActive = typeof isDeleted === "boolean";
   const extraFiltersCount = isMoreFiltersActive ? 1 : 0;
 
@@ -87,6 +77,8 @@ export default function BusinessFilters({
     }
   };
 
+  const isStatusActive = Boolean(selectedStatus && selectedStatus !== "ALL");
+
   return (
     <div
       data-filter-controls
@@ -102,22 +94,27 @@ export default function BusinessFilters({
         />
       </div>
 
-      {/* 2. Lead Status Filter (Server-side GET /api/businesses/status) */}
-      <div className="w-full sm:w-36 lg:w-36 shrink-0">
+      {/* 2. Leads Filter (Server-side GET /api/businesses/status) */}
+      <div className="w-full sm:w-40 lg:w-36 xl:w-40 shrink-0">
         <Select
           value={selectedStatus || "ALL"}
           onValueChange={(val) => onStatusChange?.(val === "ALL" ? "" : val)}
         >
           <SelectTrigger className="w-full h-10 rounded-xl bg-white border-[#e2e8f0] text-xs font-medium text-[#334155] shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all hover:border-[#cbd5e1] focus:ring-[#0b63e5]/20 focus:border-[#0b63e5]">
-            <SelectValue placeholder="All Status" />
+            <div className="flex items-center gap-2 min-w-0 flex-1">
+              <Users className="size-3.5 shrink-0 text-[#64748b]" />
+              <span className="truncate text-left">
+                {isStatusActive ? getStatusLabel(selectedStatus) : "All Leads"}
+              </span>
+            </div>
           </SelectTrigger>
-          <SelectContent className="bg-white">
-            <SelectItem value="ALL" className="text-xs">
-              All Status
+          <SelectContent className="bg-white z-50">
+            <SelectItem value="ALL" className="text-xs font-medium">
+              All Leads
             </SelectItem>
-            {statusOptions.map((opt) => (
-              <SelectItem key={opt.key} value={opt.key} className="text-xs">
-                {opt.title}
+            {statusOptions.map((status) => (
+              <SelectItem key={status} value={status} className="text-xs">
+                {getStatusLabel(status)}
               </SelectItem>
             ))}
           </SelectContent>
@@ -173,27 +170,34 @@ export default function BusinessFilters({
             )}
           </div>
 
+          {/* Status Filter (Active / Inactive mapped to isDeleted) */}
           <div>
             <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#475569]">
               <Activity className="size-3.5 text-[#94a3b8]" />
-              Record Status
+              Status
             </label>
             <Select
               value={activeInactiveValue}
               onValueChange={handleActiveInactiveChange}
             >
               <SelectTrigger className="w-full h-9 rounded-lg bg-[#f8fafc] border-[#e2e8f0] text-xs font-medium text-[#334155]">
-                <SelectValue />
+                <SelectValue placeholder="All Status">
+                  {activeInactiveValue === "active"
+                    ? "Active"
+                    : activeInactiveValue === "inactive"
+                      ? "Inactive"
+                      : "All Status"}
+                </SelectValue>
               </SelectTrigger>
-              <SelectContent className="bg-white">
-                <SelectItem value="all" className="text-xs">
-                  All Records
+              <SelectContent className="bg-white z-50">
+                <SelectItem value="all" className="text-xs font-medium">
+                  All Status
                 </SelectItem>
                 <SelectItem value="active" className="text-xs">
-                  Active Only (isDeleted=false)
+                  Active
                 </SelectItem>
                 <SelectItem value="inactive" className="text-xs">
-                  Inactive Only (isDeleted=true)
+                  Inactive
                 </SelectItem>
               </SelectContent>
             </Select>
@@ -201,7 +205,7 @@ export default function BusinessFilters({
         </PopoverContent>
       </Popover>
 
-      {/* 5. Reset Filters Button */}
+      {/* 4. Reset Filters Button */}
       {hasActiveFilters && onResetFilters && (
         <button
           type="button"

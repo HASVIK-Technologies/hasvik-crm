@@ -169,42 +169,50 @@ export function useBusinessKpisQuery(params: BusinessKpiParams) {
   });
 }
 
-export function formatStatusTitle(key: string): string {
-  if (!key) return "";
-  return key
+export const STATUS_LABEL_MAP: Record<string, string> = {
+  NEW: "New",
+  CONTACTED: "Contacted",
+  PROPOSAL_AND_NEGOTIATION: "Proposal and Negotiation",
+  INTERESTED: "Interested",
+  WON: "Won",
+  LOST: "Lost",
+};
+
+export function getStatusLabel(status: string): string {
+  if (!status) return "";
+  if (STATUS_LABEL_MAP[status]) {
+    return STATUS_LABEL_MAP[status];
+  }
+  return status
     .toLowerCase()
     .split("_")
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .map((word, idx) =>
+      idx > 0 && (word === "and" || word === "or" || word === "of")
+        ? word
+        : word.charAt(0).toUpperCase() + word.slice(1),
+    )
     .join(" ");
 }
 
-export async function getBusinessStatuses(): Promise<BusinessStatusOption[]> {
+export function formatStatusTitle(key: string): string {
+  return getStatusLabel(key);
+}
+
+export async function getBusinessStatuses(): Promise<string[]> {
   try {
-    const response = await apiClient.get<unknown>("/businesses/status");
-    const data = response.data;
-    if (Array.isArray(data)) {
-      return data.map((item) => {
-        if (typeof item === "string") {
-          return { key: item, title: formatStatusTitle(item) };
-        }
-        if (item && typeof item === "object") {
-          const rec = item as Record<string, unknown>;
-          const key = String(rec.key || rec.value || rec.id || "");
-          const title = String(rec.title || rec.label || rec.name || formatStatusTitle(key));
-          return { key, title };
-        }
-        return { key: String(item), title: String(item) };
-      });
+    const response = await apiClient.get<string[]>("/businesses/status");
+    if (Array.isArray(response.data)) {
+      return response.data;
     }
     return [];
   } catch {
     return [
-      { key: "NEW", title: "New" },
-      { key: "CONTACTED", title: "Contacted" },
-      { key: "PROPOSAL_AND_NEGOTIATION", title: "Proposal & Negotiation" },
-      { key: "INTERESTED", title: "Interested" },
-      { key: "WON", title: "Won" },
-      { key: "LOST", title: "Lost" },
+      "NEW",
+      "CONTACTED",
+      "PROPOSAL_AND_NEGOTIATION",
+      "INTERESTED",
+      "WON",
+      "LOST",
     ];
   }
 }

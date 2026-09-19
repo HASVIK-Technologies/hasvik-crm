@@ -72,10 +72,7 @@ export type BusinessKpisResponse = {
   categoriesCount?: number;
 };
 
-export type BusinessStatusOption = {
-  key: string;
-  title: string;
-};
+export type BusinessStatusOption = string;
 
 export type CategoryAutocompleteItem = {
   _id: string;
