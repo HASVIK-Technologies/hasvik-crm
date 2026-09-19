@@ -85,9 +85,9 @@ export default function ListPageLayout({
       <div className="w-full lg:hidden">{search}</div>
       {showFilters && (filters || search) && (
         <div className="hidden grow lg:flex p-4 rounded-2xl border border-[#e4ecf2] shadow-[0_2px_12px_rgba(20,40,60,0.03)] bg-white overflow-visible">
-          <div className="flex w-full flex-col lg:flex-row gap-5 items-start">
-            {search && <div className="w-full lg:max-w-sm shrink-0">{search}</div>}
-            {filters && <div className="min-w-0 flex-1">{filters}</div>}
+          <div className="flex w-full flex-col lg:flex-row gap-4 items-center">
+            {search && <div className="w-full lg:w-72 xl:w-80 shrink-0">{search}</div>}
+            {filters && <div className="min-w-0 flex-1 w-full">{filters}</div>}
           </div>
         </div>
       )}
