@@ -2,8 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-import { useState } from "react";
-import { useRouter } from "next/navigation";
 import {
   FormProvider,
   useFieldArray,
@@ -35,7 +33,7 @@ import AdditionalInfoSection from "@/components/businesses/sections/AdditionalIn
 import FollowUpSection from "@/components/businesses/sections/FollowUpSection";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/lib/use-is-desktop";
-import { useCreateBusiness } from "@/hooks/use-businesses";
+import { getBusinessRaw, useCreateBusiness, useCreateBusinessMutation, useUpdateBusinessMutation } from "@/hooks/use-businesses";
 import { getApiErrorMessage } from "@/lib/api-error";
 import {
   defaultBusinessFormValues,
@@ -96,7 +94,7 @@ export default function BusinessForm({
   const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
 
-  const targetId = businessId || searchParams.get("id") || undefined;
+  const targetId = searchParams.get("id") || undefined;
   const isEditMode = Boolean(targetId);
 
   // Captured once on mount - this is the snapshot Reset restores to,
