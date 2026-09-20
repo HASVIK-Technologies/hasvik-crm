@@ -1,7 +1,7 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
   Controller,
   FormProvider,
@@ -10,9 +10,12 @@ import {
   type FieldErrors,
 } from "react-hook-form";
 import {
+  ArrowLeft,
   ArrowRight,
+  AlertCircle,
   Check,
   FileText,
+  Loader2,
   Phone,
   Save,
   UsersRound,
@@ -36,6 +39,11 @@ import {
   STEP_FIELD_NAMES,
   type BusinessFormValues,
 } from "@/lib/business-form-types";
+import {
+  getBusinessRaw,
+  useUpdateBusinessMutation,
+  useCreateBusinessMutation,
+} from "@/hooks/use-businesses";
 
 // Additional Information is built out but hidden from view for now - the
 // team plans to start using it in a future release. Flip this to `true`
@@ -62,9 +70,17 @@ const describeErrors = (errors: FieldErrors<BusinessFormValues>): string[] =>
     .filter((key) => Boolean(errors[key]))
     .map((key) => FIELD_LABELS[key] as string);
 
-export default function BusinessForm() {
+interface BusinessFormProps {
+  businessId?: string;
+}
+
+export default function BusinessForm({ businessId }: BusinessFormProps) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
+
+  const targetId = businessId || searchParams.get("id") || undefined;
+  const isEditMode = Boolean(targetId);
 
   const methods = useForm<BusinessFormValues>({
     defaultValues: defaultBusinessFormValues,
@@ -76,10 +92,83 @@ export default function BusinessForm() {
   const [currentStep, setCurrentStep] = useState(0);
   const [stepAttempted, setStepAttempted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isLoadingBusiness, setIsLoadingBusiness] = useState(isEditMode);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const updateMutation = useUpdateBusinessMutation();
+  const createMutation = useCreateBusinessMutation();
 
   const phoneArray = useFieldArray({ control, name: "phoneNumbers" });
   const whatsappArray = useFieldArray({ control, name: "whatsappNumbers" });
 
+  useEffect(() => {
+    if (!targetId) {
+      setIsLoadingBusiness(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingBusiness(true);
+    setLoadError(null);
+
+    getBusinessRaw(targetId)
+      .then((data) => {
+        if (!isMounted) return;
+        if (!data || !data._id) {
+          setLoadError(`Business with ID #${targetId} not found.`);
+          setIsLoadingBusiness(false);
+          return;
+        }
+
+        const phoneNumbers =
+          data.phoneNumbers && data.phoneNumbers.length > 0
+            ? data.phoneNumbers.map((p) => ({ value: p.number || "" }))
+            : [{ value: "" }];
+
+        const whatsappNumbers =
+          data.whatsappNumbers && data.whatsappNumbers.length > 0
+            ? data.whatsappNumbers.map((w) => ({ value: w.number || "" }))
+            : [{ value: "" }];
+
+        reset({
+          businessName: data.name || "",
+          category: (data.categoryId ?? data.category) || "",
+          city: data.city || "",
+          state: data.state || "",
+          pincode: data.pincode || "",
+          address: data.address || "",
+          status: data.status || (data.isActive === false ? "Inactive" : "Active"),
+          businessType: data.businessType || "",
+          phoneNumbers,
+          whatsappNumbers,
+          email: data.email || "",
+          website: data.website || "",
+          description: data.description || "",
+          notes: data.notes || "",
+          leadSource: data.leadSource || "",
+          assignTo: data.assignedTo || "",
+          nextFollowupDate: data.nextFollowupDate ? data.nextFollowupDate.slice(0, 10) : "",
+          reminder: data.reminder || "",
+          addAnother: false,
+        });
+
+        setIsLoadingBusiness(false);
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return;
+        setLoadError(
+          `Unable to load business details: ${
+            err instanceof Error ? err.message : "Not found"
+          }`,
+        );
+        setIsLoadingBusiness(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [targetId, reset]);
 
   const handleCancel = () => router.push("/businesses");
 
@@ -153,19 +242,60 @@ export default function BusinessForm() {
     setCurrentStep((step) => Math.max(step - 1, 0));
   };
 
-  const onValid = (values: BusinessFormValues) => {
+  const onValid = async (values: BusinessFormValues) => {
     setSubmitError(null);
+    setIsSubmitting(true);
 
-    // Persisting to the backend will be wired up separately - for now this
-    // captures the shape of the payload the API will expect. Note the
-    // shape: phoneNumbers/whatsappNumbers are `{ value: string }[]`.
-    console.log("Saving business", values);
+    const payload: Record<string, unknown> = {
+      name: values.businessName.trim(),
+      businessType: values.businessType || undefined,
+      status: values.status || "Active",
+      email: values.email.trim() || undefined,
+      website: values.website.trim() || undefined,
+      address: values.address.trim() || undefined,
+      city: values.city.trim() || undefined,
+      state: values.state.trim() || undefined,
+      pincode: values.pincode.trim() || undefined,
+      leadSource: values.leadSource || undefined,
+      assignedTo: values.assignTo || undefined,
+      description: values.description || undefined,
+      notes: values.notes || undefined,
+      nextFollowupDate: values.nextFollowupDate || undefined,
+      reminder: values.reminder || undefined,
+      phoneNumbers: values.phoneNumbers
+        .filter((p) => p.value.trim())
+        .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
+      whatsappNumbers: values.whatsappNumbers
+        .filter((w) => w.value.trim())
+        .map((w, idx) => ({ number: w.value.trim(), isPrimary: idx === 0 })),
+    };
 
-    if (values.addAnother) {
-      reset(defaultBusinessFormValues);
-      setCurrentStep(0);
-    } else {
-      router.push("/businesses");
+    if (values.category) {
+      payload.category = values.category;
+      payload.categoryId = values.category;
+    }
+
+    try {
+      if (isEditMode && targetId) {
+        await updateMutation.mutateAsync({ id: targetId, payload });
+        router.push(`/businesses/${targetId}`);
+      } else {
+        await createMutation.mutateAsync(payload);
+        if (values.addAnother) {
+          reset(defaultBusinessFormValues);
+          setCurrentStep(0);
+        } else {
+          router.push("/businesses");
+        }
+      }
+    } catch (err: unknown) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Failed to save business. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
     }
   };
 
@@ -177,6 +307,40 @@ export default function BusinessForm() {
         : "Please fix the highlighted fields before saving.",
     );
   };
+
+  if (isLoadingBusiness) {
+    return (
+      <Card className="border-[#dce8ee] p-12 text-center">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <Loader2 className="size-8 animate-spin text-[#2563eb]" />
+          <p className="text-sm font-medium text-[#64748b]">
+            Loading business details...
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Card className="border-red-200 bg-red-50/50 p-8 text-center max-w-lg mx-auto">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+            <AlertCircle className="size-6" />
+          </div>
+          <h3 className="text-base font-bold text-[#0f172a]">Business Not Found</h3>
+          <p className="text-sm text-[#64748b]">{loadError}</p>
+          <OutlinedButton
+            type="button"
+            onClick={() => router.push("/businesses")}
+            className="mt-3 gap-2"
+          >
+            <ArrowLeft className="size-4" /> Back to Businesses
+          </OutlinedButton>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <FormProvider {...methods}>
@@ -232,29 +396,42 @@ export default function BusinessForm() {
                 </OutlinedButton>
 
                 <div className="flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center">
-                  <Controller
-                    control={control}
-                    name="addAnother"
-                    render={({ field }) => (
-                      <Label className="justify-center gap-2 text-[#547080] sm:justify-start">
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={(checked) =>
-                            field.onChange(checked === true)
-                          }
-                        />
-                        Add another business
-                      </Label>
-                    )}
-                  />
+                  {!isEditMode && (
+                    <Controller
+                      control={control}
+                      name="addAnother"
+                      render={({ field }) => (
+                        <Label className="justify-center gap-2 text-[#547080] sm:justify-start">
+                          <Checkbox
+                            checked={field.value}
+                            onCheckedChange={(checked) =>
+                              field.onChange(checked === true)
+                            }
+                          />
+                          Add another business
+                        </Label>
+                      )}
+                    />
+                  )}
 
                   <SecondaryButton
                     type="submit"
                     size="lg"
+                    disabled={isSubmitting}
                     className="w-full sm:w-auto"
                   >
-                    <Save className="size-4" />
-                    Save Business
+                    {isSubmitting ? (
+                      <Loader2 className="size-4 animate-spin" />
+                    ) : (
+                      <Save className="size-4" />
+                    )}
+                    {isSubmitting
+                      ? isEditMode
+                        ? "Updating..."
+                        : "Saving..."
+                      : isEditMode
+                        ? "Save Changes"
+                        : "Save Business"}
                   </SecondaryButton>
                 </div>
               </div>
@@ -319,27 +496,40 @@ export default function BusinessForm() {
 
                   {isLastStep ? (
                     <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
-                      <Controller
-                        control={control}
-                        name="addAnother"
-                        render={({ field }) => (
-                          <Label className="justify-center gap-2 text-[#547080] sm:justify-start">
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={(checked) =>
-                                field.onChange(checked === true)
-                              }
-                            />
-                            Add another business
-                          </Label>
-                        )}
-                      />
+                      {!isEditMode && (
+                        <Controller
+                          control={control}
+                          name="addAnother"
+                          render={({ field }) => (
+                            <Label className="justify-center gap-2 text-[#547080] sm:justify-start">
+                              <Checkbox
+                                checked={field.value}
+                                onCheckedChange={(checked) =>
+                                  field.onChange(checked === true)
+                                }
+                              />
+                              Add another business
+                            </Label>
+                          )}
+                        />
+                      )}
                       <SecondaryButton
                         type="submit"
+                        disabled={isSubmitting}
                         className="w-full sm:w-auto"
                       >
-                        <Save className="size-4" />
-                        Save Business
+                        {isSubmitting ? (
+                          <Loader2 className="size-4 animate-spin" />
+                        ) : (
+                          <Save className="size-4" />
+                        )}
+                        {isSubmitting
+                          ? isEditMode
+                            ? "Updating..."
+                            : "Saving..."
+                          : isEditMode
+                            ? "Save Changes"
+                            : "Save Business"}
                       </SecondaryButton>
                     </div>
                   ) : (

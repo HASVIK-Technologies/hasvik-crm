@@ -1,172 +1,82 @@
 "use client";
 
 import { create } from "zustand";
+import {
+  BusinessListStateFilters,
+  DEFAULT_BUSINESS_QUERY,
+} from "@/lib/business-query-builder";
 
-type BusinessListState = {
-  searchTerm: string;
-  searchChips: string[];
-  selectedCategory: string;
-  selectedCategories: string[];
-  selectedStatus: string;
-  selectedCity: string;
-  selectedCities: string[];
-  sortOrder: "Latest First" | "Oldest First";
-  page: number;
-  limit: number;
+export interface BusinessListStoreState extends BusinessListStateFilters {
   showStats: boolean;
-  setSearchTerm: (searchTerm: string) => void;
-  setSearchChips: (chips: string[]) => void;
-  addSearchChip: (chip: string) => void;
-  removeSearchChip: (chip: string) => void;
-  clearSearchChips: () => void;
-  setSelectedCategory: (selectedCategory: string) => void;
-  setSelectedCategories: (selectedCategories: string[]) => void;
-  toggleCategory: (category: string) => void;
-  clearCategories: () => void;
-  setSelectedStatus: (selectedStatus: string) => void;
-  setSelectedCity: (selectedCity: string) => void;
-  setSelectedCities: (selectedCities: string[]) => void;
-  toggleCity: (city: string) => void;
-  clearCities: () => void;
-  setSortOrder: (sortOrder: BusinessListState["sortOrder"]) => void;
+
+  // Actions
   setPage: (page: number) => void;
   setLimit: (limit: number) => void;
+  setSortBy: (sortBy: string) => void;
+  setSearch: (search: string) => void;
+  setCategory: (categoryId: string, categoryName?: string) => void;
+  setCity: (city: string) => void;
+  setStatus: (status: string) => void;
+  setIsDeleted: (isDeleted: boolean | undefined) => void;
   toggleStats: () => void;
   resetAllFilters: () => void;
-};
+  syncFromParams: (filters: Partial<BusinessListStateFilters>) => void;
+}
 
-const resetPage = { page: 1 };
-
-export const useBusinessListStore = create<BusinessListState>((set) => ({
-  searchTerm: "",
-  searchChips: [],
-  selectedCategory: "All Categories",
-  selectedCategories: [],
-  selectedStatus: "All Status",
-  selectedCity: "All Cities",
-  selectedCities: [],
-  sortOrder: "Latest First",
-  page: 1,
-  limit: 10,
+export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
+  page: DEFAULT_BUSINESS_QUERY.page,
+  limit: DEFAULT_BUSINESS_QUERY.limit,
+  sortBy: DEFAULT_BUSINESS_QUERY.sortBy,
+  search: DEFAULT_BUSINESS_QUERY.search,
+  categoryId: DEFAULT_BUSINESS_QUERY.categoryId,
+  categoryName: DEFAULT_BUSINESS_QUERY.categoryName,
+  city: DEFAULT_BUSINESS_QUERY.city,
+  status: DEFAULT_BUSINESS_QUERY.status,
+  isDeleted: DEFAULT_BUSINESS_QUERY.isDeleted,
   showStats: true,
-  setSearchTerm: (searchTerm) => set({ searchTerm, ...resetPage }),
-  setSearchChips: (searchChips) => set({ searchChips, ...resetPage }),
-  addSearchChip: (chip) =>
-    set((state) => {
-      const trimmed = chip.trim();
-      if (!trimmed || state.searchChips.includes(trimmed)) return state;
-      return { searchChips: [...state.searchChips, trimmed], ...resetPage };
-    }),
-  removeSearchChip: (chip) =>
-    set((state) => ({
-      searchChips: state.searchChips.filter((c) => c !== chip),
-      ...resetPage,
-    })),
-  clearSearchChips: () => set({ searchChips: [], searchTerm: "", ...resetPage }),
-  setSelectedCategory: (selectedCategory) =>
-    set((state) => ({
-      selectedCategory,
-      selectedCategories:
-        state.selectedCategories.length > 1
-          ? state.selectedCategories
-          : selectedCategory && selectedCategory !== "All Categories"
-            ? [selectedCategory]
-            : [],
-      ...resetPage,
-    })),
-  setSelectedCategories: (selectedCategories) =>
+
+  // Rule: Pagination: change page only; preserve filters/search/sort/limit
+  setPage: (page: number) => set({ page }),
+
+  // Rule: Page-size change: reset page=1 and use new limit
+  setLimit: (limit: number) => set({ limit, page: 1 }),
+
+  // Rule: Sorting: reset page=1 and use sortBy=-createdAt or +createdAt
+  setSortBy: (sortBy: string) => set({ sortBy, page: 1 }),
+
+  // Rule: Any filter/search change: reset page=1
+  setSearch: (search: string) => set({ search, page: 1 }),
+
+  setCategory: (categoryId: string, categoryName?: string) =>
     set({
-      selectedCategories,
-      selectedCategory:
-        selectedCategories.length === 1
-          ? selectedCategories[0]
-          : selectedCategories.length > 1
-            ? `${selectedCategories.length} Categories`
-            : "All Categories",
-      ...resetPage,
-    }),
-  toggleCategory: (category) =>
-    set((state) => {
-      const exists = state.selectedCategories.includes(category);
-      const updated = exists
-        ? state.selectedCategories.filter((c) => c !== category)
-        : [...state.selectedCategories, category];
-      return {
-        selectedCategories: updated,
-        selectedCategory:
-          updated.length === 1
-            ? updated[0]
-            : updated.length > 1
-              ? `${updated.length} Categories`
-              : "All Categories",
-        ...resetPage,
-      };
-    }),
-  clearCategories: () =>
-    set({
-      selectedCategories: [],
-      selectedCategory: "All Categories",
-      ...resetPage,
-    }),
-  setSelectedStatus: (selectedStatus) => set({ selectedStatus, ...resetPage }),
-  setSelectedCity: (selectedCity: string) =>
-    set((state) => ({
-      selectedCity,
-      selectedCities:
-        state.selectedCities.length > 1
-          ? state.selectedCities
-          : selectedCity && selectedCity !== "All Cities"
-            ? [selectedCity]
-            : [],
-      ...resetPage,
-    })),
-  setSelectedCities: (selectedCities) =>
-    set({
-      selectedCities,
-      selectedCity:
-        selectedCities.length === 1
-          ? selectedCities[0]
-          : selectedCities.length > 1
-            ? `${selectedCities.length} Cities`
-            : "All Cities",
-      ...resetPage,
-    }),
-  toggleCity: (city) =>
-    set((state) => {
-      const exists = state.selectedCities.includes(city);
-      const updated = exists
-        ? state.selectedCities.filter((c) => c !== city)
-        : [...state.selectedCities, city];
-      return {
-        selectedCities: updated,
-        selectedCity:
-          updated.length === 1
-            ? updated[0]
-            : updated.length > 1
-              ? `${updated.length} Cities`
-              : "All Cities",
-        ...resetPage,
-      };
-    }),
-  clearCities: () =>
-    set({
-      selectedCities: [],
-      selectedCity: "All Cities",
-      ...resetPage,
-    }),
-  setSortOrder: (sortOrder) => set({ sortOrder, ...resetPage }),
-  setPage: (page) => set({ page }),
-  setLimit: (limit) => set({ limit, ...resetPage }),
-  toggleStats: () => set((state) => ({ showStats: !state.showStats })),
-  resetAllFilters: () =>
-    set({
-      searchTerm: "",
-      searchChips: [],
-      selectedCategory: "All Categories",
-      selectedCategories: [],
-      selectedStatus: "All Status",
-      selectedCity: "All Cities",
-      selectedCities: [],
+      categoryId,
+      categoryName: categoryName ?? (categoryId ? categoryName : ""),
       page: 1,
     }),
+
+  setCity: (city: string) => set({ city, page: 1 }),
+
+  setStatus: (status: string) => set({ status, page: 1 }),
+
+  setIsDeleted: (isDeleted: boolean | undefined) =>
+    set({ isDeleted, page: 1 }),
+
+  toggleStats: () => set((state) => ({ showStats: !state.showStats })),
+
+  resetAllFilters: () =>
+    set({
+      search: "",
+      categoryId: "",
+      categoryName: "",
+      city: "",
+      status: "",
+      isDeleted: undefined,
+      page: 1,
+    }),
+
+  syncFromParams: (params: Partial<BusinessListStateFilters>) =>
+    set((state) => ({
+      ...state,
+      ...params,
+    })),
 }));
