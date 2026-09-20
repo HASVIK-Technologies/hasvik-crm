@@ -1,25 +1,29 @@
 "use client";
 
 import { create } from "zustand";
-import { createJSONStorage, persist } from "zustand/middleware";
+import { ACCESS_TOKEN_TTL_MS } from "@/lib/auth-config";
+import type { AuthUser } from "@/types/auth";
 
 type AuthState = {
   token: string | null;
-  setToken: (token: string) => void;
+  tokenExpiresAt: number | null;
+  user: AuthUser | null;
+  status: "loading" | "authenticated" | "unauthenticated";
+  setToken: (token: string, expiresAt?: number) => void;
+  setUser: (user: AuthUser) => void;
+  setStatus: (status: AuthState["status"]) => void;
   clearAuth: () => void;
 };
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set) => ({
-      token: null,
-      setToken: (token) => set({ token }),
-      clearAuth: () => set({ token: null }),
-    }),
-    {
-      name: "hasvik-auth",
-      storage: createJSONStorage(() => localStorage),
-      partialize: (state) => ({ token: state.token }),
-    },
-  ),
-);
+export const useAuthStore = create<AuthState>((set) => ({
+  token: null,
+  tokenExpiresAt: null,
+  user: null,
+  status: "unauthenticated",
+  setToken: (token, expiresAt = Date.now() + ACCESS_TOKEN_TTL_MS) =>
+    set({ token, tokenExpiresAt: expiresAt, status: "authenticated" }),
+  setUser: (user) => set({ user }),
+  setStatus: (status) => set({ status }),
+  clearAuth: () =>
+    set({ token: null, tokenExpiresAt: null, user: null, status: "unauthenticated" }),
+}));
