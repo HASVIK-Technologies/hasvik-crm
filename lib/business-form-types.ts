@@ -3,6 +3,7 @@ export type NumberFieldValue = {
 };
 
 export type BusinessFormValues = {
+  addAnother: any;
   businessName: string;
   category: string;
   city: string;
@@ -21,7 +22,6 @@ export type BusinessFormValues = {
   assignTo: string;
   nextFollowupDate: string;
   reminder: string;
-  addAnother: boolean;
 };
 
 export const defaultBusinessFormValues: BusinessFormValues = {
@@ -43,7 +43,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   assignTo: "",
   nextFollowupDate: "",
   reminder: "",
-  addAnother: false,
+  addAnother: undefined
 };
 
 // Field names validated per step of the mobile wizard. Phone/WhatsApp
