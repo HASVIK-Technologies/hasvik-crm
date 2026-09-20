@@ -1,5 +1,7 @@
 "use client";
 
+import { useEffect, useState } from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -10,9 +12,12 @@ import {
   type FieldErrors,
 } from "react-hook-form";
 import {
+  ArrowLeft,
   ArrowRight,
+  AlertCircle,
   Check,
   FileText,
+  Loader2,
   Phone,
   RotateCcw,
   Save,
@@ -88,7 +93,11 @@ export default function BusinessForm({
   initialValues?: BusinessFormValues;
 }) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
+
+  const targetId = businessId || searchParams.get("id") || undefined;
+  const isEditMode = Boolean(targetId);
 
   // Captured once on mount - this is the snapshot Reset restores to,
   // independent of anything the person types afterward.
@@ -105,6 +114,12 @@ export default function BusinessForm({
 
   const [currentStep, setCurrentStep] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isLoadingBusiness, setIsLoadingBusiness] = useState(isEditMode);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const updateMutation = useUpdateBusinessMutation();
+  const createMutation = useCreateBusinessMutation();
 
   const phoneArray = useFieldArray({ control, name: "phoneNumbers" });
   const whatsappArray = useFieldArray({ control, name: "whatsappNumbers" });
@@ -115,6 +130,73 @@ export default function BusinessForm({
   const isFormComplete =
     isBusinessInfoComplete(watchedValues) &&
     isContactInfoComplete(watchedValues);
+  useEffect(() => {
+    if (!targetId) {
+      setIsLoadingBusiness(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingBusiness(true);
+    setLoadError(null);
+
+    getBusinessRaw(targetId)
+      .then((data) => {
+        if (!isMounted) return;
+        if (!data || !data._id) {
+          setLoadError(`Business with ID #${targetId} not found.`);
+          setIsLoadingBusiness(false);
+          return;
+        }
+
+        const phoneNumbers =
+          data.phoneNumbers && data.phoneNumbers.length > 0
+            ? data.phoneNumbers.map((p) => ({ value: p.number || "" }))
+            : [{ value: "" }];
+
+        const whatsappNumbers =
+          data.whatsappNumbers && data.whatsappNumbers.length > 0
+            ? data.whatsappNumbers.map((w) => ({ value: w.number || "" }))
+            : [{ value: "" }];
+
+        reset({
+          businessName: data.name || "",
+          category: (data.categoryId ?? data.category) || "",
+          city: data.city || "",
+          state: data.state || "",
+          pincode: data.pincode || "",
+          address: data.address || "",
+          status: data.status || (data.isActive === false ? "Inactive" : "Active"),
+          businessType: data.businessType || "",
+          phoneNumbers,
+          whatsappNumbers,
+          email: data.email || "",
+          website: data.website || "",
+          description: data.description || "",
+          notes: data.notes || "",
+          leadSource: data.leadSource || "",
+          assignTo: data.assignedTo || "",
+          nextFollowupDate: data.nextFollowupDate ? data.nextFollowupDate.slice(0, 10) : "",
+          reminder: data.reminder || "",
+          addAnother: false,
+        });
+
+        setIsLoadingBusiness(false);
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return;
+        setLoadError(
+          `Unable to load business details: ${
+            err instanceof Error ? err.message : "Not found"
+          }`,
+        );
+        setIsLoadingBusiness(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [targetId, reset]);
 
   const handleBackToBusinesses = () => router.push("/businesses");
 
@@ -176,8 +258,61 @@ export default function BusinessForm({
     setCurrentStep((step) => Math.max(step - 1, 0));
   };
 
-  const onValid = (values: BusinessFormValues) => {
+  const onValid = async (values: BusinessFormValues) => {
     setSubmitError(null);
+    setIsSubmitting(true);
+
+    const payload: Record<string, unknown> = {
+      name: values.businessName.trim(),
+      businessType: values.businessType || undefined,
+      status: values.status || "Active",
+      email: values.email.trim() || undefined,
+      website: values.website.trim() || undefined,
+      address: values.address.trim() || undefined,
+      city: values.city.trim() || undefined,
+      state: values.state.trim() || undefined,
+      pincode: values.pincode.trim() || undefined,
+      leadSource: values.leadSource || undefined,
+      assignedTo: values.assignTo || undefined,
+      description: values.description || undefined,
+      notes: values.notes || undefined,
+      nextFollowupDate: values.nextFollowupDate || undefined,
+      reminder: values.reminder || undefined,
+      phoneNumbers: values.phoneNumbers
+        .filter((p) => p.value.trim())
+        .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
+      whatsappNumbers: values.whatsappNumbers
+        .filter((w) => w.value.trim())
+        .map((w, idx) => ({ number: w.value.trim(), isPrimary: idx === 0 })),
+    };
+
+    if (values.category) {
+      payload.category = values.category;
+      payload.categoryId = values.category;
+    }
+
+    try {
+      if (isEditMode && targetId) {
+        await updateMutation.mutateAsync({ id: targetId, payload });
+        router.push(`/businesses/${targetId}`);
+      } else {
+        await createMutation.mutateAsync(payload);
+        if (values.addAnother) {
+          reset(defaultBusinessFormValues);
+          setCurrentStep(0);
+        } else {
+          router.push("/businesses");
+        }
+      }
+    } catch (err: unknown) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Failed to save business. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
 
     createBusinessMutation.mutate(values, {
       onSuccess: () => {
@@ -197,6 +332,40 @@ export default function BusinessForm({
         : "Please fix the highlighted fields before saving.",
     );
   };
+
+  if (isLoadingBusiness) {
+    return (
+      <Card className="border-[#dce8ee] p-12 text-center">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <Loader2 className="size-8 animate-spin text-[#2563eb]" />
+          <p className="text-sm font-medium text-[#64748b]">
+            Loading business details...
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Card className="border-red-200 bg-red-50/50 p-8 text-center max-w-lg mx-auto">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+            <AlertCircle className="size-6" />
+          </div>
+          <h3 className="text-base font-bold text-[#0f172a]">Business Not Found</h3>
+          <p className="text-sm text-[#64748b]">{loadError}</p>
+          <OutlinedButton
+            type="button"
+            onClick={() => router.push("/businesses")}
+            className="mt-3 gap-2"
+          >
+            <ArrowLeft className="size-4" /> Back to Businesses
+          </OutlinedButton>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <FormProvider {...methods}>

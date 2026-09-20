@@ -2,7 +2,7 @@
 
 import Image from "next/image";
 import Link from "next/link";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   Bell,
   Building2,
@@ -10,14 +10,16 @@ import {
   ChevronDown,
   CircleHelp,
   Home,
+  LogOut,
   Menu,
   Settings,
-  SlidersHorizontal,
   UsersRound,
   X,
 } from "lucide-react";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SearchInput from "@/components/common/SearchInput";
+import { useAuthSession, useLogout, useTokenRefresh } from "@/hooks/use-auth";
+import { useAuthStore } from "@/store/auth-store";
 
 const navigation = [
   { label: "Home", href: "/dashboard", icon: Home },
@@ -56,15 +58,18 @@ function isActivePath(pathname: string, href: string) {
 }
 
 function getPageDetails(pathname: string) {
-  if (pathname === "/businesses/form") {
+  if (pathname === "/businesses/form" || pathname.startsWith("/businesses/form/")) {
+    const isEdit = pathname.startsWith("/businesses/form/");
     return {
       eyebrow: "BUSINESSES",
-      title: "Add Business",
-      subtitle: "Create a new business lead and set up its first follow-up.",
+      title: isEdit ? "Edit Business" : "Add Business",
+      subtitle: isEdit
+        ? "Update business lead details and follow-up settings."
+        : "Create a new business lead and set up its first follow-up.",
     };
   }
 
-  if (pathname.startsWith("/businesses/") && pathname !== "/businesses/form") {
+  if (pathname.startsWith("/businesses/") && !pathname.startsWith("/businesses/form")) {
     return {
       eyebrow: "BUSINESS DETAILS",
       title: "Business Details",
@@ -77,12 +82,63 @@ function getPageDetails(pathname: string) {
 
 export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
+  const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const sessionQuery = useAuthSession(pathname !== "/");
+  useTokenRefresh();
+  const logoutMutation = useLogout();
+  const authStatus = useAuthStore((state) => state.status);
+  const user = useAuthStore((state) => state.user);
+  const clearAuth = useAuthStore((state) => state.clearAuth);
   const currentPage = getPageDetails(pathname);
+
+  useEffect(() => {
+    if (pathname === "/" && authStatus === "authenticated") router.replace("/dashboard");
+    if (
+      pathname !== "/" &&
+      (sessionQuery.isError ||
+        (authStatus === "unauthenticated" && !sessionQuery.isPending))
+    ) {
+      clearAuth();
+      router.replace("/");
+    }
+  }, [
+    authStatus,
+    clearAuth,
+    pathname,
+    router,
+    sessionQuery.isError,
+    sessionQuery.isPending,
+  ]);
 
   if (pathname === "/") {
     return <>{children}</>;
   }
+
+  if (authStatus !== "authenticated" || sessionQuery.isPending) {
+    return (
+      <main className="flex min-h-screen items-center justify-center bg-[#f8fafc] text-sm text-slate-500">
+        Restoring your session...
+      </main>
+    );
+  }
+
+  async function handleLogout() {
+    try {
+      await logoutMutation.mutateAsync();
+    } finally {
+      router.replace("/");
+    }
+  }
+
+  const displayName = user?.fullName || user?.email || "Hasvik user";
+  const displayRole = user?.role || "User";
+  const initials = displayName
+    .split(" ")
+    .map((part) => part[0])
+    .join("")
+    .slice(0, 2)
+    .toUpperCase();
 
   return (
     <div className="min-h-screen bg-[#f8fafc] text-[#374151]">
@@ -164,18 +220,26 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <div className="flex items-center justify-between rounded-xl p-2 transition-colors hover:bg-[#f8fafc]">
               <div className="flex items-center gap-3">
                 <div className="flex size-9 items-center justify-center rounded-full bg-[#1e293b] text-xs font-bold text-white">
-                  N
+                  {initials}
                 </div>
                 <div className="min-w-0">
                   <p className="truncate text-xs font-bold text-[#0f172a]">
-                    Amit Sharma
+                    {displayName}
                   </p>
                   <p className="truncate text-[11px] text-[#94a3b8]">
-                    Administrator
+                    {displayRole}
                   </p>
                 </div>
               </div>
-              <ChevronDown className="size-4 text-[#94a3b8]" />
+              <button
+                type="button"
+                aria-label="Sign out"
+                title="Sign out"
+                onClick={() => void handleLogout()}
+                className="rounded-lg p-1.5 text-[#94a3b8] transition-colors hover:bg-[#fee2e2] hover:text-[#b91c1c]"
+              >
+                <LogOut className="size-4" />
+              </button>
             </div>
           </div>
         </div>
@@ -220,6 +284,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <button
                 type="button"
                 aria-label="Notifications"
+                suppressHydrationWarning
                 className="relative flex size-10 items-center justify-center rounded-xl border border-[#e2e8f0] bg-white text-[#64748b] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a]"
               >
                 <Bell className="size-4" />
@@ -229,14 +294,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               {/* User Profile in Header */}
               <div className="flex items-center gap-2.5 pl-1 sm:pl-2">
                 <div className="flex size-9 items-center justify-center rounded-full bg-[#e0eafe] text-xs font-bold text-[#2563eb]">
-                  AS
+                  {initials}
                 </div>
                 <div className="hidden text-left sm:block">
                   <p className="text-xs font-bold text-[#0f172a]">
-                    Amit Sharma
+                    {displayName}
                   </p>
                   <p className="text-[10px] text-[#94a3b8]">
-                    Administrator
+                    {displayRole}
                   </p>
                 </div>
                 <ChevronDown className="hidden size-3.5 text-[#94a3b8] sm:block" />
