@@ -5,10 +5,19 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import LabeledSelect from "@/components/businesses/LabeledSelect";
+import {
+  Combobox,
+  ComboboxContent,
+  ComboboxEmpty,
+  ComboboxInput,
+  ComboboxItem,
+  ComboboxList,
+} from "@/components/ui/combobox";
 import { useCategoriesQuery } from "@/hooks/use-businesses";
 import {
   BUSINESS_TYPE_OPTIONS,
   CITY_OPTIONS,
+  STATE_OPTIONS,
   STATUS_OPTIONS,
 } from "@/lib/business-form-options";
 import type { BusinessFormValues } from "@/lib/business-form-types";
@@ -133,21 +142,68 @@ export default function BusinessInfoSection({
         />
       </div>
 
-      <div>
-        <FieldLabel
-          htmlFor={`${idPrefix}state`}
-          required
-          invalid={!!errors.state}
-        >
-          State
-        </FieldLabel>
-        <Input
-          id={`${idPrefix}state`}
-          placeholder="Enter state"
-          aria-invalid={!!errors.state}
-          {...register("state", { required: "State is required" })}
-        />
-      </div>
+      <Controller
+        control={control}
+        name="state"
+        rules={{
+          required: "State is required",
+          validate: (value) =>
+            STATE_OPTIONS.some((state) => state === value.trim()) ||
+            "Select a valid Indian state or union territory",
+        }}
+        render={({ field, fieldState }) => {
+          const query = field.value.trim().toLowerCase();
+          const matchingStates = STATE_OPTIONS.filter((state) =>
+            state.toLowerCase().includes(query),
+          );
+
+          return (
+            <div>
+              <FieldLabel
+                htmlFor={`${idPrefix}state`}
+                required
+                invalid={!!fieldState.error}
+              >
+                State
+              </FieldLabel>
+              <Combobox
+                items={matchingStates}
+                value={field.value}
+                inputValue={field.value}
+                onValueChange={(value) => field.onChange(value ?? "")}
+                onInputValueChange={(value) => {
+                  field.onChange(value.replace(/[^A-Za-z\s]/g, ""));
+                }}
+              >
+                <ComboboxInput
+                  id={`${idPrefix}state`}
+                  placeholder="Start typing a state or union territory"
+                  aria-invalid={!!fieldState.error}
+                  className="h-9 w-full"
+                  showClear
+                  onChange={(event) => {
+                    field.onChange(
+                      event.currentTarget.value.replace(/[^A-Za-z\s]/g, ""),
+                    );
+                  }}
+                />
+                <ComboboxContent>
+                  <ComboboxList>
+                    <ComboboxEmpty>
+                      No matching state or union territory.
+                    </ComboboxEmpty>
+                    {matchingStates.map((state) => (
+                      <ComboboxItem key={state} value={state}>
+                        {state}
+                      </ComboboxItem>
+                    ))}
+                  </ComboboxList>
+                </ComboboxContent>
+              </Combobox>
+            </div>
+          );
+        }}
+      />
 
       <Controller
         control={control}
