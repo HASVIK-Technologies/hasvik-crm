@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { SlidersHorizontal, RotateCcw, Activity, Users } from "lucide-react";
+import { SlidersHorizontal, RotateCcw, Activity } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -14,9 +14,9 @@ import {
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import CategoryMultiSelect from "./CategoryMultiSelect";
-import CityMultiSelect from "./CityMultiSelect";
-import { useBusinessStatusesQuery, getStatusLabel } from "@/hooks/use-businesses";
+import CategoryAutocomplete from "@/components/common/CategoryAutocomplete";
+import CityAutocomplete from "@/components/common/CityAutocomplete";
+import LeadStatusSelect from "@/components/common/LeadStatusSelect";
 
 interface BusinessFiltersProps {
   // Category
@@ -56,9 +56,6 @@ export default function BusinessFilters({
 }: BusinessFiltersProps) {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
 
-  // Dynamic server-side Lead Status options from GET /api/businesses/status
-  const { data: statusOptions = [] } = useBusinessStatusesQuery();
-
   // Active count for "More Filters" (Active/Inactive mapped to isDeleted)
   const isMoreFiltersActive = typeof isDeleted === "boolean";
   const extraFiltersCount = isMoreFiltersActive ? 1 : 0;
@@ -77,60 +74,37 @@ export default function BusinessFilters({
     }
   };
 
-  const isStatusActive = Boolean(selectedStatus && selectedStatus !== "ALL");
-
   return (
     <div
       data-filter-controls
-      className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full lg:flex-nowrap"
+      className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full xl:flex-nowrap"
     >
-      {/* 1. Category Filter (Debounced Server Autocomplete: GET /api/businesses/autocomplete?search=<text>) */}
+      {/* 1. Category Filter (Debounced server autocomplete) */}
       <div className="w-full sm:w-48 lg:w-44 xl:w-48 shrink-0">
-        <CategoryMultiSelect
-          selectedCategoryId={selectedCategoryId}
-          selectedCategoryName={selectedCategoryName}
-          onCategorySelect={onCategorySelect}
+        <CategoryAutocomplete
+          value={selectedCategoryId}
+          label={selectedCategoryName}
+          onChange={onCategorySelect}
           placeholder="All Categories"
         />
       </div>
 
       {/* 2. Leads Filter (Server-side GET /api/businesses/status) */}
       <div className="w-full sm:w-40 lg:w-36 xl:w-40 shrink-0">
-        <Select
-          value={selectedStatus || "ALL"}
-          onValueChange={(val) => onStatusChange?.(val === "ALL" ? "" : val)}
-        >
-          <SelectTrigger className="w-full h-10 rounded-xl bg-white border-[#e2e8f0] text-xs font-medium text-[#334155] shadow-[0_1px_2px_rgba(0,0,0,0.02)] transition-all hover:border-[#cbd5e1] focus:ring-[#0b63e5]/20 focus:border-[#0b63e5]">
-            <div className="flex items-center gap-2 min-w-0 flex-1">
-              <Users className="size-3.5 shrink-0 text-[#64748b]" />
-              <span className="truncate text-left">
-                {isStatusActive ? getStatusLabel(selectedStatus) : "All Leads"}
-              </span>
-            </div>
-          </SelectTrigger>
-          <SelectContent className="bg-white z-50">
-            <SelectItem value="ALL" className="text-xs font-medium">
-              All Leads
-            </SelectItem>
-            {statusOptions.map((status) => (
-              <SelectItem key={status} value={status} className="text-xs">
-                {getStatusLabel(status)}
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <LeadStatusSelect value={selectedStatus} onChange={onStatusChange} />
       </div>
 
       {/* 3. City Filter (Debounced Server Autocomplete: GET /api/businesses/city/autocomplete?search=<city>) */}
       <div className="w-full sm:w-40 lg:w-40 xl:w-44 shrink-0">
-        <CityMultiSelect
-          selectedCity={selectedCity}
-          onCitySelect={onCityChange}
+        <CityAutocomplete
+          value={selectedCity}
+          onChange={onCityChange}
           placeholder="All Cities"
         />
       </div>
 
-      {/* 4. More Filters Popover (Active / Inactive mapped to isDeleted) */}
+      {/* More Filters Popover (Active / Inactive mapped to isDeleted) */}
+      <div className="hidden lg:block">
       <Popover open={moreFiltersOpen} onOpenChange={setMoreFiltersOpen}>
         <PopoverTrigger asChild>
           <button
@@ -204,6 +178,20 @@ export default function BusinessFilters({
           </div>
         </PopoverContent>
       </Popover>
+      </div>
+
+      <div className="w-full sm:w-40 shrink-0 lg:hidden">
+        <Select value={activeInactiveValue} onValueChange={handleActiveInactiveChange}>
+          <SelectTrigger className="w-full h-10 rounded-xl bg-white border-[#e2e8f0] text-xs font-medium text-[#334155]">
+            <SelectValue placeholder="All Status" />
+          </SelectTrigger>
+          <SelectContent className="bg-white z-50">
+            <SelectItem value="all" className="text-xs">All Status</SelectItem>
+            <SelectItem value="active" className="text-xs">Active</SelectItem>
+            <SelectItem value="inactive" className="text-xs">Inactive</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
 
       {/* 4. Reset Filters Button */}
       {hasActiveFilters && onResetFilters && (

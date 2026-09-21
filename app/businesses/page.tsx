@@ -1,7 +1,7 @@
 "use client";
 
 import React, { Suspense, useEffect, useMemo, useRef } from "react";
-import { useRouter, useSearchParams, usePathname } from "next/navigation";
+import { useSearchParams, usePathname } from "next/navigation";
 import { ChartNoAxesCombined, Plus } from "lucide-react";
 import Actions from "@/components/common/Actions";
 import {
@@ -29,7 +29,6 @@ import Breadcrumb from "@/components/common/Breadcrumb";
 const EMPTY_BUSINESSES: BusinessItem[] = [];
 
 function BusinessesContent() {
-  const router = useRouter();
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const hasInitializedFromUrl = useRef(false);
@@ -257,7 +256,6 @@ function BusinessesContent() {
             itemsPerPage={limit}
             onPageChange={setPage}
             onItemsPerPageChange={setLimit}
-            onExport={() => {}}
             onClearFilters={resetAllFilters}
           />
         )

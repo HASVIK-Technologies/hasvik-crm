@@ -7,30 +7,27 @@ import {
   Bell,
   Building2,
   CalendarCheck2,
-  ChevronDown,
-  CircleHelp,
-  Home,
-  LogOut,
   Menu,
-  Settings,
-  UsersRound,
+  PanelLeftClose,
+  PanelLeftOpen,
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import SearchInput from "@/components/common/SearchInput";
 import { useAuthSession, useLogout, useTokenRefresh } from "@/hooks/use-auth";
 import { useAuthStore } from "@/store/auth-store";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 const navigation = [
-  { label: "Home", href: "/dashboard", icon: Home },
   { label: "Businesses", href: "/businesses", icon: Building2 },
   { label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2 },
-  { label: "Contacts", href: "/contacts", icon: UsersRound },
-];
-
-const toolNavigation = [
-  { label: "Help center", href: "/dashboard#help", icon: CircleHelp },
-  { label: "Settings", href: "/dashboard#settings", icon: Settings },
 ];
 
 const pageDetails: Record<
@@ -84,6 +81,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const pathname = usePathname();
   const router = useRouter();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const sessionQuery = useAuthSession(pathname !== "/");
   useTokenRefresh();
   const logoutMutation = useLogout();
@@ -93,7 +91,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const currentPage = getPageDetails(pathname);
 
   useEffect(() => {
-    if (pathname === "/" && authStatus === "authenticated") router.replace("/dashboard");
+    if (pathname === "/" && authStatus === "authenticated") router.replace("/businesses");
     if (
       pathname !== "/" &&
       (sessionQuery.isError ||
@@ -143,9 +141,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-[#f8fafc] text-[#374151]">
       {/* Sidebar for Desktop */}
-      <aside className="fixed inset-y-0 left-0 z-30 hidden w-64 flex-col border-r border-[#e4ecf2] bg-white lg:flex">
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-[#e4ecf2] bg-white transition-[width] lg:flex ${sidebarCollapsed ? "w-20" : "w-64"}`}>
         {/* Brand Logo Header */}
-        <div className="flex h-20 items-center border-b border-[#f1f5f9] px-6">
+        <div className={`flex h-20 items-center border-b border-[#f1f5f9] ${sidebarCollapsed ? "justify-center px-3" : "px-6"}`}>
           <Link href="/dashboard" aria-label="Hasvik home">
             <Image
               src="/logo.png"
@@ -153,16 +151,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               width={140}
               height={42}
               priority
-              className="h-auto w-32"
+              className={`h-auto ${sidebarCollapsed ? "w-10 object-cover object-left" : "w-32"}`}
             />
           </Link>
         </div>
 
         {/* Sidebar Navigation */}
-        <div className="flex flex-1 flex-col justify-between px-4 py-6">
+        <div className={`flex flex-1 flex-col justify-between py-6 ${sidebarCollapsed ? "px-2" : "px-4"}`}>
           <div>
             {/* MAIN MENU */}
-            <p className="px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#94a3b8]">
+            <p className={`px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#94a3b8] ${sidebarCollapsed ? "sr-only" : ""}`}>
               Main menu
             </p>
             <nav className="mt-3 space-y-1.5" aria-label="Main navigation">
@@ -173,7 +171,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold transition-all ${
+                    className={`flex rounded-xl text-xs font-semibold transition-all ${sidebarCollapsed ? "flex-col gap-1 px-1 py-2 text-center" : "items-center gap-3 px-3.5 py-2.5"} ${
                       active
                         ? "bg-[#ecfdf3] text-secondary"
                         : "text-[#64748b] hover:bg-[#f8fafc] hover:text-[#0f172a]"
@@ -183,8 +181,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       className="size-4"
                       strokeWidth={active ? 2.5 : 2}
                     />
-                    <span>{item.label}</span>
-                    {item.label === "Follow-ups" && (
+                    <span className={sidebarCollapsed ? "text-[10px] leading-tight" : ""}>{item.label}</span>
+                    {item.label === "Follow-ups" && !sidebarCollapsed && (
                       <span className="ml-auto rounded-full bg-[#d1fadf] px-2 py-0.5 text-[10px] font-bold text-secondary">
                         3
                       </span>
@@ -194,59 +192,26 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               })}
             </nav>
 
-            {/* TOOLS & SETTINGS */}
-            <p className="mt-8 px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#94a3b8]">
-              Tools & settings
-            </p>
-            <nav className="mt-3 space-y-1.5" aria-label="Tools navigation">
-              {toolNavigation.map((item) => {
-                const Icon = item.icon;
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    className="flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-medium text-[#64748b] transition-all hover:bg-[#f8fafc] hover:text-[#0f172a]"
-                  >
-                    <Icon className="size-4" strokeWidth={2} />
-                    <span>{item.label}</span>
-                  </Link>
-                );
-              })}
-            </nav>
           </div>
 
-          {/* User Profile Footer */}
+          {/* Sidebar collapse control */}
           <div className="border-t border-[#f1f5f9] pt-4">
-            <div className="flex items-center justify-between rounded-xl p-2 transition-colors hover:bg-[#f8fafc]">
-              <div className="flex items-center gap-3">
-                <div className="flex size-9 items-center justify-center rounded-full bg-[#1e293b] text-xs font-bold text-white">
-                  {initials}
-                </div>
-                <div className="min-w-0">
-                  <p className="truncate text-xs font-bold text-[#0f172a]">
-                    {displayName}
-                  </p>
-                  <p className="truncate text-[11px] text-[#94a3b8]">
-                    {displayRole}
-                  </p>
-                </div>
-              </div>
-              <button
-                type="button"
-                aria-label="Sign out"
-                title="Sign out"
-                onClick={() => void handleLogout()}
-                className="rounded-lg p-1.5 text-[#94a3b8] transition-colors hover:bg-[#fee2e2] hover:text-[#b91c1c]"
-              >
-                <LogOut className="size-4" />
-              </button>
+            <button
+              type="button"
+              aria-label={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
+              title={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
+              onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
+              className={`flex w-full items-center rounded-xl p-2.5 text-[#64748b] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a] ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
+            >
+              {sidebarCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
+              {!sidebarCollapsed && <span className="text-xs font-semibold">Collapse navigation</span>}
+            </button>
             </div>
-          </div>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className="lg:pl-64">
+      <div className={sidebarCollapsed ? "lg:pl-20" : "lg:pl-64"}>
         {/* Sticky Header matching screenshot */}
         <header className="sticky top-0 z-20 border-b border-[#e4ecf2] bg-white/95 backdrop-blur">
           <div className="flex h-20 items-center justify-between px-5 sm:px-8">
@@ -292,20 +257,24 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </button>
 
               {/* User Profile in Header */}
-              <div className="flex items-center gap-2.5 pl-1 sm:pl-2">
-                <div className="flex size-9 items-center justify-center rounded-full bg-[#e0eafe] text-xs font-bold text-[#2563eb]">
-                  {initials}
-                </div>
-                <div className="hidden text-left sm:block">
-                  <p className="text-xs font-bold text-[#0f172a]">
-                    {displayName}
-                  </p>
-                  <p className="text-[10px] text-[#94a3b8]">
-                    {displayRole}
-                  </p>
-                </div>
-                <ChevronDown className="hidden size-3.5 text-[#94a3b8] sm:block" />
-              </div>
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <button type="button" aria-label="Open user menu" className="flex size-9 items-center justify-center rounded-full bg-[#e0eafe] text-xs font-bold text-[#2563eb] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#2563eb]">
+                    {initials}
+                  </button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="end" className="w-56 bg-white">
+                  <DropdownMenuLabel className="font-normal">
+                    <p className="truncate text-xs font-bold text-[#0f172a]">{displayName}</p>
+                    <p className="truncate text-[11px] text-[#94a3b8]">{user?.email}</p>
+                    <p className="mt-1 text-[11px] text-[#64748b]">{displayRole}</p>
+                  </DropdownMenuLabel>
+                  <DropdownMenuSeparator />
+                  <DropdownMenuItem onClick={() => void handleLogout()} className="cursor-pointer text-xs text-[#b91c1c]">
+                    Sign out
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 

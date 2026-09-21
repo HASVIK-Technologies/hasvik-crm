@@ -29,7 +29,7 @@ export default function LoginForm() {
         email: values.email.trim(),
         password: values.password,
       });
-      router.replace("/dashboard");
+      router.replace("/businesses");
     } catch {
       // The mutation error is rendered below.
     }
