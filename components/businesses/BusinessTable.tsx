@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Download,
   SlidersHorizontal,
   ChevronDown,
   Phone,
@@ -52,12 +51,25 @@ import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 
+function formatDisplayString(val: unknown, fallback: string = "-"): string {
+  if (!val) return fallback;
+  if (typeof val === "string") return val;
+  if (
+    typeof val === "object" &&
+    val !== null &&
+    "name" in (val as Record<string, unknown>)
+  ) {
+    return String((val as { name?: unknown }).name || fallback);
+  }
+  return String(val);
+}
+
 interface BusinessTableProps {
   businesses: BusinessItem[];
   totalCount?: number;
-  onExport?: () => void;
+  isLoading?: boolean;
   sortOrder?: string;
-  onSortOrderChange?: (sort: "Latest First" | "Oldest First") => void;
+  onSortOrderChange?: (sort: string) => void;
   currentPage: number;
   totalPages: number;
   itemsPerPage: number;
@@ -69,8 +81,8 @@ interface BusinessTableProps {
 export default function BusinessTable({
   businesses,
   totalCount,
-  onExport,
-  sortOrder = "Latest First",
+  isLoading = false,
+  sortOrder = "-createdAt",
   onSortOrderChange,
   currentPage,
   totalPages,
@@ -82,6 +94,9 @@ export default function BusinessTable({
   const router = useRouter();
   const [statusModalBusiness, setStatusModalBusiness] = useState<BusinessItem | null>(null);
   const updateStatusMutation = useUpdateBusinessStatus();
+
+  const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
+  const sortLabel = isLatest ? "Latest First" : "Oldest First";
 
   const handleOpenStatusModal = (item: BusinessItem) => {
     setStatusModalBusiness(item);
@@ -152,31 +167,24 @@ export default function BusinessTable({
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <OutlinedButton
-              onClick={onExport}
-            >
-              <Download />
-              Export
-            </OutlinedButton>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <OutlinedButton>
                   <SlidersHorizontal />
-                  <span>{sortOrder}</span>
+                  <span>{sortLabel}</span>
                   <ChevronDown />
                 </OutlinedButton>
               </DropdownMenuTrigger>
               <DropdownMenuContent align="end" className="w-40 bg-white">
                 <DropdownMenuItem
-                  onClick={() => onSortOrderChange && onSortOrderChange("Latest First")}
-                  className="cursor-pointer text-xs"
+                  onClick={() => onSortOrderChange && onSortOrderChange("-createdAt")}
+                  className={`cursor-pointer text-xs ${isLatest ? "font-semibold text-[#0b63e5]" : ""}`}
                 >
                   Latest First
                 </DropdownMenuItem>
                 <DropdownMenuItem
-                  onClick={() => onSortOrderChange && onSortOrderChange("Oldest First")}
-                  className="cursor-pointer text-xs"
+                  onClick={() => onSortOrderChange && onSortOrderChange("+createdAt")}
+                  className={`cursor-pointer text-xs ${!isLatest ? "font-semibold text-[#0b63e5]" : ""}`}
                 >
                   Oldest First
                 </DropdownMenuItem>
@@ -186,7 +194,25 @@ export default function BusinessTable({
         </div>
 
         <div data-layout-mobile>
-          {businesses.length === 0 ? (
+          {isLoading ? (
+            <div className="flex flex-col gap-3 p-3 md:gap-4 md:p-4">
+              {Array.from({ length: 4 }).map((_, i) => (
+                <div
+                  key={`skeleton-mobile-${i}`}
+                  className="animate-pulse rounded-2xl border border-[#eaf0f6] bg-white p-4 shadow-sm space-y-3"
+                >
+                  <div className="flex items-center gap-3">
+                    <div className="size-10 rounded-full bg-[#f1f5f9]" />
+                    <div className="space-y-1.5 flex-1">
+                      <div className="h-4 w-32 rounded bg-[#f1f5f9]" />
+                      <div className="h-3 w-20 rounded bg-[#f1f5f9]" />
+                    </div>
+                  </div>
+                  <div className="h-3 w-48 rounded bg-[#f1f5f9]" />
+                </div>
+              ))}
+            </div>
+          ) : businesses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
                 <Building2 className="size-6 text-[#94a3b8]" />
@@ -242,7 +268,10 @@ export default function BusinessTable({
                         {item.name}
                       </h3>
                       <p className="mt-0.5 text-xs text-[#64748b]">
-                        {item.category} • {item.city}
+                        {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
+                      </p>
+                      <p className="mt-0.5 text-xs text-[#64748b]">
+                        Lead status: {formatDisplayString(item.leadStatus, "-")}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
                     </div>
@@ -337,17 +366,9 @@ export default function BusinessTable({
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
-                              if (item.status?.toLowerCase() === "active") {
-                                router.push(`/businesses/${item.id}`);
-                              }
+                              router.push(`/businesses/form/${item.id}`);
                             }}
-                            disabled={item.status?.toLowerCase() !== "active"}
-                            className={cn(
-                              "text-xs",
-                              item.status?.toLowerCase() === "active"
-                                ? "cursor-pointer"
-                                : "cursor-not-allowed opacity-40 text-slate-400 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
-                            )}
+                            className="cursor-pointer text-xs"
                           >
                             Edit Business
                           </DropdownMenuItem>
@@ -391,6 +412,7 @@ export default function BusinessTable({
                 </TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Category</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">City</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Status</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>
@@ -398,9 +420,48 @@ export default function BusinessTable({
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
-              {businesses.length === 0 ? (
+              {isLoading ? (
+                Array.from({ length: 6 }).map((_, idx) => (
+                  <TableRow key={`skeleton-row-${idx}`} className="border-b border-[#f1f5f9]">
+                    <TableCell className="py-4.5 pl-6 pr-4">
+                      <div className="flex items-center gap-3.5 animate-pulse">
+                        <div className="size-4 rounded bg-[#f1f5f9]" />
+                        <div className="size-11 rounded-full bg-[#f1f5f9]" />
+                        <div className="space-y-1.5 flex-1">
+                          <div className="h-4 w-32 rounded bg-[#f1f5f9]" />
+                          <div className="h-3 w-20 rounded bg-[#f1f5f9]" />
+                        </div>
+                      </div>
+                    </TableCell>
+                    <TableCell className="px-4 py-4.5">
+                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
+                    <TableCell className="px-4 py-4.5">
+                      <div className="h-3.5 w-20 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
+                    <TableCell className="px-4 py-4.5">
+                      <div className="h-6 w-16 rounded-full bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
+                    <TableCell className="px-4 py-4.5">
+                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
+                    <TableCell className="px-4 py-4.5">
+                      <div className="h-3.5 w-28 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
+                    <TableCell className="px-4 py-4.5">
+                      <div className="h-3.5 w-20 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
+                    <TableCell className="py-4.5 pl-4 pr-6 text-right">
+                      <div className="flex justify-end gap-2 animate-pulse">
+                        <div className="size-7 rounded bg-[#f1f5f9]" />
+                        <div className="size-7 rounded bg-[#f1f5f9]" />
+                      </div>
+                    </TableCell>
+                  </TableRow>
+                ))
+              ) : businesses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-0">
+                  <TableCell colSpan={8} className="py-0">
                     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                       <div className="flex size-14 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
                         <Building2 className="size-7 text-[#94a3b8]" />
@@ -461,10 +522,19 @@ export default function BusinessTable({
                     </TableCell>
 
                     {/* Category */}
-                    <TableCell className="px-4 py-4.5 text-sm">{item.category}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">
+                      {formatDisplayString(item.category, "Uncategorized")}
+                    </TableCell>
 
                     {/* City */}
-                    <TableCell className="px-4 py-4.5 text-sm">{item.city}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">
+                      {formatDisplayString(item.city, "-")}
+                    </TableCell>
+
+                    {/* Lead Status */}
+                    <TableCell className="px-4 py-4.5 text-sm">
+                      {formatDisplayString(item.leadStatus, "-")}
+                    </TableCell>
 
                     {/* Status */}
                     <TableCell className="px-4 py-4.5">
@@ -575,17 +645,9 @@ export default function BusinessTable({
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
-                                if (item.status?.toLowerCase() === "active") {
-                                  router.push(`/businesses/${item.id}`);
-                                }
+                                router.push(`/businesses/form/${item.id}`);
                               }}
-                              disabled={item.status?.toLowerCase() !== "active"}
-                              className={cn(
-                                "text-xs",
-                                item.status?.toLowerCase() === "active"
-                                  ? "cursor-pointer"
-                                  : "cursor-not-allowed opacity-40 text-slate-400 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
-                              )}
+                              className="cursor-pointer text-xs"
                             >
                               Edit Business
                             </DropdownMenuItem>
@@ -674,11 +736,14 @@ export default function BusinessTable({
                 <SelectItem value="10 per page" className="text-xs">
                   10 per page
                 </SelectItem>
-                <SelectItem value="25 per page" className="text-xs">
-                  25 per page
+                <SelectItem value="20 per page" className="text-xs">
+                  20 per page
                 </SelectItem>
                 <SelectItem value="50 per page" className="text-xs">
                   50 per page
+                </SelectItem>
+                <SelectItem value="100 per page" className="text-xs">
+                  100 per page
                 </SelectItem>
               </SelectContent>
             </Select>

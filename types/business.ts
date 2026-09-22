@@ -8,10 +8,15 @@ export interface BusinessItem {
   category: string;
   city: string;
   state?: string;
+  leadStatus?: string;
   status: "Active" | "Inactive";
   lastFollowUp: string;
   nextFollowUp: string;
-  nextFollowUpType: "today" | "tomorrow" | "date" | "none";
+  nextFollowUpType: "today" | "tomorrow" | "date" | "none" | "overdue";
+  nextFollowupDate?: string;
+  reminder?: string;
+  description?: string;
+  notes?: string;
   owner?: string;
   address?: string;
   email?: string;
@@ -25,6 +30,18 @@ export interface BusinessItem {
 export interface BusinessStatsData {
   total: number;
   active: number;
-  followUpToday: number;
-  categoriesCount: number;
+  deactivated?: number;
+  followUpToday?: number;
+  categoriesCount?: number;
+  new?: number;
+  interested?: number;
+  won?: number;
+}
+
+export interface BusinessKpisData {
+  total: number;
+  active: number;
+  new: number;
+  interested: number;
+  won: number;
 }

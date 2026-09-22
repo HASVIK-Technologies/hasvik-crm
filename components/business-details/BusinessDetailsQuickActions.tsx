@@ -20,7 +20,7 @@ export default function BusinessDetailsQuickActions({ business, cleanNumber, set
           <Calendar className="mr-3 size-4" /> Add Follow-up
         </Button>
         <Button variant="outline" className="h-11 justify-start border-slate-200 text-blue-600" asChild>
-          <Link href={`/businesses/form?id=${business.id}`}>
+          <Link href={`/businesses/form/${business.id}`}>
             <Edit2 className="mr-3 size-4" /> Edit Business
           </Link>
         </Button>

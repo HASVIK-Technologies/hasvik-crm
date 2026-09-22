@@ -1,26 +1,28 @@
 "use client";
 
 import { useEffect, useState } from "react";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import {
-  Controller,
   FormProvider,
   useFieldArray,
   useForm,
+  useWatch,
   type FieldErrors,
 } from "react-hook-form";
 import {
+  ArrowLeft,
   ArrowRight,
+  AlertCircle,
   Check,
   FileText,
+  Loader2,
   Phone,
+  RotateCcw,
   Save,
   UsersRound,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
-import { Checkbox } from "@/components/ui/checkbox";
-import { Label } from "@/components/ui/label";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import SecondaryButton from "@/components/common/SecondaryButton";
 
@@ -31,9 +33,10 @@ import AdditionalInfoSection from "@/components/businesses/sections/AdditionalIn
 import FollowUpSection from "@/components/businesses/sections/FollowUpSection";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/lib/use-is-desktop";
+import { getBusinessRaw, useCreateBusiness, useCreateBusinessMutation, useUpdateBusinessMutation } from "@/hooks/use-businesses";
+import { getApiErrorMessage } from "@/lib/api-error";
 import {
   defaultBusinessFormValues,
-  STEP_FIELD_NAMES,
   type BusinessFormValues,
 } from "@/lib/business-form-types";
 
@@ -62,26 +65,144 @@ const describeErrors = (errors: FieldErrors<BusinessFormValues>): string[] =>
     .filter((key) => Boolean(errors[key]))
     .map((key) => FIELD_LABELS[key] as string);
 
-export default function BusinessForm() {
+// These mirror each field's actual validation rules (see BusinessInfoSection
+// / ContactInfoSection), but computed live off watched values so the
+// Save/Next buttons can be disabled proactively - before the person has
+// tried to submit - rather than only rejecting a click after the fact.
+const isBusinessInfoComplete = (values: BusinessFormValues) =>
+  Boolean(values.businessName?.trim()) &&
+  Boolean(values.category) &&
+  Boolean(values.city) &&
+  Boolean(values.state?.trim()) &&
+  /^\d{6}$/.test(values.pincode ?? "") &&
+  Boolean(values.address?.trim()) &&
+  Boolean(values.status);
+
+const isContactInfoComplete = (values: BusinessFormValues) =>
+  (values.phoneNumbers ?? []).some((p) => p.value.trim().length > 0) &&
+  (values.whatsappNumbers ?? []).some((w) => w.value.trim().length > 0);
+
+export default function BusinessForm({
+  initialValues,
+}: {
+  /** Pass the fetched-and-transformed record here for edit mode; omit for
+   * a fresh "Add Business" form. Whatever is passed in is what "Reset"
+   * restores the form to. */
+  initialValues?: BusinessFormValues;
+}) {
   const router = useRouter();
+  const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
 
+  const targetId = searchParams.get("id") || undefined;
+  const isEditMode = Boolean(targetId);
+
+  // Captured once on mount - this is the snapshot Reset restores to,
+  // independent of anything the person types afterward.
+  const [initialSnapshot] = useState<BusinessFormValues>(
+    () => initialValues ?? defaultBusinessFormValues,
+  );
+
   const methods = useForm<BusinessFormValues>({
-    defaultValues: defaultBusinessFormValues,
+    defaultValues: initialSnapshot,
     mode: "onChange",
     shouldUnregister: false,
   });
-  const { control, handleSubmit, trigger, getValues, reset } = methods;
+  const { control, handleSubmit, reset } = methods;
 
   const [currentStep, setCurrentStep] = useState(0);
-  const [stepAttempted, setStepAttempted] = useState(false);
   const [submitError, setSubmitError] = useState<string | null>(null);
+  const [isLoadingBusiness, setIsLoadingBusiness] = useState(isEditMode);
+  const [loadError, setLoadError] = useState<string | null>(null);
+  const [isSubmitting, setIsSubmitting] = useState(false);
+
+  const updateMutation = useUpdateBusinessMutation();
+  const createMutation = useCreateBusinessMutation();
 
   const phoneArray = useFieldArray({ control, name: "phoneNumbers" });
   const whatsappArray = useFieldArray({ control, name: "whatsappNumbers" });
 
+  const createBusinessMutation = useCreateBusiness();
 
-  const handleCancel = () => router.push("/businesses");
+  const watchedValues = useWatch({ control }) as BusinessFormValues;
+  const isFormComplete =
+    isBusinessInfoComplete(watchedValues) &&
+    isContactInfoComplete(watchedValues);
+  useEffect(() => {
+    if (!targetId) {
+      setIsLoadingBusiness(false);
+      return;
+    }
+
+    let isMounted = true;
+    setIsLoadingBusiness(true);
+    setLoadError(null);
+
+    getBusinessRaw(targetId)
+      .then((data) => {
+        if (!isMounted) return;
+        if (!data || !data._id) {
+          setLoadError(`Business with ID #${targetId} not found.`);
+          setIsLoadingBusiness(false);
+          return;
+        }
+
+        const phoneNumbers =
+          data.phoneNumbers && data.phoneNumbers.length > 0
+            ? data.phoneNumbers.map((p) => ({ value: p.number || "" }))
+            : [{ value: "" }];
+
+        const whatsappNumbers =
+          data.whatsappNumbers && data.whatsappNumbers.length > 0
+            ? data.whatsappNumbers.map((w) => ({ value: w.number || "" }))
+            : [{ value: "" }];
+
+        reset({
+          businessName: data.name || "",
+          category: (data.categoryId ?? data.category) || "",
+          city: data.city || "",
+          state: data.state || "",
+          pincode: data.pincode || "",
+          address: data.address || "",
+          status: data.status || (data.isActive === false ? "Inactive" : "Active"),
+          businessType: data.businessType || "",
+          phoneNumbers,
+          whatsappNumbers,
+          email: data.email || "",
+          website: data.website || "",
+          description: data.description || "",
+          notes: data.notes || "",
+          leadSource: data.leadSource || "",
+          assignTo: data.assignedTo || "",
+          nextFollowupDate: data.nextFollowupDate ? data.nextFollowupDate.slice(0, 10) : "",
+          reminder: data.reminder || "",
+          addAnother: false,
+        });
+
+        setIsLoadingBusiness(false);
+      })
+      .catch((err: unknown) => {
+        if (!isMounted) return;
+        setLoadError(
+          `Unable to load business details: ${
+            err instanceof Error ? err.message : "Not found"
+          }`,
+        );
+        setIsLoadingBusiness(false);
+      });
+
+    return () => {
+      isMounted = false;
+    };
+  }, [targetId, reset]);
+
+  const handleBackToBusinesses = () => router.push("/businesses");
+
+  const handleReset = () => {
+    reset(initialSnapshot);
+    setSubmitError(null);
+    setCurrentStep(0);
+  };
 
   const steps = [
     {
@@ -120,53 +241,85 @@ export default function BusinessForm() {
 
   const isLastStep = currentStep === steps.length - 1;
 
-  const fieldsForStep = (stepKey: string): string[] => {
-    if (stepKey === "business") return [...STEP_FIELD_NAMES.business];
-    if (stepKey === "contact") {
-      return [
-        ...getValues("phoneNumbers").map((_, i) => `phoneNumbers.${i}.value`),
-        ...getValues("whatsappNumbers").map(
-          (_, i) => `whatsappNumbers.${i}.value`,
-        ),
-      ];
-    }
-    if (stepKey === "additional") return [...STEP_FIELD_NAMES.additional];
-    return [...STEP_FIELD_NAMES.followup];
-  };
+  const isCurrentStepComplete = (() => {
+    const key = steps[currentStep].key;
+    if (key === "business") return isBusinessInfoComplete(watchedValues);
+    if (key === "contact") return isContactInfoComplete(watchedValues);
+    return true;
+  })();
 
-  const goNext = async () => {
-    // Dynamic array-index paths (e.g. "phoneNumbers.0.value") aren't fully
-    // expressible in react-hook-form's static Path<T> type, hence the cast.
-    const isStepValid = await trigger(
-      fieldsForStep(steps[currentStep].key) as never,
-    );
-    if (!isStepValid) {
-      setStepAttempted(true);
-      return;
-    }
-    setStepAttempted(false);
+  const goNext = () => {
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
 
   const goBack = () => {
-    setStepAttempted(false);
     setCurrentStep((step) => Math.max(step - 1, 0));
   };
 
-  const onValid = (values: BusinessFormValues) => {
+  const onValid = async (values: BusinessFormValues) => {
     setSubmitError(null);
+    setIsSubmitting(true);
 
-    // Persisting to the backend will be wired up separately - for now this
-    // captures the shape of the payload the API will expect. Note the
-    // shape: phoneNumbers/whatsappNumbers are `{ value: string }[]`.
-    console.log("Saving business", values);
+    const payload: Record<string, unknown> = {
+      name: values.businessName.trim(),
+      businessType: values.businessType || undefined,
+      status: values.status || "Active",
+      email: values.email.trim() || undefined,
+      website: values.website.trim() || undefined,
+      address: values.address.trim() || undefined,
+      city: values.city.trim() || undefined,
+      state: values.state.trim() || undefined,
+      pincode: values.pincode.trim() || undefined,
+      leadSource: values.leadSource || undefined,
+      assignedTo: values.assignTo || undefined,
+      description: values.description || undefined,
+      notes: values.notes || undefined,
+      nextFollowupDate: values.nextFollowupDate || undefined,
+      reminder: values.reminder || undefined,
+      phoneNumbers: values.phoneNumbers
+        .filter((p) => p.value.trim())
+        .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
+      whatsappNumbers: values.whatsappNumbers
+        .filter((w) => w.value.trim())
+        .map((w, idx) => ({ number: w.value.trim(), isPrimary: idx === 0 })),
+    };
 
-    if (values.addAnother) {
-      reset(defaultBusinessFormValues);
-      setCurrentStep(0);
-    } else {
-      router.push("/businesses");
+    if (values.category) {
+      payload.category = values.category;
+      payload.categoryId = values.category;
     }
+
+    try {
+      if (isEditMode && targetId) {
+        await updateMutation.mutateAsync({ id: targetId, payload });
+        router.push(`/businesses/${targetId}`);
+      } else {
+        await createMutation.mutateAsync(payload);
+        if (values.addAnother) {
+          reset(defaultBusinessFormValues);
+          setCurrentStep(0);
+        } else {
+          router.push("/businesses");
+        }
+      }
+    } catch (err: unknown) {
+      setSubmitError(
+        err instanceof Error
+          ? err.message
+          : "Failed to save business. Please try again.",
+      );
+    } finally {
+      setIsSubmitting(false);
+    }
+
+    createBusinessMutation.mutate(values, {
+      onSuccess: () => {
+        router.push("/businesses");
+      },
+      onError: (error) => {
+        setSubmitError(getApiErrorMessage(error));
+      },
+    });
   };
 
   const onInvalid = (formErrors: FieldErrors<BusinessFormValues>) => {
@@ -177,6 +330,40 @@ export default function BusinessForm() {
         : "Please fix the highlighted fields before saving.",
     );
   };
+
+  if (isLoadingBusiness) {
+    return (
+      <Card className="border-[#dce8ee] p-12 text-center">
+        <div className="flex flex-col items-center justify-center gap-3">
+          <Loader2 className="size-8 animate-spin text-[#2563eb]" />
+          <p className="text-sm font-medium text-[#64748b]">
+            Loading business details...
+          </p>
+        </div>
+      </Card>
+    );
+  }
+
+  if (loadError) {
+    return (
+      <Card className="border-red-200 bg-red-50/50 p-8 text-center max-w-lg mx-auto">
+        <div className="flex flex-col items-center gap-3">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+            <AlertCircle className="size-6" />
+          </div>
+          <h3 className="text-base font-bold text-[#0f172a]">Business Not Found</h3>
+          <p className="text-sm text-[#64748b]">{loadError}</p>
+          <OutlinedButton
+            type="button"
+            onClick={() => router.push("/businesses")}
+            className="mt-3 gap-2"
+          >
+            <ArrowLeft className="size-4" /> Back to Businesses
+          </OutlinedButton>
+        </div>
+      </Card>
+    );
+  }
 
   return (
     <FormProvider {...methods}>
@@ -225,36 +412,35 @@ export default function BusinessForm() {
                 <OutlinedButton
                   type="button"
                   size="lg"
-                  onClick={handleCancel}
+                  onClick={handleBackToBusinesses}
                   className="w-full sm:w-auto"
                 >
-                  Cancel
+                  Back to Business
                 </OutlinedButton>
 
-                <div className="flex flex-col-reverse items-stretch gap-4 sm:flex-row sm:items-center">
-                  <Controller
-                    control={control}
-                    name="addAnother"
-                    render={({ field }) => (
-                      <Label className="justify-center gap-2 text-[#547080] sm:justify-start">
-                        <Checkbox
-                          checked={field.value}
-                          onCheckedChange={(checked) =>
-                            field.onChange(checked === true)
-                          }
-                        />
-                        Add another business
-                      </Label>
-                    )}
-                  />
+                <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
+                  <OutlinedButton
+                    type="button"
+                    size="lg"
+                    onClick={handleReset}
+                    className="w-full sm:w-auto"
+                  >
+                    <RotateCcw className="size-4" />
+                    Reset
+                  </OutlinedButton>
 
                   <SecondaryButton
                     type="submit"
                     size="lg"
+                    disabled={
+                      !isFormComplete || createBusinessMutation.isPending
+                    }
                     className="w-full sm:w-auto"
                   >
                     <Save className="size-4" />
-                    Save Business
+                    {createBusinessMutation.isPending
+                      ? "Saving..."
+                      : "Save Business"}
                   </SecondaryButton>
                 </div>
               </div>
@@ -311,47 +497,48 @@ export default function BusinessForm() {
                 <div className="mt-6 flex flex-col-reverse gap-3 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <OutlinedButton
                     type="button"
-                    onClick={currentStep === 0 ? handleCancel : goBack}
+                    onClick={
+                      currentStep === 0 ? handleBackToBusinesses : goBack
+                    }
                     className="w-full sm:w-auto"
                   >
-                    {currentStep === 0 ? "Cancel" : "Back"}
+                    {currentStep === 0 ? "Back to Business" : "Back"}
                   </OutlinedButton>
 
                   {isLastStep ? (
                     <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
-                      <Controller
-                        control={control}
-                        name="addAnother"
-                        render={({ field }) => (
-                          <Label className="justify-center gap-2 text-[#547080] sm:justify-start">
-                            <Checkbox
-                              checked={field.value}
-                              onCheckedChange={(checked) =>
-                                field.onChange(checked === true)
-                              }
-                            />
-                            Add another business
-                          </Label>
-                        )}
-                      />
+                      <OutlinedButton
+                        type="button"
+                        onClick={handleReset}
+                        className="w-full sm:w-auto"
+                      >
+                        <RotateCcw className="size-4" />
+                        Reset
+                      </OutlinedButton>
                       <SecondaryButton
                         type="submit"
+                        disabled={
+                          !isFormComplete || createBusinessMutation.isPending
+                        }
                         className="w-full sm:w-auto"
                       >
                         <Save className="size-4" />
-                        Save Business
+                        {createBusinessMutation.isPending
+                          ? "Saving..."
+                          : "Save Business"}
                       </SecondaryButton>
                     </div>
                   ) : (
                     <div className="flex flex-col items-stretch gap-2 sm:items-end">
-                      {stepAttempted && (
-                        <p className="text-xs text-red-500">
+                      {!isCurrentStepComplete && (
+                        <p className="text-xs text-[#8a9eaa]">
                           Fill in all required fields to continue.
                         </p>
                       )}
                       <SecondaryButton
                         type="button"
                         onClick={goNext}
+                        disabled={!isCurrentStepComplete}
                         className="w-full sm:w-auto"
                       >
                         Next

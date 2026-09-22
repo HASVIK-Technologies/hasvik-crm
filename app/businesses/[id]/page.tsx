@@ -475,7 +475,6 @@ export default function BusinessDetails() {
             <TabsList className="inline-flex h-auto p-0 bg-transparent gap-6">
               {businessData.tabs
                 .filter((tab: any) => tab.id !== "activity-log")
-                .filter((tab: any) => tab.id !== "activity-log")
                 .map((tab: any) => (
                   <TabsTrigger
                     key={tab.id}
