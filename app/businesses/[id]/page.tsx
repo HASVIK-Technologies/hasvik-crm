@@ -488,11 +488,6 @@ export default function BusinessDetails() {
                     {tab.id === "follow-ups" &&
                       ` (${businessData.recentFollowUps.length})`}
                     {tab.id === "notes" && ` (2)`}
-                    {tab.id === "contacts" &&
-                      ` (${businessData.contactInfo.phones.length + businessData.contactInfo.whatsapps.length})`}
-                    {tab.id === "follow-ups" &&
-                      ` (${businessData.recentFollowUps.length})`}
-                    {tab.id === "notes" && ` (2)`}
                   </TabsTrigger>
                 ))}
             </TabsList>
