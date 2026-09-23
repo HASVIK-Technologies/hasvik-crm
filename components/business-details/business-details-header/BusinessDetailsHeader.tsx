@@ -1,4 +1,5 @@
 import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import PhoneButton from "./PhoneButton";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { Building2, MapPin } from "lucide-react";

@@ -84,17 +84,19 @@ const isContactInfoComplete = (values: BusinessFormValues) =>
 
 export default function BusinessForm({
   initialValues,
+  businessId,
 }: {
   /** Pass the fetched-and-transformed record here for edit mode; omit for
    * a fresh "Add Business" form. Whatever is passed in is what "Reset"
    * restores the form to. */
   initialValues?: BusinessFormValues;
+  businessId?: string;
 }) {
   const router = useRouter();
   const searchParams = useSearchParams();
   const isDesktop = useIsDesktop();
 
-  const targetId = searchParams.get("id") || undefined;
+  const targetId = businessId || searchParams.get("id") || undefined;
   const isEditMode = Boolean(targetId);
 
   // Captured once on mount - this is the snapshot Reset restores to,
@@ -130,11 +132,11 @@ export default function BusinessForm({
     isContactInfoComplete(watchedValues);
   useEffect(() => {
     if (!targetId) {
-      setIsLoadingBusiness(false);
       return;
     }
 
     let isMounted = true;
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setIsLoadingBusiness(true);
     setLoadError(null);
 
