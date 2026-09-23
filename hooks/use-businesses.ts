@@ -10,7 +10,6 @@ import type {
   BusinessesResult,
   BusinessKpiParams,
   BusinessKpisResponse,
-  BusinessStatusOption,
   CategoryAutocompleteItem,
   CityAutocompleteItem,
   CreateBusinessPayload,
@@ -136,6 +135,7 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     category: resolvedCategory,
     city: business.city ?? "-",
     state: business.state ?? "-",
+    leadStatus: business.status ?? "-",
     status:
       business.isActive === false || business.status === "INACTIVE"
         ? "Inactive"
@@ -233,9 +233,9 @@ export function formatStatusTitle(key: string): string {
 
 export async function getBusinessStatuses(): Promise<string[]> {
   try {
-    const response = await apiClient.get<string[]>("/businesses/status");
-    if (Array.isArray(response.data)) {
-      return response.data;
+    const response = await apiClient.get<Record<string, string>>("/businesses/status");
+    if (response.data && typeof response.data === "object") {
+      return Object.keys(response.data);
     }
     return [];
   } catch {
@@ -263,7 +263,7 @@ export async function getBusinessCategoryAutocomplete(
 ): Promise<CategoryAutocompleteItem[]> {
   try {
     const response = await apiClient.get<CategoryAutocompleteItem[]>(
-      "/businesses/autocomplete",
+      "/categories/autocomplete",
       {
         params: { search: search.trim() },
       },

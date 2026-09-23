@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Download,
   SlidersHorizontal,
   ChevronDown,
   Phone,
@@ -69,7 +68,6 @@ interface BusinessTableProps {
   businesses: BusinessItem[];
   totalCount?: number;
   isLoading?: boolean;
-  onExport?: () => void;
   sortOrder?: string;
   onSortOrderChange?: (sort: string) => void;
   currentPage: number;
@@ -84,7 +82,6 @@ export default function BusinessTable({
   businesses,
   totalCount,
   isLoading = false,
-  onExport,
   sortOrder = "-createdAt",
   onSortOrderChange,
   currentPage,
@@ -170,13 +167,6 @@ export default function BusinessTable({
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <OutlinedButton
-              onClick={onExport}
-            >
-              <Download />
-              Export
-            </OutlinedButton>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <OutlinedButton>
@@ -279,6 +269,9 @@ export default function BusinessTable({
                       </h3>
                       <p className="mt-0.5 text-xs text-[#64748b]">
                         {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
+                      </p>
+                      <p className="mt-0.5 text-xs text-[#64748b]">
+                        Lead status: {formatDisplayString(item.leadStatus, "-")}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
                     </div>
@@ -419,6 +412,7 @@ export default function BusinessTable({
                 </TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Category</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">City</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Status</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>
@@ -449,6 +443,9 @@ export default function BusinessTable({
                       <div className="h-6 w-16 rounded-full bg-[#f1f5f9] animate-pulse" />
                     </TableCell>
                     <TableCell className="px-4 py-4.5">
+                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
+                    <TableCell className="px-4 py-4.5">
                       <div className="h-3.5 w-28 rounded bg-[#f1f5f9] animate-pulse" />
                     </TableCell>
                     <TableCell className="px-4 py-4.5">
@@ -464,7 +461,7 @@ export default function BusinessTable({
                 ))
               ) : businesses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-0">
+                  <TableCell colSpan={8} className="py-0">
                     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                       <div className="flex size-14 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
                         <Building2 className="size-7 text-[#94a3b8]" />
@@ -532,6 +529,11 @@ export default function BusinessTable({
                     {/* City */}
                     <TableCell className="px-4 py-4.5 text-sm">
                       {formatDisplayString(item.city, "-")}
+                    </TableCell>
+
+                    {/* Lead Status */}
+                    <TableCell className="px-4 py-4.5 text-sm">
+                      {formatDisplayString(item.leadStatus, "-")}
                     </TableCell>
 
                     {/* Status */}

@@ -8,6 +8,7 @@ export interface BusinessItem {
   category: string;
   city: string;
   state?: string;
+  leadStatus?: string;
   status: "Active" | "Inactive";
   lastFollowUp: string;
   nextFollowUp: string;
