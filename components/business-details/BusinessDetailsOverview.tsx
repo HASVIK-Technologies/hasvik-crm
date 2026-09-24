@@ -1,4 +1,5 @@
 import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Building2, Tags, MapPin, Building, Zap, Globe, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 

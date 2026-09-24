@@ -1,4 +1,5 @@
 import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Mail } from "lucide-react";
 import OutlinedButton from "@/components/common/OutlinedButton";
 

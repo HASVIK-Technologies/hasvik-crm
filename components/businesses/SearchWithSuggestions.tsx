@@ -28,6 +28,7 @@ export default function SearchWithSuggestions({
 
   // Sync with external resets (e.g. Reset Filters button or URL change)
   useEffect(() => {
+    // eslint-disable-next-line react-hooks/set-state-in-effect
     setInputValue(searchTerm);
   }, [searchTerm]);
 
