@@ -11,6 +11,7 @@ export type ApiBusiness = {
   categoryId?: string | null;
   businessType?: string;
   status?: string;
+  isDeleted?: boolean;
   isActive?: boolean;
   phoneNumbers?: PhoneNumber[];
   whatsappNumbers?: PhoneNumber[];

@@ -182,11 +182,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       strokeWidth={active ? 2.5 : 2}
                     />
                     <span className={sidebarCollapsed ? "text-[10px] leading-tight" : ""}>{item.label}</span>
-                    {item.label === "Follow-ups" && !sidebarCollapsed && (
-                      <span className="ml-auto rounded-full bg-[#d1fadf] px-2 py-0.5 text-[10px] font-bold text-secondary">
-                        3
-                      </span>
-                    )}
                   </Link>
                 );
               })}
