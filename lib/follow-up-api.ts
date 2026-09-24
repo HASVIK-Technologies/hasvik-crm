@@ -52,7 +52,10 @@ export async function getFollowUpOptions(
 
 function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
   const business = (value.business ?? {}) as Record<string, unknown>;
-  const assignee = (value.assignedTo ?? {}) as Record<string, unknown>;
+  const assignee = (value.assignee ?? value.assignedTo ?? {}) as Record<
+    string,
+    unknown
+  >;
   return {
     id: String(value._id ?? value.id ?? ""),
     businessId: String(value.businessId ?? business._id ?? business.id ?? ""),
@@ -70,14 +73,13 @@ function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
           ? value.assignedTo
           : undefined,
     assignedToName:
-      typeof value.assignedTo === "string"
-        ? value.assignedTo
-        : String(
-            value.assignedToName ??
-              assignee.name ??
-              assignee.fullName ??
-              "Unassigned",
-          ),
+      String(
+        assignee.fullName ??
+          assignee.name ??
+          value.assignedToName ??
+          (typeof value.assignedTo === "string" ? value.assignedTo : null) ??
+          "Unassigned",
+      ),
     type: String(value.type ?? "CALL"),
     status: String(value.status ?? "SCHEDULED"),
     scheduledAt: String(value.scheduledAt ?? value.followUpDate ?? ""),
