@@ -6,6 +6,8 @@ export type BusinessFormValues = {
   addAnother: any;
   businessName: string;
   category: string;
+  /** Display name for `category`; only used to prefill the dropdown label in edit mode. Never sent to the API. */
+  categoryName?: string;
   city: string;
   state: string;
   pincode: string;
