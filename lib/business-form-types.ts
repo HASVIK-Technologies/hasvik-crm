@@ -3,7 +3,7 @@ export type NumberFieldValue = {
 };
 
 export type BusinessFormValues = {
-  addAnother: any;
+  addAnother: boolean;
   businessName: string;
   category: string;
   /** Display name for `category`; only used to prefill the dropdown label in edit mode. Never sent to the API. */
@@ -45,7 +45,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   assignTo: "",
   nextFollowupDate: "",
   reminder: "",
-  addAnother: undefined
+  addAnother: false
 };
 
 // Field names validated per step of the mobile wizard. Phone/WhatsApp

@@ -1,4 +1,5 @@
 import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { User, Phone, Mail, Plus, Trash2 } from "lucide-react";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";

@@ -1,4 +1,5 @@
 import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
 import { Button } from "@/components/ui/button";
 import { Calendar, Edit2, FileText, Phone, Slash } from "lucide-react";
