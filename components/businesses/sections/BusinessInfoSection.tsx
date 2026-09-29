@@ -4,15 +4,11 @@ import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
-import LabeledSelect from "@/components/businesses/LabeledSelect";
 import FormCategoryAutocomplete from "@/components/common/form-controls/FormCategoryAutocomplete";
 import FormCityAutocomplete from "@/components/common/form-controls/FormCityAutocomplete";
 import FormLeadStatusSelect from "@/components/common/form-controls/FormLeadStatusSelect";
 import StateAutocomplete from "@/components/common/StateAutocomplete";
-import {
-  BUSINESS_TYPE_OPTIONS,
-  STATE_OPTIONS,
-} from "@/lib/business-form-options";
+import { STATE_OPTIONS } from "@/lib/business-form-options";
 import type { BusinessFormValues } from "@/lib/business-form-types";
 
 export default function BusinessInfoSection({
@@ -163,20 +159,15 @@ export default function BusinessInfoSection({
         )}
       />
 
-      <Controller
-        control={control}
-        name="businessType"
-        render={({ field }) => (
-          <LabeledSelect
-            label="Business Type"
-            placeholder="Select business type"
-            options={BUSINESS_TYPE_OPTIONS}
-            value={field.value}
-            onChange={field.onChange}
-            optional
-          />
-        )}
-      />
+      <div>
+        <FieldLabel htmlFor={`${idPrefix}locationUrl`}>Location URL</FieldLabel>
+        <Input
+          id={`${idPrefix}locationUrl`}
+          type="url"
+          placeholder="https://maps.google.com/..."
+          {...register("locationUrl")}
+        />
+      </div>
     </div>
   );
 }

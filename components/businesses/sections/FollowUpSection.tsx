@@ -2,6 +2,7 @@
 
 import { Controller, useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
+import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import LabeledSelect from "@/components/businesses/LabeledSelect";
 import {
@@ -25,8 +26,8 @@ export default function FollowUpSection({
         name="leadSource"
         render={({ field }) => (
           <LabeledSelect
-            label="Lead Source"
-            placeholder="Select lead source"
+            label="Follow-up Type"
+            placeholder="Select follow-up type"
             options={LEAD_SOURCE_OPTIONS}
             value={field.value}
             onChange={field.onChange}
@@ -72,6 +73,15 @@ export default function FollowUpSection({
           />
         )}
       />
+
+      <div className="sm:col-span-2 lg:col-span-4">
+        <FieldLabel htmlFor={`${idPrefix}notes`}>Notes</FieldLabel>
+        <Textarea
+          id={`${idPrefix}notes`}
+          placeholder="Add any additional notes..."
+          {...register("notes")}
+        />
+      </div>
     </div>
   );
 }

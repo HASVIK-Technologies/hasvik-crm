@@ -32,15 +32,6 @@ export default function AdditionalInfoSection({
           {...register("description")}
         />
       </div>
-
-      <div>
-        <FieldLabel htmlFor={`${idPrefix}notes`}>Notes</FieldLabel>
-        <Textarea
-          id={`${idPrefix}notes`}
-          placeholder="Add any additional notes..."
-          {...register("notes")}
-        />
-      </div>
     </div>
   );
 }

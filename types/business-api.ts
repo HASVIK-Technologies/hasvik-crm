@@ -10,6 +10,7 @@ export type ApiBusiness = {
   name: string;
   categoryId?: string | null;
   businessType?: string;
+  location?: { url?: string } | null;
   status?: string;
   isDeleted?: boolean;
   isActive?: boolean;

@@ -186,7 +186,7 @@ export default function BusinessForm({
           address: data.address || "",
           status:
             data.status || (data.isActive === false ? "Inactive" : "Active"),
-          businessType: data.businessType || "",
+          locationUrl: data.location?.url || "",
           phoneNumbers,
           whatsappNumbers,
           email: data.email || "",
@@ -289,7 +289,6 @@ export default function BusinessForm({
 
     const payload: Record<string, unknown> = {
       name: values.businessName.trim(),
-      businessType: values.businessType || undefined,
       status: values.status || "Active",
       email: values.email.trim() || undefined,
       website: values.website.trim() || undefined,
@@ -314,6 +313,10 @@ export default function BusinessForm({
     if (values.category) {
       payload.category = values.category;
       payload.categoryId = values.category;
+    }
+
+    if (values.locationUrl.trim()) {
+      payload.location = { url: values.locationUrl.trim() };
     }
 
     try {
