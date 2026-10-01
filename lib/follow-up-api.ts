@@ -1,3 +1,4 @@
+import axios from "axios";
 import { apiClient } from "@/lib/api-client";
 import type {
   CreateFollowUpPayload,
@@ -84,6 +85,7 @@ function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
     status: String(value.status ?? "SCHEDULED"),
     scheduledAt: String(value.scheduledAt ?? value.followUpDate ?? ""),
     notes: value.notes ? String(value.notes) : undefined,
+    reminder: value.reminder ? String(value.reminder) : undefined,
   };
 }
 
@@ -168,11 +170,41 @@ export async function getFollowUp(id: string, signal?: AbortSignal) {
 }
 
 export async function updateFollowUp(payload: UpdateFollowUpPayload) {
-  const response = await apiClient.patch("/follow-ups", payload);
-  return unwrap<FollowUpItem>(response.data);
+  const id = payload.id ?? payload.followUpId;
+  const body = {
+    ...payload,
+    ...(id ? { id, followUpId: id } : {}),
+  };
+  try {
+    const response = await apiClient.patch("/follow-ups", body);
+    return unwrap<FollowUpItem>(response.data);
+  } catch (error) {
+    if (
+      id &&
+      axios.isAxiosError(error) &&
+      (error.response?.status === 404 || error.response?.status === 405)
+    ) {
+      const response = await apiClient.patch(`/follow-ups/${id}`, body);
+      return unwrap<FollowUpItem>(response.data);
+    }
+    throw error;
+  }
 }
 
-export async function cancelFollowUp(id: string) {
-  const response = await apiClient.delete("/follow-ups", { data: { id } });
-  return response.data;
+export async function cancelFollowUp(
+  id: string,
+  existing?: Partial<UpdateFollowUpPayload>,
+) {
+  try {
+    const response = await apiClient.patch("/follow-ups", {
+      ...(existing || {}),
+      id,
+      followUpId: id,
+      status: "CANCELLED",
+    });
+    return unwrap<FollowUpItem>(response.data);
+  } catch {
+    const response = await apiClient.delete("/follow-ups", { data: { id } });
+    return response.data;
+  }
 }

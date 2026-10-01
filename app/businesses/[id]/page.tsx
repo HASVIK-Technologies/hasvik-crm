@@ -120,7 +120,9 @@ export default function BusinessDetails() {
   const submitFollowUpToApi = async () => {
     if (
       !followUpDate ||
+      !assignedTo ||
       assignedTo === "Select Assignee..." ||
+      !reminder ||
       reminder === "Select Reminder..."
     ) {
       alert("Please fill out all fields before adding!");
@@ -612,31 +614,12 @@ export default function BusinessDetails() {
                       onChange={(e) => setReminder(e.target.value)}
                       className="w-full mt-1.5 p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
                     >
-                      <option>Select Reminder...</option>
-                      <option>Before 15 Minutes</option>
-                      <option>Before 30 Minutes</option>
-                      <option>Before 1 Hour</option>
-                      <option>At 9:00 AM</option>
-                      <option>At 9:30 AM</option>
-                      <option>At 10:00 AM</option>
-                      <option>At 10:30 AM</option>
-                      <option>At 11:00 AM</option>
-                      <option>At 11:30 AM</option>
-                      <option>At 12:00 PM</option>
-                      <option>At 12:30 PM</option>
-                      <option>At 01:00 PM</option>
-                      <option>At 01:30 PM</option>
-                      <option>At 02:00 PM</option>
-                      <option>At 02:30 PM</option>
-                      <option>At 03:00 PM</option>
-                      <option>At 03:30 PM</option>
-                      <option>At 04:00 PM</option>
-                      <option>At 04:30 PM</option>
-                      <option>At 05:00 PM</option>
-                      <option>At 05:30 PM</option>
-                      <option>At 06:00 PM</option>
-                      <option>At 06:30 PM</option>
-                      <option>At 07:0 PM</option>
+                      <option value="">Select Reminder...</option>
+                      <option value="10 minutes">10 minutes</option>
+                      <option value="15 minutes">15 minutes</option>
+                      <option value="30 minutes">30 minutes</option>
+                      <option value="45 minutes">45 minutes</option>
+                      <option value="1 hour">1 hour</option>
                     </select>
                   </div>
                 </div>
