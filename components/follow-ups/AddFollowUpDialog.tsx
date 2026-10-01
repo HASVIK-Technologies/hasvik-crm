@@ -48,11 +48,10 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
         assignedTo: assignee.id,
         type,
         scheduledAt: new Date(scheduledAt).toISOString(),
-        status: "SCHEDULED",
-        notes,
+        notes: notes.trim() || undefined,
         reminder: reminder || undefined,
       });
-      toast.success("Follow-up added");
+      toast.success("Follow-up created successfully");
       onOpenChange(false);
       setBusiness(undefined);
       setAssignee(undefined);
@@ -147,6 +146,7 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
                     <SelectItem value="MEETING">Meeting</SelectItem>
                     <SelectItem value="EMAIL">Email</SelectItem>
                     <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+                    <SelectItem value="OTHER">Other</SelectItem>
                   </SelectContent>
                 </Select>
               </div>

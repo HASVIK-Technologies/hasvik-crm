@@ -16,15 +16,14 @@ import CancelFollowUpDialog from "@/components/follow-ups/CancelFollowUpDialog";
 import CompleteFollowUpDialog from "@/components/follow-ups/CompleteFollowUpDialog";
 import {
   useCancelFollowUp,
+  useCompleteFollowUp,
   useFollowUpKpisQuery,
   useFollowUpsQuery,
-  useUpdateFollowUp,
 } from "@/hooks/use-follow-ups";
 import { useFollowUpListStore } from "@/store/follow-up-list-store";
 import type {
   FollowUpFilters as FollowUpFilterState,
   FollowUpItem,
-  FollowUpType,
 } from "@/types/follow-up";
 
 function dayBoundary(offset: number, end = false) {
@@ -56,7 +55,7 @@ export default function FollowupsPage() {
   const listQuery = useFollowUpsQuery(queryFilters);
   const kpisQuery = useFollowUpKpisQuery();
   const cancelMutation = useCancelFollowUp();
-  const updateMutation = useUpdateFollowUp();
+  const completeMutation = useCompleteFollowUp();
   const setFilter = filters.setFilter;
 
   const searchControl = (
@@ -71,17 +70,7 @@ export default function FollowupsPage() {
   const confirmComplete = async () => {
     if (!completeFollowUp) return;
     try {
-      await updateMutation.mutateAsync({
-        id: completeFollowUp.id,
-        followUpId: completeFollowUp.id,
-        businessId: completeFollowUp.businessId,
-        assignedTo: completeFollowUp.assignedToId || "",
-        type: (completeFollowUp.type as FollowUpType) || "CALL",
-        scheduledAt: completeFollowUp.scheduledAt,
-        status: "COMPLETED",
-        notes: completeFollowUp.notes || "",
-        reminder: completeFollowUp.reminder,
-      });
+      await completeMutation.mutateAsync(completeFollowUp.id);
       toast.success("Follow-up marked as completed");
       setCompleteFollowUp(undefined);
     } catch {
@@ -92,17 +81,7 @@ export default function FollowupsPage() {
   const confirmCancel = async () => {
     if (!cancelFollowUp) return;
     try {
-      await cancelMutation.mutateAsync({
-        id: cancelFollowUp.id,
-        existing: {
-          businessId: cancelFollowUp.businessId,
-          assignedTo: cancelFollowUp.assignedToId || "",
-          type: (cancelFollowUp.type as FollowUpType) || "CALL",
-          scheduledAt: cancelFollowUp.scheduledAt,
-          notes: cancelFollowUp.notes || "",
-          reminder: cancelFollowUp.reminder,
-        },
-      });
+      await cancelMutation.mutateAsync(cancelFollowUp.id);
       toast.success("Follow-up cancelled");
       setCancelFollowUp(undefined);
     } catch {
@@ -194,7 +173,7 @@ export default function FollowupsPage() {
         <CompleteFollowUpDialog
           open={Boolean(completeFollowUp)}
           businessName={completeFollowUp.businessName}
-          loading={updateMutation.isPending}
+          loading={completeMutation.isPending}
           onOpenChange={(open) => {
             if (!open) setCompleteFollowUp(undefined);
           }}

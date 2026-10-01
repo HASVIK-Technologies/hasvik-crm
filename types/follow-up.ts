@@ -1,5 +1,5 @@
-export type FollowUpType = "CALL" | "MEETING" | "EMAIL" | "WHATSAPP";
-export type FollowUpStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED";
+export type FollowUpType = "CALL" | "MEETING" | "EMAIL" | "WHATSAPP" | "OTHER";
+export type FollowUpStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "OVERDUE";
 
 export const FOLLOW_UP_REMINDER_OPTIONS = [
   "10 minutes",
@@ -30,6 +30,7 @@ export interface FollowUpItem {
   scheduledAt: string;
   notes?: string;
   reminder?: string;
+  reminderInMinutes?: number;
 }
 
 export interface FollowUpFilters {
@@ -57,22 +58,28 @@ export interface FollowUpKpis {
 export interface CreateFollowUpPayload {
   businessId: string;
   assignedTo: string;
-  type: FollowUpType;
+  type: FollowUpType | string;
   scheduledAt: string;
-  status: "SCHEDULED";
-  notes: string;
+  notes?: string;
   reminder?: string;
+  reminderInMinutes?: number;
 }
 
 export interface UpdateFollowUpPayload {
-  id?: string;
+  id: string;
   followUpId?: string;
-  businessId: string;
-  assignedTo: string;
-  type: FollowUpType;
-  scheduledAt: string;
-  status: FollowUpStatus | string;
-  notes: string;
+  businessId?: string;
+  assignedTo?: string;
+  type?: FollowUpType | string;
+  scheduledAt?: string;
+  status?: FollowUpStatus | string;
+  notes?: string;
   reminder?: string;
+  reminderInMinutes?: number;
+}
+
+export interface UpdateFollowUpStatusPayload {
+  id: string;
+  status: "COMPLETED" | "CANCELLED";
 }
 

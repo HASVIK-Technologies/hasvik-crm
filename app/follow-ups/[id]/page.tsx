@@ -13,10 +13,9 @@ import CancelFollowUpDialog from "@/components/follow-ups/CancelFollowUpDialog";
 import CompleteFollowUpDialog from "@/components/follow-ups/CompleteFollowUpDialog";
 import {
   useCancelFollowUp,
+  useCompleteFollowUp,
   useFollowUpQuery,
-  useUpdateFollowUp,
 } from "@/hooks/use-follow-ups";
-import type { FollowUpType } from "@/types/follow-up";
 
 export default function FollowUpDetailsPage() {
   const [editOpen, setEditOpen] = useState(false);
@@ -27,22 +26,12 @@ export default function FollowUpDetailsPage() {
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const query = useFollowUpQuery(id);
   const cancelMutation = useCancelFollowUp();
-  const updateMutation = useUpdateFollowUp();
+  const completeMutation = useCompleteFollowUp();
 
   const handleCancel = async () => {
-    if (!id || !query.data) return;
+    if (!id) return;
     try {
-      await cancelMutation.mutateAsync({
-        id,
-        existing: {
-          businessId: query.data.businessId,
-          assignedTo: query.data.assignedToId || "",
-          type: (query.data.type as FollowUpType) || "CALL",
-          scheduledAt: query.data.scheduledAt,
-          notes: query.data.notes || "",
-          reminder: query.data.reminder,
-        },
-      });
+      await cancelMutation.mutateAsync(id);
       toast.success("Follow-up cancelled");
       setCancelOpen(false);
     } catch {
@@ -51,19 +40,9 @@ export default function FollowUpDetailsPage() {
   };
 
   const handleComplete = async () => {
-    if (!id || !query.data) return;
+    if (!id) return;
     try {
-      await updateMutation.mutateAsync({
-        id,
-        followUpId: id,
-        businessId: query.data.businessId,
-        assignedTo: query.data.assignedToId || "",
-        type: (query.data.type as FollowUpType) || "CALL",
-        scheduledAt: query.data.scheduledAt,
-        status: "COMPLETED",
-        notes: query.data.notes || "",
-        reminder: query.data.reminder,
-      });
+      await completeMutation.mutateAsync(id);
       toast.success("Follow-up marked as completed");
       setCompleteOpen(false);
     } catch {
@@ -171,7 +150,7 @@ export default function FollowUpDetailsPage() {
       <CompleteFollowUpDialog
         open={completeOpen}
         businessName={followUp.businessName}
-        loading={updateMutation.isPending}
+        loading={completeMutation.isPending}
         onOpenChange={setCompleteOpen}
         onConfirm={handleComplete}
       />
