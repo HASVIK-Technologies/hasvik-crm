@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { CalendarDays, X } from "lucide-react";
+import { Bell, CalendarDays, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -16,17 +16,23 @@ import {
 } from "@/components/ui/select";
 import FollowUpAutocomplete from "@/components/follow-ups/FollowUpAutocomplete";
 import { useCreateFollowUp } from "@/hooks/use-follow-ups";
-import type { FollowUpOption, FollowUpType } from "@/types/follow-up";
+import {
+  FOLLOW_UP_REMINDER_OPTIONS,
+  type FollowUpOption,
+  type FollowUpType,
+} from "@/types/follow-up";
 
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }
+
 export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
   const [business, setBusiness] = useState<FollowUpOption>();
   const [assignee, setAssignee] = useState<FollowUpOption>();
   const [scheduledAt, setScheduledAt] = useState("");
   const [type, setType] = useState<FollowUpType>("CALL");
+  const [reminder, setReminder] = useState("");
   const [notes, setNotes] = useState("");
   const mutation = useCreateFollowUp();
 
@@ -44,12 +50,14 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
         scheduledAt: new Date(scheduledAt).toISOString(),
         status: "SCHEDULED",
         notes,
+        reminder: reminder || undefined,
       });
       toast.success("Follow-up added");
       onOpenChange(false);
       setBusiness(undefined);
       setAssignee(undefined);
       setScheduledAt("");
+      setReminder("");
       setNotes("");
     } catch {
       toast.error("Unable to add follow-up.");
@@ -59,7 +67,7 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35 backdrop-blur-[2px]" />
         <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-2xl outline-none">
           <div className="mb-5 flex items-start justify-between">
             <div>
@@ -155,6 +163,30 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
+                Reminder
+              </label>
+              <Select
+                value={reminder || "none"}
+                onValueChange={(val) => setReminder(val === "none" ? "" : val)}
+              >
+                <SelectTrigger className="h-10 text-xs">
+                  <div className="flex items-center gap-2">
+                    <Bell className="size-3.5 text-[#94a3b8]" />
+                    <SelectValue placeholder="No reminder" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="none">No reminder</SelectItem>
+                  {FOLLOW_UP_REMINDER_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
                 Notes
               </label>
               <Textarea
@@ -171,7 +203,13 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
                 </Button>
               </DialogPrimitive.Close>
               <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? "Adding..." : "Add Follow-up"}
+                {mutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" /> Adding...
+                  </>
+                ) : (
+                  "Add Follow-up"
+                )}
               </Button>
             </div>
           </form>
