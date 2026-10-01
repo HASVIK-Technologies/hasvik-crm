@@ -102,7 +102,8 @@ export default function FollowUpEditDialog({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-[#e4ecf2] bg-white p-6 shadow-2xl outline-none">
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-[#e4ecf2] bg-white p-6 shadow-2xl outline-none">
+          {/* Header */}
           <div className="flex items-start justify-between border-b border-[#eef2f6] pb-4">
             <div>
               <DialogPrimitive.Title className="text-lg font-bold text-[#0f172a]">
@@ -123,121 +124,120 @@ export default function FollowUpEditDialog({
             </DialogPrimitive.Close>
           </div>
 
+          {/* Single-Column Vertical Form */}
           <form onSubmit={submit} className="mt-5 space-y-4">
-            <div className="grid gap-4 sm:grid-cols-2">
-              {/* Business Field: Read-Only / Non-editable */}
-              <div>
-                <label className="block text-xs font-semibold text-[#475569]">
-                  Business
-                </label>
-                <div className="relative mt-1">
-                  <Search className="pointer-events-none absolute left-3 top-3 size-4 text-[#94a3b8]" />
-                  <Input
-                    readOnly
-                    tabIndex={-1}
-                    value={followUp.businessName}
-                    title="Business cannot be changed from the edit follow-up flow"
-                    className="h-10 cursor-not-allowed border-[#e2e8f0] bg-[#f8fafc] pl-9 text-xs font-medium text-[#0f172a] select-none focus-visible:ring-0"
-                  />
-                </div>
-              </div>
-
-              {/* Assigned to */}
-              <div>
-                <label className="block text-xs font-semibold text-[#475569]">
-                  Assigned to
-                </label>
-                <div className="mt-1">
-                  <FollowUpAutocomplete
-                    kind="user"
-                    value={assignee?.id}
-                    label={assignee?.label}
-                    onChange={setAssignee}
-                    placeholder="Select team member"
-                  />
-                </div>
-              </div>
-
-              {/* Scheduled date */}
-              <div>
-                <label className="block text-xs font-semibold text-[#475569]">
-                  Scheduled date
-                </label>
+            {/* 1. Business (Read-Only) */}
+            <div>
+              <label className="block text-xs font-semibold text-[#475569]">
+                Business
+              </label>
+              <div className="relative mt-1.5">
+                <Search className="pointer-events-none absolute left-3 top-3 size-4 text-[#94a3b8]" />
                 <Input
-                  required
-                  type="datetime-local"
-                  value={scheduledAt}
-                  onChange={(event) => setScheduledAt(event.target.value)}
-                  className="mt-1 h-10 text-xs"
+                  readOnly
+                  tabIndex={-1}
+                  value={followUp.businessName}
+                  title="Business cannot be changed from the edit follow-up flow"
+                  className="h-10 w-full cursor-not-allowed border-[#e2e8f0] bg-[#f8fafc] pl-9 text-xs font-medium text-[#0f172a] select-none focus-visible:ring-0"
                 />
-              </div>
-
-              {/* Type */}
-              <div>
-                <label className="block text-xs font-semibold text-[#475569]">
-                  Type
-                </label>
-                <Select
-                  value={type}
-                  onValueChange={(value) => setType(value as FollowUpType)}
-                >
-                  <SelectTrigger className="mt-1 h-10 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="CALL">Call</SelectItem>
-                    <SelectItem value="MEETING">Meeting</SelectItem>
-                    <SelectItem value="EMAIL">Email</SelectItem>
-                    <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Status */}
-              <div>
-                <label className="block text-xs font-semibold text-[#475569]">
-                  Status
-                </label>
-                <Select value={status} onValueChange={setStatus}>
-                  <SelectTrigger className="mt-1 h-10 text-xs">
-                    <SelectValue />
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="SCHEDULED">Scheduled</SelectItem>
-                    <SelectItem value="COMPLETED">Completed</SelectItem>
-                    <SelectItem value="CANCELLED">Cancelled</SelectItem>
-                  </SelectContent>
-                </Select>
-              </div>
-
-              {/* Reminder Field */}
-              <div>
-                <label className="block text-xs font-semibold text-[#475569]">
-                  Reminder
-                </label>
-                <Select
-                  value={reminder || "none"}
-                  onValueChange={(val) => setReminder(val === "none" ? "" : val)}
-                >
-                  <SelectTrigger className="mt-1 h-10 text-xs">
-                    <div className="flex items-center gap-2">
-                      <Bell className="size-3.5 text-[#94a3b8]" />
-                      <SelectValue placeholder="No reminder" />
-                    </div>
-                  </SelectTrigger>
-                  <SelectContent className="bg-white">
-                    <SelectItem value="none">No reminder</SelectItem>
-                    {FOLLOW_UP_REMINDER_OPTIONS.map((opt) => (
-                      <SelectItem key={opt} value={opt}>
-                        {opt}
-                      </SelectItem>
-                    ))}
-                  </SelectContent>
-                </Select>
               </div>
             </div>
 
-            {/* Notes */}
+            {/* 2. Assigned to */}
+            <div>
+              <label className="block text-xs font-semibold text-[#475569]">
+                Assigned to
+              </label>
+              <div className="mt-1.5">
+                <FollowUpAutocomplete
+                  kind="user"
+                  value={assignee?.id}
+                  label={assignee?.label}
+                  onChange={setAssignee}
+                  placeholder="Select team member"
+                />
+              </div>
+            </div>
+
+            {/* 3. Scheduled Date */}
+            <div>
+              <label className="block text-xs font-semibold text-[#475569]">
+                Scheduled date
+              </label>
+              <Input
+                required
+                type="datetime-local"
+                value={scheduledAt}
+                onChange={(event) => setScheduledAt(event.target.value)}
+                className="mt-1.5 h-10 w-full text-xs"
+              />
+            </div>
+
+            {/* 4. Type */}
+            <div>
+              <label className="block text-xs font-semibold text-[#475569]">
+                Type
+              </label>
+              <Select
+                value={type}
+                onValueChange={(value) => setType(value as FollowUpType)}
+              >
+                <SelectTrigger className="mt-1.5 h-10 w-full text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="CALL">Call</SelectItem>
+                  <SelectItem value="MEETING">Meeting</SelectItem>
+                  <SelectItem value="EMAIL">Email</SelectItem>
+                  <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 5. Status */}
+            <div>
+              <label className="block text-xs font-semibold text-[#475569]">
+                Status
+              </label>
+              <Select value={status} onValueChange={setStatus}>
+                <SelectTrigger className="mt-1.5 h-10 w-full text-xs">
+                  <SelectValue />
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="SCHEDULED">Scheduled</SelectItem>
+                  <SelectItem value="COMPLETED">Completed</SelectItem>
+                  <SelectItem value="CANCELLED">Cancelled</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 6. Reminder */}
+            <div>
+              <label className="block text-xs font-semibold text-[#475569]">
+                Reminder
+              </label>
+              <Select
+                value={reminder || "none"}
+                onValueChange={(val) => setReminder(val === "none" ? "" : val)}
+              >
+                <SelectTrigger className="mt-1.5 h-10 w-full text-xs">
+                  <div className="flex items-center gap-2">
+                    <Bell className="size-3.5 text-[#94a3b8]" />
+                    <SelectValue placeholder="No reminder" />
+                  </div>
+                </SelectTrigger>
+                <SelectContent className="bg-white">
+                  <SelectItem value="none">No reminder</SelectItem>
+                  {FOLLOW_UP_REMINDER_OPTIONS.map((opt) => (
+                    <SelectItem key={opt} value={opt}>
+                      {opt}
+                    </SelectItem>
+                  ))}
+                </SelectContent>
+              </Select>
+            </div>
+
+            {/* 7. Notes */}
             <div>
               <label className="block text-xs font-semibold text-[#475569]">
                 Notes
@@ -246,12 +246,12 @@ export default function FollowUpEditDialog({
                 value={notes}
                 onChange={(event) => setNotes(event.target.value)}
                 placeholder="Add notes about this follow-up..."
-                className="mt-1 min-h-28 text-xs"
+                className="mt-1.5 min-h-28 w-full text-xs"
               />
             </div>
 
-            {/* Action buttons */}
-            <div className="flex justify-end gap-2 border-t border-[#eef2f6] pt-4">
+            {/* Action Buttons */}
+            <div className="flex justify-end gap-2.5 border-t border-[#eef2f6] pt-4">
               <DialogPrimitive.Close asChild>
                 <Button type="button" variant="outline">
                   Cancel
