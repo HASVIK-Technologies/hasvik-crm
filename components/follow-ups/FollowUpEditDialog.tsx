@@ -47,9 +47,14 @@ export default function FollowUpEditDialog({
   const [type, setType] = useState<FollowUpType>(
     (followUp.type as FollowUpType) || "CALL",
   );
+  const sanitizeNotes = (val?: string) =>
+    val && val !== "[object Object]" && val !== "null" && val !== "undefined"
+      ? val
+      : "";
+
   const [status, setStatus] = useState(followUp.status);
   const [reminder, setReminder] = useState(followUp.reminder ?? "");
-  const [notes, setNotes] = useState(followUp.notes ?? "");
+  const [notes, setNotes] = useState(sanitizeNotes(followUp.notes));
 
   // Sync state whenever followUp changes or dialog opens
   useEffect(() => {
@@ -67,7 +72,7 @@ export default function FollowUpEditDialog({
       setType((followUp.type as FollowUpType) || "CALL");
       setStatus(followUp.status);
       setReminder(followUp.reminder ?? "");
-      setNotes(followUp.notes ?? "");
+      setNotes(sanitizeNotes(followUp.notes));
     }
   }, [followUp, open]);
 

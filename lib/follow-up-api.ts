@@ -51,12 +51,70 @@ export async function getFollowUpOptions(
     .map(optionFromApi);
 }
 
+function parseNotes(value: unknown): string | undefined {
+  if (!value) return undefined;
+  if (typeof value === "string") {
+    const trimmed = value.trim();
+    if (
+      trimmed === "[object Object]" ||
+      trimmed === "null" ||
+      trimmed === "undefined"
+    ) {
+      return "";
+    }
+    if (trimmed.startsWith("{") || trimmed.startsWith("[")) {
+      try {
+        const parsed = JSON.parse(trimmed);
+        return parseNotes(parsed);
+      } catch {
+        return trimmed;
+      }
+    }
+    return trimmed;
+  }
+  if (Array.isArray(value)) {
+    return value
+      .map((item) => parseNotes(item))
+      .filter(Boolean)
+      .join("\n");
+  }
+  if (typeof value === "object") {
+    const obj = value as Record<string, unknown>;
+    const directContent =
+      obj.text ??
+      obj.note ??
+      obj.content ??
+      obj.message ??
+      obj.body ??
+      obj.comment ??
+      obj.description;
+    if (directContent !== undefined && directContent !== null) {
+      return parseNotes(directContent);
+    }
+    const textValues = Object.entries(obj)
+      .filter(
+        ([k, v]) =>
+          !k.startsWith("_") &&
+          typeof v === "string" &&
+          v !== "[object Object]",
+      )
+      .map(([, v]) => v as string);
+    if (textValues.length > 0) {
+      return textValues.join(" - ");
+    }
+    return "";
+  }
+  return String(value);
+}
+
 function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
   const business = (value.business ?? {}) as Record<string, unknown>;
   const assignee = (value.assignee ?? value.assignedTo ?? {}) as Record<
     string,
     unknown
   >;
+  const rawNotes =
+    value.notes ?? value.note ?? value.comment ?? value.description;
   return {
     id: String(value._id ?? value.id ?? ""),
     businessId: String(value.businessId ?? business._id ?? business.id ?? ""),
@@ -84,7 +142,7 @@ function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
     type: String(value.type ?? "CALL"),
     status: String(value.status ?? "SCHEDULED"),
     scheduledAt: String(value.scheduledAt ?? value.followUpDate ?? ""),
-    notes: value.notes ? String(value.notes) : undefined,
+    notes: parseNotes(rawNotes),
     reminder: value.reminder ? String(value.reminder) : undefined,
   };
 }

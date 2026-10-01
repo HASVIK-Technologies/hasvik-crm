@@ -170,7 +170,11 @@ export default function FollowUpDetails({
           <div className="mt-8 border-t border-[#eef2f6] pt-6">
             <h3 className="text-sm font-bold text-[#0f172a]">Notes</h3>
             <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#475569]">
-              {followUp.notes || "No notes have been added to this follow-up."}
+              {followUp.notes &&
+              followUp.notes !== "[object Object]" &&
+              followUp.notes.trim()
+                ? followUp.notes
+                : "No notes have been added to this follow-up."}
             </p>
           </div>
         </section>
