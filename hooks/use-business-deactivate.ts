@@ -7,14 +7,13 @@ export function useUpdateBusinessStatus() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (data: { businessId: string, status: string }) => updateBusinessStatusApi(data),
+    mutationFn: (data: { businessId: string, isActive: boolean }) => updateBusinessStatusApi(data),
     onSuccess: (_, variables) => {
-      toast.success(`Business is now ${variables.status}!`); // Dynamic Toast!
-      queryClient.invalidateQueries({ queryKey: ["businesses", variables.businessId] });
-      queryClient.invalidateQueries({ queryKey: ["businesses"] });
-    },
-    onError: (error) => {
-      toast.error(getApiErrorMessage(error));
+      const statusText = variables.isActive ? "Activated" : "Deactivated";
+      toast.success(`Business successfully ${statusText}!`); 
+      
+      queryClient.invalidateQueries({ queryKey: ["business", variables.businessId] });
+      queryClient.invalidateQueries({ queryKey: ["businesses"] });    
     }
   });
 }

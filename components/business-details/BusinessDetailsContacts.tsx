@@ -35,7 +35,6 @@ export default function BusinessDetailsContacts({ businessData }: ContactsProps)
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full text-blue-600 border-dashed hover:text-blue-700"><Plus className="w-4 h-4 mr-2" /> Add Phone Number</Button>
                 </div>
 
                 {/* WhatsApp List */}
@@ -53,7 +52,6 @@ export default function BusinessDetailsContacts({ businessData }: ContactsProps)
                       </div>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full text-blue-600 border-dashed hover:text-blue-700"><Plus className="w-4 h-4 mr-2" /> Add WhatsApp Number</Button>
                 </div>
                 
                 {/* Email List */}
@@ -68,9 +66,7 @@ export default function BusinessDetailsContacts({ businessData }: ContactsProps)
                       <button><Trash2 className="w-4 h-4 text-red-500 hover:text-red-600 shrink-0" /></button>
                     </div>
                   ))}
-                  <Button variant="outline" className="w-full text-blue-600 border-dashed hover:text-blue-700"><Plus className="w-4 h-4 mr-2" /> Add Email</Button>
                 </div>
-
               </div>
             </div>
           </div>

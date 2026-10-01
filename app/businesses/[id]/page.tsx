@@ -16,6 +16,8 @@ import BusinessDetailsOverview from "../../../components/business-details/Busine
 import BusinessDetailsQuickActions from "../../../components/business-details/BusinessDetailsQuickActions";
 // import PhoneButton from "../../../components/business-details/business-details-header/PhoneButton";
 import BusinessDetailsContacts from "../../../components/business-details/BusinessDetailsContacts";
+import { useBusinessFollowUpsQuery } from "@/hooks/use-business-get-follow-ups";
+import { useModalStore } from "@/store/business-modal-store";
 import { AddFollowUpModal } from "@/components/business-details/AddFollowUpModal";
 
 
@@ -119,6 +121,9 @@ export default function BusinessDetails() {
   const [reminder, setReminder] = React.useState("");
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  const stringId = typeof rawId === "string" ? rawId : "";
+  const { data: followUps } = useBusinessFollowUpsQuery(stringId);
+  const realFollowUpsCount = Array.isArray(followUps) ? followUps.length : 0;
   const {
     data: apiBusiness,
     isError,
@@ -128,7 +133,8 @@ export default function BusinessDetails() {
   // For /businesses/12, always provide the static Hasvik Technology data as requested
   const business =
     apiBusiness ?? (numericId === 12 ? STATIC_BUSINESS_12 : undefined);
-
+  const { openFollowUpModal, openDeactivateModal } = useModalStore();
+  const isInactive = business?.status?.toLowerCase() === "inactive" || (business as any)?.isActive === false;
   // If business is not found or ID is invalid
   // if ((isLoaded || numericId === 12) && !business) {
   //   return (
@@ -206,18 +212,20 @@ export default function BusinessDetails() {
           primary={{
             label: "Add Follow-Up",
             icon: <Plus className="size-4" />,
+            disabled: isInactive, // Lock it if inactive!
+            onSelect: () => openFollowUpModal(String(business?.id)) // Open the modal!
           }}
           secondary={[
             {
               label: "Edit Business",
               icon: <Edit2 className="size-4" />,
-              disabled: business?.status?.toLowerCase() !== "active",
+              href: `/businesses/form/${business.id}`, // Link to the edit form!
+              disabled: isInactive, // Lock it if inactive!
             },
             {
-              label:
-                business?.status?.toLowerCase() === "active"
-                  ? "Deactivate"
-                  : "Activate",
+              label: isInactive ? "Activate" : "Deactivate",
+              // Open the Deactivate/Activate modal!
+              onSelect: () => openDeactivateModal(String(business?.id))
             },
           ]}
         />
@@ -441,17 +449,17 @@ export default function BusinessDetails() {
                 .filter((tab: any) => tab.id !== "activity-log" && tab.id !== "Notes")
                 .map((tab: any) => (
                   <TabsTrigger
-                    key={tab.id}
-                    value={tab.id}
-                    className="flex-none !px-0 py-2 !bg-transparent !shadow-none border-0 border-b-2 border-transparent rounded-none text-slate-500 font-medium text-base data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 outline-none focus-visible:ring-0"
-                  >
-                    {tab.label}
-                    {tab.id === "contacts" &&
-                      ` (${businessData.contactInfo.phones.length + businessData.contactInfo.whatsapps.length})`}
-                    {tab.id === "follow-ups" &&
-                      ` (${businessData.recentFollowUps.length})`}
-                    {/* {tab.id === "notes" && ` (2)`} */}
-                  </TabsTrigger>
+                  key={tab.id}
+                  value={tab.id}
+                  className="flex-none !px-0 py-2 !bg-transparent !shadow-none border-0 border-b-2 border-transparent rounded-none text-slate-500 font-medium text-base data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 outline-none focus-visible:ring-0"
+                >
+                  {tab.label}
+                  
+                  {/* Contacts: Deleted the old number code! */}
+                  {/* Follow-ups: Using the REAL TanStack count! */}
+                  {tab.id === "follow-ups" && ` (${realFollowUpsCount})`}
+                  
+                </TabsTrigger>
                 ))}
             </TabsList>
 
@@ -477,18 +485,20 @@ export default function BusinessDetails() {
 
             {/* FOLLOW-UPS TAB */}
             <TabsContent value="follow-ups" className="mt-6">
-              <BusinessDetailsFollowups businessData={businessData} />
+              <BusinessDetailsFollowups/>
             </TabsContent>
             {/* NOTES TAB 
             <TabsContent value="notes" className="mt-6"></TabsContent> */}
             
           </Tabs>
-
-          
           {/* New Follow-up Modal */}
-          <AddFollowUpModal />
+          <AddFollowUpModal businessName={business?.name || "Business"} />
           {/* Deactivate Business Modal */}
-          <DeactivateBusinessModal businessName={business.name} businessStatus={business.status} />
+          <DeactivateBusinessModal 
+            businessName={business?.name || ""} 
+            businessStatus={business?.status || ""} 
+            businessIsActive={(business as any)?.isActive}
+          />
         </>
       }
     />

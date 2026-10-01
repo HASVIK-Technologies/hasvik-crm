@@ -3,25 +3,28 @@ import { Slash, CheckCircle } from "lucide-react";
 import { useModalStore } from "@/store/business-modal-store";
 import { useUpdateBusinessStatus } from "@/hooks/use-business-deactivate";
 
-// 1. We now expect businessStatus as a prop!
+// 1. Change the prop to boolean!
 interface ModalProps {
   businessName: string;
-  businessStatus: string; 
+  businessStatus: string; // We put status back!
+  businessIsActive?: boolean; 
 }
 
-export function DeactivateBusinessModal({ businessName, businessStatus }: ModalProps) {
+export function DeactivateBusinessModal({ businessName, businessStatus, businessIsActive }: ModalProps) {
   const { isDeactivateModalOpen, closeDeactivateModal, activeBusinessId } = useModalStore();
   const statusMutation = useUpdateBusinessStatus();
 
-  // 2. Logic to figure out what the UI should look like
-  const isInactive = businessStatus?.toLowerCase() === "inactive";
-  const newStatus = isInactive ? "ACTIVE" : "INACTIVE";
+  // Now it safely checks both!
+  const isInactive = businessStatus?.toLowerCase() === "inactive" || businessIsActive === false;
+  
+  const newIsActiveState = isInactive ? true : false;
   const actionText = isInactive ? "Activate" : "Deactivate";
 
   const handleConfirm = async () => {
     if (!activeBusinessId) return;
     try {
-      await statusMutation.mutateAsync({ businessId: activeBusinessId, status: newStatus });
+      // 3. Send the boolean to the hook
+      await statusMutation.mutateAsync({ businessId: activeBusinessId, isActive: newIsActiveState });
       closeDeactivateModal(); 
     } catch {
       // Error handled by hook
@@ -34,7 +37,6 @@ export function DeactivateBusinessModal({ businessName, businessStatus }: ModalP
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-slate-200 text-center">
         
-        {/* Dynamic Icon (Green if activating, Red if deactivating) */}
         <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${isInactive ? "bg-emerald-100" : "bg-red-100"}`}>
           {isInactive ? <CheckCircle className="h-6 w-6 text-emerald-600" /> : <Slash className="h-6 w-6 text-red-600" />}
         </div>

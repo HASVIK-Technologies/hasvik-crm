@@ -15,7 +15,7 @@ export default function BusinessDetailsQuickActions({ business, cleanNumber }: Q
   const { openFollowUpModal, openDeactivateModal } = useModalStore();
 
   // 1. Check if the business is currently Inactive
-  const isInactive = business.status?.toLowerCase() === "inactive";
+  const isInactive = business?.status?.toLowerCase() === "inactive" || business?.isActive === false;
   
   // 2. A special CSS class we add to disabled buttons so they look faded out
   const disabledStyles = isInactive ? "opacity-50 pointer-events-none cursor-not-allowed" : "";
