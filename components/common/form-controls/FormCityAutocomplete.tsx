@@ -22,7 +22,7 @@ export default function FormCityAutocomplete({
   label,
   value = "",
   onChange,
-  placeholder = "Start typing a city",
+  placeholder = "Select a city",
   required,
   invalid,
 }: FormCityAutocompleteProps) {

@@ -59,6 +59,9 @@ const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
   pincode: "Pincode",
   address: "Address",
   status: "Status",
+  leadSource: "Follow-up Type",
+  assignTo: "Assignee",
+  nextFollowupDate: "Next Follow-up Date",
   phoneNumbers: "Phone Number",
   whatsappNumbers: "WhatsApp Number",
 };
@@ -198,7 +201,10 @@ export default function BusinessForm({
           nextFollowupDate: data.nextFollowupDate
             ? data.nextFollowupDate.slice(0, 10)
             : "",
-          reminder: data.reminder || "",
+          reminder:
+            data.reminder === undefined || data.reminder === null
+              ? ""
+              : String(data.reminder),
           addAnother: false,
         };
 
@@ -261,7 +267,7 @@ export default function BusinessForm({
       : []),
     {
       key: "followup",
-      title: "Follow-up Settings",
+      title: "Follow-up",
       render: (idPrefix: string) => <FollowUpSection idPrefix={idPrefix} />,
     },
   ];
@@ -301,7 +307,7 @@ export default function BusinessForm({
       description: values.description || undefined,
       notes: values.notes || undefined,
       nextFollowupDate: values.nextFollowupDate || undefined,
-      reminder: values.reminder || undefined,
+      reminder: values.reminder ? Number(values.reminder) : undefined,
       phoneNumbers: values.phoneNumbers
         .filter((p) => p.value.trim())
         .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
@@ -425,7 +431,7 @@ export default function BusinessForm({
                 </FormSection>
               )}
 
-              <FormSection icon={UsersRound} title="Follow-up Settings">
+              <FormSection icon={UsersRound} title="Follow-up">
                 <FollowUpSection idPrefix="desktop-" />
               </FormSection>
 

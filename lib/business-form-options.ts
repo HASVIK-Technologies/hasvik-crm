@@ -93,17 +93,11 @@ export const LEAD_SOURCE_OPTIONS = [
   "Trade Show",
 ];
 
-export const TEAM_MEMBER_OPTIONS = [
-  "Amit Sharma",
-  "Priya Nair",
-  "Rahul Verma",
-  "Sneha Iyer",
-];
-
 export const REMINDER_OPTIONS = [
-  "No reminder",
-  "On the day",
-  "1 day before",
-  "2 days before",
-  "1 week before",
+  { value: "5", label: "5 mins" },
+  { value: "10", label: "10 mins" },
+  { value: "15", label: "15 mins" },
+  { value: "30", label: "30 mins" },
+  { value: "45", label: "45 mins" },
+  { value: "60", label: "1 hr" },
 ];

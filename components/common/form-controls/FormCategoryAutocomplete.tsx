@@ -24,7 +24,7 @@ export default function FormCategoryAutocomplete({
   value = "",
   valueLabel = "",
   onChange,
-  placeholder = "Start typing a category",
+  placeholder = "Select a category",
   required,
   invalid,
 }: FormCategoryAutocompleteProps) {

@@ -5,6 +5,7 @@ import React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import OutlinedButton from "@/components/common/OutlinedButton";
+import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import Actions from "@/components/common/Actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -51,6 +52,7 @@ import { ChangeBusinessStatusModal } from "@/components/businesses";
 import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
+import { REMINDER_OPTIONS } from "@/lib/business-form-options";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -118,11 +120,7 @@ export default function BusinessDetails() {
   const [reminder, setReminder] = React.useState("");
 
   const submitFollowUpToApi = async () => {
-    if (
-      !followUpDate ||
-      assignedTo === "Select Assignee..." ||
-      reminder === "Select Reminder..."
-    ) {
+    if (!followUpDate || !assignedTo || !reminder) {
       alert("Please fill out all fields before adding!");
       return;
     }
@@ -138,7 +136,7 @@ export default function BusinessDetails() {
           body: JSON.stringify({
             nextFollowupDate: followUpDate,
             assignedTo: assignedTo,
-            reminder: reminder,
+            reminder: Number(reminder),
           }),
         },
       );
@@ -591,16 +589,11 @@ export default function BusinessDetails() {
                     <label className="text-xs font-semibold text-slate-500 camelcase tracking-wider">
                       Assigned To
                     </label>
-                    <select
+                    <AssigneeAutocomplete
                       value={assignedTo}
-                      onChange={(e) => setAssignedTo(e.target.value)}
-                      className="w-full mt-1.5 p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
-                    >
-                      <option>Select Assignee...</option>
-                      <option>Amit Sharma</option>
-                      <option>Annu Singh</option>
-                      <option>Aakriti Singh</option>
-                    </select>
+                      label={assignedTo}
+                      onChange={(option) => setAssignedTo(option?.id ?? "")}
+                    />
                   </div>
                   {/* Reminder Dropdown */}
                   <div>
@@ -612,31 +605,12 @@ export default function BusinessDetails() {
                       onChange={(e) => setReminder(e.target.value)}
                       className="w-full mt-1.5 p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
                     >
-                      <option>Select Reminder...</option>
-                      <option>Before 15 Minutes</option>
-                      <option>Before 30 Minutes</option>
-                      <option>Before 1 Hour</option>
-                      <option>At 9:00 AM</option>
-                      <option>At 9:30 AM</option>
-                      <option>At 10:00 AM</option>
-                      <option>At 10:30 AM</option>
-                      <option>At 11:00 AM</option>
-                      <option>At 11:30 AM</option>
-                      <option>At 12:00 PM</option>
-                      <option>At 12:30 PM</option>
-                      <option>At 01:00 PM</option>
-                      <option>At 01:30 PM</option>
-                      <option>At 02:00 PM</option>
-                      <option>At 02:30 PM</option>
-                      <option>At 03:00 PM</option>
-                      <option>At 03:30 PM</option>
-                      <option>At 04:00 PM</option>
-                      <option>At 04:30 PM</option>
-                      <option>At 05:00 PM</option>
-                      <option>At 05:30 PM</option>
-                      <option>At 06:00 PM</option>
-                      <option>At 06:30 PM</option>
-                      <option>At 07:0 PM</option>
+                      <option value="">Select Reminder...</option>
+                      {REMINDER_OPTIONS.map((option) => (
+                        <option key={option.value} value={option.value}>
+                          {option.label}
+                        </option>
+                      ))}
                     </select>
                   </div>
                 </div>

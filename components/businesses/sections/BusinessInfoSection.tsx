@@ -54,7 +54,7 @@ export default function BusinessInfoSection({
             label="Category"
             value={field.value}
             onChange={(categoryId) => field.onChange(categoryId)}
-            placeholder="Start typing a category"
+            placeholder="Select a category"
             required
             invalid={!!fieldState.error}
           />
@@ -71,7 +71,7 @@ export default function BusinessInfoSection({
             label="City"
             value={field.value}
             onChange={field.onChange}
-            placeholder="Start typing a city"
+            placeholder="Select a city"
             required
             invalid={!!fieldState.error}
           />

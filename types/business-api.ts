@@ -26,7 +26,7 @@ export type ApiBusiness = {
   assignedTo?: string;
   leadSource?: string;
   nextFollowupDate?: string;
-  reminder?: string;
+  reminder?: string | number;
   description?: string;
   notes?: string;
   createdAt?: string;
