@@ -24,13 +24,16 @@ export const CITY_OPTIONS = [
   "Surat",
 ];
 
+// Values match the backend's exact enum for `status` on POST/PATCH
+// /businesses - sending anything else is rejected with a 400. Labels are
+// just the friendly text shown in the dropdown.
 export const STATUS_OPTIONS = [
-  "New Lead",
-  "Contacted",
-  "Follow-up Scheduled",
-  "Negotiation",
-  "Converted",
-  "Not Interested",
+  { value: "NEW", label: "New Lead" },
+  { value: "CONTACTED", label: "Contacted" },
+  { value: "PROPOSAL_AND_NEGOTIATION", label: "Proposal & Negotiation" },
+  { value: "INTERESTED", label: "Interested" },
+  { value: "WON", label: "Won" },
+  { value: "LOST", label: "Lost" },
 ];
 
 export const BUSINESS_TYPE_OPTIONS = [

@@ -6,7 +6,6 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import OutlinedButton from "../common/OutlinedButton";
 import SearchInput from "../common/SearchInput";
 import PageContainer from "./PageContainer";
-import { Card } from "../ui/card";
 
 interface LayoutProps {
   breadcrumb?: React.ReactNode;
@@ -41,10 +40,12 @@ export default function ListPageLayout({
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
 
   const handleFilterToggle = () => {
-    setShowFilters((visible) => !visible);
     if (window.matchMedia("(max-width: 1023px)").matches) {
       setFilterDrawerOpen(true);
+      return;
     }
+
+    setShowFilters((visible) => !visible);
   };
 
   const search =
@@ -87,7 +88,7 @@ export default function ListPageLayout({
         <div className="hidden grow lg:flex p-4 rounded-2xl border border-[#e4ecf2] shadow-[0_2px_12px_rgba(20,40,60,0.03)] bg-white overflow-visible">
           <div className="flex w-full flex-col lg:flex-row gap-4 items-center">
             {search && <div className="w-full lg:w-72 xl:w-80 shrink-0">{search}</div>}
-            {filters && <div className="min-w-0 flex-1 w-full">{filters}</div>}
+            {filters && <div className="min-w-0 flex-1 w-full border-l border-[#e2e8f0] pl-4">{filters}</div>}
           </div>
         </div>
       )}

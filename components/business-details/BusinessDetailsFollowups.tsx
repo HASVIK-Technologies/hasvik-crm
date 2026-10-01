@@ -1,4 +1,5 @@
 import React from "react";
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Badge } from "@/components/ui/badge";
 import { Phone, MoreVertical } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";

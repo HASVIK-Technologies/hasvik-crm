@@ -1,0 +1,2 @@
+export const ACCESS_TOKEN_TTL_MS = 15 * 60 * 1000;
+export const ACCESS_TOKEN_REFRESH_BUFFER_MS = 60 * 1000;

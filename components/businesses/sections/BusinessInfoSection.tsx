@@ -5,9 +5,9 @@ import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import LabeledSelect from "@/components/businesses/LabeledSelect";
+import { useCategoriesQuery } from "@/hooks/use-businesses";
 import {
   BUSINESS_TYPE_OPTIONS,
-  CATEGORY_OPTIONS,
   CITY_OPTIONS,
   STATUS_OPTIONS,
 } from "@/lib/business-form-options";
@@ -23,6 +23,14 @@ export default function BusinessInfoSection({
     register,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
+
+  const { data: categories, isLoading: categoriesLoading } =
+    useCategoriesQuery();
+  const categoryOptions =
+    categories?.map((category) => ({
+      value: category._id,
+      label: category.name,
+    })) ?? [];
 
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
@@ -51,12 +59,15 @@ export default function BusinessInfoSection({
         render={({ field, fieldState }) => (
           <LabeledSelect
             label="Category"
-            placeholder="Select category"
-            options={CATEGORY_OPTIONS}
+            placeholder={
+              categoriesLoading ? "Loading categories..." : "Select category"
+            }
+            options={categoryOptions}
             value={field.value}
             onChange={field.onChange}
             required
             invalid={!!fieldState.error}
+            disabled={categoriesLoading}
           />
         )}
       />

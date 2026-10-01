@@ -3,7 +3,6 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  Download,
   SlidersHorizontal,
   ChevronDown,
   Phone,
@@ -11,9 +10,7 @@ import {
   ChevronLeft,
   ChevronRight,
   Building2,
-  X,
 } from "lucide-react";
-import { Checkbox } from "@/components/ui/checkbox";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PlainButton from "@/components/common/PlainButton";
@@ -69,7 +66,6 @@ interface BusinessTableProps {
   businesses: BusinessItem[];
   totalCount?: number;
   isLoading?: boolean;
-  onExport?: () => void;
   sortOrder?: string;
   onSortOrderChange?: (sort: string) => void;
   currentPage: number;
@@ -84,7 +80,6 @@ export default function BusinessTable({
   businesses,
   totalCount,
   isLoading = false,
-  onExport,
   sortOrder = "-createdAt",
   onSortOrderChange,
   currentPage,
@@ -103,21 +98,6 @@ export default function BusinessTable({
 
   const handleOpenStatusModal = (item: BusinessItem) => {
     setStatusModalBusiness(item);
-  };
-  const [selectedRowIds, setSelectedRowIds] = useState<(string | number)[]>([]);
-
-  const handleToggleRow = (id: string | number) => {
-    setSelectedRowIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
-    );
-  };
-
-  const handleToggleSelectAll = () => {
-    if (businesses.length > 0 && selectedRowIds.length === businesses.length) {
-      setSelectedRowIds([]);
-    } else {
-      setSelectedRowIds(businesses.map((b) => b.id));
-    }
   };
 
   const handleConfirmStatusChange = async () => {
@@ -154,29 +134,9 @@ export default function BusinessTable({
             <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
               Businesses <span className="font-medium text-[#64748b]">({displayCount})</span>
             </h2>
-            {selectedRowIds.length > 0 && (
-              <span className="inline-flex items-center gap-1.5 rounded-lg bg-[#eff6ff] px-2.5 py-1 text-xs font-semibold text-[#0b63e5]">
-                {selectedRowIds.length} selected
-                <button
-                  type="button"
-                  onClick={() => setSelectedRowIds([])}
-                  className="rounded p-0.5 hover:bg-[#dbeafe] text-[#1e40af]"
-                  title="Clear selection"
-                >
-                  <X className="size-3" />
-                </button>
-              </span>
-            )}
           </div>
 
           <div className="flex items-center gap-2.5 sm:gap-3">
-            <OutlinedButton
-              onClick={onExport}
-            >
-              <Download />
-              Export
-            </OutlinedButton>
-
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <OutlinedButton>
@@ -246,25 +206,22 @@ export default function BusinessTable({
               {businesses.map((item) => (
                 <div
                   key={item.id}
-                  onClick={() => router.push(`/businesses/${item.id}`)}
-                  className="flex cursor-pointer items-start justify-between gap-3 md:gap-4 rounded-2xl border border-[#eaf0f6] bg-white p-3 md:p-4 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all hover:border-[#0b63e5]/40 hover:shadow-md"
+                  onClick={
+                    item.status === "Active"
+                      ? () => router.push(`/businesses/${item.id}`)
+                      : undefined
+                  }
+                  className={`flex items-start justify-between gap-3 rounded-2xl border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all md:gap-4 md:p-4 ${
+                    item.status === "Active"
+                      ? "cursor-pointer hover:border-[#0b63e5]/40 hover:shadow-md"
+                      : ""
+                  }`}
                 >
-                  {/* Left Side: Checkbox + Avatar + Business Info */}
+                  {/* Left Side: Avatar + Business Info */}
                   <div className="flex items-start gap-3 min-w-0">
-                    <div
-                      onClick={(e) => e.stopPropagation()}
-                      className="mt-2.5 shrink-0 flex items-center justify-center"
-                    >
-                      <Checkbox
-                        checked={selectedRowIds.includes(item.id)}
-                        onCheckedChange={() => handleToggleRow(item.id)}
-                        aria-label={`Select ${item.name}`}
-                        className="size-4 rounded border-[#cbd5e1] data-[state=checked]:bg-[#0b63e5] data-[state=checked]:border-[#0b63e5]"
-                      />
-                    </div>
                     <Avatar
                       className={cn(
-                        "size-11 shrink-0 rounded-full text-sm font-bold",
+                        "hidden size-11 shrink-0 rounded-full text-sm font-bold sm:flex",
                         item.avatarBg,
                         item.avatarTextColor
                       )}
@@ -279,6 +236,9 @@ export default function BusinessTable({
                       </h3>
                       <p className="mt-0.5 text-xs text-[#64748b]">
                         {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
+                      </p>
+                      <p className="mt-0.5 text-xs text-[#64748b]">
+                        Lead status: {formatDisplayString(item.leadStatus, "-")}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
                     </div>
@@ -361,24 +321,28 @@ export default function BusinessTable({
                           </PlainButton>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-36 bg-white">
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/businesses/${item.id}`);
-                            }}
-                            className="cursor-pointer text-xs"
-                          >
-                            View Details
-                          </DropdownMenuItem>
-                          <DropdownMenuItem
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              router.push(`/businesses/form/${item.id}`);
-                            }}
-                            className="cursor-pointer text-xs"
-                          >
-                            Edit Business
-                          </DropdownMenuItem>
+                          {item.status === "Active" && (
+                            <>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(`/businesses/${item.id}`);
+                                }}
+                                className="cursor-pointer text-xs"
+                              >
+                                View Details
+                              </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  router.push(`/businesses/form/${item.id}`);
+                                }}
+                                className="cursor-pointer text-xs"
+                              >
+                                Edit Business
+                              </DropdownMenuItem>
+                            </>
+                          )}
                           <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
@@ -403,22 +367,10 @@ export default function BusinessTable({
           <Table className="w-full min-w-225 text-left">
             <TableHeader className="text-[13px] font-semibold">
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
-                <TableHead className="py-4 pl-6 pr-4 font-semibold">
-                  <div className="flex items-center gap-3">
-                    <Checkbox
-                      checked={
-                        businesses.length > 0 &&
-                        selectedRowIds.length === businesses.length
-                      }
-                      onCheckedChange={handleToggleSelectAll}
-                      aria-label="Select all businesses"
-                      className="size-4 rounded border-[#cbd5e1] data-[state=checked]:bg-[#0b63e5] data-[state=checked]:border-[#0b63e5]"
-                    />
-                    <span>Business Name</span>
-                  </div>
-                </TableHead>
+                <TableHead className="py-4 pl-6 pr-4 font-semibold">Business Name</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Category</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">City</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Status</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>
@@ -449,6 +401,9 @@ export default function BusinessTable({
                       <div className="h-6 w-16 rounded-full bg-[#f1f5f9] animate-pulse" />
                     </TableCell>
                     <TableCell className="px-4 py-4.5">
+                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
+                    <TableCell className="px-4 py-4.5">
                       <div className="h-3.5 w-28 rounded bg-[#f1f5f9] animate-pulse" />
                     </TableCell>
                     <TableCell className="px-4 py-4.5">
@@ -464,7 +419,7 @@ export default function BusinessTable({
                 ))
               ) : businesses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={7} className="py-0">
+                  <TableCell colSpan={8} className="py-0">
                     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                       <div className="flex size-14 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
                         <Building2 className="size-7 text-[#94a3b8]" />
@@ -489,23 +444,20 @@ export default function BusinessTable({
                 businesses.map((item) => (
                   <TableRow
                     key={item.id}
-                    onClick={() => router.push(`/businesses/${item.id}`)}
-                    className="cursor-pointer border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80"
+                    onClick={
+                      item.status === "Active"
+                        ? () => router.push(`/businesses/${item.id}`)
+                        : undefined
+                    }
+                    className={`border-b border-[#f1f5f9] transition-colors ${
+                      item.status === "Active"
+                        ? "cursor-pointer hover:bg-[#f8fafc]/80"
+                        : ""
+                    }`}
                   >
-                    {/* Business Name + Checkbox + Avatar + Phone */}
+                    {/* Business Name + Avatar + Phone */}
                     <TableCell className="py-4.5 pl-6 pr-4">
                       <div className="flex items-center gap-3.5">
-                        <div
-                          onClick={(e) => e.stopPropagation()}
-                          className="flex items-center justify-center shrink-0"
-                        >
-                          <Checkbox
-                            checked={selectedRowIds.includes(item.id)}
-                            onCheckedChange={() => handleToggleRow(item.id)}
-                            aria-label={`Select ${item.name}`}
-                            className="size-4 rounded border-[#cbd5e1] data-[state=checked]:bg-[#0b63e5] data-[state=checked]:border-[#0b63e5]"
-                          />
-                        </div>
                         <Avatar
                           className={cn(
                             "size-10.5 shrink-0 rounded-full text-xs font-bold",
@@ -532,6 +484,11 @@ export default function BusinessTable({
                     {/* City */}
                     <TableCell className="px-4 py-4.5 text-sm">
                       {formatDisplayString(item.city, "-")}
+                    </TableCell>
+
+                    {/* Lead Status */}
+                    <TableCell className="px-4 py-4.5 text-sm">
+                      {formatDisplayString(item.leadStatus, "-")}
                     </TableCell>
 
                     {/* Status */}
@@ -631,24 +588,28 @@ export default function BusinessTable({
                             </PlainButton>
                           </DropdownMenuTrigger>
                           <DropdownMenuContent align="end" className="w-36 bg-white">
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(`/businesses/${item.id}`);
-                              }}
-                              className="cursor-pointer text-xs"
-                            >
-                              View Details
-                            </DropdownMenuItem>
-                            <DropdownMenuItem
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                router.push(`/businesses/form/${item.id}`);
-                              }}
-                              className="cursor-pointer text-xs"
-                            >
-                              Edit Business
-                            </DropdownMenuItem>
+                            {item.status === "Active" && (
+                              <>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(`/businesses/${item.id}`);
+                                  }}
+                                  className="cursor-pointer text-xs"
+                                >
+                                  View Details
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    router.push(`/businesses/form/${item.id}`);
+                                  }}
+                                  className="cursor-pointer text-xs"
+                                >
+                                  Edit Business
+                                </DropdownMenuItem>
+                              </>
+                            )}
                             <DropdownMenuItem
                               onClick={(e) => {
                                 e.stopPropagation();
