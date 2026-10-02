@@ -13,13 +13,19 @@ import SearchWithSuggestions from "@/components/businesses/SearchWithSuggestions
 import AddFollowUpDialog from "@/components/follow-ups/AddFollowUpDialog";
 import FollowUpEditDialog from "@/components/follow-ups/FollowUpEditDialog";
 import CancelFollowUpDialog from "@/components/follow-ups/CancelFollowUpDialog";
+import CompleteFollowUpDialog from "@/components/follow-ups/CompleteFollowUpDialog";
 import {
   useCancelFollowUp,
   useFollowUpKpisQuery,
   useFollowUpsQuery,
+  useUpdateFollowUp,
 } from "@/hooks/use-follow-ups";
 import { useFollowUpListStore } from "@/store/follow-up-list-store";
-import type { FollowUpFilters as FollowUpFilterState, FollowUpItem } from "@/types/follow-up";
+import type {
+  FollowUpFilters as FollowUpFilterState,
+  FollowUpItem,
+  FollowUpType,
+} from "@/types/follow-up";
 
 function dayBoundary(offset: number, end = false) {
   const date = new Date();
@@ -32,7 +38,9 @@ export default function FollowupsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
   const [editFollowUp, setEditFollowUp] = useState<FollowUpItem>();
   const [cancelFollowUp, setCancelFollowUp] = useState<FollowUpItem>();
+  const [completeFollowUp, setCompleteFollowUp] = useState<FollowUpItem>();
   const filters = useFollowUpListStore();
+
   const queryFilters = useMemo<FollowUpFilterState>(() => {
     const dates =
       filters.tab === "today"
@@ -44,10 +52,13 @@ export default function FollowupsPage() {
             : { fromDate: filters.fromDate, toDate: filters.toDate };
     return { ...filters, ...dates };
   }, [filters]);
+
   const listQuery = useFollowUpsQuery(queryFilters);
   const kpisQuery = useFollowUpKpisQuery();
   const cancelMutation = useCancelFollowUp();
+  const updateMutation = useUpdateFollowUp();
   const setFilter = filters.setFilter;
+
   const searchControl = (
     <SearchWithSuggestions
       searchTerm={filters.search}
@@ -56,10 +67,42 @@ export default function FollowupsPage() {
       isSearching={listQuery.isFetching}
     />
   );
+
+  const confirmComplete = async () => {
+    if (!completeFollowUp) return;
+    try {
+      await updateMutation.mutateAsync({
+        id: completeFollowUp.id,
+        followUpId: completeFollowUp.id,
+        businessId: completeFollowUp.businessId,
+        assignedTo: completeFollowUp.assignedToId || "",
+        type: (completeFollowUp.type as FollowUpType) || "CALL",
+        scheduledAt: completeFollowUp.scheduledAt,
+        status: "COMPLETED",
+        notes: completeFollowUp.notes || "",
+        reminder: completeFollowUp.reminder,
+      });
+      toast.success("Follow-up marked as completed");
+      setCompleteFollowUp(undefined);
+    } catch {
+      toast.error("Unable to mark follow-up as completed.");
+    }
+  };
+
   const confirmCancel = async () => {
     if (!cancelFollowUp) return;
     try {
-      await cancelMutation.mutateAsync(cancelFollowUp.id);
+      await cancelMutation.mutateAsync({
+        id: cancelFollowUp.id,
+        existing: {
+          businessId: cancelFollowUp.businessId,
+          assignedTo: cancelFollowUp.assignedToId || "",
+          type: (cancelFollowUp.type as FollowUpType) || "CALL",
+          scheduledAt: cancelFollowUp.scheduledAt,
+          notes: cancelFollowUp.notes || "",
+          reminder: cancelFollowUp.reminder,
+        },
+      });
       toast.success("Follow-up cancelled");
       setCancelFollowUp(undefined);
     } catch {
@@ -121,13 +164,43 @@ export default function FollowupsPage() {
               onItemsPerPageChange={(limit) => setFilter("limit", limit)}
               onEdit={setEditFollowUp}
               onCancel={setCancelFollowUp}
+              onComplete={setCompleteFollowUp}
             />
           </div>
         }
       />
       <AddFollowUpDialog open={dialogOpen} onOpenChange={setDialogOpen} />
-      {editFollowUp && <FollowUpEditDialog followUp={editFollowUp} open={Boolean(editFollowUp)} onOpenChange={(open) => { if (!open) setEditFollowUp(undefined); }} />}
-      {cancelFollowUp && <CancelFollowUpDialog open={Boolean(cancelFollowUp)} businessName={cancelFollowUp.businessName} loading={cancelMutation.isPending} onOpenChange={(open) => { if (!open) setCancelFollowUp(undefined); }} onConfirm={confirmCancel} />}
+      {editFollowUp && (
+        <FollowUpEditDialog
+          followUp={editFollowUp}
+          open={Boolean(editFollowUp)}
+          onOpenChange={(open) => {
+            if (!open) setEditFollowUp(undefined);
+          }}
+        />
+      )}
+      {cancelFollowUp && (
+        <CancelFollowUpDialog
+          open={Boolean(cancelFollowUp)}
+          businessName={cancelFollowUp.businessName}
+          loading={cancelMutation.isPending}
+          onOpenChange={(open) => {
+            if (!open) setCancelFollowUp(undefined);
+          }}
+          onConfirm={confirmCancel}
+        />
+      )}
+      {completeFollowUp && (
+        <CompleteFollowUpDialog
+          open={Boolean(completeFollowUp)}
+          businessName={completeFollowUp.businessName}
+          loading={updateMutation.isPending}
+          onOpenChange={(open) => {
+            if (!open) setCompleteFollowUp(undefined);
+          }}
+          onConfirm={confirmComplete}
+        />
+      )}
     </>
   );
 }

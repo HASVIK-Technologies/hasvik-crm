@@ -79,7 +79,17 @@ export function useUpdateFollowUp() {
 export function useCancelFollowUp() {
   const queryClient = useQueryClient();
   return useMutation({
-    mutationFn: (id: string) => cancelFollowUp(id),
-    onSuccess: () => queryClient.invalidateQueries({ queryKey: ["follow-ups"] }),
+    mutationFn: (
+      variables:
+        | string
+        | { id: string; existing?: Partial<UpdateFollowUpPayload> },
+    ) => {
+      if (typeof variables === "string") {
+        return cancelFollowUp(variables);
+      }
+      return cancelFollowUp(variables.id, variables.existing);
+    },
+    onSuccess: () =>
+      queryClient.invalidateQueries({ queryKey: ["follow-ups"] }),
   });
 }

@@ -2,7 +2,7 @@
 
 import { Controller, useForm } from "react-hook-form";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { CalendarDays, X } from "lucide-react";
+import { Bell, CalendarDays, Loader2, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -17,7 +17,11 @@ import {
 import FollowUpAutocomplete from "@/components/follow-ups/FollowUpAutocomplete";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import { useCreateFollowUp } from "@/hooks/use-follow-ups";
-import type { FollowUpOption, FollowUpType } from "@/types/follow-up";
+import {
+  FOLLOW_UP_REMINDER_OPTIONS,
+  type FollowUpOption,
+  type FollowUpType,
+} from "@/types/follow-up";
 
 interface Props {
   open: boolean;
@@ -30,6 +34,7 @@ interface AddFollowUpFormValues {
   scheduledAt: string;
   type: FollowUpType | "";
   notes: string;
+  reminder: string | null;
 }
 
 const defaultValues: AddFollowUpFormValues = {
@@ -38,6 +43,7 @@ const defaultValues: AddFollowUpFormValues = {
   scheduledAt: "",
   type: "",
   notes: "",
+  reminder: null,
 };
 
 export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
@@ -63,6 +69,7 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
         scheduledAt: new Date(values.scheduledAt).toISOString(),
         status: "SCHEDULED",
         notes: values.notes,
+        reminder: values.reminder || undefined,
       });
       toast.success("Follow-up added");
       onOpenChange(false);
@@ -77,7 +84,7 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35" />
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35 backdrop-blur-[2px]" />
         <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-2xl outline-none">
           <div className="mb-5 flex items-start justify-between">
             <div>
@@ -217,16 +224,39 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
                   </p>
                 )}
               </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                  Status
-                </label>
-                <Input
-                  value="Scheduled"
-                  readOnly
-                  className="h-10 bg-[#f8fafc] text-xs"
-                />
-              </div>
+              
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
+                Reminder
+              </label>
+              <Controller
+                control={control}
+                name="reminder"
+                render={({ field }) => (
+                  <Select
+                    value={field.value || "none"}
+                    onValueChange={(val) =>
+                      field.onChange(val === "none" ? null : val)
+                    }
+                  >
+                    <SelectTrigger className="h-10 text-xs">
+                      <div className="flex items-center gap-2">
+                        <Bell className="size-3.5 text-[#94a3b8]" />
+                        <SelectValue placeholder="No reminder" />
+                      </div>
+                    </SelectTrigger>
+                    <SelectContent className="bg-white">
+                      <SelectItem value="none">No reminder</SelectItem>
+                      {FOLLOW_UP_REMINDER_OPTIONS.map((opt) => (
+                        <SelectItem key={opt} value={opt}>
+                          {opt}
+                        </SelectItem>
+                      ))}
+                    </SelectContent>
+                  </Select>
+                )}
+              />
+            </div>
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
@@ -245,7 +275,13 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
                 </Button>
               </DialogPrimitive.Close>
               <Button type="submit" disabled={mutation.isPending}>
-                {mutation.isPending ? "Adding..." : "Add Follow-up"}
+                {mutation.isPending ? (
+                  <>
+                    <Loader2 className="mr-2 size-4 animate-spin" /> Adding...
+                  </>
+                ) : (
+                  "Add Follow-up"
+                )}
               </Button>
             </div>
           </form>
