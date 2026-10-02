@@ -5,6 +5,7 @@ import React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import OutlinedButton from "@/components/common/OutlinedButton";
+import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import Actions from "@/components/common/Actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +55,7 @@ import { ChangeBusinessStatusModal } from "@/components/businesses";
 import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
+import { REMINDER_OPTIONS } from "@/lib/business-form-options";
 import {
   DropdownMenu,
   DropdownMenuContent,

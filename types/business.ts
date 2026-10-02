@@ -14,7 +14,7 @@ export interface BusinessItem {
   nextFollowUp: string;
   nextFollowUpType: "today" | "tomorrow" | "date" | "none" | "overdue";
   nextFollowupDate?: string;
-  reminder?: string;
+  reminder?: string | number;
   description?: string;
   notes?: string;
   owner?: string;

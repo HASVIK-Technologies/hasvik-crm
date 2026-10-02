@@ -61,7 +61,7 @@ function getPageDetails(pathname: string) {
       eyebrow: "BUSINESSES",
       title: isEdit ? "Edit Business" : "Add Business",
       subtitle: isEdit
-        ? "Update business lead details and follow-up settings."
+        ? "Update business lead details and follow-up."
         : "Create a new business lead and set up its first follow-up.",
     };
   }
