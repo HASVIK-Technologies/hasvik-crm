@@ -1,8 +1,8 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { Bell, CalendarDays, Loader2, X } from "lucide-react";
+import { Bell, CalendarDays, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -25,10 +25,17 @@ import {
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialBusiness?: FollowUpOption;
 }
 
-export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
-  const [business, setBusiness] = useState<FollowUpOption>();
+export default function AddFollowUpDialog({
+  open,
+  onOpenChange,
+  initialBusiness,
+}: Props) {
+  const [business, setBusiness] = useState<FollowUpOption | undefined>(
+    initialBusiness,
+  );
   const [assignee, setAssignee] = useState<FollowUpOption>();
   const [scheduledAt, setScheduledAt] = useState("");
   const [type, setType] = useState<FollowUpType>("CALL");
@@ -36,15 +43,23 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
   const [notes, setNotes] = useState("");
   const mutation = useCreateFollowUp();
 
+  useEffect(() => {
+    if (open && initialBusiness) {
+      setBusiness(initialBusiness);
+    }
+  }, [open, initialBusiness]);
+
+  const activeBusiness = initialBusiness || business;
+
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
-    if (!business?.id || !assignee?.id || !scheduledAt) {
+    if (!activeBusiness?.id || !assignee?.id || !scheduledAt) {
       toast.error("Business, assignee, and date are required.");
       return;
     }
     try {
       await mutation.mutateAsync({
-        businessId: business.id,
+        businessId: activeBusiness.id,
         assignedTo: assignee.id,
         type,
         scheduledAt: new Date(scheduledAt).toISOString(),
@@ -53,7 +68,7 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
       });
       toast.success("Follow-up created successfully");
       onOpenChange(false);
-      setBusiness(undefined);
+      setBusiness(initialBusiness);
       setAssignee(undefined);
       setScheduledAt("");
       setReminder("");
@@ -92,13 +107,25 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
                 Business
               </label>
-              <FollowUpAutocomplete
-                kind="business"
-                value={business?.id}
-                label={business?.label}
-                onChange={setBusiness}
-                placeholder="Select business"
-              />
+              {initialBusiness ? (
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-3 size-4 text-[#94a3b8]" />
+                  <Input
+                    readOnly
+                    tabIndex={-1}
+                    value={initialBusiness.label}
+                    className="h-10 w-full cursor-not-allowed border-[#e2e8f0] bg-[#f8fafc] pl-9 text-xs font-medium text-[#0f172a] select-none focus-visible:ring-0"
+                  />
+                </div>
+              ) : (
+                <FollowUpAutocomplete
+                  kind="business"
+                  value={business?.id}
+                  label={business?.label}
+                  onChange={setBusiness}
+                  placeholder="Select business"
+                />
+              )}
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
               <div>
@@ -152,38 +179,28 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
               </div>
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                  Status
+                  Reminder
                 </label>
-                <Input
-                  value="Scheduled"
-                  readOnly
-                  className="h-10 bg-[#f8fafc] text-xs"
-                />
+                <Select
+                  value={reminder || "none"}
+                  onValueChange={(val) => setReminder(val === "none" ? "" : val)}
+                >
+                  <SelectTrigger className="h-10 text-xs">
+                    <div className="flex items-center gap-2">
+                      <Bell className="size-3.5 text-[#94a3b8]" />
+                      <SelectValue placeholder="No reminder" />
+                    </div>
+                  </SelectTrigger>
+                  <SelectContent className="bg-white">
+                    <SelectItem value="none">No reminder</SelectItem>
+                    {FOLLOW_UP_REMINDER_OPTIONS.map((opt) => (
+                      <SelectItem key={opt} value={opt}>
+                        {opt}
+                      </SelectItem>
+                    ))}
+                  </SelectContent>
+                </Select>
               </div>
-            </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                Reminder
-              </label>
-              <Select
-                value={reminder || "none"}
-                onValueChange={(val) => setReminder(val === "none" ? "" : val)}
-              >
-                <SelectTrigger className="h-10 text-xs">
-                  <div className="flex items-center gap-2">
-                    <Bell className="size-3.5 text-[#94a3b8]" />
-                    <SelectValue placeholder="No reminder" />
-                  </div>
-                </SelectTrigger>
-                <SelectContent className="bg-white">
-                  <SelectItem value="none">No reminder</SelectItem>
-                  {FOLLOW_UP_REMINDER_OPTIONS.map((opt) => (
-                    <SelectItem key={opt} value={opt}>
-                      {opt}
-                    </SelectItem>
-                  ))}
-                </SelectContent>
-              </Select>
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">

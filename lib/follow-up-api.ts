@@ -1,3 +1,4 @@
+import axios from "axios";
 import { apiClient } from "@/lib/api-client";
 import type {
   CreateFollowUpPayload,
@@ -138,6 +139,26 @@ function parseNotes(value: unknown): string | undefined {
   return String(value);
 }
 
+function extractPhoneNumber(raw: unknown): string | undefined {
+  if (!raw) return undefined;
+  if (typeof raw === "string" && raw.trim()) return raw.trim();
+  if (Array.isArray(raw) && raw.length > 0) {
+    const primary = raw.find(
+      (item) => typeof item === "object" && item !== null && (item as { isPrimary?: boolean }).isPrimary,
+    ) as { number?: string; value?: string } | undefined;
+    if (primary?.number && String(primary.number).trim()) return String(primary.number).trim();
+    if (primary?.value && String(primary.value).trim()) return String(primary.value).trim();
+    const first = raw[0];
+    if (typeof first === "string" && first.trim()) return first.trim();
+    if (typeof first === "object" && first !== null) {
+      const obj = first as { number?: string; value?: string };
+      if (obj.number && String(obj.number).trim()) return String(obj.number).trim();
+      if (obj.value && String(obj.value).trim()) return String(obj.value).trim();
+    }
+  }
+  return undefined;
+}
+
 export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
   const business = (value.business ?? {}) as Record<string, unknown>;
   const assignee = (value.assignee ?? value.assignedTo ?? {}) as Record<
@@ -159,6 +180,29 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
         ? String(value.reminder)
         : undefined;
 
+  const callingNumber =
+    extractPhoneNumber(business.phoneNumbers) ||
+    extractPhoneNumber(value.phoneNumbers) ||
+    (business.phone ? String(business.phone) : undefined) ||
+    (business.phoneNumber ? String(business.phoneNumber) : undefined) ||
+    (value.businessPhone ? String(value.businessPhone) : undefined) ||
+    (value.phone ? String(value.phone) : undefined);
+
+  const whatsappNumber =
+    extractPhoneNumber(business.whatsappNumbers) ||
+    extractPhoneNumber(value.whatsappNumbers) ||
+    (business.whatsapp ? String(business.whatsapp) : undefined) ||
+    (business.whatsappNumber ? String(business.whatsappNumber) : undefined) ||
+    (business.alternatePhone ? String(business.alternatePhone) : undefined) ||
+    (value.whatsapp ? String(value.whatsapp) : undefined) ||
+    (value.whatsappNumber ? String(value.whatsappNumber) : undefined);
+
+  const email =
+    (business.email ? String(business.email) : undefined) ||
+    (business.contactEmail ? String(business.contactEmail) : undefined) ||
+    (value.email ? String(value.email) : undefined) ||
+    (value.businessEmail ? String(value.businessEmail) : undefined);
+
   return {
     id: String(value._id ?? value.id ?? ""),
     businessId: String(value.businessId ?? business._id ?? business.id ?? ""),
@@ -168,9 +212,10 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
     businessCity: (value.businessCity || business.city)
       ? String(value.businessCity || business.city)
       : undefined,
-    businessPhone: String(
-      value.businessPhone ?? business.phone ?? business.phoneNumber ?? "",
-    ),
+    businessPhone: callingNumber || whatsappNumber || "",
+    businessCallingNumber: callingNumber,
+    businessWhatsappNumber: whatsappNumber,
+    businessEmail: email,
     assignedToId:
       assignee._id || assignee.id
         ? String(assignee._id ?? assignee.id)
@@ -278,7 +323,9 @@ export async function createFollowUp(payload: CreateFollowUpPayload) {
   }
 
   if (payload.notes && payload.notes.trim()) {
-    body.notes = payload.notes.trim();
+    const trimmedNotes = payload.notes.trim();
+    body.notes = trimmedNotes;
+    body.note = trimmedNotes;
   }
 
   const response = await apiClient.post("/follow-ups", body);
@@ -287,7 +334,7 @@ export async function createFollowUp(payload: CreateFollowUpPayload) {
 
 /**
  * PATCH /api/follow-ups/{id}
- * Body: UpdateFollowUpDto { businessId?, assignedTo?, type?, scheduledAt?, reminderInMinutes?, notes? }
+ * Body: UpdateFollowUpDto { businessId?, assignedTo?, type?, scheduledAt?, reminderInMinutes?, notes?, note? }
  * If status is provided, also updates status via PATCH /api/follow-ups/{id}/status
  */
 export async function updateFollowUp(payload: UpdateFollowUpPayload) {
@@ -310,26 +357,72 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
     body.reminderInMinutes = reminderMinutes;
   }
   if (payload.notes !== undefined) {
-    body.notes = payload.notes.trim();
+    const trimmedNotes = payload.notes.trim();
+    body.notes = trimmedNotes;
+    body.note = trimmedNotes;
+    body.description = trimmedNotes;
+    body.comment = trimmedNotes;
   }
 
-  // Update details via PATCH /api/follow-ups/{id}
+  // Update details via PATCH /api/follow-ups/{id} (or fallback PATCH /api/follow-ups)
   let updatedRecord: Record<string, unknown> = {};
   if (Object.keys(body).length > 0) {
-    const response = await apiClient.patch(`/follow-ups/${id}`, body);
-    updatedRecord = unwrap<Record<string, unknown>>(response.data) || {};
+    try {
+      const response = await apiClient.patch(`/follow-ups/${id}`, body);
+      updatedRecord = unwrap<Record<string, unknown>>(response.data) || {};
+    } catch (error) {
+      if (
+        axios.isAxiosError(error) &&
+        (error.response?.status === 404 || error.response?.status === 405)
+      ) {
+        const response = await apiClient.patch("/follow-ups", {
+          ...body,
+          id,
+          followUpId: id,
+        });
+        updatedRecord = unwrap<Record<string, unknown>>(response.data) || {};
+      } else {
+        throw error;
+      }
+    }
   }
 
   // If status is specified as COMPLETED or CANCELLED, call status endpoint
   if (payload.status === "COMPLETED" || payload.status === "CANCELLED") {
-    const statusResponse = await updateFollowUpStatus({
-      id,
-      status: payload.status,
-    });
-    return statusResponse;
+    try {
+      const statusResponse = await updateFollowUpStatus({
+        id,
+        status: payload.status,
+      });
+      if (payload.notes !== undefined) {
+        statusResponse.notes = payload.notes.trim();
+      }
+      return statusResponse;
+    } catch {
+      // If status update failed (e.g. already completed), but details were updated, return updated details
+    }
   }
 
-  return toFollowUpItem(updatedRecord);
+  const item = toFollowUpItem({
+    ...body,
+    ...updatedRecord,
+    id,
+    _id: id,
+  });
+  if (payload.notes !== undefined) {
+    item.notes = payload.notes.trim();
+  }
+  if (payload.reminder !== undefined) {
+    item.reminder = payload.reminder;
+  }
+  if (payload.type) {
+    item.type = payload.type;
+  }
+  if (payload.scheduledAt) {
+    item.scheduledAt = payload.scheduledAt;
+  }
+
+  return item;
 }
 
 /**
@@ -374,6 +467,7 @@ export async function getFollowUpKpis(
   if (params?.type) queryParams.type = params.type;
   if (params?.fromDate) queryParams.fromDate = params.fromDate;
   if (params?.toDate) queryParams.toDate = params.toDate;
+  if (params?.search && params.search.trim()) queryParams.search = params.search.trim();
 
   const response = await apiClient.get<FollowUpKpis>("/follow-ups/kpis", {
     params: Object.keys(queryParams).length > 0 ? queryParams : undefined,

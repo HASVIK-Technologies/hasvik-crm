@@ -48,6 +48,7 @@ import {
 } from "@/hooks/use-businesses";
 import { BusinessItem } from "@/types/business";
 import { ChangeBusinessStatusModal } from "@/components/businesses";
+import AddFollowUpDialog from "@/components/follow-ups/AddFollowUpDialog";
 import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
@@ -112,50 +113,7 @@ export default function BusinessDetails() {
 
   const params = useParams();
   const [showDeactivateModal, setShowDeactivateModal] = React.useState(false);
-  const [showFollowUpModal, setShowFollowUpModal] = React.useState(false);
-  const [followUpDate, setFollowUpDate] = React.useState("");
-  const [assignedTo, setAssignedTo] = React.useState("");
-  const [reminder, setReminder] = React.useState("");
-
-  const submitFollowUpToApi = async () => {
-    if (
-      !followUpDate ||
-      !assignedTo ||
-      assignedTo === "Select Assignee..." ||
-      !reminder ||
-      reminder === "Select Reminder..."
-    ) {
-      alert("Please fill out all fields before adding!");
-      return;
-    }
-    try {
-      // We use rawId here so it automatically uses the ID from the URL (like 6aa6553d6a0547b6ab75072d)
-      const response = await fetch(
-        `http://localhost:3000/businesses/${rawId}`,
-        {
-          method: "PATCH", // Change this to "POST" or "PUT" depending on what your backend developer requires
-          headers: {
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            nextFollowupDate: followUpDate,
-            assignedTo: assignedTo,
-            reminder: reminder,
-          }),
-        },
-      );
-
-      if (response.ok) {
-        alert("Success! The Follow Up is added!");
-        setShowFollowUpModal(false); // Close the modal
-      } else {
-        alert("Failed to Add.");
-      }
-    } catch (error) {
-      console.error("Network Error:", error);
-      alert("Something went wrong with the network.");
-    }
-  };
+  const [addFollowUpOpen, setAddFollowUpOpen] = React.useState(false);
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const {
@@ -231,7 +189,8 @@ export default function BusinessDetails() {
   }
 
   return (
-    <DetailsPageLayout
+    <>
+      <DetailsPageLayout
       breadcrumb={
         <Breadcrumb
           items={[
@@ -245,6 +204,7 @@ export default function BusinessDetails() {
           primary={{
             label: "Add Follow-Up",
             icon: <Plus className="size-4" />,
+            onSelect: () => setAddFollowUpOpen(true),
           }}
           secondary={[
             {
@@ -503,7 +463,7 @@ export default function BusinessDetails() {
                 <BusinessDetailsQuickActions
                   business={business}
                   cleanNumber={cleanNumber}
-                  setShowFollowUpModal={setShowFollowUpModal}
+                  setShowFollowUpModal={setAddFollowUpOpen}
                   setShowDeactivateModal={setShowDeactivateModal}
                 />
               </div>
@@ -525,123 +485,6 @@ export default function BusinessDetails() {
             <TabsContent value="notes" className="mt-6"></TabsContent>
           </Tabs>
 
-          
-          {/* New Follow-up Modal */}
-          {showFollowUpModal && (
-            <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-              <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-slate-200">
-                {/* Header */}
-                <div className="flex justify-between items-center mb-6">
-                  <h2 className="text-lg font-bold text-slate-800">
-                    New Follow Up
-                  </h2>
-                  <button
-                    onClick={() => setShowFollowUpModal(false)}
-                    className="text-slate-400 hover:text-slate-700"
-                  >
-                    <svg
-                      xmlns="http://www.w3.org/2000/svg"
-                      width="20"
-                      height="20"
-                      viewBox="0 0 24 24"
-                      fill="none"
-                      stroke="currentColor"
-                      strokeWidth="2.5"
-                      strokeLinecap="round"
-                      strokeLinejoin="round"
-                    >
-                      <path d="M18 6 6 18" />
-                      <path d="m6 6 12 12" />
-                    </svg>
-                  </button>
-                </div>
-
-                {/* Form Fields */}
-                <div className="space-y-4">
-                  {/* Business Name (Disabled) */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 camelcase tracking-wider">
-                      Business Name
-                    </label>
-                    <input
-                      type="text"
-                      disabled
-                      value={business.name}
-                      className="w-full mt-1.5 p-2.5 text-sm border border-slate-200 rounded-lg bg-slate-100 text-slate-500 cursor-not-allowed"
-                    />
-                  </div>
-
-                  {/* Date Picker */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 camelcase tracking-wider">
-                      Next Follow Up Date
-                    </label>
-                    <div className="relative mt-1.5">
-                      <input
-                        type="date"
-                        value={followUpDate}
-                        onChange={(e) => setFollowUpDate(e.target.value)}
-                        className="w-full p-2.5 pr-10 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-transparent relative z-10 [&::-webkit-calendar-picker-indicator]:opacity-0 [&::-webkit-calendar-picker-indicator]:absolute [&::-webkit-calendar-picker-indicator]:w-full [&::-webkit-calendar-picker-indicator]:h-full [&::-webkit-calendar-picker-indicator]:cursor-pointer [&::-webkit-calendar-picker-indicator]:right-0"
-                      />
-                      {/* The Custom Calendar Icon */}
-                      <Calendar className="absolute right-3 top-1/2 -translate-y-1/2 w-4 h-4 text-slate-500 z-0" />
-                    </div>
-                  </div>
-
-                  {/* Assigned To Dropdown */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 camelcase tracking-wider">
-                      Assigned To
-                    </label>
-                    <select
-                      value={assignedTo}
-                      onChange={(e) => setAssignedTo(e.target.value)}
-                      className="w-full mt-1.5 p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
-                    >
-                      <option>Select Assignee...</option>
-                      <option>Amit Sharma</option>
-                      <option>Annu Singh</option>
-                      <option>Aakriti Singh</option>
-                    </select>
-                  </div>
-                  {/* Reminder Dropdown */}
-                  <div>
-                    <label className="text-xs font-semibold text-slate-500 camelcase tracking-wider">
-                      Reminder
-                    </label>
-                    <select
-                      value={reminder}
-                      onChange={(e) => setReminder(e.target.value)}
-                      className="w-full mt-1.5 p-2.5 text-sm border border-slate-200 rounded-lg focus:outline-none focus:border-emerald-500 focus:ring-1 focus:ring-emerald-500 bg-white"
-                    >
-                      <option value="">Select Reminder...</option>
-                      <option value="10 minutes">10 minutes</option>
-                      <option value="15 minutes">15 minutes</option>
-                      <option value="30 minutes">30 minutes</option>
-                      <option value="45 minutes">45 minutes</option>
-                      <option value="1 hour">1 hour</option>
-                    </select>
-                  </div>
-                </div>
-
-                {/* Buttons */}
-                <div className="flex justify-between gap-3 mt-8">
-                  <button
-                    onClick={() => setShowFollowUpModal(false)}
-                    className="px-5 py-2.5 text-sm font-medium text-slate-600 bg-white border border-slate-200 rounded-xl hover:bg-slate-50 transition-colors"
-                  >
-                    Cancel
-                  </button>
-                  <button
-                    onClick={submitFollowUpToApi}
-                    className="px-5 py-2.5 text-sm font-medium text-white bg-emerald-600 rounded-xl hover:bg-emerald-700 transition-colors"
-                  >
-                    Schedule
-                  </button>
-                </div>
-              </div>
-            </div>
-          )}
           {/* Deactivate Business Modal */}
           {showDeactivateModal && (
             <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
@@ -687,5 +530,18 @@ export default function BusinessDetails() {
         </>
       }
     />
-  );
+    <AddFollowUpDialog
+      open={addFollowUpOpen}
+      onOpenChange={setAddFollowUpOpen}
+      initialBusiness={
+        business
+          ? {
+              id: String((business as any)._id || business.id || rawId),
+              label: business.name,
+            }
+          : undefined
+      }
+    />
+  </>
+);
 }

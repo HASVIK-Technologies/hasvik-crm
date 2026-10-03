@@ -12,6 +12,7 @@ import FollowUpTable from "@/components/follow-ups/FollowUpTable";
 import SearchWithSuggestions from "@/components/businesses/SearchWithSuggestions";
 import AddFollowUpDialog from "@/components/follow-ups/AddFollowUpDialog";
 import FollowUpEditDialog from "@/components/follow-ups/FollowUpEditDialog";
+import NextFollowUpDialog from "@/components/follow-ups/NextFollowUpDialog";
 import CancelFollowUpDialog from "@/components/follow-ups/CancelFollowUpDialog";
 import CompleteFollowUpDialog from "@/components/follow-ups/CompleteFollowUpDialog";
 import {
@@ -38,6 +39,7 @@ export default function FollowupsPage() {
   const [editFollowUp, setEditFollowUp] = useState<FollowUpItem>();
   const [cancelFollowUp, setCancelFollowUp] = useState<FollowUpItem>();
   const [completeFollowUp, setCompleteFollowUp] = useState<FollowUpItem>();
+  const [nextFollowUp, setNextFollowUp] = useState<FollowUpItem>();
   const filters = useFollowUpListStore();
 
   const queryFilters = useMemo<FollowUpFilterState>(() => {
@@ -52,11 +54,54 @@ export default function FollowupsPage() {
     return { ...filters, ...dates };
   }, [filters]);
 
+  const kpiFilters = useMemo<Partial<FollowUpFilterState>>(() => {
+    const p: Partial<FollowUpFilterState> = {};
+    if (filters.businessId) p.businessId = filters.businessId;
+    if (filters.assignedTo) p.assignedTo = filters.assignedTo;
+    if (filters.type) p.type = filters.type;
+    if (filters.status) p.status = filters.status;
+    if (filters.search?.trim()) p.search = filters.search.trim();
+    if (filters.fromDate) p.fromDate = filters.fromDate;
+    if (filters.toDate) p.toDate = filters.toDate;
+    return p;
+  }, [
+    filters.businessId,
+    filters.assignedTo,
+    filters.type,
+    filters.status,
+    filters.search,
+    filters.fromDate,
+    filters.toDate,
+  ]);
+
   const listQuery = useFollowUpsQuery(queryFilters);
-  const kpisQuery = useFollowUpKpisQuery();
+  const kpisQuery = useFollowUpKpisQuery(kpiFilters);
   const cancelMutation = useCancelFollowUp();
   const completeMutation = useCompleteFollowUp();
   const setFilter = filters.setFilter;
+
+  const kpiStats = useMemo(() => {
+    const data = kpisQuery.data ?? { total: 0, today: 0, upcoming: 0, overdue: 0 };
+    const hasFilter = Boolean(
+      filters.businessId ||
+      filters.assignedTo ||
+      filters.type ||
+      filters.status ||
+      filters.search?.trim() ||
+      filters.fromDate ||
+      filters.toDate,
+    );
+
+    let total = data.total;
+    if (hasFilter && filters.tab === "all" && typeof listQuery.data?.total === "number") {
+      total = listQuery.data.total;
+    }
+
+    return {
+      ...data,
+      total,
+    };
+  }, [kpisQuery.data, filters, listQuery.data?.total]);
 
   const searchControl = (
     <SearchWithSuggestions
@@ -101,9 +146,7 @@ export default function FollowupsPage() {
         }
         stats={
           <FollowUpStats
-            data={
-              kpisQuery.data ?? { total: 0, today: 0, upcoming: 0, overdue: 0 }
-            }
+            data={kpiStats}
             loading={kpisQuery.isLoading}
           />
         }
@@ -125,11 +168,6 @@ export default function FollowupsPage() {
                   className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-[#0b63e5] text-[#0b63e5]" : "border-transparent text-[#64748b] hover:text-[#334155]"}`}
                 >
                   {tab}
-                  {kpisQuery.data && (
-                    <span className="ml-1.5 text-[10px]">
-                      ({kpisQuery.data[tab === "all" ? "total" : tab]})
-                    </span>
-                  )}
                 </button>
               ))}
             </div>
@@ -144,6 +182,7 @@ export default function FollowupsPage() {
               onEdit={setEditFollowUp}
               onCancel={setCancelFollowUp}
               onComplete={setCompleteFollowUp}
+              onNextFollowUp={setNextFollowUp}
             />
           </div>
         }
@@ -178,6 +217,15 @@ export default function FollowupsPage() {
             if (!open) setCompleteFollowUp(undefined);
           }}
           onConfirm={confirmComplete}
+        />
+      )}
+      {nextFollowUp && (
+        <NextFollowUpDialog
+          followUp={nextFollowUp}
+          open={Boolean(nextFollowUp)}
+          onOpenChange={(open) => {
+            if (!open) setNextFollowUp(undefined);
+          }}
         />
       )}
     </>

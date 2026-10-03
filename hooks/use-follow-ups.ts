@@ -18,6 +18,7 @@ import {
 import type {
   CreateFollowUpPayload,
   FollowUpFilters,
+  FollowUpItem,
   UpdateFollowUpPayload,
   UpdateFollowUpStatusPayload,
 } from "@/types/follow-up";
@@ -97,8 +98,42 @@ export function useUpdateFollowUp() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: UpdateFollowUpPayload) => updateFollowUp(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["follow-ups"] });
+    onSuccess: (data, variables) => {
+      const id = variables.id || variables.followUpId;
+      if (id) {
+        queryClient.setQueryData(
+          ["follow-ups", "detail", id],
+          (old: FollowUpItem | undefined) => {
+            const nextNotes =
+              variables.notes !== undefined
+                ? variables.notes.trim()
+                : (data?.notes ?? old?.notes);
+            if (!old) {
+              return {
+                ...data,
+                notes: nextNotes,
+              };
+            }
+            return {
+              ...old,
+              ...data,
+              notes: nextNotes,
+              reminder:
+                variables.reminder !== undefined
+                  ? variables.reminder
+                  : (data?.reminder ?? old.reminder),
+              type: variables.type || data?.type || old.type,
+              scheduledAt:
+                variables.scheduledAt || data?.scheduledAt || old.scheduledAt,
+            };
+          },
+        );
+      }
+      // Invalidate follow-up list and kpis queries without wiping out detail cache
+      queryClient.invalidateQueries({
+        predicate: (query) =>
+          query.queryKey[0] === "follow-ups" && query.queryKey[1] !== "detail",
+      });
     },
   });
 }

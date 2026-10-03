@@ -23,6 +23,9 @@ export interface FollowUpItem {
   businessName: string;
   businessCity?: string;
   businessPhone?: string;
+  businessCallingNumber?: string;
+  businessWhatsappNumber?: string;
+  businessEmail?: string;
   assignedToId?: string;
   assignedToName: string;
   type: FollowUpType | string;
