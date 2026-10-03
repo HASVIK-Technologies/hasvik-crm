@@ -1,10 +1,15 @@
 "use client";
 
 import {
+  CheckCircle2,
   ChevronLeft,
   ChevronRight,
+  Eye,
   MoreVertical,
+  Pencil,
   Phone,
+  Plus,
+  Trash2,
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -32,6 +37,7 @@ import {
 import PlainButton from "@/components/common/PlainButton";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PrimaryButton from "@/components/common/PrimaryButton";
+import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import type { FollowUpItem } from "@/types/follow-up";
 import {
@@ -86,6 +92,7 @@ interface FollowUpTableProps {
   onEdit: (item: FollowUpItem) => void;
   onCancel: (item: FollowUpItem) => void;
   onComplete: (item: FollowUpItem) => void;
+  onNextFollowUp?: (item: FollowUpItem) => void;
 }
 
 export default function FollowUpTable({
@@ -99,6 +106,7 @@ export default function FollowUpTable({
   onEdit,
   onCancel,
   onComplete,
+  onNextFollowUp,
 }: FollowUpTableProps) {
   const totalPages = Math.max(1, Math.ceil(total / limit));
   const firstResult = total === 0 ? 0 : (page - 1) * limit + 1;
@@ -157,19 +165,34 @@ export default function FollowUpTable({
                     <div className="flex items-center gap-1.5">
                       <a href={item.businessPhone ? `tel:${item.businessPhone}` : undefined} aria-label={`Call ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-[#059669] hover:bg-[#ecfdf3] aria-disabled:pointer-events-none aria-disabled:opacity-40"><Phone className="size-4" /></a>
                       <a href={item.businessPhone ? `https://wa.me/91${item.businessPhone}` : undefined} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-[#16a34a] hover:bg-[#ecfdf3] aria-disabled:pointer-events-none aria-disabled:opacity-40"><WhatsAppIcon className="size-4" /></a>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => onEdit(item)}
+                        className="h-7 gap-1 border-[#d0d5dd] px-2 text-xs font-semibold text-[#344054] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+                      >
+                        <Pencil className="size-3 text-[#64748b]" /> Edit
+                      </Button>
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <PlainButton size="icon" aria-label="More actions" className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"><MoreVertical className="size-4" /></PlainButton>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-44 bg-white">
                           <DropdownMenuItem asChild className="cursor-pointer text-xs"><Link href={`/follow-ups/${item.id}`}>View Details</Link></DropdownMenuItem>
-                          <DropdownMenuItem onSelect={() => onEdit(item)} className="cursor-pointer text-xs">Reschedule / Edit</DropdownMenuItem>
+                          {item.status === "COMPLETED" && onNextFollowUp && (
+                            <DropdownMenuItem
+                              onSelect={() => onNextFollowUp(item)}
+                              className="cursor-pointer text-xs font-semibold text-[#027a48] focus:bg-[#ecfdf3] focus:text-[#027a48]"
+                            >
+                              <Plus className="mr-1.5 size-3.5" /> Next Follow-Up
+                            </DropdownMenuItem>
+                          )}
                           {item.status !== "COMPLETED" && (
                             <DropdownMenuItem onSelect={() => onComplete(item)} className="cursor-pointer text-xs text-[#027a48] focus:bg-[#ecfdf3] focus:text-[#027a48]">
                               Mark as Completed
                             </DropdownMenuItem>
                           )}
-                          {item.status !== "CANCELLED" && (
+                          {item.status !== "CANCELLED" && item.status !== "COMPLETED" && (
                             <DropdownMenuItem onSelect={() => onCancel(item)} className="cursor-pointer text-xs text-[#b42318] focus:bg-[#fff1f3] focus:text-[#b42318]">
                               Cancel Follow-up
                             </DropdownMenuItem>
@@ -341,26 +364,41 @@ export default function FollowUpTable({
                           </DropdownMenuTrigger>
                           <DropdownMenuContent
                             align="end"
-                            className="w-44 bg-white"
+                            className="w-48 rounded-xl border border-[#e2e8f0] bg-white p-1 shadow-lg"
                           >
-                            <DropdownMenuItem asChild className="cursor-pointer text-xs"><Link href={`/follow-ups/${item.id}`}>View Details</Link></DropdownMenuItem>
-                            <DropdownMenuItem onSelect={() => onEdit(item)} className="cursor-pointer text-xs">Reschedule / Edit</DropdownMenuItem>
-                            {item.status !== "COMPLETED" && (
-                              <DropdownMenuItem
-                                onSelect={() => onComplete(item)}
-                                className="cursor-pointer text-xs text-[#027a48] focus:bg-[#ecfdf3] focus:text-[#027a48]"
+                            <DropdownMenuItem asChild className="cursor-pointer text-xs">
+                              <Link
+                                href={`/follow-ups/${item.id}`}
+                                className="flex w-full items-center gap-2 px-2.5 py-1.5 font-medium text-[#344054] hover:bg-[#f1f5f9]"
                               >
-                                Mark as Completed
-                              </DropdownMenuItem>
-                            )}
-                            {item.status !== "CANCELLED" && (
-                              <DropdownMenuItem
-                                onSelect={() => onCancel(item)}
-                                className="cursor-pointer text-xs text-[#b42318] focus:bg-[#fff1f3] focus:text-[#b42318]"
-                              >
-                                Cancel Follow-up
-                              </DropdownMenuItem>
-                            )}
+                                <Eye className="size-3.5 text-[#64748b]" />
+                                <span>View Details</span>
+                              </Link>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onSelect={() => onEdit(item)}
+                              className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#344054] hover:bg-[#f1f5f9] focus:bg-[#f8fafc]"
+                            >
+                              <Pencil className="size-3.5 text-[#64748b]" />
+                              <span>Edit</span>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onSelect={() => onCancel(item)}
+                              className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#b42318] hover:bg-[#fff1f3] focus:bg-[#fff1f3] focus:text-[#b42318]"
+                            >
+                              <Trash2 className="size-3.5 text-[#b42318]" />
+                              <span>Cancel Follow-Up</span>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onSelect={() => onComplete(item)}
+                              className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#027a48] hover:bg-[#ecfdf3] focus:bg-[#ecfdf3] focus:text-[#027a48]"
+                            >
+                              <CheckCircle2 className="size-3.5 text-[#027a48]" />
+                              <span>Mark as Completed</span>
+                            </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

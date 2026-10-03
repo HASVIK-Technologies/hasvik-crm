@@ -118,9 +118,7 @@ export default function BusinessDetails() {
   const cleanNumber = (num: string) => num.replace(/\D/g, "");
 
   const params = useParams();
-  const [followUpDate, setFollowUpDate] = React.useState("");
-  const [assignedTo, setAssignedTo] = React.useState("");
-  const [reminder, setReminder] = React.useState("");
+
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const stringId = typeof rawId === "string" ? rawId : "";
@@ -214,8 +212,8 @@ export default function BusinessDetails() {
           primary={{
             label: "Add Follow-Up",
             icon: <Plus className="size-4" />,
-            disabled: isInactive, // Lock it if inactive!
-            onSelect: () => openFollowUpModal(String(business?.id)) // Open the modal!
+            disabled: isInactive,
+            onSelect: () => openFollowUpModal(String((business as any)?._id || business?.id || rawId)),
           }}
           secondary={[
             {
@@ -475,6 +473,7 @@ export default function BusinessDetails() {
                 <BusinessDetailsQuickActions
                   business={business}
                   cleanNumber={cleanNumber}
+
                 />
               </div>
               <BusinessDetailsMap business={business} />

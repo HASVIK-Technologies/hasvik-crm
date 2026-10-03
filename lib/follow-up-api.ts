@@ -7,13 +7,40 @@ import type {
   FollowUpKpis,
   FollowUpOption,
   UpdateFollowUpPayload,
+  UpdateFollowUpStatusPayload,
 } from "@/types/follow-up";
 
 export type FollowUpStatusOption = Record<string, string>;
 
 function unwrap<T>(payload: unknown): T {
   const body = payload as { data?: unknown };
-  return (body?.data ?? payload) as T;
+  return (body?.data !== undefined ? body.data : payload) as T;
+}
+
+export function parseReminderToMinutes(
+  reminder?: string | number,
+): number | undefined {
+  if (typeof reminder === "number") {
+    return reminder >= 0 ? reminder : undefined;
+  }
+  if (!reminder || reminder === "none") return undefined;
+  if (reminder === "1 hour") return 60;
+  const match = reminder.match(/^(\d+)/);
+  if (match) {
+    const mins = parseInt(match[1], 10);
+    return isNaN(mins) ? undefined : mins;
+  }
+  return undefined;
+}
+
+export function minutesToReminder(
+  minutes?: number | string,
+): string | undefined {
+  if (minutes === undefined || minutes === null || minutes === "") return undefined;
+  const mins = Number(minutes);
+  if (isNaN(mins) || mins <= 0) return undefined;
+  if (mins === 60) return "1 hour";
+  return `${mins} minutes`;
 }
 
 function optionFromApi(value: Record<string, unknown>): FollowUpOption {
@@ -21,7 +48,12 @@ function optionFromApi(value: Record<string, unknown>): FollowUpOption {
     value._id ?? value.id ?? value.userId ?? value.businessId ?? "",
   );
   const label = String(
-    value.name ?? value.businessName ?? value.fullName ?? value.email ?? id,
+    value.name ??
+      value.businessName ??
+      value.fullName ??
+      value.userName ??
+      value.email ??
+      id,
   );
   return {
     id,
@@ -107,7 +139,27 @@ function parseNotes(value: unknown): string | undefined {
   return String(value);
 }
 
-function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
+function extractPhoneNumber(raw: unknown): string | undefined {
+  if (!raw) return undefined;
+  if (typeof raw === "string" && raw.trim()) return raw.trim();
+  if (Array.isArray(raw) && raw.length > 0) {
+    const primary = raw.find(
+      (item) => typeof item === "object" && item !== null && (item as { isPrimary?: boolean }).isPrimary,
+    ) as { number?: string; value?: string } | undefined;
+    if (primary?.number && String(primary.number).trim()) return String(primary.number).trim();
+    if (primary?.value && String(primary.value).trim()) return String(primary.value).trim();
+    const first = raw[0];
+    if (typeof first === "string" && first.trim()) return first.trim();
+    if (typeof first === "object" && first !== null) {
+      const obj = first as { number?: string; value?: string };
+      if (obj.number && String(obj.number).trim()) return String(obj.number).trim();
+      if (obj.value && String(obj.value).trim()) return String(obj.value).trim();
+    }
+  }
+  return undefined;
+}
+
+export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
   const business = (value.business ?? {}) as Record<string, unknown>;
   const assignee = (value.assignee ?? value.assignedTo ?? {}) as Record<
     string,
@@ -115,38 +167,81 @@ function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
   >;
   const rawNotes =
     value.notes ?? value.note ?? value.comment ?? value.description;
+
+  const rawMinutes =
+    value.reminderInMinutes !== undefined && value.reminderInMinutes !== null
+      ? Number(value.reminderInMinutes)
+      : undefined;
+
+  const formattedReminder =
+    rawMinutes !== undefined
+      ? minutesToReminder(rawMinutes)
+      : value.reminder
+        ? String(value.reminder)
+        : undefined;
+
+  const callingNumber =
+    extractPhoneNumber(business.phoneNumbers) ||
+    extractPhoneNumber(value.phoneNumbers) ||
+    (business.phone ? String(business.phone) : undefined) ||
+    (business.phoneNumber ? String(business.phoneNumber) : undefined) ||
+    (value.businessPhone ? String(value.businessPhone) : undefined) ||
+    (value.phone ? String(value.phone) : undefined);
+
+  const whatsappNumber =
+    extractPhoneNumber(business.whatsappNumbers) ||
+    extractPhoneNumber(value.whatsappNumbers) ||
+    (business.whatsapp ? String(business.whatsapp) : undefined) ||
+    (business.whatsappNumber ? String(business.whatsappNumber) : undefined) ||
+    (business.alternatePhone ? String(business.alternatePhone) : undefined) ||
+    (value.whatsapp ? String(value.whatsapp) : undefined) ||
+    (value.whatsappNumber ? String(value.whatsappNumber) : undefined);
+
+  const email =
+    (business.email ? String(business.email) : undefined) ||
+    (business.contactEmail ? String(business.contactEmail) : undefined) ||
+    (value.email ? String(value.email) : undefined) ||
+    (value.businessEmail ? String(value.businessEmail) : undefined);
+
   return {
     id: String(value._id ?? value.id ?? ""),
     businessId: String(value.businessId ?? business._id ?? business.id ?? ""),
     businessName: String(
       value.businessName ?? business.name ?? "Unknown business",
     ),
-    businessCity: business.city ? String(business.city) : undefined,
-    businessPhone: String(
-      value.businessPhone ?? business.phone ?? business.phoneNumber ?? "",
-    ),
+    businessCity: (value.businessCity || business.city)
+      ? String(value.businessCity || business.city)
+      : undefined,
+    businessPhone: callingNumber || whatsappNumber || "",
+    businessCallingNumber: callingNumber,
+    businessWhatsappNumber: whatsappNumber,
+    businessEmail: email,
     assignedToId:
       assignee._id || assignee.id
         ? String(assignee._id ?? assignee.id)
         : typeof value.assignedTo === "string"
           ? value.assignedTo
           : undefined,
-    assignedToName:
-      String(
-        assignee.fullName ??
-          assignee.name ??
-          value.assignedToName ??
-          (typeof value.assignedTo === "string" ? value.assignedTo : null) ??
-          "Unassigned",
-      ),
+    assignedToName: String(
+      assignee.fullName ??
+        assignee.name ??
+        value.assignedToName ??
+        (typeof value.assignedTo === "string" ? value.assignedTo : null) ??
+        "Unassigned",
+    ),
     type: String(value.type ?? "CALL"),
     status: String(value.status ?? "SCHEDULED"),
     scheduledAt: String(value.scheduledAt ?? value.followUpDate ?? ""),
     notes: parseNotes(rawNotes),
-    reminder: value.reminder ? String(value.reminder) : undefined,
+    reminder: formattedReminder,
+    reminderInMinutes: rawMinutes,
   };
 }
 
+/**
+ * GET /api/follow-ups
+ * Query parameters: page, limit, businessId, assignedTo, status, type, fromDate, toDate, search
+ */
 export async function getFollowUps(
   filters: FollowUpFilters,
   signal?: AbortSignal,
@@ -155,7 +250,9 @@ export async function getFollowUps(
     page: filters.page,
     limit: filters.limit,
   };
-  if (filters.search.trim()) params.search = filters.search.trim();
+  if (filters.search && filters.search.trim()) {
+    params.search = filters.search.trim();
+  }
   if (filters.businessId) params.businessId = filters.businessId;
   if (filters.assignedTo) params.assignedTo = filters.assignedTo;
   if (filters.status) params.status = filters.status;
@@ -188,6 +285,7 @@ export async function getFollowUps(
     root.totalPages ??
     (!Array.isArray(nested) ? nested?.totalPages : undefined) ??
     Math.max(1, Math.ceil(total / filters.limit));
+
   return {
     items: rows.map((item) => toFollowUpItem(item as Record<string, unknown>)),
     total,
@@ -195,8 +293,184 @@ export async function getFollowUps(
   };
 }
 
-export async function getFollowUpKpis(signal?: AbortSignal) {
+/**
+ * GET /api/follow-ups/{id}
+ */
+export async function getFollowUp(id: string, signal?: AbortSignal) {
+  const response = await apiClient.get(`/follow-ups/${id}`, { signal });
+  return toFollowUpItem(unwrap<Record<string, unknown>>(response.data));
+}
+
+/**
+ * POST /api/follow-ups
+ * Body: CreateFollowUpDto { businessId, assignedTo, type, scheduledAt, reminderInMinutes?, notes? }
+ */
+export async function createFollowUp(payload: CreateFollowUpPayload) {
+  const reminderMinutes =
+    payload.reminderInMinutes !== undefined
+      ? payload.reminderInMinutes
+      : parseReminderToMinutes(payload.reminder);
+
+  const body: Record<string, unknown> = {
+    businessId: payload.businessId,
+    assignedTo: payload.assignedTo,
+    type: payload.type,
+    scheduledAt: payload.scheduledAt,
+  };
+
+  if (reminderMinutes !== undefined) {
+    body.reminderInMinutes = reminderMinutes;
+  }
+
+  if (payload.notes && payload.notes.trim()) {
+    const trimmedNotes = payload.notes.trim();
+    body.notes = trimmedNotes;
+    body.note = trimmedNotes;
+  }
+
+  const response = await apiClient.post("/follow-ups", body);
+  return toFollowUpItem(unwrap<Record<string, unknown>>(response.data));
+}
+
+/**
+ * PATCH /api/follow-ups/{id}
+ * Body: UpdateFollowUpDto { businessId?, assignedTo?, type?, scheduledAt?, reminderInMinutes?, notes?, note? }
+ * If status is provided, also updates status via PATCH /api/follow-ups/{id}/status
+ */
+export async function updateFollowUp(payload: UpdateFollowUpPayload) {
+  const id = payload.id || payload.followUpId;
+  if (!id) {
+    throw new Error("Follow-up ID is required for update.");
+  }
+
+  const reminderMinutes =
+    payload.reminderInMinutes !== undefined
+      ? payload.reminderInMinutes
+      : parseReminderToMinutes(payload.reminder);
+
+  const body: Record<string, unknown> = {};
+  if (payload.businessId) body.businessId = payload.businessId;
+  if (payload.assignedTo) body.assignedTo = payload.assignedTo;
+  if (payload.type) body.type = payload.type;
+  if (payload.scheduledAt) body.scheduledAt = payload.scheduledAt;
+  if (reminderMinutes !== undefined) {
+    body.reminderInMinutes = reminderMinutes;
+  }
+  if (payload.notes !== undefined) {
+    const trimmedNotes = payload.notes.trim();
+    body.notes = trimmedNotes;
+    body.note = trimmedNotes;
+    body.description = trimmedNotes;
+    body.comment = trimmedNotes;
+  }
+
+  // Update details via PATCH /api/follow-ups/{id} (or fallback PATCH /api/follow-ups)
+  let updatedRecord: Record<string, unknown> = {};
+  if (Object.keys(body).length > 0) {
+    try {
+      const response = await apiClient.patch(`/follow-ups/${id}`, body);
+      updatedRecord = unwrap<Record<string, unknown>>(response.data) || {};
+    } catch (error) {
+      if (
+        axios.isAxiosError(error) &&
+        (error.response?.status === 404 || error.response?.status === 405)
+      ) {
+        const response = await apiClient.patch("/follow-ups", {
+          ...body,
+          id,
+          followUpId: id,
+        });
+        updatedRecord = unwrap<Record<string, unknown>>(response.data) || {};
+      } else {
+        throw error;
+      }
+    }
+  }
+
+  // If status is specified as COMPLETED or CANCELLED, call status endpoint
+  if (payload.status === "COMPLETED" || payload.status === "CANCELLED") {
+    try {
+      const statusResponse = await updateFollowUpStatus({
+        id,
+        status: payload.status,
+      });
+      if (payload.notes !== undefined) {
+        statusResponse.notes = payload.notes.trim();
+      }
+      return statusResponse;
+    } catch {
+      // If status update failed (e.g. already completed), but details were updated, return updated details
+    }
+  }
+
+  const item = toFollowUpItem({
+    ...body,
+    ...updatedRecord,
+    id,
+    _id: id,
+  });
+  if (payload.notes !== undefined) {
+    item.notes = payload.notes.trim();
+  }
+  if (payload.reminder !== undefined) {
+    item.reminder = payload.reminder;
+  }
+  if (payload.type) {
+    item.type = payload.type;
+  }
+  if (payload.scheduledAt) {
+    item.scheduledAt = payload.scheduledAt;
+  }
+
+  return item;
+}
+
+/**
+ * PATCH /api/follow-ups/{id}/status
+ * Body: UpdateFollowUpStatusDto { status: "COMPLETED" | "CANCELLED" }
+ */
+export async function updateFollowUpStatus(
+  payload: UpdateFollowUpStatusPayload,
+) {
+  const response = await apiClient.patch(`/follow-ups/${payload.id}/status`, {
+    status: payload.status,
+  });
+  return toFollowUpItem(unwrap<Record<string, unknown>>(response.data));
+}
+
+/**
+ * Cancel a follow-up via PATCH /api/follow-ups/{id}/status with status "CANCELLED"
+ */
+export async function cancelFollowUp(id: string) {
+  return updateFollowUpStatus({ id, status: "CANCELLED" });
+}
+
+/**
+ * Mark a follow-up as completed via PATCH /api/follow-ups/{id}/status with status "COMPLETED"
+ */
+export async function completeFollowUp(id: string) {
+  return updateFollowUpStatus({ id, status: "COMPLETED" });
+}
+
+/**
+ * GET /api/follow-ups/kpis
+ * Query parameters: businessId, assignedTo, status, type, fromDate, toDate
+ */
+export async function getFollowUpKpis(
+  params?: Partial<FollowUpFilters>,
+  signal?: AbortSignal,
+) {
+  const queryParams: Record<string, string> = {};
+  if (params?.businessId) queryParams.businessId = params.businessId;
+  if (params?.assignedTo) queryParams.assignedTo = params.assignedTo;
+  if (params?.status) queryParams.status = params.status;
+  if (params?.type) queryParams.type = params.type;
+  if (params?.fromDate) queryParams.fromDate = params.fromDate;
+  if (params?.toDate) queryParams.toDate = params.toDate;
+  if (params?.search && params.search.trim()) queryParams.search = params.search.trim();
+
   const response = await apiClient.get<FollowUpKpis>("/follow-ups/kpis", {
+    params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
     signal,
   });
   const value = unwrap<Partial<FollowUpKpis>>(response.data);
@@ -208,61 +482,55 @@ export async function getFollowUpKpis(signal?: AbortSignal) {
   };
 }
 
+/**
+ * GET /api/follow-ups/statuses
+ */
 export async function getFollowUpStatuses(signal?: AbortSignal) {
-  const response = await apiClient.get<FollowUpStatusOption | string[]>("/follow-ups/statuses", { signal });
+  const response = await apiClient.get<FollowUpStatusOption | string[]>(
+    "/follow-ups/statuses",
+    { signal },
+  );
   const payload = unwrap<FollowUpStatusOption | string[]>(response.data);
   if (Array.isArray(payload)) {
-    return Object.fromEntries(payload.map((status) => [status, status])) as FollowUpStatusOption;
+    return Object.fromEntries(
+      payload.map((status) => [status, status]),
+    ) as FollowUpStatusOption;
   }
   return payload ?? {};
 }
 
-export async function createFollowUp(payload: CreateFollowUpPayload) {
-  const response = await apiClient.post("/follow-ups", payload);
-  return unwrap<FollowUpItem>(response.data);
-}
-
-export async function getFollowUp(id: string, signal?: AbortSignal) {
-  const response = await apiClient.get(`/follow-ups/${id}`, { signal });
-  return toFollowUpItem(unwrap<Record<string, unknown>>(response.data));
-}
-
-export async function updateFollowUp(payload: UpdateFollowUpPayload) {
-  const id = payload.id ?? payload.followUpId;
-  const body = {
-    ...payload,
-    ...(id ? { id, followUpId: id } : {}),
-  };
-  try {
-    const response = await apiClient.patch("/follow-ups", body);
-    return unwrap<FollowUpItem>(response.data);
-  } catch (error) {
-    if (
-      id &&
-      axios.isAxiosError(error) &&
-      (error.response?.status === 404 || error.response?.status === 405)
-    ) {
-      const response = await apiClient.patch(`/follow-ups/${id}`, body);
-      return unwrap<FollowUpItem>(response.data);
-    }
-    throw error;
-  }
-}
-
-export async function cancelFollowUp(
-  id: string,
-  existing?: Partial<UpdateFollowUpPayload>,
+/**
+ * GET /api/follow-ups/business/{businessId}
+ */
+export async function getFollowUpsByBusiness(
+  businessId: string,
+  signal?: AbortSignal,
 ) {
-  try {
-    const response = await apiClient.patch("/follow-ups", {
-      ...(existing || {}),
-      id,
-      followUpId: id,
-      status: "CANCELLED",
-    });
-    return unwrap<FollowUpItem>(response.data);
-  } catch {
-    const response = await apiClient.delete("/follow-ups", { data: { id } });
-    return response.data;
-  }
+  const response = await apiClient.get(
+    `/follow-ups/business/${businessId}`,
+    { signal },
+  );
+  const payload = unwrap<unknown>(response.data);
+  const rows = Array.isArray(payload)
+    ? payload
+    : ((payload as { data?: unknown[] })?.data ?? []);
+  return rows.map((item) => toFollowUpItem(item as Record<string, unknown>));
+}
+
+/**
+ * GET /api/follow-ups/assigned/{userId}
+ */
+export async function getFollowUpsByUser(
+  userId: string,
+  signal?: AbortSignal,
+) {
+  const response = await apiClient.get(
+    `/follow-ups/assigned/${userId}`,
+    { signal },
+  );
+  const payload = unwrap<unknown>(response.data);
+  const rows = Array.isArray(payload)
+    ? payload
+    : ((payload as { data?: unknown[] })?.data ?? []);
+  return rows.map((item) => toFollowUpItem(item as Record<string, unknown>));
 }

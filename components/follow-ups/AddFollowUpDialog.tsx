@@ -1,8 +1,9 @@
 "use client";
 
+import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { Bell, CalendarDays, Loader2, X } from "lucide-react";
+import { Bell, CalendarDays, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -26,6 +27,7 @@ import {
 interface Props {
   open: boolean;
   onOpenChange: (open: boolean) => void;
+  initialBusiness?: FollowUpOption;
 }
 
 interface AddFollowUpFormValues {
@@ -46,34 +48,58 @@ const defaultValues: AddFollowUpFormValues = {
   reminder: null,
 };
 
-export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
+export default function AddFollowUpDialog({
+  open,
+  onOpenChange,
+  initialBusiness,
+}: Props) {
   const {
     control,
     register,
     handleSubmit,
     reset,
     formState: { errors },
-  } = useForm<AddFollowUpFormValues>({ defaultValues, mode: "onChange" });
+  } = useForm<AddFollowUpFormValues>({
+    defaultValues: {
+      ...defaultValues,
+      business: initialBusiness ?? null,
+    },
+    mode: "onChange",
+  });
+
+  useEffect(() => {
+    if (open) {
+      reset({
+        ...defaultValues,
+        business: initialBusiness ?? null,
+      });
+    }
+  }, [open, initialBusiness, reset]);
+
   const mutation = useCreateFollowUp();
 
   const submit = async (values: AddFollowUpFormValues) => {
-    if (!values.business || !values.assignee || !values.type) {
+    const activeBusiness = initialBusiness || values.business;
+    if (!activeBusiness?.id || !values.assignee?.id || !values.type || !values.scheduledAt) {
       toast.error("Please complete all required fields.");
       return;
     }
+
     try {
       await mutation.mutateAsync({
-        businessId: values.business.id,
+        businessId: activeBusiness.id,
         assignedTo: values.assignee.id,
         type: values.type,
         scheduledAt: new Date(values.scheduledAt).toISOString(),
-        status: "SCHEDULED",
-        notes: values.notes,
+        notes: values.notes.trim() || undefined,
         reminder: values.reminder || undefined,
       });
-      toast.success("Follow-up added");
+      toast.success("Follow-up created successfully");
       onOpenChange(false);
-      reset(defaultValues);
+      reset({
+        ...defaultValues,
+        business: initialBusiness ?? null,
+      });
     } catch (error: unknown) {
       toast.error(
         error instanceof Error ? error.message : "Unable to add follow-up.",
@@ -114,28 +140,42 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
                 Business <span className="text-red-500">*</span>
               </label>
-              <Controller
-                control={control}
-                name="business"
-                rules={{
-                  validate: (value) =>
-                    Boolean(value?.id) || "Business is required.",
-                }}
-                render={({ field }) => (
-                  <FollowUpAutocomplete
-                    kind="business"
-                    value={field.value?.id}
-                    label={field.value?.label}
-                    onChange={(option) => field.onChange(option ?? null)}
-                    placeholder="Select business"
-                    invalid={Boolean(errors.business)}
+              {initialBusiness ? (
+                <div className="relative">
+                  <Search className="pointer-events-none absolute left-3 top-3 size-4 text-[#94a3b8]" />
+                  <Input
+                    readOnly
+                    tabIndex={-1}
+                    value={initialBusiness.label}
+                    className="h-10 w-full cursor-not-allowed border-[#e2e8f0] bg-[#f8fafc] pl-9 text-xs font-medium text-[#0f172a] select-none focus-visible:ring-0"
                   />
-                )}
-              />
-              {errors.business && (
-                <p role="alert" className="mt-1 text-xs text-red-600">
-                  {errors.business.message}
-                </p>
+                </div>
+              ) : (
+                <>
+                  <Controller
+                    control={control}
+                    name="business"
+                    rules={{
+                      validate: (value) =>
+                        Boolean(value?.id) || "Business is required.",
+                    }}
+                    render={({ field }) => (
+                      <FollowUpAutocomplete
+                        kind="business"
+                        value={field.value?.id}
+                        label={field.value?.label}
+                        onChange={(option) => field.onChange(option ?? null)}
+                        placeholder="Select business"
+                        invalid={Boolean(errors.business)}
+                      />
+                    )}
+                  />
+                  {errors.business && (
+                    <p role="alert" className="mt-1 text-xs text-red-600">
+                      {errors.business.message}
+                    </p>
+                  )}
+                </>
               )}
             </div>
             <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
@@ -214,6 +254,7 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
                         <SelectItem value="MEETING">Meeting</SelectItem>
                         <SelectItem value="EMAIL">Email</SelectItem>
                         <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
+                        <SelectItem value="OTHER">Other</SelectItem>
                       </SelectContent>
                     </Select>
                   )}
@@ -224,39 +265,38 @@ export default function AddFollowUpDialog({ open, onOpenChange }: Props) {
                   </p>
                 )}
               </div>
-              
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                Reminder
-              </label>
-              <Controller
-                control={control}
-                name="reminder"
-                render={({ field }) => (
-                  <Select
-                    value={field.value || "none"}
-                    onValueChange={(val) =>
-                      field.onChange(val === "none" ? null : val)
-                    }
-                  >
-                    <SelectTrigger className="h-10 text-xs">
-                      <div className="flex items-center gap-2">
-                        <Bell className="size-3.5 text-[#94a3b8]" />
-                        <SelectValue placeholder="No reminder" />
-                      </div>
-                    </SelectTrigger>
-                    <SelectContent className="bg-white">
-                      <SelectItem value="none">No reminder</SelectItem>
-                      {FOLLOW_UP_REMINDER_OPTIONS.map((opt) => (
-                        <SelectItem key={opt} value={opt}>
-                          {opt}
-                        </SelectItem>
-                      ))}
-                    </SelectContent>
-                  </Select>
-                )}
-              />
-            </div>
+              <div>
+                <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
+                  Reminder
+                </label>
+                <Controller
+                  control={control}
+                  name="reminder"
+                  render={({ field }) => (
+                    <Select
+                      value={field.value || "none"}
+                      onValueChange={(val) =>
+                        field.onChange(val === "none" ? null : val)
+                      }
+                    >
+                      <SelectTrigger className="h-10 text-xs">
+                        <div className="flex items-center gap-2">
+                          <Bell className="size-3.5 text-[#94a3b8]" />
+                          <SelectValue placeholder="No reminder" />
+                        </div>
+                      </SelectTrigger>
+                      <SelectContent className="bg-white">
+                        <SelectItem value="none">No reminder</SelectItem>
+                        {FOLLOW_UP_REMINDER_OPTIONS.map((opt) => (
+                          <SelectItem key={opt} value={opt}>
+                            {opt}
+                          </SelectItem>
+                        ))}
+                      </SelectContent>
+                    </Select>
+                  )}
+                />
+              </div>
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
