@@ -213,14 +213,8 @@ export default function FollowUpDetails({
           <p className="text-xs font-semibold uppercase tracking-wide text-[#94a3b8]">
             Business contact
           </p>
-          <p className="mt-4 font-semibold text-[#0f172a]">
-            {followUp.businessName}
-          </p>
-          <p className="mt-1 text-sm text-[#64748b]">
-            {followUp.businessCity || businessData?.city || "-"}
-          </p>
 
-          <div className="mt-5 space-y-3.5 border-t border-[#f1f5f9] pt-4">
+          <div className="mt-4 space-y-4">
             {/* Calling number */}
             <div>
               <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94a3b8]">
