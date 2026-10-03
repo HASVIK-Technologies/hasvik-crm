@@ -146,11 +146,6 @@ export default function FollowupsPage() {
                   className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-[#0b63e5] text-[#0b63e5]" : "border-transparent text-[#64748b] hover:text-[#334155]"}`}
                 >
                   {tab}
-                  {kpisQuery.data && (
-                    <span className="ml-1.5 text-[10px]">
-                      ({kpisQuery.data[tab === "all" ? "total" : tab]})
-                    </span>
-                  )}
                 </button>
               ))}
             </div>

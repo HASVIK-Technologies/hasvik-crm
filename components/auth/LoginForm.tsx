@@ -48,7 +48,15 @@ export default function LoginForm() {
           <div className="absolute -right-20 -top-20 h-72 w-72 rounded-full border-[42px] border-[#2aa781]/30" />
           <div className="absolute -bottom-36 -left-28 h-96 w-96 rounded-full border-[54px] border-[#1d8aca]/25" />
           <div className="relative">
-            <Image src="/logo.png" alt="Hasvik" width={224} height={67} priority className="h-auto w-56" />
+            <Image
+              src="/logo.png"
+              alt="Hasvik"
+              width={224}
+              height={67}
+              priority
+              style={{ height: "auto" }}
+              className="w-56"
+            />
             <div className="mt-16 max-w-xs">
               <p className="mb-4 text-xs font-semibold uppercase tracking-[0.24em] text-[#8ed9bd]">Business management</p>
               <h1 className="text-4xl font-semibold leading-tight tracking-tight">Keep your business moving forward.</h1>
@@ -59,13 +67,23 @@ export default function LoginForm() {
         </section>
         <section className="flex min-h-[600px] items-center justify-center p-7 sm:p-14">
           <div className="w-full max-w-md">
-            <div className="mb-10 lg:hidden"><Image src="/logo.png" alt="Hasvik" width={176} height={53} priority className="h-auto w-44" /></div>
+            <div className="mb-10 lg:hidden">
+              <Image
+                src="/logo.png"
+                alt="Hasvik"
+                width={176}
+                height={53}
+                priority
+                style={{ height: "auto" }}
+                className="w-44"
+              />
+            </div>
             <div className="mb-8">
               <p className="mb-3 text-xs font-semibold uppercase tracking-[0.2em] text-[#168d6e]">Welcome back</p>
               <h2 className="text-3xl font-semibold tracking-tight text-[#123b59]">Sign in to Hasvik</h2>
               <p className="mt-3 text-sm leading-6 text-slate-500">Enter your details to access your workspace.</p>
             </div>
-            <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate>
+            <form className="space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate suppressHydrationWarning>
               <div className="space-y-2">
                 <label htmlFor="email" className="text-sm font-medium text-[#23445d]">Email</label>
                 <div className="relative">
@@ -82,15 +100,31 @@ export default function LoginForm() {
                 <div className="relative">
                   <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400" />
                   <Input id="password" type={showPassword ? "text" : "password"} autoComplete="current-password" placeholder="Enter your password" aria-invalid={Boolean(errors.password)} className="h-12 border-slate-200 pl-11 pr-12 text-sm shadow-sm placeholder:text-slate-400 focus-visible:border-[#168d6e] focus-visible:ring-[#168d6e]/20" {...register("password", { required: "Password is required" })} />
-                  <button type="button" title={showPassword ? "Hide password" : "Show password"} aria-label={showPassword ? "Hide password" : "Show password"} onClick={() => setShowPassword(!showPassword)} className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-[#168d6e]">
+                  <button
+                    type="button"
+                    suppressHydrationWarning
+                    title={showPassword ? "Hide password" : "Show password"}
+                    aria-label={showPassword ? "Hide password" : "Show password"}
+                    onClick={() => setShowPassword(!showPassword)}
+                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-[#168d6e]"
+                  >
                     {showPassword ? <EyeOff className="size-[18px]" /> : <Eye className="size-[18px]" />}
                   </button>
                 </div>
                 {errors.password && <p className="text-xs text-red-600">{errors.password.message}</p>}
               </div>
               <div className="flex items-center justify-between pt-1 text-sm">
-                <label className="flex items-center gap-2 text-slate-500"><input type="checkbox" className="size-4 accent-[#168d6e]" />Remember me</label>
-                <button type="button" className="font-medium text-[#0b6e8d] hover:text-[#168d6e]">Forgot password?</button>
+                <label className="flex items-center gap-2 text-slate-500">
+                  <input type="checkbox" suppressHydrationWarning className="size-4 accent-[#168d6e]" />
+                  Remember me
+                </label>
+                <button
+                  type="button"
+                  suppressHydrationWarning
+                  className="font-medium text-[#0b6e8d] hover:text-[#168d6e]"
+                >
+                  Forgot password?
+                </button>
               </div>
               {loginError && <p className="text-sm text-red-600" role="alert">{loginError}</p>}
               <PrimaryButton type="submit" disabled={loginMutation.isPending} className="mt-3 h-12 w-full text-base">

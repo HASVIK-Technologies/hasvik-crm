@@ -151,7 +151,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               width={140}
               height={42}
               priority
-              className={`h-auto ${sidebarCollapsed ? "w-10 object-cover object-left" : "w-32"}`}
+              style={{ height: "auto" }}
+              className={sidebarCollapsed ? "w-10 object-cover object-left" : "w-32"}
             />
           </Link>
         </div>
