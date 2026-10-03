@@ -16,6 +16,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import FollowUpAutocomplete from "@/components/follow-ups/FollowUpAutocomplete";
+import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import { useUpdateFollowUp } from "@/hooks/use-follow-ups";
 import {
   FOLLOW_UP_REMINDER_OPTIONS,

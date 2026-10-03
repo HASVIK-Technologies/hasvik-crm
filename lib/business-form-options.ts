@@ -24,6 +24,45 @@ export const CITY_OPTIONS = [
   "Surat",
 ];
 
+export const STATE_OPTIONS = [
+  "Andhra Pradesh",
+  "Arunachal Pradesh",
+  "Assam",
+  "Bihar",
+  "Chhattisgarh",
+  "Goa",
+  "Gujarat",
+  "Haryana",
+  "Himachal Pradesh",
+  "Jharkhand",
+  "Karnataka",
+  "Kerala",
+  "Madhya Pradesh",
+  "Maharashtra",
+  "Manipur",
+  "Meghalaya",
+  "Mizoram",
+  "Nagaland",
+  "Odisha",
+  "Punjab",
+  "Rajasthan",
+  "Sikkim",
+  "Tamil Nadu",
+  "Telangana",
+  "Tripura",
+  "Uttar Pradesh",
+  "Uttarakhand",
+  "West Bengal",
+  "Andaman and Nicobar Islands",
+  "Chandigarh",
+  "Dadra and Nagar Haveli and Daman and Diu",
+  "Delhi",
+  "Jammu and Kashmir",
+  "Ladakh",
+  "Lakshadweep",
+  "Puducherry",
+] as const;
+
 // Values match the backend's exact enum for `status` on POST/PATCH
 // /businesses - sending anything else is rejected with a 400. Labels are
 // just the friendly text shown in the dropdown.
@@ -54,17 +93,11 @@ export const LEAD_SOURCE_OPTIONS = [
   "Trade Show",
 ];
 
-export const TEAM_MEMBER_OPTIONS = [
-  "Amit Sharma",
-  "Priya Nair",
-  "Rahul Verma",
-  "Sneha Iyer",
-];
-
 export const REMINDER_OPTIONS = [
-  "No reminder",
-  "On the day",
-  "1 day before",
-  "2 days before",
-  "1 week before",
+  { value: "5", label: "5 mins" },
+  { value: "10", label: "10 mins" },
+  { value: "15", label: "15 mins" },
+  { value: "30", label: "30 mins" },
+  { value: "45", label: "45 mins" },
+  { value: "60", label: "1 hr" },
 ];

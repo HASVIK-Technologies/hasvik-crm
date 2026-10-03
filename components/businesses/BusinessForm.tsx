@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   FormProvider,
@@ -33,8 +33,11 @@ import AdditionalInfoSection from "@/components/businesses/sections/AdditionalIn
 import FollowUpSection from "@/components/businesses/sections/FollowUpSection";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/lib/use-is-desktop";
-import { getBusinessRaw, useCreateBusiness, useCreateBusinessMutation, useUpdateBusinessMutation } from "@/hooks/use-businesses";
-import { getApiErrorMessage } from "@/lib/api-error";
+import {
+  getBusinessRaw,
+  useCreateBusinessMutation,
+  useUpdateBusinessMutation,
+} from "@/hooks/use-businesses";
 import {
   defaultBusinessFormValues,
   type BusinessFormValues,
@@ -56,6 +59,9 @@ const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
   pincode: "Pincode",
   address: "Address",
   status: "Status",
+  leadSource: "Follow-up Type",
+  assignTo: "Assignee",
+  nextFollowupDate: "Next Follow-up Date",
   phoneNumbers: "Phone Number",
   whatsappNumbers: "WhatsApp Number",
 };
@@ -124,7 +130,9 @@ export default function BusinessForm({
   const phoneArray = useFieldArray({ control, name: "phoneNumbers" });
   const whatsappArray = useFieldArray({ control, name: "whatsappNumbers" });
 
-  const createBusinessMutation = useCreateBusiness();
+  // In edit mode this holds the values loaded from the API, so "Reset"
+  // can restore them instead of clearing the form.
+  const savedValuesRef = useRef<BusinessFormValues | null>(null);
 
   const watchedValues = useWatch({ control }) as BusinessFormValues;
   const isFormComplete =
@@ -159,15 +167,29 @@ export default function BusinessForm({
             ? data.whatsappNumbers.map((w) => ({ value: w.number || "" }))
             : [{ value: "" }];
 
-        reset({
+        // The API may return `category` as an object ({ _id, name }) or
+        // as a plain id string, so handle both.
+        const rawCategory = data.category as unknown;
+        const categoryObj =
+          typeof rawCategory === "object" && rawCategory !== null
+            ? (rawCategory as { _id?: string; name?: string })
+            : null;
+        const categoryId =
+          data.categoryId ??
+          categoryObj?._id ??
+          (typeof rawCategory === "string" ? rawCategory : "");
+
+        const loadedValues: BusinessFormValues = {
           businessName: data.name || "",
-          category: (data.categoryId ?? data.category) || "",
+          category: categoryId || "",
+          categoryName: categoryObj?.name || "",
           city: data.city || "",
           state: data.state || "",
           pincode: data.pincode || "",
           address: data.address || "",
-          status: data.status || (data.isActive === false ? "Inactive" : "Active"),
-          businessType: data.businessType || "",
+          status:
+            data.status || (data.isActive === false ? "Inactive" : "Active"),
+          locationUrl: data.location?.url || "",
           phoneNumbers,
           whatsappNumbers,
           email: data.email || "",
@@ -176,10 +198,18 @@ export default function BusinessForm({
           notes: data.notes || "",
           leadSource: data.leadSource || "",
           assignTo: data.assignedTo || "",
-          nextFollowupDate: data.nextFollowupDate ? data.nextFollowupDate.slice(0, 10) : "",
-          reminder: data.reminder || "",
+          nextFollowupDate: data.nextFollowupDate
+            ? data.nextFollowupDate.slice(0, 10)
+            : "",
+          reminder:
+            data.reminder === undefined || data.reminder === null
+              ? ""
+              : String(data.reminder),
           addAnother: false,
-        });
+        };
+
+        savedValuesRef.current = loadedValues;
+        reset(loadedValues);
 
         setIsLoadingBusiness(false);
       })
@@ -201,7 +231,8 @@ export default function BusinessForm({
   const handleBackToBusinesses = () => router.push("/businesses");
 
   const handleReset = () => {
-    reset(initialSnapshot);
+    // Edit mode -> back to the saved values; add mode -> empty form.
+    reset(savedValuesRef.current ?? initialSnapshot);
     setSubmitError(null);
     setCurrentStep(0);
   };
@@ -236,7 +267,7 @@ export default function BusinessForm({
       : []),
     {
       key: "followup",
-      title: "Follow-up Settings",
+      title: "Follow-up",
       render: (idPrefix: string) => <FollowUpSection idPrefix={idPrefix} />,
     },
   ];
@@ -264,7 +295,6 @@ export default function BusinessForm({
 
     const payload: Record<string, unknown> = {
       name: values.businessName.trim(),
-      businessType: values.businessType || undefined,
       status: values.status || "Active",
       email: values.email.trim() || undefined,
       website: values.website.trim() || undefined,
@@ -277,7 +307,7 @@ export default function BusinessForm({
       description: values.description || undefined,
       notes: values.notes || undefined,
       nextFollowupDate: values.nextFollowupDate || undefined,
-      reminder: values.reminder || undefined,
+      reminder: values.reminder ? Number(values.reminder) : undefined,
       phoneNumbers: values.phoneNumbers
         .filter((p) => p.value.trim())
         .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
@@ -291,18 +321,20 @@ export default function BusinessForm({
       payload.categoryId = values.category;
     }
 
+    if (values.locationUrl.trim()) {
+      payload.location = { url: values.locationUrl.trim() };
+    }
+
     try {
       if (isEditMode && targetId) {
         await updateMutation.mutateAsync({ id: targetId, payload });
         router.push(`/businesses/${targetId}`);
       } else {
         await createMutation.mutateAsync(payload);
-        if (values.addAnother) {
-          reset(defaultBusinessFormValues);
-          setCurrentStep(0);
-        } else {
-          router.push("/businesses");
-        }
+        // Stay on the form so the next business can be added right away.
+        // (The success toast is shown by useCreateBusinessMutation.)
+        reset(defaultBusinessFormValues);
+        setCurrentStep(0);
       }
     } catch (err: unknown) {
       setSubmitError(
@@ -313,15 +345,6 @@ export default function BusinessForm({
     } finally {
       setIsSubmitting(false);
     }
-
-    createBusinessMutation.mutate(values, {
-      onSuccess: () => {
-        router.push("/businesses");
-      },
-      onError: (error) => {
-        setSubmitError(getApiErrorMessage(error));
-      },
-    });
   };
 
   const onInvalid = (formErrors: FieldErrors<BusinessFormValues>) => {
@@ -353,7 +376,9 @@ export default function BusinessForm({
           <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
             <AlertCircle className="size-6" />
           </div>
-          <h3 className="text-base font-bold text-[#0f172a]">Business Not Found</h3>
+          <h3 className="text-base font-bold text-[#0f172a]">
+            Business Not Found
+          </h3>
           <p className="text-sm text-[#64748b]">{loadError}</p>
           <OutlinedButton
             type="button"
@@ -406,7 +431,7 @@ export default function BusinessForm({
                 </FormSection>
               )}
 
-              <FormSection icon={UsersRound} title="Follow-up Settings">
+              <FormSection icon={UsersRound} title="Follow-up">
                 <FollowUpSection idPrefix="desktop-" />
               </FormSection>
 
@@ -434,15 +459,11 @@ export default function BusinessForm({
                   <SecondaryButton
                     type="submit"
                     size="lg"
-                    disabled={
-                      !isFormComplete || createBusinessMutation.isPending
-                    }
+                    disabled={!isFormComplete || isSubmitting}
                     className="w-full sm:w-auto"
                   >
                     <Save className="size-4" />
-                    {createBusinessMutation.isPending
-                      ? "Saving..."
-                      : "Save Business"}
+                    {isSubmitting ? "Saving..." : "Save Business"}
                   </SecondaryButton>
                 </div>
               </div>
@@ -519,15 +540,11 @@ export default function BusinessForm({
                       </OutlinedButton>
                       <SecondaryButton
                         type="submit"
-                        disabled={
-                          !isFormComplete || createBusinessMutation.isPending
-                        }
+                        disabled={!isFormComplete || isSubmitting}
                         className="w-full sm:w-auto"
                       >
                         <Save className="size-4" />
-                        {createBusinessMutation.isPending
-                          ? "Saving..."
-                          : "Save Business"}
+                        {isSubmitting ? "Saving..." : "Save Business"}
                       </SecondaryButton>
                     </div>
                   ) : (

@@ -10,6 +10,7 @@ export type ApiBusiness = {
   name: string;
   categoryId?: string | null;
   businessType?: string;
+  location?: { url?: string } | null;
   status?: string;
   isDeleted?: boolean;
   isActive?: boolean;
@@ -25,7 +26,7 @@ export type ApiBusiness = {
   assignedTo?: string;
   leadSource?: string;
   nextFollowupDate?: string;
-  reminder?: string;
+  reminder?: string | number;
   description?: string;
   notes?: string;
   createdAt?: string;

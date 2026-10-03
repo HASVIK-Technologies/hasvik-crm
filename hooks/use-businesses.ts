@@ -24,11 +24,8 @@ import type {
  * Maps the Add Business form's values to POST /businesses' request shape.
  *
  * Known gaps, since this is scoped to just the create call for now:
- * - `assignedTo` is sent as whatever plain string the Assign To dropdown
- *   currently holds (e.g. "Amit Sharma"), NOT a real database ID - that
- *   dropdown is still a hardcoded placeholder list (see
- *   lib/business-form-options.ts), not fetched from the backend.
- *   (`categoryId` is now the real category _id, via useCategoriesQuery.)
+ * - `assignedTo` comes from the shared team-member autocomplete.
+ * - `categoryId` is the real category _id, via useCategoriesQuery.
  * - `status` and `leadSource` are sent as whatever the form's dropdowns
  *   currently hold (e.g. "New Lead"), which likely don't match the
  *   backend's real enum values (e.g. "NEW").
@@ -636,4 +633,3 @@ export function useCreateBusiness() {
     },
   });
 }
-

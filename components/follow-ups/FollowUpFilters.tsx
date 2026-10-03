@@ -11,6 +11,7 @@ import {
 import { Popover, PopoverContent, PopoverTrigger } from "@/components/ui/popover";
 import FollowUpStatusSelect from "@/components/follow-ups/FollowUpStatusSelect";
 import FollowUpAutocomplete from "@/components/follow-ups/FollowUpAutocomplete";
+import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import FollowUpDateRange from "@/components/follow-ups/FollowUpDateRange";
 import type {
   FollowUpFilters as Filters,
@@ -70,8 +71,7 @@ export default function FollowUpFilters({ filters, setFilter, reset }: Props) {
         />
       </div>
       <div className="w-full sm:w-44 xl:w-48">
-        <FollowUpAutocomplete
-          kind="user"
+        <AssigneeAutocomplete
           value={filters.assignedTo}
           label={filters.assignedToName}
           onChange={(option) => setOption("user", option)}

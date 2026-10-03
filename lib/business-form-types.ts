@@ -6,12 +6,15 @@ export type BusinessFormValues = {
   addAnother: boolean;
   businessName: string;
   category: string;
+  /** Display name for `category`; only used to prefill the dropdown label in edit mode. Never sent to the API. */
+  categoryName?: string;
   city: string;
   state: string;
   pincode: string;
   address: string;
   status: string;
-  businessType: string;
+  /** A direct link to the business location (e.g. a Google Maps URL). */
+  locationUrl: string;
   phoneNumbers: NumberFieldValue[];
   whatsappNumbers: NumberFieldValue[];
   email: string;
@@ -32,7 +35,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   pincode: "",
   address: "",
   status: "",
-  businessType: "",
+  locationUrl: "",
   phoneNumbers: [{ value: "" }],
   whatsappNumbers: [{ value: "" }],
   email: "",
@@ -43,7 +46,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   assignTo: "",
   nextFollowupDate: "",
   reminder: "",
-  addAnother: false
+  addAnother: false,
 };
 
 // Field names validated per step of the mobile wizard. Phone/WhatsApp
@@ -59,6 +62,12 @@ export const STEP_FIELD_NAMES = {
     "address",
     "status",
   ] as const,
-  additional: ["website", "description", "notes"] as const,
-  followup: ["leadSource", "assignTo", "nextFollowupDate", "reminder"] as const,
+  additional: ["website", "description"] as const,
+  followup: [
+    "leadSource",
+    "assignTo",
+    "nextFollowupDate",
+    "reminder",
+    "notes",
+  ] as const,
 };
