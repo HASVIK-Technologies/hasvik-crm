@@ -40,6 +40,7 @@ import {
 } from "@/hooks/use-businesses";
 import {
   defaultBusinessFormValues,
+  toFollowUpPayload,
   type BusinessFormValues,
 } from "@/lib/business-form-types";
 
@@ -59,7 +60,7 @@ const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
   pincode: "Pincode",
   address: "Address",
   status: "Status",
-  leadSource: "Follow-up Type",
+  followUpType: "Follow-up Type",
   assignTo: "Assignee",
   nextFollowupDate: "Next Follow-up Date",
   phoneNumbers: "Phone Number",
@@ -196,15 +197,21 @@ export default function BusinessForm({
           website: data.website || "",
           description: data.description || "",
           notes: data.notes || "",
-          leadSource: data.leadSource || "",
-          assignTo: data.assignedTo || "",
-          nextFollowupDate: data.nextFollowupDate
-            ? data.nextFollowupDate.slice(0, 10)
+          followUpType: data.followUp?.type || "",
+          assignTo: data.followUp?.assignedTo || data.assignedTo || "",
+          nextFollowupDate: data.followUp?.scheduledAt || data.nextFollowupDate
+            ? (data.followUp?.scheduledAt || data.nextFollowupDate || "").slice(
+                0,
+                10,
+              )
             : "",
           reminder:
-            data.reminder === undefined || data.reminder === null
+            data.followUp?.reminderInMinutes === undefined &&
+            (data.reminder === undefined || data.reminder === null)
               ? ""
-              : String(data.reminder),
+              : String(
+                  data.followUp?.reminderInMinutes ?? data.reminder,
+                ),
           addAnother: false,
         };
 
@@ -302,12 +309,10 @@ export default function BusinessForm({
       city: values.city.trim() || undefined,
       state: values.state.trim() || undefined,
       pincode: values.pincode.trim() || undefined,
-      leadSource: values.leadSource || undefined,
       assignedTo: values.assignTo || undefined,
       description: values.description || undefined,
       notes: values.notes || undefined,
-      nextFollowupDate: values.nextFollowupDate || undefined,
-      reminder: values.reminder ? Number(values.reminder) : undefined,
+      followUp: toFollowUpPayload(values),
       phoneNumbers: values.phoneNumbers
         .filter((p) => p.value.trim())
         .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),

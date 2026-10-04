@@ -4,12 +4,10 @@ import { Controller, useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
-import LabeledSelect from "@/components/businesses/LabeledSelect";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
-import {
-  LEAD_SOURCE_OPTIONS,
-  REMINDER_OPTIONS,
-} from "@/lib/business-form-options";
+import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
+import FollowUpTypeSelect from "@/components/common/FollowUpTypeSelect";
+import { REMINDER_OPTIONS } from "@/lib/business-form-options";
 import type { BusinessFormValues } from "@/lib/business-form-types";
 
 export default function FollowUpSection({
@@ -27,17 +25,17 @@ export default function FollowUpSection({
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
       <Controller
         control={control}
-        name="leadSource"
+        name="followUpType"
         rules={{ required: "Follow-up type is required." }}
         render={({ field, fieldState }) => (
           <div>
-            <LabeledSelect
-              label="Follow-up Type"
-              placeholder="Select follow-up type"
-              options={LEAD_SOURCE_OPTIONS}
+            <FieldLabel required invalid={Boolean(fieldState.error)}>
+              Follow-up Type
+            </FieldLabel>
+            <FollowUpTypeSelect
               value={field.value}
               onChange={field.onChange}
-              required
+              className="w-full"
               invalid={Boolean(fieldState.error)}
             />
             {fieldState.error && (
@@ -100,13 +98,15 @@ export default function FollowUpSection({
         control={control}
         name="reminder"
         render={({ field }) => (
-          <LabeledSelect
-            label="Reminder"
-            placeholder="Select reminder"
-            options={REMINDER_OPTIONS}
-            value={field.value}
-            onChange={field.onChange}
-          />
+          <div>
+            <FieldLabel>Reminder</FieldLabel>
+            <FollowUpReminderSelect
+              options={REMINDER_OPTIONS}
+              value={field.value}
+              onChange={field.onChange}
+              className="w-full"
+            />
+          </div>
         )}
       />
 

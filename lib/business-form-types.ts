@@ -1,3 +1,6 @@
+import type { FollowUpType } from "@/types/follow-up";
+import type { FollowUpPayload } from "@/types/business-api";
+
 export type NumberFieldValue = {
   value: string;
 };
@@ -21,7 +24,7 @@ export type BusinessFormValues = {
   website: string;
   description: string;
   notes: string;
-  leadSource: string;
+  followUpType: FollowUpType | "";
   assignTo: string;
   nextFollowupDate: string;
   reminder: string;
@@ -42,7 +45,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   website: "",
   description: "",
   notes: "",
-  leadSource: "",
+  followUpType: "",
   assignTo: "",
   nextFollowupDate: "",
   reminder: "",
@@ -64,10 +67,35 @@ export const STEP_FIELD_NAMES = {
   ] as const,
   additional: ["website", "description"] as const,
   followup: [
-    "leadSource",
+    "followUpType",
     "assignTo",
     "nextFollowupDate",
     "reminder",
     "notes",
   ] as const,
 };
+
+export function toFollowUpPayload(
+  values: BusinessFormValues,
+): FollowUpPayload {
+  if (!values.assignTo || !values.followUpType || !values.nextFollowupDate) {
+    throw new Error("Follow-up type, assignee, and date are required.");
+  }
+
+  const scheduledAt = new Date(
+    `${values.nextFollowupDate}T00:00:00.000Z`,
+  );
+  if (Number.isNaN(scheduledAt.getTime())) {
+    throw new Error("Follow-up date is invalid.");
+  }
+
+  return {
+    assignedTo: values.assignTo,
+    type: values.followUpType,
+    scheduledAt: scheduledAt.toISOString(),
+    ...(values.reminder
+      ? { reminderInMinutes: Number(values.reminder) }
+      : {}),
+    ...(values.notes ? { notes: values.notes } : {}),
+  };
+}

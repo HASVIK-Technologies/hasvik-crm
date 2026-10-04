@@ -83,14 +83,11 @@ export const BUSINESS_TYPE_OPTIONS = [
   "Franchise",
 ];
 
-export const LEAD_SOURCE_OPTIONS = [
-  "Referral",
-  "Cold Call",
-  "Walk-in",
-  "Website",
-  "Social Media",
-  "Advertisement",
-  "Trade Show",
+export const FOLLOW_UP_TYPE_OPTIONS = [
+  { value: "CALL", label: "Call" },
+  { value: "MEETING", label: "Meeting" },
+  { value: "EMAIL", label: "Email" },
+  { value: "WHATSAPP", label: "WhatsApp" },
 ];
 
 export const REMINDER_OPTIONS = [
