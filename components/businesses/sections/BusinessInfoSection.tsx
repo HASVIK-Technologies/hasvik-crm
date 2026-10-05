@@ -53,6 +53,7 @@ export default function BusinessInfoSection({
             id={`${idPrefix}category`}
             label="Category"
             value={field.value}
+            valueLabel={categoryName}
             onChange={(categoryId) => field.onChange(categoryId)}
             placeholder="Select a category"
             required

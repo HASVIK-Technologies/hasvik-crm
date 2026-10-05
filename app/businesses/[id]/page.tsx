@@ -486,7 +486,7 @@ export default function BusinessDetails() {
 
             {/* FOLLOW-UPS TAB */}
             <TabsContent value="follow-ups" className="mt-6">
-              <BusinessDetailsFollowups/>
+              <BusinessDetailsFollowups businessId={stringId} />
             </TabsContent>
             {/* NOTES TAB 
             <TabsContent value="notes" className="mt-6"></TabsContent> */}
