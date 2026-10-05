@@ -8,10 +8,11 @@ export interface CreateFollowUpPayload {
   scheduledAt: string;
   status: string;
   notes: string;
+  reminderInMinutes?: number;
 }
 
 export const createFollowUpApi = async (data: CreateFollowUpPayload) => {
-    // apiClient automatically attaches the domain from .env and the Zustand Auth Token!
-    const response = await apiClient.post("/follow-ups", data); 
-    return response.data;
-  };
+  // apiClient automatically attaches the domain from .env and the Zustand Auth Token!
+  const response = await apiClient.post("/follow-ups", data);
+  return response.data;
+};

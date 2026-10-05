@@ -137,9 +137,13 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     state: business.state ?? "-",
     leadStatus: business.status ?? "-",
     status:
-      business.isActive === false || business.status === "INACTIVE"
-        ? "Inactive"
-        : "Active",
+      typeof business.isDeleted === "boolean"
+        ? business.isDeleted
+          ? "Inactive"
+          : "Active"
+        : business.isActive === false || business.status === "INACTIVE"
+          ? "Inactive"
+          : "Active",
     lastFollowUp: formatCreatedAt(business.createdAt),
     nextFollowUp: followUpInfo.nextFollowUp,
     nextFollowUpType: followUpInfo.nextFollowUpType,
