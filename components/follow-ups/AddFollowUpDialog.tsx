@@ -8,18 +8,14 @@ import { toast } from "sonner";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import FollowUpAutocomplete from "@/components/follow-ups/FollowUpAutocomplete";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
+import FollowUpTypeSelect from "@/components/common/FollowUpTypeSelect";
+import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
 import { useCreateFollowUp } from "@/hooks/use-follow-ups";
 import {
   FOLLOW_UP_REMINDER_OPTIONS,
+  type FollowUpReminder,
   type FollowUpOption,
   type FollowUpType,
 } from "@/types/follow-up";
@@ -36,7 +32,7 @@ interface AddFollowUpFormValues {
   scheduledAt: string;
   type: FollowUpType | "";
   notes: string;
-  reminder: string | null;
+  reminder: FollowUpReminder | null;
 }
 
 const defaultValues: AddFollowUpFormValues = {
@@ -237,26 +233,12 @@ export default function AddFollowUpDialog({
                   name="type"
                   rules={{ required: "Follow-up type is required." }}
                   render={({ field }) => (
-                    <Select
-                      value={field.value || undefined}
-                      onValueChange={(value) =>
-                        field.onChange(value as FollowUpType)
-                      }
-                    >
-                      <SelectTrigger
-                        className="h-10 text-xs"
-                        aria-invalid={Boolean(errors.type)}
-                      >
-                        <SelectValue placeholder="Select type" />
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="CALL">Call</SelectItem>
-                        <SelectItem value="MEETING">Meeting</SelectItem>
-                        <SelectItem value="EMAIL">Email</SelectItem>
-                        <SelectItem value="WHATSAPP">WhatsApp</SelectItem>
-                        <SelectItem value="OTHER">Other</SelectItem>
-                      </SelectContent>
-                    </Select>
+                    <FollowUpTypeSelect
+                      value={field.value}
+                      onChange={field.onChange}
+                      placeholder="Select type"
+                      invalid={Boolean(errors.type)}
+                    />
                   )}
                 />
                 {errors.type && (
@@ -265,38 +247,32 @@ export default function AddFollowUpDialog({
                   </p>
                 )}
               </div>
-              <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                  Reminder
-                </label>
-                <Controller
-                  control={control}
-                  name="reminder"
-                  render={({ field }) => (
-                    <Select
-                      value={field.value || "none"}
-                      onValueChange={(val) =>
-                        field.onChange(val === "none" ? null : val)
-                      }
-                    >
-                      <SelectTrigger className="h-10 text-xs">
-                        <div className="flex items-center gap-2">
-                          <Bell className="size-3.5 text-[#94a3b8]" />
-                          <SelectValue placeholder="No reminder" />
-                        </div>
-                      </SelectTrigger>
-                      <SelectContent className="bg-white">
-                        <SelectItem value="none">No reminder</SelectItem>
-                        {FOLLOW_UP_REMINDER_OPTIONS.map((opt) => (
-                          <SelectItem key={opt} value={opt}>
-                            {opt}
-                          </SelectItem>
-                        ))}
-                      </SelectContent>
-                    </Select>
-                  )}
-                />
-              </div>
+              
+            <div>
+              <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
+                Reminder
+              </label>
+              <Controller
+                control={control}
+                name="reminder"
+                render={({ field }) => (
+                  <FollowUpReminderSelect
+                    value={field.value || "none"}
+                    options={FOLLOW_UP_REMINDER_OPTIONS.map((option) => ({
+                      value: option,
+                      label: option,
+                    }))}
+                    emptyOption={{ value: "none", label: "No reminder" }}
+                    placeholder="No reminder"
+                    showIcon
+                    onChange={(val) =>
+                      field.onChange(val === "none" ? null : val)
+                    }
+                    invalid={Boolean(errors.reminder)}
+                  />
+                )}
+              />
+            </div>
             </div>
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
