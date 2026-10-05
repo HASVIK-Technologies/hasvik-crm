@@ -21,7 +21,14 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
-export default function BusinessDetailsFollowups() {
+
+type BusinessDetailsFollowupsProps = {
+  businessId?: string;
+};
+
+export default function BusinessDetailsFollowups({
+  businessId: propBusinessId,
+}: BusinessDetailsFollowupsProps = {}) {
   const [cancellingItem, setCancellingItem] = React.useState<any>(null);
   // 1. Helper to build the full payload so the strict backend accepts it!
   // 1. Build the perfect payload (Added followUpId and reminder!)
@@ -43,8 +50,7 @@ export default function BusinessDetailsFollowups() {
 
   // 2. The Cancel Mutation (Now uses our fixed DELETE API!)
   const cancelMutation = useMutation({
-    // Uses the new function!
-    mutationFn: (item: any) => updateFollowUpStatus(item._id, "CANCELLED"),
+    mutationFn: (item: any) => updateFollowUpStatus({ id: item._id, status: "CANCELLED" }),
     onSuccess: () => {
       toast.success("Follow-up cancelled successfully!");
       queryClient.invalidateQueries({ queryKey: ["followUps", businessId] });
@@ -54,8 +60,7 @@ export default function BusinessDetailsFollowups() {
   });
 
   const completeMutation = useMutation({
-    // Uses the new function!
-    mutationFn: (item: any) => updateFollowUpStatus(item._id, "COMPLETED"),
+    mutationFn: (item: any) => updateFollowUpStatus({ id: item._id, status: "COMPLETED" }),
     onSuccess: () => {
       toast.success("Follow-up marked as completed!");
       queryClient.invalidateQueries({ queryKey: ["followUps", businessId] });
@@ -77,8 +82,12 @@ export default function BusinessDetailsFollowups() {
     }
   };
   const params = useParams();
-  const businessId = Array.isArray(params?.id) ? params.id[0] : params?.id;
-  const { data: followUps, isLoading, isError } = useBusinessFollowUpsQuery(businessId as string);
+  const businessId =
+    propBusinessId ??
+    (Array.isArray(params?.id) ? params.id[0] : params?.id ?? "");
+  const { data: followUps, isLoading, isError } = useBusinessFollowUpsQuery(
+    businessId as string,
+  );
   if (isLoading) return <div className="p-6 text-slate-500">Loading follow-ups...</div>;
   if (isError) return <div className="p-6 text-red-500">Failed to load follow-ups.</div>;
   const followUpsList = Array.isArray(followUps) ? followUps : [];

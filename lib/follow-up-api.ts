@@ -222,14 +222,13 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
         : typeof value.assignedTo === "string"
           ? value.assignedTo
           : undefined,
-    assignedToName:
-      String(
-        assignee.fullName ??
+    assignedToName: String(
+      assignee.fullName ??
         assignee.name ??
         value.assignedToName ??
         (typeof value.assignedTo === "string" ? value.assignedTo : null) ??
         "Unassigned",
-      ),
+    ),
     type: String(value.type ?? "CALL"),
     status: String(value.status ?? "SCHEDULED"),
     scheduledAt: String(value.scheduledAt ?? value.followUpDate ?? ""),
@@ -292,14 +291,6 @@ export async function getFollowUps(
     total,
     totalPages,
   };
-}
-
-/**
- * GET /api/follow-ups/{id}
- */
-export async function getFollowUp(id: string, signal?: AbortSignal) {
-  const response = await apiClient.get(`/follow-ups/${id}`, { signal });
-  return toFollowUpItem(unwrap<Record<string, unknown>>(response.data));
 }
 
 /**
@@ -432,7 +423,20 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
  */
 export async function updateFollowUpStatus(
   payload: UpdateFollowUpStatusPayload,
+): Promise<ReturnType<typeof toFollowUpItem>>;
+export async function updateFollowUpStatus(
+  id: string,
+  status: UpdateFollowUpStatusPayload["status"],
+): Promise<ReturnType<typeof toFollowUpItem>>;
+export async function updateFollowUpStatus(
+  payloadOrId: UpdateFollowUpStatusPayload | string,
+  status?: UpdateFollowUpStatusPayload["status"],
 ) {
+  const payload: UpdateFollowUpStatusPayload =
+    typeof payloadOrId === "string"
+      ? { id: payloadOrId, status: status ?? "COMPLETED" }
+      : payloadOrId;
+
   const response = await apiClient.patch(`/follow-ups/${payload.id}/status`, {
     status: payload.status,
   });
@@ -500,37 +504,43 @@ export async function getFollowUpStatuses(signal?: AbortSignal) {
   return payload ?? {};
 }
 
-export async function createFollowUp(payload: CreateFollowUpPayload) {
-  const response = await apiClient.post("/follow-ups", payload);
-  return unwrap<FollowUpItem>(response.data);
-}
-
 export async function getFollowUp(id: string, signal?: AbortSignal) {
   const response = await apiClient.get(`/follow-ups/${id}`, { signal });
   return toFollowUpItem(unwrap<Record<string, unknown>>(response.data));
 }
 
-
-export async function updateFollowUp(payload: UpdateFollowUpPayload) {
-
-  const id = payload.id || payload.followUpId;
-  const response = await apiClient.patch(`/follow-ups/${id}`, {
-    ...payload,
-    followUpId: id,
-    id: id
-  });
-
-  return unwrap<FollowUpItem>(response.data);
+/**
+ * GET /api/follow-ups/business/{businessId}
+ */
+export async function getFollowUpsByBusiness(
+  businessId: string,
+  signal?: AbortSignal,
+) {
+  const response = await apiClient.get(
+    `/follow-ups/business/${businessId}`,
+    { signal },
+  );
+  const payload = unwrap<unknown>(response.data);
+  const rows = Array.isArray(payload)
+    ? payload
+    : ((payload as { data?: unknown[] })?.data ?? []);
+  return rows.map((item) => toFollowUpItem(item as Record<string, unknown>));
 }
 
-export async function cancelFollowUp(id: string) {
-  const response = await apiClient.delete("/follow-ups", {
-    data: { id: id, followUpId: id }
-  });
-  return response.data;
-}
-export async function updateFollowUpStatus(id: string, status: "COMPLETED" | "CANCELLED") {
-  // Hit the special /status endpoint!
-  const response = await apiClient.patch(`/follow-ups/${id}/status`, { status });
-  return response.data;
+/**
+ * GET /api/follow-ups/assigned/{userId}
+ */
+export async function getFollowUpsByUser(
+  userId: string,
+  signal?: AbortSignal,
+) {
+  const response = await apiClient.get(
+    `/follow-ups/assigned/${userId}`,
+    { signal },
+  );
+  const payload = unwrap<unknown>(response.data);
+  const rows = Array.isArray(payload)
+    ? payload
+    : ((payload as { data?: unknown[] })?.data ?? []);
+  return rows.map((item) => toFollowUpItem(item as Record<string, unknown>));
 }
