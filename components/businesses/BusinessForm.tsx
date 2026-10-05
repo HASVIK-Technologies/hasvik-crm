@@ -31,6 +31,7 @@ import BusinessInfoSection from "@/components/businesses/sections/BusinessInfoSe
 import ContactInfoSection from "@/components/businesses/sections/ContactInfoSection";
 import AdditionalInfoSection from "@/components/businesses/sections/AdditionalInfoSection";
 import FollowUpSection from "@/components/businesses/sections/FollowUpSection";
+import BusinessDetailsFollowups from "@/components/business-details/BusinessDetailsFollowups";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/lib/use-is-desktop";
 import {
@@ -275,7 +276,16 @@ export default function BusinessForm({
     {
       key: "followup",
       title: "Follow-up",
-      render: (idPrefix: string) => <FollowUpSection idPrefix={idPrefix} />,
+      render: (idPrefix: string) => (
+        <>
+          {!isEditMode && <FollowUpSection idPrefix={idPrefix} />}
+          {isEditMode && targetId && (
+            <div className="mt-6">
+              <BusinessDetailsFollowups businessId={targetId} />
+            </div>
+          )}
+        </>
+      ),
     },
   ];
 
@@ -309,10 +319,8 @@ export default function BusinessForm({
       city: values.city.trim() || undefined,
       state: values.state.trim() || undefined,
       pincode: values.pincode.trim() || undefined,
-      assignedTo: values.assignTo || undefined,
       description: values.description || undefined,
       notes: values.notes || undefined,
-      followUp: toFollowUpPayload(values),
       phoneNumbers: values.phoneNumbers
         .filter((p) => p.value.trim())
         .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
@@ -328,6 +336,11 @@ export default function BusinessForm({
 
     if (values.locationUrl.trim()) {
       payload.location = { url: values.locationUrl.trim() };
+    }
+
+    if (!isEditMode) {
+      payload.assignedTo = values.assignTo;
+      payload.followUp = toFollowUpPayload(values);
     }
 
     try {
@@ -410,8 +423,7 @@ export default function BusinessForm({
           </div>
         )}
 
-        {isDesktop ? (
-          // Desktop / tablet: every section shown at once on a single page
+        {isDesktop || isEditMode ? (
           <Card className="border-[#dce8ee]">
             <CardContent className="px-5 py-4 sm:px-7 sm:py-5 lg:px-8 lg:py-6">
               <FormSection title="Business Information" first>
@@ -436,46 +448,50 @@ export default function BusinessForm({
                 </FormSection>
               )}
 
-              <FormSection icon={UsersRound} title="Follow-up">
-                <FollowUpSection idPrefix="desktop-" />
-              </FormSection>
+              {!isEditMode && (
+                <FormSection icon={UsersRound} title="Follow-up">
+                  <FollowUpSection idPrefix="desktop-" />
+                </FormSection>
+              )}
 
-              <div className="mt-6 flex flex-col-reverse gap-4 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
-                <OutlinedButton
-                  type="button"
-                  size="lg"
-                  onClick={handleBackToBusinesses}
-                  className="w-full sm:w-auto"
-                >
-                  Back to Business
-                </OutlinedButton>
-
-                <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
+              {!isEditMode && (
+                <div className="mt-6 flex flex-col-reverse gap-4 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <OutlinedButton
                     type="button"
                     size="lg"
-                    onClick={handleReset}
+                    onClick={handleBackToBusinesses}
                     className="w-full sm:w-auto"
                   >
-                    <RotateCcw className="size-4" />
-                    Reset
+                    Back to Business
                   </OutlinedButton>
 
-                  <SecondaryButton
-                    type="submit"
-                    size="lg"
-                    disabled={!isFormComplete || isSubmitting}
-                    className="w-full sm:w-auto"
-                  >
-                    <Save className="size-4" />
-                    {isSubmitting ? "Saving..." : "Save Business"}
-                  </SecondaryButton>
+                  <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
+                    <OutlinedButton
+                      type="button"
+                      size="lg"
+                      onClick={handleReset}
+                      className="w-full sm:w-auto"
+                    >
+                      <RotateCcw className="size-4" />
+                      Reset
+                    </OutlinedButton>
+
+                    <SecondaryButton
+                      type="submit"
+                      size="lg"
+                      disabled={!isFormComplete || isSubmitting}
+                      className="w-full sm:w-auto"
+                    >
+                      <Save className="size-4" />
+                      {isSubmitting ? "Saving..." : "Save Business"}
+                    </SecondaryButton>
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         ) : (
-          // Mobile: step-by-step wizard so the form doesn't feel massive on small screens
+          // Mobile add flow stays step-based; edit mode uses the full form layout above.
           <div>
             <div className="mb-6">
               <div className="flex items-center">
@@ -574,6 +590,42 @@ export default function BusinessForm({
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {isEditMode && targetId && (
+          <>
+            <BusinessDetailsFollowups businessId={targetId} />
+            <div className="flex flex-col-reverse gap-4 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <OutlinedButton
+                type="button"
+                size="lg"
+                onClick={handleBackToBusinesses}
+                className="w-full sm:w-auto"
+              >
+                Back to Business
+              </OutlinedButton>
+              <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
+                <OutlinedButton
+                  type="button"
+                  size="lg"
+                  onClick={handleReset}
+                  className="w-full sm:w-auto"
+                >
+                  <RotateCcw className="size-4" />
+                  Reset
+                </OutlinedButton>
+                <SecondaryButton
+                  type="submit"
+                  size="lg"
+                  disabled={!isFormComplete || isSubmitting}
+                  className="w-full sm:w-auto"
+                >
+                  <Save className="size-4" />
+                  {isSubmitting ? "Saving..." : "Save Business"}
+                </SecondaryButton>
+              </div>
+            </div>
+          </>
         )}
       </form>
     </FormProvider>
