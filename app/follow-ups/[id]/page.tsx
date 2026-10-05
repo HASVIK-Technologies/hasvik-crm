@@ -3,46 +3,35 @@
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
-import { CheckCircle2, Trash2 } from "lucide-react";
-import { Button } from "@/components/ui/button";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import FollowUpDetails from "@/components/follow-ups/FollowUpDetails";
 import FollowUpEditDialog from "@/components/follow-ups/FollowUpEditDialog";
+import NextFollowUpDialog from "@/components/follow-ups/NextFollowUpDialog";
 import CancelFollowUpDialog from "@/components/follow-ups/CancelFollowUpDialog";
 import CompleteFollowUpDialog from "@/components/follow-ups/CompleteFollowUpDialog";
 import {
   useCancelFollowUp,
+  useCompleteFollowUp,
   useFollowUpQuery,
-  useUpdateFollowUp,
 } from "@/hooks/use-follow-ups";
-import type { FollowUpType } from "@/types/follow-up";
 
 export default function FollowUpDetailsPage() {
   const [editOpen, setEditOpen] = useState(false);
   const [cancelOpen, setCancelOpen] = useState(false);
   const [completeOpen, setCompleteOpen] = useState(false);
+  const [nextFollowUpOpen, setNextFollowUpOpen] = useState(false);
 
   const params = useParams<{ id: string }>();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const query = useFollowUpQuery(id);
   const cancelMutation = useCancelFollowUp();
-  const updateMutation = useUpdateFollowUp();
+  const completeMutation = useCompleteFollowUp();
 
   const handleCancel = async () => {
-    if (!id || !query.data) return;
+    if (!id) return;
     try {
-      await cancelMutation.mutateAsync({
-        id,
-        existing: {
-          businessId: query.data.businessId,
-          assignedTo: query.data.assignedToId || "",
-          type: (query.data.type as FollowUpType) || "CALL",
-          scheduledAt: query.data.scheduledAt,
-          notes: query.data.notes || "",
-          reminder: query.data.reminder,
-        },
-      });
+      await cancelMutation.mutateAsync(id);
       toast.success("Follow-up cancelled");
       setCancelOpen(false);
     } catch {
@@ -51,19 +40,9 @@ export default function FollowUpDetailsPage() {
   };
 
   const handleComplete = async () => {
-    if (!id || !query.data) return;
+    if (!id) return;
     try {
-      await updateMutation.mutateAsync({
-        id,
-        followUpId: id,
-        businessId: query.data.businessId,
-        assignedTo: query.data.assignedToId || "",
-        type: (query.data.type as FollowUpType) || "CALL",
-        scheduledAt: query.data.scheduledAt,
-        status: "COMPLETED",
-        notes: query.data.notes || "",
-        reminder: query.data.reminder,
-      });
+      await completeMutation.mutateAsync(id);
       toast.success("Follow-up marked as completed");
       setCompleteOpen(false);
     } catch {
@@ -124,35 +103,13 @@ export default function FollowUpDetailsPage() {
             ]}
           />
         }
-        actions={
-          <div className="flex items-center gap-2">
-            {followUp.status !== "COMPLETED" && (
-              <Button
-                type="button"
-                onClick={() => setCompleteOpen(true)}
-                className="gap-2 bg-[#027a48] text-white hover:bg-[#05603a]"
-              >
-                <CheckCircle2 className="size-4" /> Mark as Completed
-              </Button>
-            )}
-            {followUp.status !== "CANCELLED" && (
-              <Button
-                type="button"
-                variant="outline"
-                onClick={() => setCancelOpen(true)}
-                className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-              >
-                <Trash2 className="size-4" /> Cancel follow-up
-              </Button>
-            )}
-          </div>
-        }
         content={
           <FollowUpDetails
             followUp={followUp}
             onEdit={() => setEditOpen(true)}
             onComplete={() => setCompleteOpen(true)}
             onCancel={() => setCancelOpen(true)}
+            onNextFollowUp={() => setNextFollowUpOpen(true)}
           />
         }
       />
@@ -160,6 +117,11 @@ export default function FollowUpDetailsPage() {
         followUp={followUp}
         open={editOpen}
         onOpenChange={setEditOpen}
+      />
+      <NextFollowUpDialog
+        followUp={followUp}
+        open={nextFollowUpOpen}
+        onOpenChange={setNextFollowUpOpen}
       />
       <CancelFollowUpDialog
         open={cancelOpen}
@@ -171,7 +133,7 @@ export default function FollowUpDetailsPage() {
       <CompleteFollowUpDialog
         open={completeOpen}
         businessName={followUp.businessName}
-        loading={updateMutation.isPending}
+        loading={completeMutation.isPending}
         onOpenChange={setCompleteOpen}
         onConfirm={handleComplete}
       />

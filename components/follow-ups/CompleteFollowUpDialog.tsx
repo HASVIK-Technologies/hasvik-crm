@@ -62,7 +62,7 @@ export default function CompleteFollowUpDialog({
                 type="button"
                 variant="outline"
                 disabled={loading}
-                className="h-10 rounded-xl border-[#d0d5dd] bg-white text-[#344054] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+                className="h-10 rounded-xl border border-[#d0d5dd] bg-[#f2f4f7] font-medium text-[#344054] hover:bg-[#e4e7ec] hover:text-[#0f172a]"
               >
                 Cancel
               </Button>
