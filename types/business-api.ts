@@ -1,4 +1,5 @@
 import type { BusinessItem } from "@/types/business";
+import type { FollowUpType } from "@/types/follow-up";
 
 export type PhoneNumber = {
   number?: string;
@@ -10,6 +11,7 @@ export type ApiBusiness = {
   name: string;
   categoryId?: string | null;
   businessType?: string;
+  location?: { url?: string } | null;
   status?: string;
   isDeleted?: boolean;
   isActive?: boolean;
@@ -24,8 +26,9 @@ export type ApiBusiness = {
   category?: string | null;
   assignedTo?: string;
   leadSource?: string;
+  followUp?: FollowUpPayload;
   nextFollowupDate?: string;
-  reminder?: string;
+  reminder?: string | number;
   description?: string;
   notes?: string;
   createdAt?: string;
@@ -90,6 +93,14 @@ export type BusinessesResult = {
   totalPages: number;
 };
 
+export type FollowUpPayload = {
+  assignedTo: string;
+  type: FollowUpType;
+  scheduledAt: string;
+  reminderInMinutes?: number;
+  notes?: string;
+};
+
 // Matches the request body documented for POST /businesses.
 export type CreateBusinessPayload = {
   name: string;
@@ -107,4 +118,5 @@ export type CreateBusinessPayload = {
   longitude?: number;
   assignedTo?: string;
   leadSource?: string;
+  followUp?: FollowUpPayload;
 };

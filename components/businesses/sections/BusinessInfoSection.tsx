@@ -1,16 +1,14 @@
 "use client";
 
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
-import LabeledSelect from "@/components/businesses/LabeledSelect";
-import { useCategoriesQuery } from "@/hooks/use-businesses";
-import {
-  BUSINESS_TYPE_OPTIONS,
-  CITY_OPTIONS,
-  STATUS_OPTIONS,
-} from "@/lib/business-form-options";
+import FormCategoryAutocomplete from "@/components/common/form-controls/FormCategoryAutocomplete";
+import FormCityAutocomplete from "@/components/common/form-controls/FormCityAutocomplete";
+import FormLeadStatusSelect from "@/components/common/form-controls/FormLeadStatusSelect";
+import StateAutocomplete from "@/components/common/StateAutocomplete";
+import { STATE_OPTIONS } from "@/lib/business-form-options";
 import type { BusinessFormValues } from "@/lib/business-form-types";
 
 export default function BusinessInfoSection({
@@ -24,13 +22,7 @@ export default function BusinessInfoSection({
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
 
-  const { data: categories, isLoading: categoriesLoading } =
-    useCategoriesQuery();
-  const categoryOptions =
-    categories?.map((category) => ({
-      value: category._id,
-      label: category.name,
-    })) ?? [];
+  const categoryName = useWatch({ control, name: "categoryName" });
 
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2">
@@ -57,17 +49,15 @@ export default function BusinessInfoSection({
         name="category"
         rules={{ required: "Category is required" }}
         render={({ field, fieldState }) => (
-          <LabeledSelect
+          <FormCategoryAutocomplete
+            id={`${idPrefix}category`}
             label="Category"
-            placeholder={
-              categoriesLoading ? "Loading categories..." : "Select category"
-            }
-            options={categoryOptions}
             value={field.value}
-            onChange={field.onChange}
+            valueLabel={categoryName}
+            onChange={(categoryId) => field.onChange(categoryId)}
+            placeholder="Select a category"
             required
             invalid={!!fieldState.error}
-            disabled={categoriesLoading}
           />
         )}
       />
@@ -77,12 +67,12 @@ export default function BusinessInfoSection({
         name="city"
         rules={{ required: "City is required" }}
         render={({ field, fieldState }) => (
-          <LabeledSelect
+          <FormCityAutocomplete
+            id={`${idPrefix}city`}
             label="City"
-            placeholder="Select city"
-            options={CITY_OPTIONS}
             value={field.value}
             onChange={field.onChange}
+            placeholder="Select a city"
             required
             invalid={!!fieldState.error}
           />
@@ -133,31 +123,19 @@ export default function BusinessInfoSection({
         />
       </div>
 
-      <div>
-        <FieldLabel
-          htmlFor={`${idPrefix}state`}
-          required
-          invalid={!!errors.state}
-        >
-          State
-        </FieldLabel>
-        <Input
-          id={`${idPrefix}state`}
-          placeholder="Enter state"
-          aria-invalid={!!errors.state}
-          {...register("state", { required: "State is required" })}
-        />
-      </div>
-
       <Controller
         control={control}
-        name="status"
-        rules={{ required: "Status is required" }}
+        name="state"
+        rules={{
+          required: "State is required",
+          validate: (value) =>
+            STATE_OPTIONS.some((state) => state === value.trim()) ||
+            "Select a valid Indian state or union territory",
+        }}
         render={({ field, fieldState }) => (
-          <LabeledSelect
-            label="Status"
-            placeholder="Select status"
-            options={STATUS_OPTIONS}
+          <StateAutocomplete
+            id={`${idPrefix}state`}
+            label="State"
             value={field.value}
             onChange={field.onChange}
             required
@@ -168,18 +146,29 @@ export default function BusinessInfoSection({
 
       <Controller
         control={control}
-        name="businessType"
-        render={({ field }) => (
-          <LabeledSelect
-            label="Business Type"
-            placeholder="Select business type"
-            options={BUSINESS_TYPE_OPTIONS}
+        name="status"
+        rules={{ required: "Status is required" }}
+        render={({ field, fieldState }) => (
+          <FormLeadStatusSelect
+            id={`${idPrefix}status`}
+            label="Status"
             value={field.value}
             onChange={field.onChange}
-            optional
+            required
+            invalid={!!fieldState.error}
           />
         )}
       />
+
+      <div>
+        <FieldLabel htmlFor={`${idPrefix}locationUrl`}>Location URL</FieldLabel>
+        <Input
+          id={`${idPrefix}locationUrl`}
+          type="url"
+          placeholder="https://maps.google.com/..."
+          {...register("locationUrl")}
+        />
+      </div>
     </div>
   );
 }

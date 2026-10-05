@@ -1,3 +1,6 @@
+import type { FollowUpType } from "@/types/follow-up";
+import type { FollowUpPayload } from "@/types/business-api";
+
 export type NumberFieldValue = {
   value: string;
 };
@@ -6,19 +9,22 @@ export type BusinessFormValues = {
   addAnother: boolean;
   businessName: string;
   category: string;
+  /** Display name for `category`; only used to prefill the dropdown label in edit mode. Never sent to the API. */
+  categoryName?: string;
   city: string;
   state: string;
   pincode: string;
   address: string;
   status: string;
-  businessType: string;
+  /** A direct link to the business location (e.g. a Google Maps URL). */
+  locationUrl: string;
   phoneNumbers: NumberFieldValue[];
   whatsappNumbers: NumberFieldValue[];
   email: string;
   website: string;
   description: string;
   notes: string;
-  leadSource: string;
+  followUpType: FollowUpType | "";
   assignTo: string;
   nextFollowupDate: string;
   reminder: string;
@@ -32,18 +38,18 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   pincode: "",
   address: "",
   status: "",
-  businessType: "",
+  locationUrl: "",
   phoneNumbers: [{ value: "" }],
   whatsappNumbers: [{ value: "" }],
   email: "",
   website: "",
   description: "",
   notes: "",
-  leadSource: "",
+  followUpType: "",
   assignTo: "",
   nextFollowupDate: "",
   reminder: "",
-  addAnother: false
+  addAnother: false,
 };
 
 // Field names validated per step of the mobile wizard. Phone/WhatsApp
@@ -59,6 +65,37 @@ export const STEP_FIELD_NAMES = {
     "address",
     "status",
   ] as const,
-  additional: ["website", "description", "notes"] as const,
-  followup: ["leadSource", "assignTo", "nextFollowupDate", "reminder"] as const,
+  additional: ["website", "description"] as const,
+  followup: [
+    "followUpType",
+    "assignTo",
+    "nextFollowupDate",
+    "reminder",
+    "notes",
+  ] as const,
 };
+
+export function toFollowUpPayload(
+  values: BusinessFormValues,
+): FollowUpPayload {
+  if (!values.assignTo || !values.followUpType || !values.nextFollowupDate) {
+    throw new Error("Follow-up type, assignee, and date are required.");
+  }
+
+  const scheduledAt = new Date(
+    `${values.nextFollowupDate}T00:00:00.000Z`,
+  );
+  if (Number.isNaN(scheduledAt.getTime())) {
+    throw new Error("Follow-up date is invalid.");
+  }
+
+  return {
+    assignedTo: values.assignTo,
+    type: values.followUpType,
+    scheduledAt: scheduledAt.toISOString(),
+    ...(values.reminder
+      ? { reminderInMinutes: Number(values.reminder) }
+      : {}),
+    ...(values.notes ? { notes: values.notes } : {}),
+  };
+}

@@ -5,15 +5,19 @@ import {
   CalendarClock,
   CheckCircle2,
   FileText,
+  Mail,
   MapPin,
   Pencil,
   Phone,
+  Plus,
   Trash2,
   UserRound,
 } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
+import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
+import { useBusinessQuery } from "@/hooks/use-businesses";
 import type { FollowUpItem } from "@/types/follow-up";
 
 function statusClass(status: string) {
@@ -49,14 +53,36 @@ interface FollowUpDetailsProps {
   onEdit: () => void;
   onComplete?: () => void;
   onCancel?: () => void;
+  onNextFollowUp?: () => void;
 }
+
+const cleanNumber = (num: string) => num.replace(/\D/g, "");
 
 export default function FollowUpDetails({
   followUp,
   onEdit,
   onComplete,
   onCancel,
+  onNextFollowUp,
 }: FollowUpDetailsProps) {
+  const { data: businessData } = useBusinessQuery(followUp.businessId);
+
+  const callingNumber =
+    followUp.businessCallingNumber ||
+    businessData?.phone ||
+    followUp.businessPhone;
+
+  const whatsappNumber =
+    followUp.businessWhatsappNumber ||
+    businessData?.alternatePhone;
+
+  const email =
+    followUp.businessEmail ||
+    businessData?.email;
+
+  const cleanCalling = callingNumber ? cleanNumber(callingNumber) : "";
+  const cleanWhatsapp = whatsappNumber ? cleanNumber(whatsappNumber) : "";
+
   return (
     <div className="space-y-6">
       {/* Top Banner Card */}
@@ -87,19 +113,32 @@ export default function FollowUpDetails({
         </div>
 
         <div className="flex flex-wrap items-center gap-2.5">
+          <Button
+            type="button"
+            onClick={onEdit}
+            className="gap-2 bg-[#0b63e5] text-white shadow-sm hover:bg-[#0951bd]"
+          >
+            <Pencil className="size-4" /> Edit / Reschedule
+          </Button>
+          {followUp.status === "COMPLETED" && onNextFollowUp && (
+            <Button
+              type="button"
+              onClick={onNextFollowUp}
+              className="gap-2 bg-[#027a48] text-white shadow-sm hover:bg-[#05603a]"
+            >
+              <Plus className="size-4" /> Next Follow-Up
+            </Button>
+          )}
           {followUp.status !== "COMPLETED" && onComplete && (
             <Button
               type="button"
               onClick={onComplete}
-              className="gap-2 bg-[#027a48] text-white hover:bg-[#05603a]"
+              className="gap-2 bg-[#027a48] text-white shadow-sm hover:bg-[#05603a]"
             >
               <CheckCircle2 className="size-4" /> Mark as Completed
             </Button>
           )}
-          <Button type="button" onClick={onEdit} className="gap-2">
-            <Pencil className="size-4" /> Reschedule / Edit
-          </Button>
-          {followUp.status !== "CANCELLED" && onCancel && (
+          {followUp.status !== "CANCELLED" && followUp.status !== "COMPLETED" && onCancel && (
             <Button
               type="button"
               variant="outline"
@@ -146,15 +185,6 @@ export default function FollowUpDetails({
                 </p>
               </div>
             </div>
-            <div className="flex gap-3">
-              <Phone className="mt-0.5 size-5 text-[#94a3b8]" />
-              <div>
-                <p className="text-sm text-[#64748b]">Business phone</p>
-                <p className="mt-1 text-sm font-semibold text-[#0f172a]">
-                  {followUp.businessPhone || "-"}
-                </p>
-              </div>
-            </div>
             {/* Reminder Item */}
             <div className="flex gap-3">
               <Bell className="mt-0.5 size-5 text-[#94a3b8]" />
@@ -183,20 +213,68 @@ export default function FollowUpDetails({
           <p className="text-xs font-semibold uppercase tracking-wide text-[#94a3b8]">
             Business contact
           </p>
-          <p className="mt-4 font-semibold text-[#0f172a]">
-            {followUp.businessName}
-          </p>
-          <p className="mt-1 text-sm text-[#64748b]">
-            {followUp.businessCity || "-"}
-          </p>
-          {followUp.businessPhone && (
-            <a
-              href={`tel:${followUp.businessPhone}`}
-              className="mt-5 inline-flex items-center gap-2 text-sm font-semibold text-[#027a48] hover:underline"
-            >
-              <Phone className="size-4" /> {followUp.businessPhone}
-            </a>
-          )}
+
+          <div className="mt-4 space-y-4">
+            {/* Calling number */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94a3b8]">
+                Calling number
+              </p>
+              {callingNumber ? (
+                <a
+                  href={`tel:${cleanCalling || callingNumber}`}
+                  className="mt-1.5 inline-flex items-center gap-2 text-sm font-semibold text-[#0b63e5] transition-colors hover:text-[#094bb3] hover:underline"
+                >
+                  <Phone className="size-4 shrink-0 text-[#0b63e5]" />
+                  <span>{callingNumber}</span>
+                </a>
+              ) : (
+                <p className="mt-1 text-sm text-[#94a3b8]">-</p>
+              )}
+            </div>
+
+            {/* WhatsApp number */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94a3b8]">
+                WhatsApp number
+              </p>
+              {whatsappNumber ? (
+                <a
+                  href={
+                    cleanWhatsapp.length === 10
+                      ? `https://wa.me/91${cleanWhatsapp}`
+                      : `https://wa.me/${cleanWhatsapp}`
+                  }
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="mt-1.5 inline-flex items-center gap-2 text-sm font-semibold text-[#027a48] transition-colors hover:text-[#05603a] hover:underline"
+                >
+                  <WhatsAppIcon className="size-4 shrink-0 text-[#027a48]" />
+                  <span>{whatsappNumber}</span>
+                </a>
+              ) : (
+                <p className="mt-1 text-sm text-[#94a3b8]">-</p>
+              )}
+            </div>
+
+            {/* Email */}
+            <div>
+              <p className="text-[11px] font-semibold uppercase tracking-wider text-[#94a3b8]">
+                Email
+              </p>
+              {email ? (
+                <a
+                  href={`mailto:${email}`}
+                  className="mt-1.5 inline-flex items-center gap-2 text-sm font-semibold text-[#475569] transition-colors hover:text-[#0f172a] hover:underline"
+                >
+                  <Mail className="size-4 shrink-0 text-[#64748b]" />
+                  <span className="truncate">{email}</span>
+                </a>
+              ) : (
+                <p className="mt-1 text-sm text-[#94a3b8]">-</p>
+              )}
+            </div>
+          </div>
         </aside>
       </div>
     </div>

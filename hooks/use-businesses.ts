@@ -19,19 +19,15 @@ import type {
   BusinessFormValues,
   NumberFieldValue,
 } from "@/lib/business-form-types";
+import { toFollowUpPayload } from "@/lib/business-form-types";
 
 /**
  * Maps the Add Business form's values to POST /businesses' request shape.
  *
  * Known gaps, since this is scoped to just the create call for now:
- * - `assignedTo` is sent as whatever plain string the Assign To dropdown
- *   currently holds (e.g. "Amit Sharma"), NOT a real database ID - that
- *   dropdown is still a hardcoded placeholder list (see
- *   lib/business-form-options.ts), not fetched from the backend.
- *   (`categoryId` is now the real category _id, via useCategoriesQuery.)
- * - `status` and `leadSource` are sent as whatever the form's dropdowns
- *   currently hold (e.g. "New Lead"), which likely don't match the
- *   backend's real enum values (e.g. "NEW").
+ * - `assignedTo` comes from the shared team-member autocomplete.
+ * - `categoryId` is the real category _id, via useCategoriesQuery.
+ * - Follow-up details are sent in the API's nested `followUp` shape.
  * - `latitude` / `longitude` aren't collected anywhere in the form yet, so
  *   they're always omitted.
  * - Each phone/WhatsApp number's `name` field (required by the API) is
@@ -566,16 +562,8 @@ const toNumberEntries = (
 /**
  * Maps the Add Business form's values to POST /businesses' request shape.
  *
- * Known gaps, since this is scoped to just the create call for now:
- * - `categoryId` and `assignedTo` are sent as whatever plain string the
- *   Category / Assign To dropdowns currently hold (e.g. "Retail & Shopping"),
- *   NOT real database IDs - those dropdowns are still hardcoded placeholder
- *   lists (see lib/business-form-options.ts), not fetched from the backend.
- *   (Category *can* be fetched via useCategoriesQuery above - swapping the
- *   dropdown to use it, and sending the real _id, is a follow-up task.)
- * - `status` and `leadSource` are sent as whatever the form's dropdowns
- *   currently hold (e.g. "New Lead"), which likely don't match the
- *   backend's real enum values (e.g. "NEW").
+ * Follow-up details are serialized in the nested shape expected by POST
+ * /businesses, including reminder intervals in minutes.
  * - `latitude` / `longitude` aren't collected anywhere in the form yet, so
  *   they're always omitted.
  * - Each phone/WhatsApp number's `name` field (required by the API) is
@@ -602,7 +590,7 @@ export function toCreateBusinessPayload(
   if (values.email.trim()) payload.email = values.email.trim();
   if (values.website.trim()) payload.website = values.website.trim();
   if (values.assignTo) payload.assignedTo = values.assignTo;
-  if (values.leadSource) payload.leadSource = values.leadSource;
+  payload.followUp = toFollowUpPayload(values);
 
   return payload;
 }
@@ -636,4 +624,3 @@ export function useCreateBusiness() {
     },
   });
 }
-

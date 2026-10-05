@@ -61,7 +61,7 @@ function getPageDetails(pathname: string) {
       eyebrow: "BUSINESSES",
       title: isEdit ? "Edit Business" : "Add Business",
       subtitle: isEdit
-        ? "Update business lead details and follow-up settings."
+        ? "Update business lead details and follow-up."
         : "Create a new business lead and set up its first follow-up.",
     };
   }
@@ -151,7 +151,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               width={140}
               height={42}
               priority
-              className={`h-auto ${sidebarCollapsed ? "w-10 object-cover object-left" : "w-32"}`}
+              style={{ height: "auto" }}
+              className={sidebarCollapsed ? "w-10 object-cover object-left" : "w-32"}
             />
           </Link>
         </div>

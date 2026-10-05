@@ -5,6 +5,7 @@ import React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import OutlinedButton from "@/components/common/OutlinedButton";
+import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import Actions from "@/components/common/Actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -54,6 +55,7 @@ import { ChangeBusinessStatusModal } from "@/components/businesses";
 import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
+import { REMINDER_OPTIONS } from "@/lib/business-form-options";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -116,9 +118,7 @@ export default function BusinessDetails() {
   const cleanNumber = (num: string) => num.replace(/\D/g, "");
 
   const params = useParams();
-  const [followUpDate, setFollowUpDate] = React.useState("");
-  const [assignedTo, setAssignedTo] = React.useState("");
-  const [reminder, setReminder] = React.useState("");
+
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const stringId = typeof rawId === "string" ? rawId : "";
@@ -212,7 +212,7 @@ export default function BusinessDetails() {
           primary={{
             label: "Edit Business",
             icon: <Edit2 className="size-4" />,
-            href: `/businesses/form/${business.id}`, // Link to the edit form!
+            href: `/businesses/form/${business.id}`
           }}
           secondary={[
             {
@@ -452,6 +452,7 @@ export default function BusinessDetails() {
                 <BusinessDetailsQuickActions
                   business={business}
                   cleanNumber={cleanNumber}
+
                 />
               </div>
               <BusinessDetailsMap business={business} />
@@ -465,6 +466,7 @@ export default function BusinessDetails() {
             {/* FOLLOW-UPS TAB */}
             <TabsContent value="follow-ups" className="mt-6">
               <BusinessDetailsFollowups />
+
             </TabsContent>
             {/* NOTES TAB 
             <TabsContent value="notes" className="mt-6"></TabsContent> */}

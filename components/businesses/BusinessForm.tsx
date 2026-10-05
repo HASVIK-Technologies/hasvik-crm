@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   FormProvider,
@@ -31,12 +31,17 @@ import BusinessInfoSection from "@/components/businesses/sections/BusinessInfoSe
 import ContactInfoSection from "@/components/businesses/sections/ContactInfoSection";
 import AdditionalInfoSection from "@/components/businesses/sections/AdditionalInfoSection";
 import FollowUpSection from "@/components/businesses/sections/FollowUpSection";
+import BusinessDetailsFollowups from "@/components/business-details/BusinessDetailsFollowups";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/lib/use-is-desktop";
-import { getBusinessRaw, useCreateBusiness, useCreateBusinessMutation, useUpdateBusinessMutation } from "@/hooks/use-businesses";
-import { getApiErrorMessage } from "@/lib/api-error";
+import {
+  getBusinessRaw,
+  useCreateBusinessMutation,
+  useUpdateBusinessMutation,
+} from "@/hooks/use-businesses";
 import {
   defaultBusinessFormValues,
+  toFollowUpPayload,
   type BusinessFormValues,
 } from "@/lib/business-form-types";
 
@@ -56,6 +61,9 @@ const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
   pincode: "Pincode",
   address: "Address",
   status: "Status",
+  followUpType: "Follow-up Type",
+  assignTo: "Assignee",
+  nextFollowupDate: "Next Follow-up Date",
   phoneNumbers: "Phone Number",
   whatsappNumbers: "WhatsApp Number",
 };
@@ -124,7 +132,9 @@ export default function BusinessForm({
   const phoneArray = useFieldArray({ control, name: "phoneNumbers" });
   const whatsappArray = useFieldArray({ control, name: "whatsappNumbers" });
 
-  const createBusinessMutation = useCreateBusiness();
+  // In edit mode this holds the values loaded from the API, so "Reset"
+  // can restore them instead of clearing the form.
+  const savedValuesRef = useRef<BusinessFormValues | null>(null);
 
   const watchedValues = useWatch({ control }) as BusinessFormValues;
   const isFormComplete =
@@ -159,27 +169,55 @@ export default function BusinessForm({
             ? data.whatsappNumbers.map((w) => ({ value: w.number || "" }))
             : [{ value: "" }];
 
-        reset({
+        // The API may return `category` as an object ({ _id, name }) or
+        // as a plain id string, so handle both.
+        const rawCategory = data.category as unknown;
+        const categoryObj =
+          typeof rawCategory === "object" && rawCategory !== null
+            ? (rawCategory as { _id?: string; name?: string })
+            : null;
+        const categoryId =
+          data.categoryId ??
+          categoryObj?._id ??
+          (typeof rawCategory === "string" ? rawCategory : "");
+
+        const loadedValues: BusinessFormValues = {
           businessName: data.name || "",
-          category: (data.categoryId ?? data.category) || "",
+          category: categoryId || "",
+          categoryName: categoryObj?.name || "",
           city: data.city || "",
           state: data.state || "",
           pincode: data.pincode || "",
           address: data.address || "",
-          status: data.status || (data.isActive === false ? "Inactive" : "Active"),
-          businessType: data.businessType || "",
+          status:
+            data.status || (data.isActive === false ? "Inactive" : "Active"),
+          locationUrl: data.location?.url || "",
           phoneNumbers,
           whatsappNumbers,
           email: data.email || "",
           website: data.website || "",
           description: data.description || "",
           notes: data.notes || "",
-          leadSource: data.leadSource || "",
-          assignTo: data.assignedTo || "",
-          nextFollowupDate: data.nextFollowupDate ? data.nextFollowupDate.slice(0, 10) : "",
-          reminder: data.reminder || "",
+          followUpType: data.followUp?.type || "",
+          assignTo: data.followUp?.assignedTo || data.assignedTo || "",
+          nextFollowupDate: data.followUp?.scheduledAt || data.nextFollowupDate
+            ? (data.followUp?.scheduledAt || data.nextFollowupDate || "").slice(
+                0,
+                10,
+              )
+            : "",
+          reminder:
+            data.followUp?.reminderInMinutes === undefined &&
+            (data.reminder === undefined || data.reminder === null)
+              ? ""
+              : String(
+                  data.followUp?.reminderInMinutes ?? data.reminder,
+                ),
           addAnother: false,
-        });
+        };
+
+        savedValuesRef.current = loadedValues;
+        reset(loadedValues);
 
         setIsLoadingBusiness(false);
       })
@@ -201,7 +239,8 @@ export default function BusinessForm({
   const handleBackToBusinesses = () => router.push("/businesses");
 
   const handleReset = () => {
-    reset(initialSnapshot);
+    // Edit mode -> back to the saved values; add mode -> empty form.
+    reset(savedValuesRef.current ?? initialSnapshot);
     setSubmitError(null);
     setCurrentStep(0);
   };
@@ -236,8 +275,17 @@ export default function BusinessForm({
       : []),
     {
       key: "followup",
-      title: "Follow-up Settings",
-      render: (idPrefix: string) => <FollowUpSection idPrefix={idPrefix} />,
+      title: "Follow-up",
+      render: (idPrefix: string) => (
+        <>
+          {!isEditMode && <FollowUpSection idPrefix={idPrefix} />}
+          {isEditMode && targetId && (
+            <div className="mt-6">
+              <BusinessDetailsFollowups businessId={targetId} />
+            </div>
+          )}
+        </>
+      ),
     },
   ];
 
@@ -264,7 +312,6 @@ export default function BusinessForm({
 
     const payload: Record<string, unknown> = {
       name: values.businessName.trim(),
-      businessType: values.businessType || undefined,
       status: values.status || "Active",
       email: values.email.trim() || undefined,
       website: values.website.trim() || undefined,
@@ -272,12 +319,8 @@ export default function BusinessForm({
       city: values.city.trim() || undefined,
       state: values.state.trim() || undefined,
       pincode: values.pincode.trim() || undefined,
-      leadSource: values.leadSource || undefined,
-      assignedTo: values.assignTo || undefined,
       description: values.description || undefined,
       notes: values.notes || undefined,
-      nextFollowupDate: values.nextFollowupDate || undefined,
-      reminder: values.reminder || undefined,
       phoneNumbers: values.phoneNumbers
         .filter((p) => p.value.trim())
         .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
@@ -291,18 +334,25 @@ export default function BusinessForm({
       payload.categoryId = values.category;
     }
 
+    if (values.locationUrl.trim()) {
+      payload.location = { url: values.locationUrl.trim() };
+    }
+
+    if (!isEditMode) {
+      payload.assignedTo = values.assignTo;
+      payload.followUp = toFollowUpPayload(values);
+    }
+
     try {
       if (isEditMode && targetId) {
         await updateMutation.mutateAsync({ id: targetId, payload });
         router.push(`/businesses/${targetId}`);
       } else {
         await createMutation.mutateAsync(payload);
-        if (values.addAnother) {
-          reset(defaultBusinessFormValues);
-          setCurrentStep(0);
-        } else {
-          router.push("/businesses");
-        }
+        // Stay on the form so the next business can be added right away.
+        // (The success toast is shown by useCreateBusinessMutation.)
+        reset(defaultBusinessFormValues);
+        setCurrentStep(0);
       }
     } catch (err: unknown) {
       setSubmitError(
@@ -313,15 +363,6 @@ export default function BusinessForm({
     } finally {
       setIsSubmitting(false);
     }
-
-    createBusinessMutation.mutate(values, {
-      onSuccess: () => {
-        router.push("/businesses");
-      },
-      onError: (error) => {
-        setSubmitError(getApiErrorMessage(error));
-      },
-    });
   };
 
   const onInvalid = (formErrors: FieldErrors<BusinessFormValues>) => {
@@ -353,7 +394,9 @@ export default function BusinessForm({
           <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
             <AlertCircle className="size-6" />
           </div>
-          <h3 className="text-base font-bold text-[#0f172a]">Business Not Found</h3>
+          <h3 className="text-base font-bold text-[#0f172a]">
+            Business Not Found
+          </h3>
           <p className="text-sm text-[#64748b]">{loadError}</p>
           <OutlinedButton
             type="button"
@@ -380,8 +423,7 @@ export default function BusinessForm({
           </div>
         )}
 
-        {isDesktop ? (
-          // Desktop / tablet: every section shown at once on a single page
+        {isDesktop || isEditMode ? (
           <Card className="border-[#dce8ee]">
             <CardContent className="px-5 py-4 sm:px-7 sm:py-5 lg:px-8 lg:py-6">
               <FormSection title="Business Information" first>
@@ -406,50 +448,50 @@ export default function BusinessForm({
                 </FormSection>
               )}
 
-              <FormSection icon={UsersRound} title="Follow-up Settings">
-                <FollowUpSection idPrefix="desktop-" />
-              </FormSection>
+              {!isEditMode && (
+                <FormSection icon={UsersRound} title="Follow-up">
+                  <FollowUpSection idPrefix="desktop-" />
+                </FormSection>
+              )}
 
-              <div className="mt-6 flex flex-col-reverse gap-4 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
-                <OutlinedButton
-                  type="button"
-                  size="lg"
-                  onClick={handleBackToBusinesses}
-                  className="w-full sm:w-auto"
-                >
-                  Back to Business
-                </OutlinedButton>
-
-                <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
+              {!isEditMode && (
+                <div className="mt-6 flex flex-col-reverse gap-4 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
                   <OutlinedButton
                     type="button"
                     size="lg"
-                    onClick={handleReset}
+                    onClick={handleBackToBusinesses}
                     className="w-full sm:w-auto"
                   >
-                    <RotateCcw className="size-4" />
-                    Reset
+                    Back to Business
                   </OutlinedButton>
 
-                  <SecondaryButton
-                    type="submit"
-                    size="lg"
-                    disabled={
-                      !isFormComplete || createBusinessMutation.isPending
-                    }
-                    className="w-full sm:w-auto"
-                  >
-                    <Save className="size-4" />
-                    {createBusinessMutation.isPending
-                      ? "Saving..."
-                      : "Save Business"}
-                  </SecondaryButton>
+                  <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
+                    <OutlinedButton
+                      type="button"
+                      size="lg"
+                      onClick={handleReset}
+                      className="w-full sm:w-auto"
+                    >
+                      <RotateCcw className="size-4" />
+                      Reset
+                    </OutlinedButton>
+
+                    <SecondaryButton
+                      type="submit"
+                      size="lg"
+                      disabled={!isFormComplete || isSubmitting}
+                      className="w-full sm:w-auto"
+                    >
+                      <Save className="size-4" />
+                      {isSubmitting ? "Saving..." : "Save Business"}
+                    </SecondaryButton>
+                  </div>
                 </div>
-              </div>
+              )}
             </CardContent>
           </Card>
         ) : (
-          // Mobile: step-by-step wizard so the form doesn't feel massive on small screens
+          // Mobile add flow stays step-based; edit mode uses the full form layout above.
           <div>
             <div className="mb-6">
               <div className="flex items-center">
@@ -519,15 +561,11 @@ export default function BusinessForm({
                       </OutlinedButton>
                       <SecondaryButton
                         type="submit"
-                        disabled={
-                          !isFormComplete || createBusinessMutation.isPending
-                        }
+                        disabled={!isFormComplete || isSubmitting}
                         className="w-full sm:w-auto"
                       >
                         <Save className="size-4" />
-                        {createBusinessMutation.isPending
-                          ? "Saving..."
-                          : "Save Business"}
+                        {isSubmitting ? "Saving..." : "Save Business"}
                       </SecondaryButton>
                     </div>
                   ) : (
@@ -552,6 +590,42 @@ export default function BusinessForm({
               </CardContent>
             </Card>
           </div>
+        )}
+
+        {isEditMode && targetId && (
+          <>
+            <BusinessDetailsFollowups businessId={targetId} />
+            <div className="flex flex-col-reverse gap-4 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
+              <OutlinedButton
+                type="button"
+                size="lg"
+                onClick={handleBackToBusinesses}
+                className="w-full sm:w-auto"
+              >
+                Back to Business
+              </OutlinedButton>
+              <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
+                <OutlinedButton
+                  type="button"
+                  size="lg"
+                  onClick={handleReset}
+                  className="w-full sm:w-auto"
+                >
+                  <RotateCcw className="size-4" />
+                  Reset
+                </OutlinedButton>
+                <SecondaryButton
+                  type="submit"
+                  size="lg"
+                  disabled={!isFormComplete || isSubmitting}
+                  className="w-full sm:w-auto"
+                >
+                  <Save className="size-4" />
+                  {isSubmitting ? "Saving..." : "Save Business"}
+                </SecondaryButton>
+              </div>
+            </div>
+          </>
         )}
       </form>
     </FormProvider>

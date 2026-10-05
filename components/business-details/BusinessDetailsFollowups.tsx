@@ -104,7 +104,12 @@ export default function BusinessDetailsFollowups() {
             {followUpsList.map((item: any) => (
               <tr key={item._id} className="border-b border-slate-100 hover:bg-slate-50">
                 <td className="py-4 pr-4 font-medium text-slate-900 whitespace-nowrap">
-                  {new Date(item.scheduledAt).toLocaleString('en-IN', { dateStyle: 'medium', timeStyle: 'short' })}
+                  {item.scheduledAt
+                    ? new Date(item.scheduledAt).toLocaleString("en-IN", {
+                        dateStyle: "medium",
+                        timeStyle: "short",
+                      })
+                    : "-"}
                 </td>
 
                 {/* Type */}

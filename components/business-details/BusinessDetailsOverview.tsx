@@ -44,16 +44,32 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
         <div className="flex items-center gap-3 text-sm">
           <Globe className="w-5 h-5 text-slate-400 shrink-0" />
           <div className="w-32 shrink-0 text-slate-500">Website</div>
-          <a href={business.website || businessData.businessInfo.website} target="_blank" rel="noopener noreferrer" className="text-blue-600 hover:underline font-medium break-all">
-            {business.website || businessData.businessInfo.website}
-          </a>
+          {business.website ? (
+            <a
+              href={business.website}
+              target="_blank"
+              rel="noopener noreferrer"
+              className="break-all font-medium text-blue-600 hover:underline"
+            >
+              {business.website}
+            </a>
+          ) : (
+            <span className="font-medium text-slate-700">-</span>
+          )}
         </div>
         <div className="flex items-center gap-3 text-sm">
           <Mail className="w-5 h-5 text-slate-400 shrink-0" />
           <div className="w-32 shrink-0 text-slate-500">Email</div>
-          <a href={`mailto:${business.email || businessData.businessInfo.email}`} className="text-blue-600 hover:underline font-medium break-all">
-            {business.email || businessData.businessInfo.email}
-          </a>
+          {business.email ? (
+            <a
+              href={`mailto:${business.email}`}
+              className="break-all font-medium text-blue-600 hover:underline"
+            >
+              {business.email}
+            </a>
+          ) : (
+            <span className="font-medium text-slate-700">-</span>
+          )}
         </div>
       </div>
     </div>
