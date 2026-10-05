@@ -24,31 +24,18 @@ import { AddFollowUpModal } from "@/components/business-details/AddFollowUpModal
 
 import {
   Edit2,
-  Plus,
-  MoreVertical,
   ArrowLeft,
   Phone,
   MapPin,
   Building2,
-  Target,
   Users,
   FolderOpen,
   Calendar,
   AlertCircle,
-  Tags,
-  Building,
-  Zap,
-  Globe,
-  Mail,
-  Trash2,
-  Slash,
-  ExternalLink,
-  FileText,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import {
   useBusinessQuery,
-  useUpdateBusinessStatus,
 } from "@/hooks/use-businesses";
 import { BusinessItem } from "@/types/business";
 import { ChangeBusinessStatusModal } from "@/components/businesses";
@@ -135,30 +122,6 @@ export default function BusinessDetails() {
     apiBusiness ?? (numericId === 12 ? STATIC_BUSINESS_12 : undefined);
   const { openFollowUpModal, openDeactivateModal } = useModalStore();
   const isInactive = business?.status?.toLowerCase() === "inactive" || (business as any)?.isActive === false;
-  // If business is not found or ID is invalid
-  // if ((isLoaded || numericId === 12) && !business) {
-  //   return (
-  //     <div className="mx-auto max-w-xl py-16 text-center space-y-4">
-  //       <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-  //         <AlertCircle className="size-7" />
-  //       </div>
-  //       <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
-  //         Business Not Found
-  //       </h1>
-  //       <p className="text-sm text-[#64748b]">
-  //         The business with ID{" "}
-  //         <span className="font-semibold text-[#0f172a]">#{rawId}</span> does not exist or has been removed.
-  //       </p>
-  //       <div className="pt-2">
-  //         <OutlinedButton asChild className="gap-2">
-  //           <Link href="/businesses">
-  //             <ArrowLeft className="size-4" /> Back to Businesses
-  //           </Link>
-  //         </OutlinedButton>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   if (isError) {
     return (
