@@ -1,7 +1,7 @@
 import React from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Building2, Tags, MapPin, Building, Zap, Globe, Mail } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/StatusBadge";
 
 interface OverviewProps {
   business: any;
@@ -9,7 +9,7 @@ interface OverviewProps {
 }
 
 export default function BusinessDetailsOverview({ business, businessData }: OverviewProps) {
-  const isInactive = business?.status?.toLowerCase() === "inactive" || business?.isActive === false;
+  const isInactive = business?.isActive === false;
   return (
     <div className="rounded-2xl border border-[#e4ecf2] bg-white p-5 shadow-[0_4px_20px_rgba(20,40,60,0.03)] sm:p-6">
       <h3 className="mb-6 text-lg font-bold tracking-tight text-slate-800">Business Information</h3>
@@ -37,9 +37,10 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
         <div className="flex items-center gap-3 text-sm">
           <Zap className="w-5 h-5 text-slate-400 shrink-0" />
           <div className="w-32 shrink-0 text-slate-500">Status</div>
-          <Badge variant="secondary" className={`font-medium border-0 ${isInactive ? "bg-slate-100 text-slate-600 hover:bg-slate-100" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"}`}>
-            {isInactive ? "Inactive" : "Active"}
-          </Badge>
+          <StatusBadge
+            status={isInactive ? "Inactive" : "Active"}
+            className="font-medium"
+          />
         </div>
         <div className="flex items-center gap-3 text-sm">
           <Globe className="w-5 h-5 text-slate-400 shrink-0" />

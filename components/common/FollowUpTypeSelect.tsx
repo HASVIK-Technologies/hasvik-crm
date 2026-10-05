@@ -7,7 +7,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { FOLLOW_UP_TYPE_OPTIONS } from "@/lib/business-form-options";
+import { FOLLOW_UP_TYPE_OPTIONS } from "@/lib/business/form-options";
 import type { FollowUpType } from "@/types/follow-up";
 
 interface FollowUpTypeSelectProps {

@@ -1,7 +1,7 @@
 import axios from "axios";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/auth-store";
-import { getApiErrorMessage } from "@/lib/api-error";
+import { getApiErrorMessage } from "@/lib/api/api-error";
 
 export const apiClient = axios.create({
   // Use the same-origin Next proxy so credentialed cookie requests avoid backend CORS.

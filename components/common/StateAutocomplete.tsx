@@ -9,7 +9,7 @@ import {
   ComboboxList,
 } from "@/components/ui/combobox";
 import FieldLabel from "@/components/businesses/FieldLabel";
-import { STATE_OPTIONS } from "@/lib/business-form-options";
+import { STATE_OPTIONS } from "@/lib/business/form-options";
 
 interface StateAutocompleteProps {
   value?: string;

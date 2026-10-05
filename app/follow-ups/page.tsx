@@ -21,6 +21,12 @@ import {
   useFollowUpKpisQuery,
   useFollowUpsQuery,
 } from "@/hooks/use-follow-ups";
+import {
+  canCancelFollowUp,
+  canCompleteFollowUp,
+  canCreateNextFollowUp,
+  canEditFollowUp,
+} from "@/lib/follow-ups/actions";
 import { useFollowUpListStore } from "@/store/follow-up-list-store";
 import type {
   FollowUpFilters as FollowUpFilterState,
@@ -80,28 +86,30 @@ export default function FollowupsPage() {
   const completeMutation = useCompleteFollowUp();
   const setFilter = filters.setFilter;
 
-  const kpiStats = useMemo(() => {
-    const data = kpisQuery.data ?? { total: 0, today: 0, upcoming: 0, overdue: 0 };
-    const hasFilter = Boolean(
-      filters.businessId ||
+  const kpiData = kpisQuery.data ?? {
+    total: 0,
+    today: 0,
+    upcoming: 0,
+    overdue: 0,
+  };
+  const hasFilter = Boolean(
+    filters.businessId ||
       filters.assignedTo ||
       filters.type ||
       filters.status ||
       filters.search?.trim() ||
       filters.fromDate ||
       filters.toDate,
-    );
-
-    let total = data.total;
-    if (hasFilter && filters.tab === "all" && typeof listQuery.data?.total === "number") {
-      total = listQuery.data.total;
-    }
-
-    return {
-      ...data,
-      total,
-    };
-  }, [kpisQuery.data, filters, listQuery.data?.total]);
+  );
+  const kpiStats = {
+    ...kpiData,
+    total:
+      hasFilter &&
+      filters.tab === "all" &&
+      typeof listQuery.data?.total === "number"
+        ? listQuery.data.total
+        : kpiData.total,
+  };
 
   const searchControl = (
     <SearchWithSuggestions
@@ -113,7 +121,10 @@ export default function FollowupsPage() {
   );
 
   const confirmComplete = async () => {
-    if (!completeFollowUp) return;
+    if (!completeFollowUp || !canCompleteFollowUp(completeFollowUp)) {
+      setCompleteFollowUp(undefined);
+      return;
+    }
     try {
       await completeMutation.mutateAsync(completeFollowUp.id);
       toast.success("Follow-up marked as completed");
@@ -124,7 +135,10 @@ export default function FollowupsPage() {
   };
 
   const confirmCancel = async () => {
-    if (!cancelFollowUp) return;
+    if (!cancelFollowUp || !canCancelFollowUp(cancelFollowUp)) {
+      setCancelFollowUp(undefined);
+      return;
+    }
     try {
       await cancelMutation.mutateAsync(cancelFollowUp.id);
       toast.success("Follow-up cancelled");
@@ -132,6 +146,22 @@ export default function FollowupsPage() {
     } catch {
       toast.error("Unable to cancel follow-up.");
     }
+  };
+
+  const requestEdit = (followUp: FollowUpItem) => {
+    if (canEditFollowUp(followUp)) setEditFollowUp(followUp);
+  };
+
+  const requestCancel = (followUp: FollowUpItem) => {
+    if (canCancelFollowUp(followUp)) setCancelFollowUp(followUp);
+  };
+
+  const requestComplete = (followUp: FollowUpItem) => {
+    if (canCompleteFollowUp(followUp)) setCompleteFollowUp(followUp);
+  };
+
+  const requestNextFollowUp = (followUp: FollowUpItem) => {
+    if (canCreateNextFollowUp(followUp)) setNextFollowUp(followUp);
   };
 
   return (
@@ -179,10 +209,10 @@ export default function FollowupsPage() {
               loading={listQuery.isFetching}
               onPage={(page) => setFilter("page", page)}
               onItemsPerPageChange={(limit) => setFilter("limit", limit)}
-              onEdit={setEditFollowUp}
-              onCancel={setCancelFollowUp}
-              onComplete={setCompleteFollowUp}
-              onNextFollowUp={setNextFollowUp}
+              onEdit={requestEdit}
+              onCancel={requestCancel}
+              onComplete={requestComplete}
+              onNextFollowUp={requestNextFollowUp}
             />
           </div>
         }

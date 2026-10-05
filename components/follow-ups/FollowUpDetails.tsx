@@ -3,29 +3,17 @@
 import {
   Bell,
   CalendarClock,
-  CheckCircle2,
   FileText,
   Mail,
   MapPin,
-  Pencil,
   Phone,
-  Plus,
-  Trash2,
   UserRound,
 } from "lucide-react";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import type { FollowUpItem } from "@/types/follow-up";
-
-function statusClass(status: string) {
-  if (status === "COMPLETED") return "bg-[#ecfdf3] text-[#027a48]";
-  if (status === "CANCELLED") return "bg-[#f2f4f7] text-[#667085]";
-  if (status === "OVERDUE") return "bg-[#fff1f3] text-[#e11d48]";
-  return "bg-[#eff6ff] text-[#175cd3]";
-}
 
 function dateTime(value: string) {
   return value
@@ -50,20 +38,12 @@ function initials(value: string) {
 
 interface FollowUpDetailsProps {
   followUp: FollowUpItem;
-  onEdit: () => void;
-  onComplete?: () => void;
-  onCancel?: () => void;
-  onNextFollowUp?: () => void;
 }
 
 const cleanNumber = (num: string) => num.replace(/\D/g, "");
 
 export default function FollowUpDetails({
   followUp,
-  onEdit,
-  onComplete,
-  onCancel,
-  onNextFollowUp,
 }: FollowUpDetailsProps) {
   const { data: businessData } = useBusinessQuery(followUp.businessId);
 
@@ -98,12 +78,10 @@ export default function FollowUpDetails({
               <h1 className="truncate text-xl font-bold tracking-tight text-[#334155] sm:text-2xl">
                 {followUp.businessName}
               </h1>
-              <Badge
-                variant="outline"
-                className={`rounded-md border-0 px-2.5 py-1 text-xs font-semibold ${statusClass(followUp.status)}`}
-              >
-                {followUp.status}
-              </Badge>
+              <StatusBadge
+                status={followUp.status}
+                className="rounded-md px-2.5 py-1 text-xs"
+              />
             </div>
             <p className="mt-2 flex items-center gap-2 text-sm text-[#64748b]">
               <MapPin className="size-4 text-[#94a3b8]" />
@@ -112,43 +90,6 @@ export default function FollowUpDetails({
           </div>
         </div>
 
-        <div className="flex flex-wrap items-center gap-2.5">
-          <Button
-            type="button"
-            onClick={onEdit}
-            className="gap-2 bg-[#0b63e5] text-white shadow-sm hover:bg-[#0951bd]"
-          >
-            <Pencil className="size-4" /> Edit / Reschedule
-          </Button>
-          {followUp.status === "COMPLETED" && onNextFollowUp && (
-            <Button
-              type="button"
-              onClick={onNextFollowUp}
-              className="gap-2 bg-[#027a48] text-white shadow-sm hover:bg-[#05603a]"
-            >
-              <Plus className="size-4" /> Next Follow-Up
-            </Button>
-          )}
-          {followUp.status !== "COMPLETED" && onComplete && (
-            <Button
-              type="button"
-              onClick={onComplete}
-              className="gap-2 bg-[#027a48] text-white shadow-sm hover:bg-[#05603a]"
-            >
-              <CheckCircle2 className="size-4" /> Mark as Completed
-            </Button>
-          )}
-          {followUp.status !== "CANCELLED" && followUp.status !== "COMPLETED" && onCancel && (
-            <Button
-              type="button"
-              variant="outline"
-              onClick={onCancel}
-              className="gap-2 border-red-200 text-red-600 hover:bg-red-50 hover:text-red-700"
-            >
-              <Trash2 className="size-4" /> Cancel follow-up
-            </Button>
-          )}
-        </div>
       </div>
 
       {/* Main Grid */}

@@ -16,9 +16,7 @@ export default function BusinessDetailsQuickActions({
 }: QuickActionsProps) {
   const { openDeactivateModal } = useModalStore();
 
-  const isInactive =
-    business?.status?.toLowerCase() === "inactive" ||
-    business?.isActive === false;
+  const isInactive = business?.isActive === false;
 
   const disabledStyles = isInactive
     ? "opacity-50 pointer-events-none cursor-not-allowed"

@@ -35,15 +35,15 @@ import BusinessDetailsFollowups from "@/components/business-details/BusinessDeta
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/lib/use-is-desktop";
 import {
-  getBusinessRaw,
   useCreateBusinessMutation,
   useUpdateBusinessMutation,
 } from "@/hooks/use-businesses";
+import { getBusinessRaw } from "@/lib/business/api";
 import {
   defaultBusinessFormValues,
   toFollowUpPayload,
   type BusinessFormValues,
-} from "@/lib/business-form-types";
+} from "@/lib/business/form-types";
 
 // Additional Information is built out but hidden from view for now - the
 // team plans to start using it in a future release. Flip this to `true`

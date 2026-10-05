@@ -6,7 +6,7 @@ import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useLogin } from "@/hooks/use-auth";
-import { getApiErrorMessage } from "@/lib/api-error";
+import { getApiErrorMessage } from "@/lib/api/api-error";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import { Input } from "@/components/ui/input";
 import type { LoginFormValues } from "@/types/auth";

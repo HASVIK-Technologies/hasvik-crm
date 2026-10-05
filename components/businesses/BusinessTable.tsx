@@ -15,7 +15,7 @@ import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PlainButton from "@/components/common/PlainButton";
 import PrimaryButton from "@/components/common/PrimaryButton";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
@@ -248,21 +248,10 @@ export default function BusinessTable({
                   <div className="flex flex-col items-end justify-between self-stretch shrink-0 gap-2.5">
                     {/* Status Badge */}
                     <div>
-                      {item.status === "Active" ? (
-                        <Badge
-                          variant="outline"
-                          className="border-0 rounded-md bg-[#ecfdf3] px-2.5 py-0.5 text-[11px] font-semibold text-[#027a48] hover:bg-[#ecfdf3]"
-                        >
-                          Active
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="border-0 rounded-md bg-[#f2f4f7] px-2.5 py-0.5 text-[11px] font-semibold text-[#667085] hover:bg-[#f2f4f7]"
-                        >
-                          Inactive
-                        </Badge>
-                      )}
+                      <StatusBadge
+                        status={item.status}
+                        className="rounded-md px-2.5 py-0.5 text-[11px]"
+                      />
                     </div>
 
                     {/* Follow-up text */}
@@ -493,21 +482,10 @@ export default function BusinessTable({
 
                     {/* Status */}
                     <TableCell className="px-4 py-4.5">
-                      {item.status === "Active" ? (
-                        <Badge
-                          variant="outline"
-                          className="border-0 rounded-md bg-[#ecfdf3] px-3 py-1 text-xs font-semibold text-[#027a48] hover:bg-[#ecfdf3]"
-                        >
-                          Active
-                        </Badge>
-                      ) : (
-                        <Badge
-                          variant="outline"
-                          className="border-0 rounded-md bg-[#f2f4f7] px-3 py-1 text-xs font-semibold text-[#667085] hover:bg-[#f2f4f7]"
-                        >
-                          Inactive
-                        </Badge>
-                      )}
+                      <StatusBadge
+                        status={item.status}
+                        className="rounded-md px-3 py-1 text-xs"
+                      />
                     </TableCell>
 
                     {/* Last Follow-up */}
@@ -515,27 +493,16 @@ export default function BusinessTable({
 
                     {/* Next Follow-up */}
                     <TableCell className="px-4 py-4.5">
-                      {item.nextFollowUpType === "today" ? (
-                        <Badge
-                          variant="outline"
-                          className="border-0 rounded-md bg-[#ecfdf3] px-3 py-1 text-xs font-semibold text-[#027a48] hover:bg-[#ecfdf3]"
-                        >
-                          Today
-                        </Badge>
-                      ) : item.nextFollowUpType === "tomorrow" ? (
-                        <Badge
-                          variant="outline"
-                          className="border-0 rounded-md bg-[#eff8ff] px-3 py-1 text-xs font-semibold text-[#175cd3] hover:bg-[#eff8ff]"
-                        >
-                          Tomorrow
-                        </Badge>
-                      ) : item.nextFollowUpType === "date" ? (
-                        <Badge
-                          variant="outline"
-                          className="border-0 rounded-md bg-[#eff8ff] px-3 py-1 text-xs font-semibold text-[#175cd3] hover:bg-[#eff8ff]"
-                        >
-                          {item.nextFollowUp}
-                        </Badge>
+                      {item.nextFollowUpType !== "none" ? (
+                        <StatusBadge
+                          status={item.nextFollowUpType}
+                          label={
+                            item.nextFollowUpType === "date"
+                              ? item.nextFollowUp
+                              : undefined
+                          }
+                          className="rounded-md px-3 py-1 text-xs"
+                        />
                       ) : (
                         <span className="text-[#94a3b8]">-</span>
                       )}

@@ -14,7 +14,7 @@ import {
   getFollowUps,
   getFollowUpsByBusiness,
   getFollowUpsByUser,
-} from "@/lib/follow-up-api";
+} from "@/lib/follow-ups/api";
 import type {
   CreateFollowUpPayload,
   FollowUpFilters,
@@ -22,10 +22,11 @@ import type {
   UpdateFollowUpPayload,
   UpdateFollowUpStatusPayload,
 } from "@/types/follow-up";
+import { followUpQueryKeys } from "@/lib/query/query-keys";
 
 export function useFollowUpsQuery(filters: FollowUpFilters) {
   return useQuery({
-    queryKey: ["follow-ups", filters],
+    queryKey: followUpQueryKeys.list(filters),
     queryFn: ({ signal }) => getFollowUps(filters, signal),
     placeholderData: (previous) => previous,
   });
@@ -33,7 +34,7 @@ export function useFollowUpsQuery(filters: FollowUpFilters) {
 
 export function useFollowUpKpisQuery(params?: Partial<FollowUpFilters>) {
   return useQuery({
-    queryKey: ["follow-ups", "kpis", params],
+    queryKey: followUpQueryKeys.kpis(params),
     queryFn: ({ signal }) => getFollowUpKpis(params, signal),
     staleTime: 30_000,
   });
@@ -41,7 +42,7 @@ export function useFollowUpKpisQuery(params?: Partial<FollowUpFilters>) {
 
 export function useFollowUpQuery(id?: string) {
   return useQuery({
-    queryKey: ["follow-ups", "detail", id],
+    queryKey: followUpQueryKeys.detail(id),
     queryFn: ({ signal }) => getFollowUp(id as string, signal),
     enabled: Boolean(id),
   });
@@ -49,7 +50,7 @@ export function useFollowUpQuery(id?: string) {
 
 export function useFollowUpStatusesQuery() {
   return useQuery({
-    queryKey: ["follow-ups", "statuses"],
+    queryKey: followUpQueryKeys.statuses(),
     queryFn: ({ signal }) => getFollowUpStatuses(signal),
     staleTime: 5 * 60 * 1000,
   });
@@ -61,7 +62,7 @@ export function useFollowUpAutocomplete(
   enabled: boolean,
 ) {
   return useQuery({
-    queryKey: [path, "autocomplete", search],
+    queryKey: followUpQueryKeys.autocomplete(path, search),
     queryFn: ({ signal }) => getFollowUpOptions(path, search, signal),
     enabled,
     staleTime: 30_000,
@@ -70,7 +71,7 @@ export function useFollowUpAutocomplete(
 
 export function useFollowUpsByBusinessQuery(businessId?: string) {
   return useQuery({
-    queryKey: ["follow-ups", "business", businessId],
+    queryKey: followUpQueryKeys.byBusiness(businessId),
     queryFn: ({ signal }) => getFollowUpsByBusiness(businessId as string, signal),
     enabled: Boolean(businessId),
   });
@@ -78,7 +79,7 @@ export function useFollowUpsByBusinessQuery(businessId?: string) {
 
 export function useFollowUpsByUserQuery(userId?: string) {
   return useQuery({
-    queryKey: ["follow-ups", "user", userId],
+    queryKey: followUpQueryKeys.byUser(userId),
     queryFn: ({ signal }) => getFollowUpsByUser(userId as string, signal),
     enabled: Boolean(userId),
   });
@@ -89,7 +90,7 @@ export function useCreateFollowUp() {
   return useMutation({
     mutationFn: (payload: CreateFollowUpPayload) => createFollowUp(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["follow-ups"] });
+      queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
     },
   });
 }
@@ -102,7 +103,7 @@ export function useUpdateFollowUp() {
       const id = variables.id || variables.followUpId;
       if (id) {
         queryClient.setQueryData(
-          ["follow-ups", "detail", id],
+          followUpQueryKeys.detail(id),
           (old: FollowUpItem | undefined) => {
             const nextNotes =
               variables.notes !== undefined
@@ -132,7 +133,8 @@ export function useUpdateFollowUp() {
       // Invalidate follow-up list and kpis queries without wiping out detail cache
       queryClient.invalidateQueries({
         predicate: (query) =>
-          query.queryKey[0] === "follow-ups" && query.queryKey[1] !== "detail",
+          query.queryKey[0] === followUpQueryKeys.all[0] &&
+          query.queryKey[1] !== "detail",
       });
     },
   });
@@ -144,7 +146,7 @@ export function useUpdateFollowUpStatus() {
     mutationFn: (payload: UpdateFollowUpStatusPayload) =>
       updateFollowUpStatus(payload),
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["follow-ups"] });
+      queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
     },
   });
 }
@@ -161,7 +163,7 @@ export function useCancelFollowUp() {
       return cancelFollowUp(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["follow-ups"] });
+      queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
     },
   });
 }
@@ -174,7 +176,7 @@ export function useCompleteFollowUp() {
       return completeFollowUp(id);
     },
     onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: ["follow-ups"] });
+      queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
     },
   });
 }

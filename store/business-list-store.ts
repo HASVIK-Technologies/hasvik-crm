@@ -4,7 +4,7 @@ import { create } from "zustand";
 import {
   BusinessListStateFilters,
   DEFAULT_BUSINESS_QUERY,
-} from "@/lib/business-query-builder";
+} from "@/lib/business/query-builder";
 
 export interface BusinessListStoreState extends BusinessListStateFilters {
   showStats: boolean;
@@ -17,7 +17,7 @@ export interface BusinessListStoreState extends BusinessListStateFilters {
   setCategory: (categoryId: string, categoryName?: string) => void;
   setCity: (city: string) => void;
   setStatus: (status: string) => void;
-  setIsDeleted: (isDeleted: boolean | undefined) => void;
+  setIsActive: (isActive: boolean | undefined) => void;
   toggleStats: () => void;
   resetAllFilters: () => void;
   syncFromParams: (filters: Partial<BusinessListStateFilters>) => void;
@@ -32,7 +32,7 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
   categoryName: DEFAULT_BUSINESS_QUERY.categoryName,
   city: DEFAULT_BUSINESS_QUERY.city,
   status: DEFAULT_BUSINESS_QUERY.status,
-  isDeleted: DEFAULT_BUSINESS_QUERY.isDeleted,
+  isActive: DEFAULT_BUSINESS_QUERY.isActive,
   showStats: true,
 
   // Rule: Pagination: change page only; preserve filters/search/sort/limit
@@ -58,8 +58,8 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
 
   setStatus: (status: string) => set({ status, page: 1 }),
 
-  setIsDeleted: (isDeleted: boolean | undefined) =>
-    set({ isDeleted, page: 1 }),
+  setIsActive: (isActive: boolean | undefined) =>
+    set({ isActive, page: 1 }),
 
   toggleStats: () => set((state) => ({ showStats: !state.showStats })),
 
@@ -70,7 +70,7 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
       categoryName: "",
       city: "",
       status: "",
-      isDeleted: undefined,
+      isActive: undefined,
       page: 1,
     }),
 

@@ -1,7 +1,7 @@
 "use client";
 
 import { create } from "zustand";
-import { ACCESS_TOKEN_TTL_MS } from "@/lib/auth-config";
+import { ACCESS_TOKEN_TTL_MS } from "@/lib/auth/auth-config";
 import type { AuthUser } from "@/types/auth";
 
 type AuthState = {

@@ -1,12 +1,16 @@
 import { create } from 'zustand';
+import type { FollowUpItem } from "@/types/follow-up";
 
 interface ModalStore {
   activeBusinessId: string | null;
   
   // Follow-up
   isFollowUpModalOpen: boolean;
-  editingFollowUp: any | null; // <-- NEW
-  openFollowUpModal: (businessId: string, followUp?: any) => void; // <-- NEW ARGUMENT
+  editingFollowUp: FollowUpItem | null;
+  openFollowUpModal: (
+    businessId: string,
+    followUp?: FollowUpItem | null,
+  ) => void;
   closeFollowUpModal: () => void;
   
   // Deactivate
@@ -18,14 +22,16 @@ export const useModalStore = create<ModalStore>((set) => ({
   activeBusinessId: null,
   
   isFollowUpModalOpen: false,
-  editingFollowUp: null, // <-- NEW
+  editingFollowUp: null,
   
-  // Accept the followUp and save it!
-  openFollowUpModal: (businessId, followUp = null) => 
-    set({ isFollowUpModalOpen: true, activeBusinessId: businessId, editingFollowUp: followUp }),
+  openFollowUpModal: (businessId, followUp = null) =>
+    set({
+      isFollowUpModalOpen: true,
+      activeBusinessId: businessId,
+      editingFollowUp: followUp,
+    }),
     
-  // Clear it when closed!
-  closeFollowUpModal: () => 
+  closeFollowUpModal: () =>
     set({ isFollowUpModalOpen: false, activeBusinessId: null, editingFollowUp: null }),
   
   isDeactivateModalOpen: false,

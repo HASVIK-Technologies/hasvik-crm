@@ -13,7 +13,7 @@ import MobileInput from "@/components/common/MobileInput";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import NumberListField from "@/components/businesses/NumberListField";
 import { cn } from "@/lib/utils";
-import type { BusinessFormValues } from "@/lib/business-form-types";
+import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function ContactInfoSection({
   idPrefix = "",

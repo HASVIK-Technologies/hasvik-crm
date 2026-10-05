@@ -22,7 +22,7 @@ import {
   buildBusinessKpiParams,
   filtersToSearchParams,
   searchParamsToFilters,
-} from "@/lib/business-query-builder";
+} from "@/lib/business/query-builder";
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
 
@@ -42,7 +42,7 @@ function BusinessesContent() {
     categoryName,
     city,
     status,
-    isDeleted,
+    isActive,
     showStats,
     setPage,
     setLimit,
@@ -51,7 +51,7 @@ function BusinessesContent() {
     setCategory,
     setCity,
     setStatus,
-    setIsDeleted,
+    setIsActive,
     toggleStats,
     resetAllFilters,
     syncFromParams,
@@ -84,7 +84,7 @@ function BusinessesContent() {
       categoryName,
       city,
       status,
-      isDeleted,
+      isActive,
     });
 
     const newQueryString = sp.toString();
@@ -106,7 +106,7 @@ function BusinessesContent() {
     categoryName,
     city,
     status,
-    isDeleted,
+    isActive,
   ]);
 
   // 3. Centralized API queries (100% Server-Side)
@@ -120,9 +120,9 @@ function BusinessesContent() {
         categoryId,
         city,
         status,
-        isDeleted,
+        isActive,
       }),
-    [page, limit, sortBy, search, categoryId, city, status, isDeleted],
+    [page, limit, sortBy, search, categoryId, city, status, isActive],
   );
 
   const kpiQueryParams = useMemo(
@@ -132,9 +132,9 @@ function BusinessesContent() {
         categoryId,
         city,
         status,
-        isDeleted,
+        isActive,
       }),
-    [search, categoryId, city, status, isDeleted],
+    [search, categoryId, city, status, isActive],
   );
 
   const {
@@ -158,7 +158,7 @@ function BusinessesContent() {
     categoryId ||
       (city && city !== "All Cities") ||
       (status && status !== "All Status") ||
-      isDeleted !== undefined,
+      isActive !== undefined,
   );
 
   const searchControl = (
@@ -178,8 +178,8 @@ function BusinessesContent() {
       onStatusChange={setStatus}
       selectedCity={city}
       onCityChange={setCity}
-      isDeleted={isDeleted}
-      onIsDeletedChange={setIsDeleted}
+      isActive={isActive}
+      onIsActiveChange={setIsActive}
       hasActiveFilters={hasActiveFilters}
       onResetFilters={resetAllFilters}
     />

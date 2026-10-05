@@ -10,6 +10,7 @@ export interface BusinessItem {
   state?: string;
   leadStatus?: string;
   status: "Active" | "Inactive";
+  isActive?: boolean;
   lastFollowUp: string;
   nextFollowUp: string;
   nextFollowUpType: "today" | "tomorrow" | "date" | "none" | "overdue";

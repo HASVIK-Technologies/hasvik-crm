@@ -32,9 +32,9 @@ interface BusinessFiltersProps {
   selectedCity?: string;
   onCityChange?: (city: string) => void;
 
-  // Active / Inactive (isDeleted)
-  isDeleted?: boolean;
-  onIsDeletedChange?: (isDeleted: boolean | undefined) => void;
+  // Active / Inactive
+  isActive?: boolean;
+  onIsActiveChange?: (isActive: boolean | undefined) => void;
 
   // Reset
   onResetFilters?: () => void;
@@ -49,28 +49,26 @@ export default function BusinessFilters({
   onStatusChange,
   selectedCity = "",
   onCityChange,
-  isDeleted,
-  onIsDeletedChange,
+  isActive,
+  onIsActiveChange,
   onResetFilters,
   hasActiveFilters = false,
 }: BusinessFiltersProps) {
   const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
 
-  // Active count for "More Filters" (Active/Inactive mapped to isDeleted)
-  const isMoreFiltersActive = typeof isDeleted === "boolean";
+  const isMoreFiltersActive = typeof isActive === "boolean";
   const extraFiltersCount = isMoreFiltersActive ? 1 : 0;
 
-  // Format the active/inactive state for the dropdown
   const activeInactiveValue =
-    isDeleted === false ? "active" : isDeleted === true ? "inactive" : "all";
+    isActive === true ? "active" : isActive === false ? "inactive" : "all";
 
   const handleActiveInactiveChange = (val: string) => {
     if (val === "active") {
-      onIsDeletedChange?.(false);
+      onIsActiveChange?.(true);
     } else if (val === "inactive") {
-      onIsDeletedChange?.(true);
+      onIsActiveChange?.(false);
     } else {
-      onIsDeletedChange?.(undefined);
+      onIsActiveChange?.(undefined);
     }
   };
 
@@ -103,7 +101,7 @@ export default function BusinessFilters({
         />
       </div>
 
-      {/* More Filters Popover (Active / Inactive mapped to isDeleted) */}
+      {/* More Filters Popover */}
       <div className="hidden lg:block">
       <Popover open={moreFiltersOpen} onOpenChange={setMoreFiltersOpen}>
         <PopoverTrigger asChild>
@@ -136,7 +134,7 @@ export default function BusinessFilters({
             {isMoreFiltersActive && (
               <button
                 type="button"
-                onClick={() => onIsDeletedChange?.(undefined)}
+                onClick={() => onIsActiveChange?.(undefined)}
                 className="text-[11px] font-medium text-[#2563eb] hover:underline"
               >
                 Reset Extra
@@ -144,7 +142,7 @@ export default function BusinessFilters({
             )}
           </div>
 
-          {/* Status Filter (Active / Inactive mapped to isDeleted) */}
+          {/* Active / inactive business filter */}
           <div>
             <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#475569]">
               <Activity className="size-3.5 text-[#94a3b8]" />

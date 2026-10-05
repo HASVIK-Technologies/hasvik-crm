@@ -9,7 +9,7 @@ export interface BusinessListStateFilters {
   categoryName?: string; // used for UI display in dropdown
   city: string;
   status: string;
-  isDeleted?: boolean; // undefined = All, false = Active, true = Inactive
+  isActive?: boolean; // undefined = All, true = Active, false = Inactive
 }
 
 export const DEFAULT_BUSINESS_QUERY: BusinessListStateFilters = {
@@ -21,12 +21,12 @@ export const DEFAULT_BUSINESS_QUERY: BusinessListStateFilters = {
   categoryName: "",
   city: "",
   status: "",
-  isDeleted: undefined,
+  isActive: undefined,
 };
 
 /**
  * Builds clean, server-side query params for GET /api/businesses
- * Preserves: page, limit, sortBy, search, categoryId, city, status, isDeleted
+ * Preserves: page, limit, sortBy, search, categoryId, city, status, isActive
  */
 export function buildBusinessListParams(
   filters: Partial<BusinessListStateFilters>,
@@ -54,8 +54,8 @@ export function buildBusinessListParams(
     params.status = filters.status.trim();
   }
 
-  if (typeof filters.isDeleted === "boolean") {
-    params.isDeleted = filters.isDeleted;
+  if (typeof filters.isActive === "boolean") {
+    params.isActive = filters.isActive;
   }
 
   return params;
@@ -63,7 +63,7 @@ export function buildBusinessListParams(
 
 /**
  * Builds query params for GET /api/businesses/kpis
- * Passes current search/filter params: search, status, categoryId, city, isDeleted
+ * Passes current search/filter params: search, status, categoryId, city, isActive
  */
 export function buildBusinessKpiParams(
   filters: Partial<BusinessListStateFilters>,
@@ -86,8 +86,8 @@ export function buildBusinessKpiParams(
     params.status = filters.status.trim();
   }
 
-  if (typeof filters.isDeleted === "boolean") {
-    params.isDeleted = filters.isDeleted;
+  if (typeof filters.isActive === "boolean") {
+    params.isActive = filters.isActive;
   }
 
   return params;
@@ -132,8 +132,8 @@ export function filtersToSearchParams(
     sp.set("status", filters.status.trim());
   }
 
-  if (typeof filters.isDeleted === "boolean") {
-    sp.set("isDeleted", String(filters.isDeleted));
+  if (typeof filters.isActive === "boolean") {
+    sp.set("isActive", String(filters.isActive));
   }
 
   return sp;
@@ -155,11 +155,11 @@ export function searchParamsToFilters(
 
   const pageVal = Number.parseInt(getParam("page") || "", 10);
   const limitVal = Number.parseInt(getParam("limit") || "", 10);
-  const isDeletedRaw = getParam("isDeleted");
+  const isActiveRaw = getParam("isActive");
 
-  let isDeleted: boolean | undefined = undefined;
-  if (isDeletedRaw === "true") isDeleted = true;
-  else if (isDeletedRaw === "false") isDeleted = false;
+  let isActive: boolean | undefined = undefined;
+  if (isActiveRaw === "true") isActive = true;
+  else if (isActiveRaw === "false") isActive = false;
 
   return {
     page: !isNaN(pageVal) && pageVal > 0 ? pageVal : DEFAULT_BUSINESS_QUERY.page,
@@ -170,6 +170,6 @@ export function searchParamsToFilters(
     categoryName: getParam("categoryName") || "",
     city: getParam("city") || "",
     status: getParam("status") || "",
-    isDeleted,
+    isActive,
   };
 }

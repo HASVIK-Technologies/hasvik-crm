@@ -8,8 +8,8 @@ import FormCategoryAutocomplete from "@/components/common/form-controls/FormCate
 import FormCityAutocomplete from "@/components/common/form-controls/FormCityAutocomplete";
 import FormLeadStatusSelect from "@/components/common/form-controls/FormLeadStatusSelect";
 import StateAutocomplete from "@/components/common/StateAutocomplete";
-import { STATE_OPTIONS } from "@/lib/business-form-options";
-import type { BusinessFormValues } from "@/lib/business-form-types";
+import { STATE_OPTIONS } from "@/lib/business/form-options";
+import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function BusinessInfoSection({
   idPrefix = "",

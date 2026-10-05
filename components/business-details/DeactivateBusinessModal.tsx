@@ -1,7 +1,7 @@
 import React from "react";
 import { Slash, CheckCircle } from "lucide-react";
 import { useModalStore } from "@/store/business-modal-store";
-import { useUpdateBusinessStatus } from "@/hooks/use-business-deactivate";
+import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
 
 // 1. Change the prop to boolean!
 interface ModalProps {
@@ -23,8 +23,10 @@ export function DeactivateBusinessModal({ businessName, businessStatus, business
   const handleConfirm = async () => {
     if (!activeBusinessId) return;
     try {
-      // 3. Send the boolean to the hook
-      await statusMutation.mutateAsync({ businessId: activeBusinessId, isActive: newIsActiveState });
+      await statusMutation.mutateAsync({
+        id: activeBusinessId,
+        status: newIsActiveState ? "Active" : "Inactive",
+      });
       closeDeactivateModal(); 
     } catch {
       // Error handled by hook

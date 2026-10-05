@@ -4,13 +4,13 @@ import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect } from "react";
 import {
   ACCESS_TOKEN_REFRESH_BUFFER_MS,
-} from "@/lib/auth-config";
+} from "@/lib/auth/auth-config";
 import {
   getCurrentUser,
   login,
   logout,
   refreshAccessToken,
-} from "@/lib/auth-api";
+} from "@/lib/auth/auth-api";
 import { useAuthStore } from "@/store/auth-store";
 import type { AuthSession } from "@/types/auth";
 

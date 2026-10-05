@@ -4,7 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
-import type { BusinessFormValues } from "@/lib/business-form-types";
+import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function AdditionalInfoSection({
   idPrefix = "",

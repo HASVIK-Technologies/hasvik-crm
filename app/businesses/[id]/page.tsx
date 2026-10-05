@@ -8,7 +8,7 @@ import OutlinedButton from "@/components/common/OutlinedButton";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import Actions from "@/components/common/Actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import businessData from "@/data/businessData.json";
@@ -42,7 +42,7 @@ import { ChangeBusinessStatusModal } from "@/components/businesses";
 import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
-import { REMINDER_OPTIONS } from "@/lib/business-form-options";
+import { REMINDER_OPTIONS } from "@/lib/business/form-options";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -121,7 +121,7 @@ export default function BusinessDetails() {
   const business =
     apiBusiness ?? (numericId === 12 ? STATIC_BUSINESS_12 : undefined);
   const { openFollowUpModal, openDeactivateModal } = useModalStore();
-  const isInactive = business?.status?.toLowerCase() === "inactive" || (business as any)?.isActive === false;
+  const isInactive = business?.isActive === false;
 
   if (isError) {
     return (
@@ -207,9 +207,7 @@ export default function BusinessDetails() {
                     <CardTitle className="truncate text-xl tracking-tight text-[#334155] sm:text-2xl">
                       {business.name}
                     </CardTitle>
-                    <Badge className={`border-0 ${isInactive ? "bg-slate-100 text-slate-600 hover:bg-slate-100" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"}`}>
-                      {isInactive ? "Inactive" : "Active"}
-                    </Badge>
+                    <StatusBadge status={isInactive ? "Inactive" : "Active"} />
                   </div>
                   <p className="flex items-center gap-2 text-sm text-[#64748b]">
                     <Building2 className="size-4 text-[#94a3b8]" />
@@ -341,9 +339,7 @@ export default function BusinessDetails() {
                   <div>
                     <p className="text-sm text-gray-500">Status</p>
                     <div className="mt-1">
-                      <Badge className={`border-0 ${isInactive ? "bg-slate-100 text-slate-600 hover:bg-slate-100" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"}`}>
-                        {isInactive ? "Inactive" : "Active"}
-                      </Badge>
+                      <StatusBadge status={isInactive ? "Inactive" : "Active"} />
                     </div>
                   </div>
                 </div>
@@ -355,9 +351,10 @@ export default function BusinessDetails() {
                       <p className="font-medium text-sm text-gray-900">
                         {business.nextFollowUp}
                       </p>
-                      <Badge className={`border-0 py-0 h-5 text-xs ${business.nextFollowUpType === "none" ? "bg-slate-100 text-slate-600 hover:bg-slate-100" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"}`}>
-                        {business.nextFollowUpType}
-                      </Badge>
+                      <StatusBadge
+                        status={business.nextFollowUpType}
+                        className="h-5 py-0 text-xs"
+                      />
                     </div>
                   </div>
                 </div>
@@ -441,7 +438,7 @@ export default function BusinessDetails() {
           <DeactivateBusinessModal
             businessName={business?.name || ""}
             businessStatus={business?.status || ""}
-            businessIsActive={(business as any)?.isActive}
+            businessIsActive={business.isActive}
           />
         </>
       }

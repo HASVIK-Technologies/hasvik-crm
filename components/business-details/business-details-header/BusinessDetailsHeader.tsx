@@ -4,7 +4,7 @@ import PhoneButton from "./PhoneButton";
 import { Building2, MapPin } from "lucide-react";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import OutlinedButton from "@/components/common/OutlinedButton";
 // 1. We define the Props so TypeScript knows what data to expect
 interface HeaderProps {
@@ -29,9 +29,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
         <div className="mt-0.5 flex min-w-0 flex-col gap-2">
           <div className="flex flex-wrap items-center gap-3">
             <CardTitle className="truncate text-xl tracking-tight text-[#334155] sm:text-2xl">{business.name}</CardTitle>
-            <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">
-              {business.status}
-            </Badge>
+            <StatusBadge status={business.status} />
           </div>
           <p className="flex items-center gap-2 text-sm text-[#64748b]">
             <Building2 className="size-4 text-[#94a3b8]" />

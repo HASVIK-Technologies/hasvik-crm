@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Badge } from "@/components/ui/badge";
+import { StatusBadge } from "@/components/common/StatusBadge";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -40,6 +40,12 @@ import PrimaryButton from "@/components/common/PrimaryButton";
 import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import type { FollowUpItem } from "@/types/follow-up";
+import {
+  canCancelFollowUp,
+  canCompleteFollowUp,
+  canCreateNextFollowUp,
+  canEditFollowUp,
+} from "@/lib/follow-ups/actions";
 import {
   Select,
   SelectContent,
@@ -74,13 +80,6 @@ function initials(name: string) {
       .toUpperCase() || "NB"
   );
 }
-function statusStyle(status: string) {
-  if (status === "OVERDUE") return "bg-[#fff1f3] text-[#e11d48]";
-  if (status === "COMPLETED") return "bg-[#ecfdf3] text-[#027a48]";
-  if (status === "CANCELLED") return "bg-[#f2f4f7] text-[#667085]";
-  return "bg-[#eff6ff] text-[#175cd3]";
-}
-
 interface FollowUpTableProps {
   items: FollowUpItem[];
   total: number;
@@ -161,25 +160,28 @@ export default function FollowUpTable({
                     </div>
                   </div>
                   <div className="flex shrink-0 flex-col items-end justify-between self-stretch gap-2.5">
-                    <Badge variant="outline" className={`rounded-md border-0 px-2.5 py-0.5 text-[10px] font-semibold ${statusStyle(item.status)}`}>{item.status}</Badge>
+                    <StatusBadge
+                      status={item.status}
+                      className="rounded-md px-2.5 py-0.5 text-[10px]"
+                    />
                     <div className="flex items-center gap-1.5">
                       <a href={item.businessPhone ? `tel:${item.businessPhone}` : undefined} aria-label={`Call ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-[#059669] hover:bg-[#ecfdf3] aria-disabled:pointer-events-none aria-disabled:opacity-40"><Phone className="size-4" /></a>
                       <a href={item.businessPhone ? `https://wa.me/91${item.businessPhone}` : undefined} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-[#16a34a] hover:bg-[#ecfdf3] aria-disabled:pointer-events-none aria-disabled:opacity-40"><WhatsAppIcon className="size-4" /></a>
-                      <Button
+                      {canEditFollowUp(item) && <Button
                         size="sm"
                         variant="outline"
                         onClick={() => onEdit(item)}
                         className="h-7 gap-1 border-[#d0d5dd] px-2 text-xs font-semibold text-[#344054] hover:bg-[#f8fafc] hover:text-[#0f172a]"
                       >
                         <Pencil className="size-3 text-[#64748b]" /> Edit
-                      </Button>
+                      </Button>}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
                           <PlainButton size="icon" aria-label="More actions" className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"><MoreVertical className="size-4" /></PlainButton>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-44 bg-white">
                           <DropdownMenuItem asChild className="cursor-pointer text-xs"><Link href={`/follow-ups/${item.id}`}>View Details</Link></DropdownMenuItem>
-                          {item.status === "COMPLETED" && onNextFollowUp && (
+                          {canCreateNextFollowUp(item) && onNextFollowUp && (
                             <DropdownMenuItem
                               onSelect={() => onNextFollowUp(item)}
                               className="cursor-pointer text-xs font-semibold text-[#027a48] focus:bg-[#ecfdf3] focus:text-[#027a48]"
@@ -187,12 +189,12 @@ export default function FollowUpTable({
                               <Plus className="mr-1.5 size-3.5" /> Next Follow-Up
                             </DropdownMenuItem>
                           )}
-                          {item.status !== "COMPLETED" && (
+                          {canCompleteFollowUp(item) && (
                             <DropdownMenuItem onSelect={() => onComplete(item)} className="cursor-pointer text-xs text-[#027a48] focus:bg-[#ecfdf3] focus:text-[#027a48]">
                               Mark as Completed
                             </DropdownMenuItem>
                           )}
-                          {item.status !== "CANCELLED" && item.status !== "COMPLETED" && (
+                          {canCancelFollowUp(item) && (
                             <DropdownMenuItem onSelect={() => onCancel(item)} className="cursor-pointer text-xs text-[#b42318] focus:bg-[#fff1f3] focus:text-[#b42318]">
                               Cancel Follow-up
                             </DropdownMenuItem>
@@ -302,12 +304,10 @@ export default function FollowUpTable({
                       {item.type}
                     </TableCell>
                     <TableCell className="px-4 py-4">
-                      <Badge
-                        variant="outline"
-                        className={`rounded-md border-0 px-2.5 py-0.5 text-[10px] font-semibold hover:opacity-90 ${statusStyle(item.status)}`}
-                      >
-                        {item.status}
-                      </Badge>
+                      <StatusBadge
+                        status={item.status}
+                        className="rounded-md px-2.5 py-0.5 text-[10px]"
+                      />
                     </TableCell>
                     <TableCell className="px-4 py-4 text-xs text-[#475569]">
                       {item.assignedToName}
@@ -376,29 +376,34 @@ export default function FollowUpTable({
                               </Link>
                             </DropdownMenuItem>
 
-                            <DropdownMenuItem
+                            {canEditFollowUp(item) && <DropdownMenuItem
                               onSelect={() => onEdit(item)}
                               className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#344054] hover:bg-[#f1f5f9] focus:bg-[#f8fafc]"
                             >
                               <Pencil className="size-3.5 text-[#64748b]" />
                               <span>Edit</span>
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
 
-                            <DropdownMenuItem
+                            {canCancelFollowUp(item) && <DropdownMenuItem
                               onSelect={() => onCancel(item)}
                               className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#b42318] hover:bg-[#fff1f3] focus:bg-[#fff1f3] focus:text-[#b42318]"
                             >
                               <Trash2 className="size-3.5 text-[#b42318]" />
                               <span>Cancel Follow-Up</span>
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
 
-                            <DropdownMenuItem
+                            {canCompleteFollowUp(item) && <DropdownMenuItem
                               onSelect={() => onComplete(item)}
                               className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#027a48] hover:bg-[#ecfdf3] focus:bg-[#ecfdf3] focus:text-[#027a48]"
                             >
                               <CheckCircle2 className="size-3.5 text-[#027a48]" />
                               <span>Mark as Completed</span>
-                            </DropdownMenuItem>
+                            </DropdownMenuItem>}
+                            {canCreateNextFollowUp(item) && onNextFollowUp && (
+                              <DropdownMenuItem onSelect={() => onNextFollowUp(item)} className="cursor-pointer text-xs font-semibold text-[#027a48]">
+                                <Plus className="mr-1.5 size-3.5" /> Next Follow-Up
+                              </DropdownMenuItem>
+                            )}
                           </DropdownMenuContent>
                         </DropdownMenu>
                       </div>

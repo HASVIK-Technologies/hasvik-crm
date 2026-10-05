@@ -7,8 +7,8 @@ import FieldLabel from "@/components/businesses/FieldLabel";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
 import FollowUpTypeSelect from "@/components/common/FollowUpTypeSelect";
-import { REMINDER_OPTIONS } from "@/lib/business-form-options";
-import type { BusinessFormValues } from "@/lib/business-form-types";
+import { REMINDER_OPTIONS } from "@/lib/business/form-options";
+import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function FollowUpSection({
   idPrefix = "",

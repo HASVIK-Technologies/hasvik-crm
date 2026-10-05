@@ -13,7 +13,6 @@ export type ApiBusiness = {
   businessType?: string;
   location?: { url?: string } | null;
   status?: string;
-  isDeleted?: boolean;
   isActive?: boolean;
   phoneNumbers?: PhoneNumber[];
   whatsappNumbers?: PhoneNumber[];
@@ -23,7 +22,7 @@ export type ApiBusiness = {
   city?: string;
   state?: string;
   pincode?: string;
-  category?: string | null;
+  category?: string | { _id?: string; name?: string } | null;
   assignedTo?: string;
   leadSource?: string;
   followUp?: FollowUpPayload;
@@ -50,7 +49,6 @@ export type BusinessQueryParams = {
   categoryId?: string;
   city?: string;
   status?: string;
-  isDeleted?: boolean;
   isActive?: boolean;
   businessType?: string;
   assignedTo?: string;
@@ -62,7 +60,7 @@ export type BusinessKpiParams = {
   status?: string;
   categoryId?: string;
   city?: string;
-  isDeleted?: boolean;
+  isActive?: boolean;
 };
 
 export type BusinessKpisResponse = {

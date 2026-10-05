@@ -3,8 +3,10 @@
 import { useParams } from "next/navigation";
 import { useState } from "react";
 import { toast } from "sonner";
+import { CheckCircle2, Pencil, Plus, Trash2 } from "lucide-react";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
+import Actions from "@/components/common/Actions";
 import FollowUpDetails from "@/components/follow-ups/FollowUpDetails";
 import FollowUpEditDialog from "@/components/follow-ups/FollowUpEditDialog";
 import NextFollowUpDialog from "@/components/follow-ups/NextFollowUpDialog";
@@ -15,6 +17,12 @@ import {
   useCompleteFollowUp,
   useFollowUpQuery,
 } from "@/hooks/use-follow-ups";
+import {
+  canCancelFollowUp,
+  canCompleteFollowUp,
+  canCreateNextFollowUp,
+  canEditFollowUp,
+} from "@/lib/follow-ups/actions";
 
 export default function FollowUpDetailsPage() {
   const [editOpen, setEditOpen] = useState(false);
@@ -29,7 +37,7 @@ export default function FollowUpDetailsPage() {
   const completeMutation = useCompleteFollowUp();
 
   const handleCancel = async () => {
-    if (!id) return;
+    if (!id || !query.data || !canCancelFollowUp(query.data)) return;
     try {
       await cancelMutation.mutateAsync(id);
       toast.success("Follow-up cancelled");
@@ -40,7 +48,7 @@ export default function FollowUpDetailsPage() {
   };
 
   const handleComplete = async () => {
-    if (!id) return;
+    if (!id || !query.data || !canCompleteFollowUp(query.data)) return;
     try {
       await completeMutation.mutateAsync(id);
       toast.success("Follow-up marked as completed");
@@ -103,14 +111,47 @@ export default function FollowUpDetailsPage() {
             ]}
           />
         }
-        content={
-          <FollowUpDetails
-            followUp={followUp}
-            onEdit={() => setEditOpen(true)}
-            onComplete={() => setCompleteOpen(true)}
-            onCancel={() => setCancelOpen(true)}
-            onNextFollowUp={() => setNextFollowUpOpen(true)}
+        actions={
+          (canCompleteFollowUp(followUp) ||
+            canCreateNextFollowUp(followUp) ||
+            canEditFollowUp(followUp) ||
+            canCancelFollowUp(followUp)) && (
+          <Actions
+            primary={
+              canCreateNextFollowUp(followUp)
+                ? {
+                    label: "Next Follow-Up",
+                    icon: <Plus className="size-4" />,
+                    onSelect: () => setNextFollowUpOpen(true),
+                  }
+                : {
+                    label: "Mark as Completed",
+                    icon: <CheckCircle2 className="size-4" />,
+                    onSelect: () => setCompleteOpen(true),
+                  }
+            }
+            secondary={[
+              ...(canEditFollowUp(followUp)
+                ? [{
+                    label: "Edit / Reschedule",
+                    icon: <Pencil className="size-4" />,
+                    onSelect: () => setEditOpen(true),
+                  }]
+                : []),
+              ...(canCancelFollowUp(followUp)
+                ? [{
+                    label: "Cancel Follow-Up",
+                    icon: <Trash2 className="size-4" />,
+                    destructive: true,
+                    onSelect: () => setCancelOpen(true),
+                  }]
+                : []),
+            ]}
           />
+          )
+        }
+        content={
+          <FollowUpDetails followUp={followUp} />
         }
       />
       <FollowUpEditDialog
