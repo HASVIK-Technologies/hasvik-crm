@@ -294,14 +294,6 @@ export async function getFollowUps(
 }
 
 /**
- * GET /api/follow-ups/{id}
- */
-export async function getFollowUp(id: string, signal?: AbortSignal) {
-  const response = await apiClient.get(`/follow-ups/${id}`, { signal });
-  return toFollowUpItem(unwrap<Record<string, unknown>>(response.data));
-}
-
-/**
  * POST /api/follow-ups
  * Body: CreateFollowUpDto { businessId, assignedTo, type, scheduledAt, reminderInMinutes?, notes? }
  */
@@ -431,7 +423,20 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
  */
 export async function updateFollowUpStatus(
   payload: UpdateFollowUpStatusPayload,
+): Promise<ReturnType<typeof toFollowUpItem>>;
+export async function updateFollowUpStatus(
+  id: string,
+  status: UpdateFollowUpStatusPayload["status"],
+): Promise<ReturnType<typeof toFollowUpItem>>;
+export async function updateFollowUpStatus(
+  payloadOrId: UpdateFollowUpStatusPayload | string,
+  status?: UpdateFollowUpStatusPayload["status"],
 ) {
+  const payload: UpdateFollowUpStatusPayload =
+    typeof payloadOrId === "string"
+      ? { id: payloadOrId, status: status ?? "COMPLETED" }
+      : payloadOrId;
+
   const response = await apiClient.patch(`/follow-ups/${payload.id}/status`, {
     status: payload.status,
   });
@@ -497,6 +502,11 @@ export async function getFollowUpStatuses(signal?: AbortSignal) {
     ) as FollowUpStatusOption;
   }
   return payload ?? {};
+}
+
+export async function getFollowUp(id: string, signal?: AbortSignal) {
+  const response = await apiClient.get(`/follow-ups/${id}`, { signal });
+  return toFollowUpItem(unwrap<Record<string, unknown>>(response.data));
 }
 
 /**

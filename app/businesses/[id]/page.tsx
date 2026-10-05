@@ -24,31 +24,18 @@ import { AddFollowUpModal } from "@/components/business-details/AddFollowUpModal
 
 import {
   Edit2,
-  Plus,
-  MoreVertical,
   ArrowLeft,
   Phone,
   MapPin,
   Building2,
-  Target,
   Users,
   FolderOpen,
   Calendar,
   AlertCircle,
-  Tags,
-  Building,
-  Zap,
-  Globe,
-  Mail,
-  Trash2,
-  Slash,
-  ExternalLink,
-  FileText,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import {
   useBusinessQuery,
-  useUpdateBusinessStatus,
 } from "@/hooks/use-businesses";
 import { BusinessItem } from "@/types/business";
 import { ChangeBusinessStatusModal } from "@/components/businesses";
@@ -135,30 +122,6 @@ export default function BusinessDetails() {
     apiBusiness ?? (numericId === 12 ? STATIC_BUSINESS_12 : undefined);
   const { openFollowUpModal, openDeactivateModal } = useModalStore();
   const isInactive = business?.status?.toLowerCase() === "inactive" || (business as any)?.isActive === false;
-  // If business is not found or ID is invalid
-  // if ((isLoaded || numericId === 12) && !business) {
-  //   return (
-  //     <div className="mx-auto max-w-xl py-16 text-center space-y-4">
-  //       <div className="mx-auto flex size-14 items-center justify-center rounded-2xl bg-red-50 text-red-600">
-  //         <AlertCircle className="size-7" />
-  //       </div>
-  //       <h1 className="text-2xl font-bold tracking-tight text-[#0f172a]">
-  //         Business Not Found
-  //       </h1>
-  //       <p className="text-sm text-[#64748b]">
-  //         The business with ID{" "}
-  //         <span className="font-semibold text-[#0f172a]">#{rawId}</span> does not exist or has been removed.
-  //       </p>
-  //       <div className="pt-2">
-  //         <OutlinedButton asChild className="gap-2">
-  //           <Link href="/businesses">
-  //             <ArrowLeft className="size-4" /> Back to Businesses
-  //           </Link>
-  //         </OutlinedButton>
-  //       </div>
-  //     </div>
-  //   );
-  // }
 
   if (isError) {
     return (
@@ -210,17 +173,15 @@ export default function BusinessDetails() {
       actions={
         <Actions
           primary={{
-            label: "Add Follow-Up",
-            icon: <Plus className="size-4" />,
-            disabled: isInactive,
-            onSelect: () => openFollowUpModal(String((business as any)?._id || business?.id || rawId)),
+            label: "Edit Business",
+            icon: <Edit2 className="size-4" />,
+            href: `/businesses/form/${business.id}`
           }}
           secondary={[
             {
-              label: "Edit Business",
-              icon: <Edit2 className="size-4" />,
-              href: `/businesses/form/${business.id}`, // Link to the edit form!
+              label: "Add Follow Up",
               disabled: isInactive, // Lock it if inactive!
+              onSelect: () => openFollowUpModal(String(business?.id)) // Open the modal!
             },
             {
               label: isInactive ? "Activate" : "Deactivate",
@@ -234,7 +195,7 @@ export default function BusinessDetails() {
         <>
           {/* 2. SINGLE MERGED CARD (Full Width) */}
           <Card className="w-full overflow-hidden rounded-2xl border-[#e4ecf2] shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
-            <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-[#eef2f6] bg-[#fbfdff] px-5 py-5 sm:px-7">
+            <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-[#eef2f6] bg-white px-5 py-5 sm:px-7">
               <div className="flex items-start gap-4">
                 <Avatar className="size-16 rounded-2xl">
                   <AvatarFallback className="bg-blue-50 text-xl font-semibold text-blue-700">
@@ -246,8 +207,8 @@ export default function BusinessDetails() {
                     <CardTitle className="truncate text-xl tracking-tight text-[#334155] sm:text-2xl">
                       {business.name}
                     </CardTitle>
-                    <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">
-                      {business.status}
+                    <Badge className={`border-0 ${isInactive ? "bg-slate-100 text-slate-600 hover:bg-slate-100" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"}`}>
+                      {isInactive ? "Inactive" : "Active"}
                     </Badge>
                   </div>
                   <p className="flex items-center gap-2 text-sm text-[#64748b]">
@@ -367,15 +328,6 @@ export default function BusinessDetails() {
                   </div>
                 </div>
                 <div className="flex gap-3">
-                  <Target className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-gray-500">Lead Source</p>
-                    <p className="font-medium text-sm text-gray-900 mt-0.5">
-                      {business.leadSource || "-"}
-                    </p>
-                  </div>
-                </div>
-                <div className="flex gap-3">
                   <Users className="h-5 w-5 text-gray-400 mt-0.5" />
                   <div>
                     <p className="text-sm text-gray-500">Assigned To</p>
@@ -389,8 +341,8 @@ export default function BusinessDetails() {
                   <div>
                     <p className="text-sm text-gray-500">Status</p>
                     <div className="mt-1">
-                      <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0">
-                        {business.status}
+                      <Badge className={`border-0 ${isInactive ? "bg-slate-100 text-slate-600 hover:bg-slate-100" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"}`}>
+                        {isInactive ? "Inactive" : "Active"}
                       </Badge>
                     </div>
                   </div>
@@ -403,7 +355,7 @@ export default function BusinessDetails() {
                       <p className="font-medium text-sm text-gray-900">
                         {business.nextFollowUp}
                       </p>
-                      <Badge className="bg-emerald-50 text-emerald-700 hover:bg-emerald-50 border-0 py-0 h-5 text-xs">
+                      <Badge className={`border-0 py-0 h-5 text-xs ${business.nextFollowUpType === "none" ? "bg-slate-100 text-slate-600 hover:bg-slate-100" : "bg-emerald-50 text-emerald-700 hover:bg-emerald-50"}`}>
                         {business.nextFollowUpType}
                       </Badge>
                     </div>
@@ -428,16 +380,6 @@ export default function BusinessDetails() {
                     </p>
                   </div>
                 </div>
-
-                <div className="flex gap-3">
-                  <MapPin className="h-5 w-5 text-gray-400 mt-0.5" />
-                  <div>
-                    <p className="text-sm text-gray-500">Address</p>
-                    <p className="font-medium text-sm text-gray-900 mt-0.5">
-                      {business.address || businessData.businessInfo.address}
-                    </p>
-                  </div>
-                </div>
               </div>
             </CardContent>
           </Card>
@@ -449,17 +391,17 @@ export default function BusinessDetails() {
                 .filter((tab: any) => tab.id !== "activity-log" && tab.id !== "Notes")
                 .map((tab: any) => (
                   <TabsTrigger
-                  key={tab.id}
-                  value={tab.id}
-                  className="flex-none !px-0 py-2 !bg-transparent !shadow-none border-0 border-b-2 border-transparent rounded-none text-slate-500 font-medium text-base data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 outline-none focus-visible:ring-0"
-                >
-                  {tab.label}
-                  
-                  {/* Contacts: Deleted the old number code! */}
-                  {/* Follow-ups: Using the REAL TanStack count! */}
-                  {tab.id === "follow-ups" && ` (${realFollowUpsCount})`}
-                  
-                </TabsTrigger>
+                    key={tab.id}
+                    value={tab.id}
+                    className="flex-none !px-0 py-2 !bg-transparent !shadow-none border-0 border-b-2 border-transparent rounded-none text-slate-500 font-medium text-base data-[state=active]:border-emerald-600 data-[state=active]:text-emerald-700 outline-none focus-visible:ring-0"
+                  >
+                    {tab.label}
+
+                    {/* Contacts: Deleted the old number code! */}
+                    {/* Follow-ups: Using the REAL TanStack count! */}
+                    {tab.id === "follow-ups" && ` (${realFollowUpsCount})`}
+
+                  </TabsTrigger>
                 ))}
             </TabsList>
 
@@ -486,18 +428,19 @@ export default function BusinessDetails() {
 
             {/* FOLLOW-UPS TAB */}
             <TabsContent value="follow-ups" className="mt-6">
-              <BusinessDetailsFollowups businessId={stringId} />
+              <BusinessDetailsFollowups />
+
             </TabsContent>
             {/* NOTES TAB 
             <TabsContent value="notes" className="mt-6"></TabsContent> */}
-            
+
           </Tabs>
           {/* New Follow-up Modal */}
           <AddFollowUpModal businessName={business?.name || "Business"} />
           {/* Deactivate Business Modal */}
-          <DeactivateBusinessModal 
-            businessName={business?.name || ""} 
-            businessStatus={business?.status || ""} 
+          <DeactivateBusinessModal
+            businessName={business?.name || ""}
+            businessStatus={business?.status || ""}
             businessIsActive={(business as any)?.isActive}
           />
         </>

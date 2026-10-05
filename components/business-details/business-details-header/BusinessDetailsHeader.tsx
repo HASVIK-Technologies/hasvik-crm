@@ -1,16 +1,11 @@
 import React from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import PhoneButton from "./PhoneButton";
-import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { Building2, MapPin } from "lucide-react";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Badge } from "@/components/ui/badge";
 import OutlinedButton from "@/components/common/OutlinedButton";
-import WhatsAppButton from "./WhatsAppButton";
-import EmailButton from "./EmailButton";
-import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem } from "@/components/ui/dropdown-menu";
-
 // 1. We define the Props so TypeScript knows what data to expect
 interface HeaderProps {
   business: any;
@@ -23,7 +18,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
 
   return (
     <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-[#eef2f6] bg-[#fbfdff] px-5 py-5 sm:px-7">
-          
+
       {/* LEFT SIDE: Avatar & Name */}
       <div className="flex items-start gap-4">
         <Avatar className="size-16 rounded-2xl">
@@ -47,7 +42,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
 
       {/* RIGHT SIDE: Action Buttons */}
       <div className="flex items-center gap-2">
-            
+
         {/* Your new Phone Component! */}
         <PhoneButton phones={businessData.contactInfo.phones} />
         {/* Maps Button */}

@@ -25,15 +25,6 @@ export default function BusinessDetailsMap({ business }: MapProps) {
             referrerPolicy="no-referrer-when-downgrade"
             ></iframe>
         </div>
-        <Button variant="secondary" className="w-full text-blue-600 bg-blue-50 hover:bg-blue-100">
-            <a 
-            href={`https://maps.google.com/?q=${encodeURIComponent(business.name + " " + (business.address || business.city))}`} 
-            target="_blank" 
-            rel="noopener noreferrer"
-            >
-            <ExternalLink className="w-4 h-4 mr-2"/> Open in Maps
-            </a>
-        </Button>
     </div>
   );
 }
