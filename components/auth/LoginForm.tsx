@@ -51,11 +51,11 @@ export default function LoginForm() {
       <div className="pointer-events-none absolute -left-40 -top-40 size-[28rem] rounded-full bg-brand-cyan/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-48 -right-40 size-[32rem] rounded-full bg-brand-growth/10 blur-3xl" />
       <div className="relative grid w-full max-w-6xl overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_32px_90px_-36px_rgba(8,62,105,0.28)] lg:min-h-[680px] lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="relative hidden overflow-hidden bg-gradient-to-br from-[#f0f8ff] via-white to-[#f2fbf4] p-12 lg:flex lg:flex-col lg:justify-between xl:p-16">
-          <div className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full border-[40px] border-brand-cyan/10" />
-          <div className="pointer-events-none absolute -bottom-36 -left-28 size-96 rounded-full border-[52px] border-brand-growth/10" />
+        <section className="relative hidden overflow-hidden bg-gradient-to-br from-[#075aa3] via-[#0876d1] to-[#064b89] p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
+          <div className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full border-[40px] border-brand-cyan/20" />
+          <div className="pointer-events-none absolute -bottom-36 -left-28 size-96 rounded-full border-[52px] border-brand-growth/15" />
           <div className="relative">
-            <div className="inline-flex rounded-2xl border border-slate-100 bg-white px-5 py-3">
+            <div className="inline-flex rounded-2xl border border-white/15 bg-white px-5 py-3 shadow-lg">
               <Image
                 src="/logo.png"
                 alt="Hasvik"
@@ -67,36 +67,36 @@ export default function LoginForm() {
               />
             </div>
             <div className="mt-20 max-w-lg">
-              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand-blue/10 bg-white/80 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-primary">
-                <span className="size-2 rounded-full bg-brand-growth" />
+              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/90">
+                <span className="size-2 rounded-full bg-brand-growth shadow-[0_0_10px_rgba(99,211,41,0.7)]" />
                 Business, moving forward
               </p>
-              <h1 className="text-4xl font-semibold leading-[1.15] tracking-tight text-slate-900 xl:text-5xl">
+              <h1 className="text-4xl font-semibold leading-[1.15] tracking-tight text-white xl:text-5xl">
                 Turn every{" "}
-                <span className="text-primary">connection</span> into
+                <span className="text-brand-growth">connection</span> into
                 meaningful growth.
               </h1>
-              <p className="mt-6 max-w-md text-base leading-7 text-slate-600">
+              <p className="mt-6 max-w-md text-base leading-7 text-blue-100">
                 Keep your business relationships, conversations, and next steps
                 moving in one clear workspace.
               </p>
             </div>
           </div>
-          <div className="relative flex items-center justify-between gap-4 rounded-2xl border border-white/80 bg-white/75 p-4 shadow-sm backdrop-blur">
+          <div className="relative flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-white/10 p-4 shadow-sm backdrop-blur">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-green/10 text-brand-green-strong">
+              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-growth/15 text-brand-growth">
                 <ArrowUpRight className="size-5" />
               </div>
               <div>
-                <p className="text-sm font-semibold text-slate-800">
+                <p className="text-sm font-semibold text-white">
                   Built for better follow-through
                 </p>
-                <p className="mt-0.5 text-xs text-slate-500">
+                <p className="mt-0.5 text-xs text-blue-100">
                   Your leads and follow-ups, together
                 </p>
               </div>
             </div>
-            <div className="hidden size-2.5 rounded-full bg-brand-growth sm:block" />
+            <div className="hidden size-2.5 rounded-full bg-brand-growth shadow-[0_0_10px_rgba(99,211,41,0.7)] sm:block" />
           </div>
         </section>
 
