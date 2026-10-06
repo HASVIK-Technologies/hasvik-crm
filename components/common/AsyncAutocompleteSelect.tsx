@@ -85,7 +85,7 @@ export default function AsyncAutocompleteSelect({
           onOpenChange?.(nextOpen);
         }}
       >
-        <div className="flex h-10 w-full items-center rounded-xl border border-[#e2e8f0] bg-white transition-colors focus-within:border-[#0b63e5]">
+        <div className="flex h-10 w-full items-center rounded-xl border border-[#e2e8f0] bg-white transition-colors focus-within:border-primary">
           <PopoverTrigger asChild>
             <button
               id={controlId}
@@ -135,7 +135,7 @@ export default function AsyncAutocompleteSelect({
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder={searchPlaceholder}
                 aria-label={searchPlaceholder}
-                className="h-8.5 w-full rounded-lg border border-[#e2e8f0] bg-[#f8fafc] pl-8 text-xs outline-none focus:border-[#0b63e5] focus:bg-white"
+                className="h-8.5 w-full rounded-lg border border-[#e2e8f0] bg-[#f8fafc] pl-8 text-xs outline-none focus:border-primary focus:bg-white"
               />
             </div>
           </div>
@@ -153,7 +153,7 @@ export default function AsyncAutocompleteSelect({
                 onClick={() => select(emptyOption.value, emptyOption.label)}
                 className={cn(
                   "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[#f8fafc]",
-                  !value && "bg-[#eff6ff] text-[#1d4ed8]",
+                  !value && "bg-primary/10 text-primary",
                 )}
               >
                 {emptyOption.label}
@@ -162,7 +162,7 @@ export default function AsyncAutocompleteSelect({
             )}
             {loading ? (
               <div className="flex justify-center py-6">
-                <Loader2 className="size-4 animate-spin text-[#0b63e5]" />
+                <Loader2 className="size-4 animate-spin text-primary" />
               </div>
             ) : options.length === 0 ? (
               <p className="px-2.5 py-5 text-center text-xs text-[#94a3b8]">
@@ -178,7 +178,7 @@ export default function AsyncAutocompleteSelect({
                   onClick={() => select(option.value, option.label)}
                   className={cn(
                     "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[#f8fafc]",
-                    value === option.value && "bg-[#eff6ff] text-[#1d4ed8]",
+                    value === option.value && "bg-primary/10 text-primary",
                   )}
                 >
                   {option.label}

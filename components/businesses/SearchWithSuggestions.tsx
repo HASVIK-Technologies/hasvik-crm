@@ -94,15 +94,15 @@ export default function SearchWithSuggestions({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={cn(
-          "h-10 w-full rounded-xl border border-[#e2e8f0] bg-white pl-10 pr-9 text-xs sm:text-sm text-[#0f172a] shadow-[0_1px_2px_rgba(0,0,0,0.02)] placeholder:text-[#94a3b8] transition-all hover:border-[#cbd5e1] focus:border-[#0b63e5] focus:outline-none focus:ring-2 focus:ring-[#0b63e5]/20",
-          Boolean(inputValue) && "border-[#0b63e5]/40",
+          "h-10 w-full rounded-xl border border-[#e2e8f0] bg-white pl-10 pr-9 text-xs sm:text-sm text-[#0f172a] shadow-[0_1px_2px_rgba(0,0,0,0.02)] placeholder:text-[#94a3b8] transition-all hover:border-[#cbd5e1] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
+          Boolean(inputValue) && "border-primary/40",
           className,
         )}
       />
 
       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
         {isSearching && (
-          <Loader2 className="size-3.5 animate-spin text-[#0b63e5]" />
+          <Loader2 className="size-3.5 animate-spin text-primary" />
         )}
         {inputValue && (
           <button

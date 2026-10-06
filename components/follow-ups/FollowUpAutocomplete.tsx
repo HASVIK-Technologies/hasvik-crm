@@ -63,7 +63,7 @@ export default function FollowUpAutocomplete({
           aria-expanded={open}
           className={cn(
             "flex h-10 w-full items-center justify-between rounded-xl border border-[#e2e8f0] bg-white px-3 text-xs font-medium text-[#334155]",
-            value && "border-[#0b63e5]/50 bg-[#f8faff]",
+            value && "border-primary/50 bg-primary/5",
             invalid && "border-red-500",
           )}
         >
@@ -114,11 +114,11 @@ export default function FollowUpAutocomplete({
             className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[#f8fafc]"
           >
             Any {kind === "business" ? "business" : "team member"}
-            {!value && <Check className="size-3.5 text-[#0b63e5]" />}
+            {!value && <Check className="size-3.5 text-primary" />}
           </button>
           {isLoading ? (
             <div className="flex justify-center py-6">
-              <Loader2 className="size-4 animate-spin text-[#0b63e5]" />
+              <Loader2 className="size-4 animate-spin text-primary" />
             </div>
           ) : (
             options.map((option) => (
@@ -131,7 +131,7 @@ export default function FollowUpAutocomplete({
                 }}
                 className={cn(
                   "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[#f8fafc]",
-                  value === option.id && "bg-[#eff6ff] text-[#1d4ed8]",
+                  value === option.id && "bg-primary/10 text-primary",
                 )}
               >
                 <span>

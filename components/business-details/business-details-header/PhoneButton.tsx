@@ -13,7 +13,7 @@ export default function PhoneButton({ phones }: PhoneProps) {
   if (!phones || phones.length === 0) return null;
   if (phones.length === 1) {
     return (
-      <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-emerald-600 border-gray-200 hover:bg-emerald-50">
+      <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10">
         <a href={`tel:${cleanNumber(phones[0].number)}`}>
           <Phone className="h-4 w-4" />
         </a>
@@ -25,7 +25,7 @@ export default function PhoneButton({ phones }: PhoneProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <OutlinedButton className="h-9 w-9 p-0 flex items-center justify-center text-emerald-600 border-gray-200 hover:bg-emerald-50">
+        <OutlinedButton className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10">
           <Phone className="h-4 w-4" />
         </OutlinedButton>
       </DropdownMenuTrigger>

@@ -6,9 +6,9 @@ import { CalendarDays, Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
+import SaveButton from "@/components/common/SaveButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useCreateFollowUp } from "@/hooks/use-follow-ups";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import { fromDateTimeLocalValue } from "@/lib/forms/date-time";
@@ -29,7 +29,6 @@ interface NextFollowUpFormValues {
   assignee: FollowUpOption | null;
   scheduledAt: string;
   reminder: string;
-  notes: string;
 }
 
 const reminderOptions = FOLLOW_UP_REMINDER_OPTIONS.map((option) => ({
@@ -57,7 +56,6 @@ function NextFollowUpForm({
         : null,
       scheduledAt: "",
       reminder: "",
-      notes: "",
     },
     mode: "onChange",
   });
@@ -72,7 +70,6 @@ function NextFollowUpForm({
         assignedTo: values.assignee.id,
         type: followUp.type || "CALL",
         scheduledAt,
-        notes: values.notes.trim() || undefined,
         reminderInMinutes: parseReminderToMinutes(values.reminder),
       });
       toast.success("Next follow-up scheduled successfully.");
@@ -109,7 +106,7 @@ function NextFollowUpForm({
       <form
         onSubmit={handleSubmit(submit)}
         noValidate
-        className="space-y-4"
+        className="space-y-5"
       >
         <div>
           <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
@@ -127,7 +124,7 @@ function NextFollowUpForm({
           </div>
         </div>
 
-        <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div>
             <label
               htmlFor="next-follow-up-date"
@@ -204,31 +201,16 @@ function NextFollowUpForm({
           />
         </div>
 
-        <div>
-          <label
-            htmlFor="next-follow-up-notes"
-            className="mb-1.5 block text-xs font-semibold text-[#475569]"
-          >
-            Notes
-          </label>
-          <Textarea
-            id="next-follow-up-notes"
-            {...register("notes")}
-            placeholder="Add notes for this next follow-up..."
-            className="min-h-24 text-xs"
-          />
-        </div>
-
-        <div className="flex justify-end gap-2 border-t border-[#eef2f6] pt-4">
+        <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">
           <DialogPrimitive.Close asChild>
             <Button type="button" variant="outline">
               Cancel
             </Button>
           </DialogPrimitive.Close>
-          <Button
+          <SaveButton
             type="submit"
             disabled={isPending}
-            className="gap-2 bg-[#027a48] text-white hover:bg-[#05603a]"
+            className="gap-2"
           >
             {isPending ? (
               <>
@@ -237,7 +219,7 @@ function NextFollowUpForm({
             ) : (
               "Schedule Next Follow-Up"
             )}
-          </Button>
+          </SaveButton>
         </div>
       </form>
     </>
@@ -253,7 +235,7 @@ export default function NextFollowUpDialog({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-2xl outline-none">
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">
           <NextFollowUpForm
             key={`next-${followUp.id}`}
             followUp={followUp}

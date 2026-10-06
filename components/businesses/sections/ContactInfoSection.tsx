@@ -99,7 +99,7 @@ export default function ContactInfoSection({
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <div className="rounded-xl border border-[#e5edf1] bg-white p-4">
+      <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4">
         <NumberListField
           label="Phone Numbers"
           addLabel="Add Phone Number"
@@ -145,7 +145,7 @@ export default function ContactInfoSection({
                 className={cn(
                   "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
                   isMarked
-                    ? "bg-[#e7f5f0] text-[#08765d] hover:bg-[#d8efe6]"
+                    ? "bg-brand-green/10 text-brand-green-strong hover:bg-brand-green/15"
                     : "bg-[#f3f5f6] text-[#8a9eaa] hover:bg-[#e5edf1] hover:text-[#547080]",
                   !phoneValue.trim() && "cursor-not-allowed opacity-50",
                 )}
@@ -157,7 +157,7 @@ export default function ContactInfoSection({
         />
       </div>
 
-      <div className="rounded-xl border border-[#e5edf1] bg-white p-4">
+      <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4">
         <NumberListField
           label="WhatsApp Numbers"
           addLabel="Add WhatsApp Number"
@@ -186,7 +186,7 @@ export default function ContactInfoSection({
         />
       </div>
 
-      <div className="rounded-xl border border-[#e5edf1] bg-white p-4">
+      <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4">
         <FieldLabel htmlFor={`${idPrefix}email`} optional>
           Email
         </FieldLabel>

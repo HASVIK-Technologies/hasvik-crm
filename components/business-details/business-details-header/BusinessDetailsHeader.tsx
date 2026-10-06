@@ -22,7 +22,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
       {/* LEFT SIDE: Avatar & Name */}
       <div className="flex items-start gap-4">
         <Avatar className="size-16 rounded-2xl">
-          <AvatarFallback className="bg-blue-50 text-xl font-semibold text-blue-700">
+          <AvatarFallback className="bg-primary/10 text-xl font-semibold text-primary">
             {business.initials}
           </AvatarFallback>
         </Avatar>
@@ -44,7 +44,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
         {/* Your new Phone Component! */}
         <PhoneButton phones={businessData.contactInfo.phones} />
         {/* Maps Button */}
-        <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-blue-600 border-gray-200 hover:bg-blue-50">
+        <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10">
           <a
             href={`https://maps.google.com/?q=${encodeURIComponent(business.name + " " + (business.address || business.city))}`}
             target="_blank"

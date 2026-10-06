@@ -1,11 +1,11 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Plus } from "lucide-react";
+import { ChartNoAxesCombined, Filter, Plus } from "lucide-react";
 import { toast } from "sonner";
+import Actions from "@/components/common/Actions";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import ListPageLayout from "@/components/layout/ListPageLayout";
-import { Button } from "@/components/ui/button";
 import FollowUpFilters from "@/components/follow-ups/FollowUpFilters";
 import FollowUpStats from "@/components/follow-ups/FollowUpStats";
 import FollowUpTable from "@/components/follow-ups/FollowUpTable";
@@ -42,6 +42,8 @@ function dayBoundary(offset: number, end = false) {
 
 export default function FollowupsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [showStats, setShowStats] = useState(true);
+  const [showFilters, setShowFilters] = useState(true);
   const [editFollowUp, setEditFollowUp] = useState<FollowUpItem>();
   const [cancelFollowUp, setCancelFollowUp] = useState<FollowUpItem>();
   const [completeFollowUp, setCompleteFollowUp] = useState<FollowUpItem>();
@@ -169,10 +171,31 @@ export default function FollowupsPage() {
       <ListPageLayout
         breadcrumb={<Breadcrumb items={[{ label: "Follow-ups" }]} />}
         customSearch={searchControl}
+        showStats={showStats}
+        showFilters={showFilters}
+        onToggleFilters={() => setShowFilters((visible) => !visible)}
         actions={
-          <Button onClick={() => setDialogOpen(true)} className="gap-1.5">
-            <Plus className="size-4" /> Add Follow-up
-          </Button>
+          <Actions
+            primary={{
+              label: "Add Follow-up",
+              onSelect: () => setDialogOpen(true),
+              icon: <Plus className="size-4" />,
+            }}
+            menuItems={[
+              {
+                label: `${showStats ? "Hide" : "Show"} KPIs`,
+                icon: <ChartNoAxesCombined className="size-4" />,
+                onSelect: () => setShowStats((visible) => !visible),
+                desktopOnly: true,
+              },
+              {
+                label: `${showFilters ? "Hide" : "Show"} Filters`,
+                icon: <Filter className="size-4" />,
+                onSelect: () => setShowFilters((visible) => !visible),
+                desktopOnly: true,
+              },
+            ]}
+          />
         }
         stats={
           <FollowUpStats
@@ -195,7 +218,7 @@ export default function FollowupsPage() {
                   type="button"
                   key={tab}
                   onClick={() => filters.setTab(tab)}
-                  className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-[#0b63e5] text-[#0b63e5]" : "border-transparent text-[#64748b] hover:text-[#334155]"}`}
+                  className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-primary text-primary" : "border-transparent text-[#64748b] hover:text-[#334155]"}`}
                 >
                   {tab}
                 </button>

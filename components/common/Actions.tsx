@@ -19,6 +19,7 @@ export interface ActionItem {
   icon?: React.ReactNode;
   destructive?: boolean;
   disabled?: boolean;
+  desktopOnly?: boolean;
 }
 
 interface ActionsProps {
@@ -87,7 +88,10 @@ export default function Actions({
   className = "",
 }: ActionsProps) {
   const secondaryActions = [...secondary, ...menuItems];
-  const allActions = [primary, ...secondaryActions];
+  const allActions = [
+    primary,
+    ...secondaryActions.filter((action) => !action.desktopOnly),
+  ];
 
   return (
     <div className={`flex items-center justify-end gap-2 ${className}`}>

@@ -1,9 +1,6 @@
-import React from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { User, Phone, Mail, Plus, Trash2 } from "lucide-react";
-import { Card, CardContent } from "@/components/ui/card";
+import { Phone, Mail } from "lucide-react";
 import { Badge } from "@/components/ui/badge";
-import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 
 // 1. Tell TypeScript we need the businessData
@@ -29,8 +26,7 @@ export default function BusinessDetailsContacts({ businessData }: ContactsProps)
                     <span className="text-sm font-medium text-slate-700">{phone.number}</span>
                     <div className="flex items-center gap-3">
                       <Badge variant="secondary" className={`${phone.badgeClass} font-normal border-0`}>{phone.type}</Badge>
-                      <a href={`tel:${cleanNumber(phone.number)}`}><Phone className="w-4 h-4 text-emerald-600 hover:text-emerald-700" /></a>
-                      <button><Trash2 className="w-4 h-4 text-red-500 hover:text-red-600" /></button>
+                      <a href={`tel:${cleanNumber(phone.number)}`}><Phone className="w-4 h-4 text-brand-green-strong hover:text-brand-green" /></a>
                     </div>
                   </div>
                 ))}
@@ -45,9 +41,8 @@ export default function BusinessDetailsContacts({ businessData }: ContactsProps)
                     <div className="flex items-center gap-3">
                       <Badge variant="secondary" className={`${wa.badgeClass} font-normal border-0`}>{wa.type}</Badge>
                       <a href={`https://wa.me/91${cleanNumber(wa.number)}`} target="_blank" rel="noopener noreferrer">
-                        <WhatsAppIcon className="w-4 h-4 text-emerald-600 hover:text-emerald-700" />
+                        <WhatsAppIcon className="w-4 h-4 text-brand-green-strong hover:text-brand-green" />
                       </a>
-                      <button><Trash2 className="w-4 h-4 text-red-500 hover:text-red-600" /></button>
                     </div>
                   </div>
                 ))}
@@ -62,7 +57,6 @@ export default function BusinessDetailsContacts({ businessData }: ContactsProps)
                       <Mail className="w-4 h-4 text-slate-400 shrink-0" />
                       <span className="text-sm font-medium text-slate-700 truncate">{emailObj.email}</span>
                     </div>
-                    <button><Trash2 className="w-4 h-4 text-red-500 hover:text-red-600 shrink-0" /></button>
                   </div>
                 ))}
               </div>

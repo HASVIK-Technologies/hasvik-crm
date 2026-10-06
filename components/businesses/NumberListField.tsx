@@ -68,7 +68,7 @@ export default function NumberListField({
         <PlainButton
           type="button"
           onClick={onAdd}
-          className="h-10 justify-center gap-1.5 rounded-lg border border-dashed border-[#cfe0e6] text-sm font-medium text-[#08765d] hover:bg-[#f3faf7] hover:text-[#08765d]"
+          className="h-10 justify-center gap-1.5 rounded-lg border border-dashed border-[#cfe0e6] text-sm font-medium text-brand-green-strong hover:bg-brand-green/10 hover:text-brand-green-strong"
         >
           <AddIcon className="size-4" />
           {addLabel}

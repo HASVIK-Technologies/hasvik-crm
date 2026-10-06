@@ -96,7 +96,6 @@ export type FollowUpPayload = {
   type: FollowUpType;
   scheduledAt: string;
   reminderInMinutes?: number;
-  notes?: string;
 };
 
 // Matches the request body documented for POST /businesses.

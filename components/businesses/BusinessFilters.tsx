@@ -1,7 +1,7 @@
 "use client";
 
 import React, { useState } from "react";
-import { SlidersHorizontal, RotateCcw, Activity } from "lucide-react";
+import { Filter, RotateCcw, Activity } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -109,14 +109,14 @@ export default function BusinessFilters({
             type="button"
             className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition-colors shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)] ${
               isMoreFiltersActive
-                ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]"
+                ? "border-primary bg-primary/10 text-primary"
                 : "border-[#e2e8f0] bg-white text-[#334155] hover:bg-[#f8fafc]"
             }`}
           >
-            <SlidersHorizontal className="size-3.5 text-[#64748b]" />
+            <Filter className="size-3.5 text-[#64748b]" />
             <span>More Filters</span>
             {extraFiltersCount > 0 && (
-              <span className="flex size-4.5 items-center justify-center rounded-full bg-[#2563eb] text-[10px] font-bold text-white">
+              <span className="flex size-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
                 {extraFiltersCount}
               </span>
             )}
@@ -128,14 +128,14 @@ export default function BusinessFilters({
         >
           <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-2.5">
             <div className="flex items-center gap-1.5">
-              <SlidersHorizontal className="size-4 text-[#2563eb]" />
+              <Filter className="size-4 text-primary" />
               <h4 className="text-xs font-bold text-[#0f172a]">More Filters</h4>
             </div>
             {isMoreFiltersActive && (
               <button
                 type="button"
                 onClick={() => onIsActiveChange?.(undefined)}
-                className="text-[11px] font-medium text-[#2563eb] hover:underline"
+                className="text-[11px] font-medium text-primary hover:underline"
               >
                 Reset Extra
               </button>

@@ -28,7 +28,7 @@ export default function CompleteFollowUpDialog({
     >
       <AlertDialogPrimitive.Portal>
         <AlertDialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 backdrop-blur-[2px]" />
-        <AlertDialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-emerald-100 bg-white p-6 shadow-2xl outline-none">
+        <AlertDialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-brand-green/20 bg-white p-6 shadow-2xl outline-none">
           <button
             type="button"
             onClick={() => onOpenChange(false)}
@@ -39,7 +39,7 @@ export default function CompleteFollowUpDialog({
             <X className="size-4" />
           </button>
           <div className="flex items-start gap-4">
-            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-600">
+            <div className="flex size-11 shrink-0 items-center justify-center rounded-xl border border-brand-green/30 bg-brand-green/10 text-brand-green-strong">
               <CheckCircle2 className="size-5" />
             </div>
             <div>
@@ -72,7 +72,7 @@ export default function CompleteFollowUpDialog({
                 type="button"
                 onClick={onConfirm}
                 disabled={loading}
-                className="h-10 rounded-xl bg-[#0b63e5] px-4 font-semibold text-white shadow-sm hover:bg-[#0951bd]"
+                className="h-10 rounded-xl bg-primary px-4 font-semibold text-primary-foreground shadow-sm hover:bg-primary/90"
               >
                 {loading ? (
                   <>

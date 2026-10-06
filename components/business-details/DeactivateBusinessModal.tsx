@@ -39,8 +39,8 @@ export function DeactivateBusinessModal({ businessName, businessStatus, business
     <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
       <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-slate-200 text-center">
         
-        <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${isInactive ? "bg-emerald-100" : "bg-red-100"}`}>
-          {isInactive ? <CheckCircle className="h-6 w-6 text-emerald-600" /> : <Slash className="h-6 w-6 text-red-600" />}
+        <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${isInactive ? "bg-brand-green/10" : "bg-red-100"}`}>
+          {isInactive ? <CheckCircle className="h-6 w-6 text-brand-green-strong" /> : <Slash className="h-6 w-6 text-red-600" />}
         </div>
         
         <h3 className="text-lg font-bold text-slate-900 mb-2">{actionText} Business</h3>
@@ -55,7 +55,7 @@ export function DeactivateBusinessModal({ businessName, businessStatus, business
           <button
             onClick={handleConfirm}
             disabled={statusMutation.isPending}
-            className={`px-5 py-2.5 text-sm font-medium text-white rounded-xl transition-colors w-full disabled:opacity-50 ${isInactive ? "bg-emerald-600 hover:bg-emerald-700" : "bg-red-600 hover:bg-red-700"}`}
+            className={`px-5 py-2.5 text-sm font-medium rounded-xl transition-colors w-full disabled:opacity-50 ${isInactive ? "bg-brand-green text-secondary-foreground hover:bg-brand-green/90" : "bg-red-600 text-white hover:bg-red-700"}`}
           >
             {statusMutation.isPending ? "Updating..." : `Yes, ${actionText}`}
           </button>

@@ -25,6 +25,7 @@ import {
 import { Card, CardContent } from "@/components/ui/card";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import SecondaryButton from "@/components/common/SecondaryButton";
+import SaveButton from "@/components/common/SaveButton";
 
 import FormSection from "@/components/businesses/FormSection";
 import BusinessInfoSection from "@/components/businesses/sections/BusinessInfoSection";
@@ -197,7 +198,6 @@ export default function BusinessForm({
           email: data.email || "",
           website: data.website || "",
           description: data.description || "",
-          notes: data.notes || "",
           followUpType: data.followUp?.type || "",
           assignTo: data.followUp?.assignedTo || data.assignedTo || "",
           nextFollowupDate: data.followUp?.scheduledAt || data.nextFollowupDate
@@ -320,7 +320,6 @@ export default function BusinessForm({
       state: values.state.trim() || undefined,
       pincode: values.pincode.trim() || undefined,
       description: values.description || undefined,
-      notes: values.notes || undefined,
       phoneNumbers: values.phoneNumbers
         .filter((p) => p.value.trim())
         .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
@@ -378,7 +377,7 @@ export default function BusinessForm({
     return (
       <Card className="border-[#dce8ee] p-12 text-center">
         <div className="flex flex-col items-center justify-center gap-3">
-          <Loader2 className="size-8 animate-spin text-[#2563eb]" />
+          <Loader2 className="size-8 animate-spin text-primary" />
           <p className="text-sm font-medium text-[#64748b]">
             Loading business details...
           </p>
@@ -415,7 +414,7 @@ export default function BusinessForm({
       <form
         onSubmit={handleSubmit(onValid, onInvalid)}
         noValidate
-        className="flex flex-col gap-4"
+        className="flex flex-col gap-5"
       >
         {submitError && (
           <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
@@ -424,8 +423,8 @@ export default function BusinessForm({
         )}
 
         {isDesktop || isEditMode ? (
-          <Card className="border-[#dce8ee]">
-            <CardContent className="px-5 py-4 sm:px-7 sm:py-5 lg:px-8 lg:py-6">
+          <Card className="overflow-hidden rounded-2xl border-slate-200 bg-white shadow-sm">
+            <CardContent className="px-4 py-5 sm:px-7 sm:py-6 lg:px-8">
               <FormSection title="Business Information" first>
                 <BusinessInfoSection idPrefix="desktop-" />
               </FormSection>
@@ -476,7 +475,7 @@ export default function BusinessForm({
                       Reset
                     </OutlinedButton>
 
-                    <SecondaryButton
+                    <SaveButton
                       type="submit"
                       size="lg"
                       disabled={!isFormComplete || isSubmitting}
@@ -484,7 +483,7 @@ export default function BusinessForm({
                     >
                       <Save className="size-4" />
                       {isSubmitting ? "Saving..." : "Save Business"}
-                    </SecondaryButton>
+                    </SaveButton>
                   </div>
                 </div>
               )}
@@ -507,8 +506,8 @@ export default function BusinessForm({
                         className={cn(
                           "flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors",
                           isCompleted &&
-                            "border-[#08765d] bg-[#08765d] text-white",
-                          isActive && "border-[#08765d] text-[#08765d]",
+                            "border-brand-green bg-brand-green text-secondary-foreground",
+                          isActive && "border-brand-green text-brand-green-strong",
                           !isActive &&
                             !isCompleted &&
                             "border-[#dce8ee] text-[#8a9eaa]",
@@ -520,7 +519,7 @@ export default function BusinessForm({
                         <div
                           className={cn(
                             "mx-2 h-0.5 flex-1 rounded-full transition-colors",
-                            isCompleted ? "bg-[#08765d]" : "bg-[#dce8ee]",
+                            isCompleted ? "bg-brand-green" : "bg-[#dce8ee]",
                           )}
                         />
                       )}
@@ -559,14 +558,14 @@ export default function BusinessForm({
                         <RotateCcw className="size-4" />
                         Reset
                       </OutlinedButton>
-                      <SecondaryButton
+                      <SaveButton
                         type="submit"
                         disabled={!isFormComplete || isSubmitting}
                         className="w-full sm:w-auto"
                       >
                         <Save className="size-4" />
                         {isSubmitting ? "Saving..." : "Save Business"}
-                      </SecondaryButton>
+                      </SaveButton>
                     </div>
                   ) : (
                     <div className="flex flex-col items-stretch gap-2 sm:items-end">
@@ -614,7 +613,7 @@ export default function BusinessForm({
                   <RotateCcw className="size-4" />
                   Reset
                 </OutlinedButton>
-                <SecondaryButton
+                <SaveButton
                   type="submit"
                   size="lg"
                   disabled={!isFormComplete || isSubmitting}
@@ -622,7 +621,7 @@ export default function BusinessForm({
                 >
                   <Save className="size-4" />
                   {isSubmitting ? "Saving..." : "Save Business"}
-                </SecondaryButton>
+                </SaveButton>
               </div>
             </div>
           </>

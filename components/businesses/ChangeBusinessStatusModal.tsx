@@ -38,7 +38,7 @@ export function ChangeBusinessStatusModal({
         <AlertDialogPrimitive.Content
           className={`fixed left-1/2 top-1/2 z-50 w-full max-w-[430px] -translate-x-1/2 -translate-y-1/2 rounded-2xl border p-6 shadow-2xl outline-none duration-200 data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0 data-[state=closed]:zoom-out-95 data-[state=open]:zoom-in-95 ${
             isActivating
-              ? "border-emerald-200 bg-white"
+              ? "border-brand-green/30 bg-white"
               : "border-red-200 bg-white"
           }`}
         >
@@ -58,12 +58,12 @@ export function ChangeBusinessStatusModal({
             <div
               className={`flex size-11 shrink-0 items-center justify-center rounded-xl border ${
                 isActivating
-                  ? "border-emerald-200 bg-emerald-50 text-emerald-600 shadow-sm"
+                  ? "border-brand-green/30 bg-brand-green/10 text-brand-green-strong shadow-sm"
                   : "border-red-200 bg-red-50 text-red-600 shadow-sm"
               }`}
             >
               {isActivating ? (
-                <CheckCircle2 className="size-5 text-emerald-600" />
+                <CheckCircle2 className="size-5 text-brand-green-strong" />
               ) : (
                 <AlertCircle className="size-5 text-red-600" />
               )}
@@ -72,7 +72,7 @@ export function ChangeBusinessStatusModal({
             <div className="min-w-0 flex-1 pt-0.5">
               <AlertDialogPrimitive.Title
                 className={`text-base font-bold tracking-tight ${
-                  isActivating ? "text-emerald-950" : "text-red-950"
+                  isActivating ? "text-brand-green-strong" : "text-red-950"
                 }`}
               >
                 {isActivating ? "Activate Business?" : "Deactivate Business?"}
@@ -94,7 +94,7 @@ export function ChangeBusinessStatusModal({
               <div
                 className={`mt-3 rounded-lg border p-2.5 text-xs leading-relaxed ${
                   isActivating
-                    ? "border-emerald-100 bg-emerald-50/70 text-emerald-800"
+                    ? "border-brand-green/20 bg-brand-green/5 text-brand-green-strong"
                     : "border-red-100 bg-red-50/70 text-red-800"
                 }`}
               >
@@ -122,10 +122,10 @@ export function ChangeBusinessStatusModal({
                 type="button"
                 onClick={onConfirm}
                 disabled={isLoading}
-                className={`h-10 rounded-xl px-4.5 text-sm font-semibold text-white shadow-xs transition-colors disabled:pointer-events-none disabled:opacity-60 ${
+                className={`h-10 rounded-xl px-4.5 text-sm font-semibold shadow-xs transition-colors disabled:pointer-events-none disabled:opacity-60 ${
                   isActivating
-                    ? "bg-[#039855] hover:bg-[#027a48] focus-visible:ring-2 focus-visible:ring-emerald-500/20"
-                    : "bg-[#d92d20] hover:bg-[#b42318] focus-visible:ring-2 focus-visible:ring-red-500/20"
+                    ? "bg-brand-green text-secondary-foreground hover:bg-brand-green/90 focus-visible:ring-2 focus-visible:ring-brand-green/20"
+                    : "bg-[#d92d20] text-white hover:bg-[#b42318] focus-visible:ring-2 focus-visible:ring-red-500/20"
                 }`}
               >
                 {isLoading ? (

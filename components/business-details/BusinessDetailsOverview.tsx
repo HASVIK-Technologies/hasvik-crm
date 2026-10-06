@@ -50,7 +50,7 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
               href={business.website}
               target="_blank"
               rel="noopener noreferrer"
-              className="break-all font-medium text-blue-600 hover:underline"
+              className="break-all font-medium text-primary hover:underline"
             >
               {business.website}
             </a>
@@ -64,7 +64,7 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
           {business.email ? (
             <a
               href={`mailto:${business.email}`}
-              className="break-all font-medium text-blue-600 hover:underline"
+              className="break-all font-medium text-primary hover:underline"
             >
               {business.email}
             </a>

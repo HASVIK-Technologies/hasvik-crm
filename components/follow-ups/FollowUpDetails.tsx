@@ -12,6 +12,7 @@ import {
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
+import { FollowUpNotes } from "@/components/follow-ups/FollowUpNotes";
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import type { FollowUpItem } from "@/types/follow-up";
 
@@ -68,7 +69,7 @@ export default function FollowUpDetails({
       {/* Top Banner Card */}
       <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-[#e4ecf2] bg-white p-5 shadow-[0_4px_20px_rgba(20,40,60,0.04)] sm:p-7">
         <div className="flex min-w-0 items-center gap-4">
-          <Avatar className="size-16 rounded-2xl bg-blue-50 text-xl font-semibold text-blue-700">
+          <Avatar className="size-16 rounded-2xl bg-primary/10 text-xl font-semibold text-primary">
             <AvatarFallback className="bg-transparent text-inherit">
               {initials(followUp.businessName)}
             </AvatarFallback>
@@ -138,16 +139,6 @@ export default function FollowUpDetails({
             </div>
           </div>
 
-          <div className="mt-8 border-t border-[#eef2f6] pt-6">
-            <h3 className="text-sm font-bold text-[#0f172a]">Notes</h3>
-            <p className="mt-3 whitespace-pre-wrap text-sm leading-6 text-[#475569]">
-              {followUp.notes &&
-              followUp.notes !== "[object Object]" &&
-              followUp.notes.trim()
-                ? followUp.notes
-                : "No notes have been added to this follow-up."}
-            </p>
-          </div>
         </section>
 
         <aside className="h-fit rounded-2xl border border-[#e4ecf2] bg-white p-5 shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
@@ -164,9 +155,9 @@ export default function FollowUpDetails({
               {callingNumber ? (
                 <a
                   href={`tel:${cleanCalling || callingNumber}`}
-                  className="mt-1.5 inline-flex items-center gap-2 text-sm font-semibold text-[#0b63e5] transition-colors hover:text-[#094bb3] hover:underline"
+                  className="mt-1.5 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80 hover:underline"
                 >
-                  <Phone className="size-4 shrink-0 text-[#0b63e5]" />
+                  <Phone className="size-4 shrink-0 text-primary" />
                   <span>{callingNumber}</span>
                 </a>
               ) : (
@@ -188,9 +179,9 @@ export default function FollowUpDetails({
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className="mt-1.5 inline-flex items-center gap-2 text-sm font-semibold text-[#027a48] transition-colors hover:text-[#05603a] hover:underline"
+                  className="mt-1.5 inline-flex items-center gap-2 text-sm font-semibold text-brand-green-strong transition-colors hover:text-brand-green hover:underline"
                 >
-                  <WhatsAppIcon className="size-4 shrink-0 text-[#027a48]" />
+                  <WhatsAppIcon className="size-4 shrink-0 text-brand-green-strong" />
                   <span>{whatsappNumber}</span>
                 </a>
               ) : (
@@ -218,6 +209,7 @@ export default function FollowUpDetails({
           </div>
         </aside>
       </div>
+      <FollowUpNotes followUpId={followUp.id} />
     </div>
   );
 }

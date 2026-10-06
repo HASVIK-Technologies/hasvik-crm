@@ -2,7 +2,6 @@
 
 import { Controller, useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
@@ -110,14 +109,6 @@ export default function FollowUpSection({
         )}
       />
 
-      <div className="sm:col-span-2 lg:col-span-4">
-        <FieldLabel htmlFor={`${idPrefix}notes`}>Notes</FieldLabel>
-        <Textarea
-          id={`${idPrefix}notes`}
-          placeholder="Add any additional notes..."
-          {...register("notes")}
-        />
-      </div>
     </div>
   );
 }

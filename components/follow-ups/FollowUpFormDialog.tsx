@@ -9,9 +9,9 @@ import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
 import FollowUpTypeSelect from "@/components/common/FollowUpTypeSelect";
 import FollowUpAutocomplete from "@/components/follow-ups/FollowUpAutocomplete";
+import SaveButton from "@/components/common/SaveButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { Textarea } from "@/components/ui/textarea";
 import { useCreateFollowUp, useUpdateFollowUp } from "@/hooks/use-follow-ups";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import { fromDateTimeLocalValue, toDateTimeLocalValue } from "@/lib/forms/date-time";
@@ -37,7 +37,6 @@ interface FormValues {
   scheduledAt: string;
   type: FollowUpType | "";
   reminder: string;
-  notes: string;
 }
 
 const emptyValues: FormValues = {
@@ -46,7 +45,6 @@ const emptyValues: FormValues = {
   scheduledAt: "",
   type: "",
   reminder: "",
-  notes: "",
 };
 
 function getDefaultValues(
@@ -63,7 +61,6 @@ function getDefaultValues(
       scheduledAt: toDateTimeLocalValue(followUp.scheduledAt),
       type: (followUp.type as FollowUpType) || "CALL",
       reminder: followUp.reminder ?? "",
-      notes: followUp.notes ?? "",
     };
   }
   return { ...emptyValues, business: initialBusiness ?? null };
@@ -112,7 +109,6 @@ export default function FollowUpFormDialog({
           assignedTo: values.assignee.id,
           type: values.type,
           scheduledAt,
-          notes: values.notes.trim(),
           reminderInMinutes: parseReminderToMinutes(values.reminder),
         });
         toast.success("Follow-up updated successfully.");
@@ -122,7 +118,6 @@ export default function FollowUpFormDialog({
           assignedTo: values.assignee.id,
           type: values.type,
           scheduledAt,
-          notes: values.notes.trim() || undefined,
           reminder: values.reminder || undefined,
         });
         toast.success("Follow-up created successfully.");
@@ -142,7 +137,7 @@ export default function FollowUpFormDialog({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-2xl outline-none">
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">
           <div className="mb-5 flex items-start justify-between">
             <div>
               <DialogPrimitive.Title className="text-lg font-bold text-[#0f172a]">
@@ -150,7 +145,7 @@ export default function FollowUpFormDialog({
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="mt-1 text-xs text-[#64748b]">
                 {isEdit
-                  ? "Reschedule, reassign, or update the notes."
+                  ? "Update the schedule, assignee, and reminder."
                   : "Schedule the next touchpoint for a business."}
               </DialogPrimitive.Description>
             </div>
@@ -164,7 +159,7 @@ export default function FollowUpFormDialog({
               </button>
             </DialogPrimitive.Close>
           </div>
-          <form onSubmit={handleSubmit(submit)} noValidate className="space-y-4">
+          <form onSubmit={handleSubmit(submit)} noValidate className="space-y-5">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
                 Business {!isEdit && !initialBusiness && <span className="text-red-500">*</span>}
@@ -200,7 +195,7 @@ export default function FollowUpFormDialog({
                 </>
               )}
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
                   Follow-up date <span className="text-red-500">*</span>
@@ -240,7 +235,7 @@ export default function FollowUpFormDialog({
                 {errors.assignee && <p role="alert" className="mt-1 text-xs text-red-600">{errors.assignee.message}</p>}
               </div>
             </div>
-            <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+            <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
                   Type <span className="text-red-500">*</span>
@@ -278,23 +273,15 @@ export default function FollowUpFormDialog({
                 />
               </div>
             </div>
-            <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#475569]">Notes</label>
-              <Textarea
-                {...register("notes")}
-                placeholder="Discuss pricing and product requirements"
-                className="min-h-24 text-xs"
-              />
-            </div>
-            <div className="flex justify-end gap-2 border-t border-[#eef2f6] pt-4">
+            <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">
               <DialogPrimitive.Close asChild>
                 <Button type="button" variant="outline">Cancel</Button>
               </DialogPrimitive.Close>
-              <Button type="submit" disabled={isPending}>
+              <SaveButton type="submit" disabled={isPending}>
                 {isPending ? (
                   <><Loader2 className="mr-2 size-4 animate-spin" />{isEdit ? "Saving..." : "Adding..."}</>
                 ) : isEdit ? "Save changes" : "Add Follow-up"}
-              </Button>
+              </SaveButton>
             </div>
           </form>
         </DialogPrimitive.Content>

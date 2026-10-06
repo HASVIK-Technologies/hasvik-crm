@@ -34,4 +34,8 @@ export const followUpQueryKeys = {
     [...followUpQueryKeys.all, "business", businessId] as const,
   byUser: (userId?: string) =>
     [...followUpQueryKeys.all, "user", userId] as const,
+  notes: (followUpId?: string, page?: number) =>
+    [...followUpQueryKeys.all, "notes", followUpId, page] as const,
+  notesForFollowUp: (followUpId?: string) =>
+    [...followUpQueryKeys.all, "notes", followUpId] as const,
 };

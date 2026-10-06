@@ -3,7 +3,7 @@
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
-  SlidersHorizontal,
+  ArrowDownUp,
   ChevronDown,
   Phone,
   MoreVertical,
@@ -140,7 +140,7 @@ export default function BusinessTable({
             <DropdownMenu>
               <DropdownMenuTrigger asChild>
                 <OutlinedButton>
-                  <SlidersHorizontal />
+                  <ArrowDownUp />
                   <span>{sortLabel}</span>
                   <ChevronDown />
                 </OutlinedButton>
@@ -148,13 +148,13 @@ export default function BusinessTable({
               <DropdownMenuContent align="end" className="w-40 bg-white">
                 <DropdownMenuItem
                   onClick={() => onSortOrderChange && onSortOrderChange("-createdAt")}
-                  className={`cursor-pointer text-xs ${isLatest ? "font-semibold text-[#0b63e5]" : ""}`}
+                  className={`cursor-pointer text-xs ${isLatest ? "font-semibold text-primary" : ""}`}
                 >
                   Latest First
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => onSortOrderChange && onSortOrderChange("+createdAt")}
-                  className={`cursor-pointer text-xs ${!isLatest ? "font-semibold text-[#0b63e5]" : ""}`}
+                  className={`cursor-pointer text-xs ${!isLatest ? "font-semibold text-primary" : ""}`}
                 >
                   Oldest First
                 </DropdownMenuItem>
@@ -213,7 +213,7 @@ export default function BusinessTable({
                   }
                   className={`flex items-start justify-between gap-3 rounded-2xl border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all md:gap-4 md:p-4 ${
                     item.status === "Active"
-                      ? "cursor-pointer hover:border-[#0b63e5]/40 hover:shadow-md"
+                      ? "cursor-pointer hover:border-primary/40 hover:shadow-md"
                       : ""
                   }`}
                 >
@@ -257,11 +257,11 @@ export default function BusinessTable({
                     {/* Follow-up text */}
                     <div className="text-[11px] font-medium text-[#64748b]">
                       {item.nextFollowUpType === "today" ? (
-                        <span className="font-medium text-[#027a48]">Today</span>
+                        <span className="font-medium text-brand-green-strong">Today</span>
                       ) : item.nextFollowUpType === "tomorrow" ? (
-                        <span className="font-medium text-[#175cd3]">Tomorrow</span>
+                        <span className="font-medium text-primary">Tomorrow</span>
                       ) : item.nextFollowUpType === "date" ? (
-                        <span className="font-medium text-[#175cd3]">{item.nextFollowUp}</span>
+                        <span className="font-medium text-primary">{item.nextFollowUp}</span>
                       ) : (
                         <span>-</span>
                       )}
@@ -291,7 +291,7 @@ export default function BusinessTable({
                             rel="noopener noreferrer"
                             onClick={(e) => e.stopPropagation()}
                             aria-label={`WhatsApp ${item.name}`}
-                            className="flex size-7 items-center justify-center rounded-lg text-[#16a34a] transition-colors hover:bg-[#ecfdf3]"
+                            className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10"
                           >
                             <WhatsAppIcon className="size-4" />
                           </a>
@@ -535,7 +535,7 @@ export default function BusinessTable({
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
                               aria-label={`WhatsApp ${item.name}`}
-                              className="flex size-8.5 items-center justify-center rounded-lg text-[#16a34a] transition-colors hover:bg-[#ecfdf3]"
+                              className="flex size-8.5 items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10"
                             >
                               <WhatsAppIcon className="size-4.5" />
                             </a>
@@ -655,7 +655,7 @@ export default function BusinessTable({
               value={`${itemsPerPage} per page`}
               onValueChange={(value) => onItemsPerPageChange(Number.parseInt(value, 10))}
             >
-              <SelectTrigger className="h-8.5 w-auto rounded-lg border border-[#e2e8f0] bg-white pl-3.5 pr-2.5 text-xs font-medium text-[#334155] hover:border-[#cbd5e1] focus-visible:ring-1 focus-visible:ring-[#0b63e5]">
+              <SelectTrigger className="h-8.5 w-auto rounded-lg border border-[#e2e8f0] bg-white pl-3.5 pr-2.5 text-xs font-medium text-[#334155] hover:border-[#cbd5e1] focus-visible:ring-1 focus-visible:ring-primary">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-white">

@@ -1,8 +1,14 @@
 "use client";
 
 import { useParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Link from "next/link";
-import { AlertCircle, MoreVertical, X } from "lucide-react";
+import {
+  AlertCircle,
+  MessageSquareText,
+  MoreVertical,
+  X,
+} from "lucide-react";
 import { toast } from "sonner";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -27,6 +33,7 @@ import {
 } from "@/lib/follow-ups/actions";
 import { useModalStore } from "@/store/business-modal-store";
 import type { FollowUpItem } from "@/types/follow-up";
+import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
 import { useState } from "react";
 
 interface BusinessDetailsFollowupsProps {
@@ -48,6 +55,7 @@ export default function BusinessDetailsFollowups({
   businessId: propBusinessId,
 }: BusinessDetailsFollowupsProps = {}) {
   const params = useParams<{ id?: string | string[] }>();
+  const router = useRouter();
   const businessId =
     propBusinessId ??
     (Array.isArray(params?.id) ? params.id[0] : params?.id ?? "");
@@ -56,6 +64,7 @@ export default function BusinessDetailsFollowups({
   const { openFollowUpModal } = useModalStore();
   const [cancellingFollowUp, setCancellingFollowUp] =
     useState<FollowUpItem | null>(null);
+  const [notesFollowUp, setNotesFollowUp] = useState<FollowUpItem | null>(null);
   const cancelMutation = useCancelFollowUp();
   const completeMutation = useCompleteFollowUp();
 
@@ -80,6 +89,35 @@ export default function BusinessDetailsFollowups({
     }
   };
 
+  const openFollowUp = (followUpId: string) => {
+    router.push(`/follow-ups/${followUpId}`);
+  };
+  const handleRowClick = (
+    event: React.MouseEvent<HTMLTableRowElement>,
+    followUpId: string,
+  ) => {
+    if (
+      event.target instanceof Element &&
+      event.target.closest("a, button, [role='button'], input, select, textarea")
+    ) {
+      return;
+    }
+
+    openFollowUp(followUpId);
+  };
+  const handleRowKeyDown = (
+    event: React.KeyboardEvent<HTMLTableRowElement>,
+    followUpId: string,
+  ) => {
+    if (
+      event.target === event.currentTarget &&
+      (event.key === "Enter" || event.key === " ")
+    ) {
+      event.preventDefault();
+      openFollowUp(followUpId);
+    }
+  };
+
   if (isLoading) {
     return <div className="p-6 text-slate-500">Loading follow-ups...</div>;
   }
@@ -89,71 +127,86 @@ export default function BusinessDetailsFollowups({
 
   return (
     <>
-      <div className="overflow-hidden rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
-        <div className="mb-6 flex items-center justify-between">
-          <h3 className="text-lg font-bold text-slate-800">Follow-ups</h3>
+      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+        <div className="flex flex-col gap-1 border-b border-slate-100 px-5 py-4 sm:px-6">
+          <h3 className="text-base font-bold text-slate-900">Follow-up history</h3>
+          <p className="text-xs text-slate-500">
+            Review scheduled touchpoints, notes, and assigned owners.
+          </p>
         </div>
         <div className="overflow-x-auto">
           <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="border-b border-slate-100 text-xs font-semibold text-slate-500">
-              <tr>
-                <th className="pb-3 pr-4">Follow-up Date</th>
-                <th className="pb-3 pr-4">Type</th>
-                <th className="pb-3 pr-4">Status</th>
-                <th className="w-1/3 pb-3 pr-4">Notes</th>
-                <th className="pb-3 pr-4">Assigned To</th>
-                <th className="pb-3 pl-4 text-right">Actions</th>
+            <thead className="bg-slate-50/80 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
+              <tr className="border-b border-slate-100">
+                <th className="px-5 py-3 sm:px-6">Date &amp; time</th>
+                <th className="px-4 py-3">Type</th>
+                <th className="px-4 py-3">Status</th>
+                <th className="px-4 py-3">Assigned to</th>
+                <th className="px-5 py-3 text-right sm:px-6">Actions</th>
               </tr>
             </thead>
-            <tbody>
+            <tbody className="divide-y divide-slate-100">
               {followUps.map((item) => {
                 return (
                   <tr
                     key={item.id}
-                    className="border-b border-slate-100 hover:bg-slate-50"
+                    tabIndex={0}
+                    aria-label={`Open follow-up details for ${formatScheduledAt(item.scheduledAt)}`}
+                    onClick={(event) => handleRowClick(event, item.id)}
+                    onKeyDown={(event) => handleRowKeyDown(event, item.id)}
+                    className="cursor-pointer transition-colors hover:bg-slate-50/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
                   >
-                    <td className="whitespace-nowrap py-4 pr-4 font-medium text-slate-900">
+                    <td className="whitespace-nowrap px-5 py-4 font-medium text-slate-900 sm:px-6">
                       {formatScheduledAt(item.scheduledAt)}
                     </td>
-                    <td className="py-4 pr-4 font-medium text-slate-600">
-                      {item.type}
+                    <td className="px-4 py-4">
+                      <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+                        {item.type}
+                      </span>
                     </td>
-                    <td className="py-4 pr-4">
+                    <td className="px-4 py-4">
                       <StatusBadge
                         status={item.status}
-                        className="uppercase tracking-wider text-[10px]"
+                        className="rounded-md px-2.5 py-1 text-[10px] uppercase tracking-wider"
                       />
                     </td>
-                    <td className="w-1/3 py-4 pr-4 text-slate-500">
-                      {item.notes || "No notes"}
-                    </td>
-                    <td className="py-4 pr-4 text-slate-600">
+                    <td className="px-4 py-4 text-sm text-slate-600">
                       {item.assignedToName || "Unassigned"}
                     </td>
-                    <td className="py-4 pl-4 text-right">
-                      <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <button
-                            type="button"
-                            aria-label={`Actions for follow-up on ${formatScheduledAt(item.scheduledAt)}`}
-                            className="rounded-md p-1.5 outline-none hover:bg-slate-100"
-                          >
-                            <MoreVertical className="size-4 text-slate-500" />
-                          </button>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent
-                          align="end"
-                          className="w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg"
+                    <td className="px-5 py-4 sm:px-6">
+                      <div className="flex items-center justify-end gap-1">
+                        <button
+                          type="button"
+                          aria-label={`View or add notes for follow-up on ${formatScheduledAt(item.scheduledAt)}`}
+                          title="View or add notes"
+                          onClick={() => setNotesFollowUp(item)}
+                          className="inline-flex size-9 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                         >
-                          <DropdownMenuItem
-                            asChild
-                            className="cursor-pointer rounded-md p-2 text-xs font-medium text-slate-700"
+                          <MessageSquareText className="size-4" />
+                        </button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <button
+                              type="button"
+                              aria-label={`Actions for follow-up on ${formatScheduledAt(item.scheduledAt)}`}
+                              className="rounded-md p-1.5 outline-none hover:bg-slate-100"
+                            >
+                              <MoreVertical className="size-4 text-slate-500" />
+                            </button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent
+                            align="end"
+                            className="w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg"
                           >
-                            <Link href={`/follow-ups/${item.id}`}>
-                              View Details
-                            </Link>
-                          </DropdownMenuItem>
-                          {canEditFollowUp(item) && (
+                            <DropdownMenuItem
+                              asChild
+                              className="cursor-pointer rounded-md p-2 text-xs font-medium text-slate-700"
+                            >
+                              <Link href={`/follow-ups/${item.id}`}>
+                                View Details
+                              </Link>
+                            </DropdownMenuItem>
+                            {canEditFollowUp(item) && (
                               <DropdownMenuItem
                                 className="cursor-pointer rounded-md p-2 text-xs font-medium text-slate-700"
                                 onClick={() =>
@@ -162,34 +215,35 @@ export default function BusinessDetailsFollowups({
                               >
                                 Reschedule / Edit
                               </DropdownMenuItem>
-                          )}
-                          {canCompleteFollowUp(item) && (
+                            )}
+                            {canCompleteFollowUp(item) && (
                               <DropdownMenuItem
-                                className="cursor-pointer rounded-md p-2 text-xs font-medium text-emerald-700"
+                                className="cursor-pointer rounded-md p-2 text-xs font-medium text-brand-green-strong"
                                 onClick={() => void completeFollowUp(item)}
                                 disabled={completeMutation.isPending}
                               >
                                 Mark as Completed
                               </DropdownMenuItem>
-                          )}
-                          {canCreateNextFollowUp(item) && (
-                            <DropdownMenuItem
-                              className="cursor-pointer rounded-md p-2 text-xs font-medium text-emerald-700"
-                              onClick={() => openFollowUpModal(businessId)}
-                            >
-                              Schedule Next Follow-up
-                            </DropdownMenuItem>
-                          )}
-                          {canCancelFollowUp(item) && (
+                            )}
+                            {canCreateNextFollowUp(item) && (
+                              <DropdownMenuItem
+                                className="cursor-pointer rounded-md p-2 text-xs font-medium text-brand-green-strong"
+                                onClick={() => openFollowUpModal(businessId)}
+                              >
+                                Schedule Next Follow-up
+                              </DropdownMenuItem>
+                            )}
+                            {canCancelFollowUp(item) && (
                               <DropdownMenuItem
                                 className="mt-1 cursor-pointer rounded-md p-2 text-xs font-medium text-red-600 focus:bg-red-50 focus:text-red-700"
                                 onClick={() => setCancellingFollowUp(item)}
                               >
                                 Cancel Follow-up
                               </DropdownMenuItem>
-                          )}
-                        </DropdownMenuContent>
-                      </DropdownMenu>
+                            )}
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </td>
                   </tr>
                 );
@@ -197,10 +251,10 @@ export default function BusinessDetailsFollowups({
               {followUps.length === 0 && (
                 <tr>
                   <td
-                    colSpan={6}
-                    className="py-8 text-center text-slate-500"
+                    colSpan={5}
+                    className="px-5 py-12 text-center text-sm text-slate-500"
                   >
-                    No follow-ups found.
+                    No follow-ups yet. Add a follow-up to start tracking the next touchpoint.
                   </td>
                 </tr>
               )}
@@ -262,6 +316,18 @@ export default function BusinessDetailsFollowups({
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
+      <FollowUpNotesDialog
+        followUpId={notesFollowUp?.id}
+        followUpName={
+          notesFollowUp
+            ? `${notesFollowUp.businessName} · ${formatScheduledAt(notesFollowUp.scheduledAt)}`
+            : ""
+        }
+        open={Boolean(notesFollowUp)}
+        onOpenChange={(open) => {
+          if (!open) setNotesFollowUp(null);
+        }}
+      />
     </>
   );
 }

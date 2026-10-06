@@ -23,7 +23,6 @@ export type BusinessFormValues = {
   email: string;
   website: string;
   description: string;
-  notes: string;
   followUpType: FollowUpType | "";
   assignTo: string;
   nextFollowupDate: string;
@@ -44,7 +43,6 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   email: "",
   website: "",
   description: "",
-  notes: "",
   followUpType: "",
   assignTo: "",
   nextFollowupDate: "",
@@ -71,7 +69,6 @@ export const STEP_FIELD_NAMES = {
     "assignTo",
     "nextFollowupDate",
     "reminder",
-    "notes",
   ] as const,
 };
 
@@ -96,6 +93,5 @@ export function toFollowUpPayload(
     ...(values.reminder
       ? { reminderInMinutes: Number(values.reminder) }
       : {}),
-    ...(values.notes ? { notes: values.notes } : {}),
   };
 }

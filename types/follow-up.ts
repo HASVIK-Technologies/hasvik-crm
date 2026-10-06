@@ -36,6 +36,25 @@ export interface FollowUpItem {
   reminderInMinutes?: number;
 }
 
+export interface FollowUpNote {
+  id: string;
+  entityType: "BUSINESS" | "FOLLOW_UP";
+  entityId: string;
+  content: string;
+  createdBy: string;
+  createdByName?: string;
+  createdAt: string;
+  updatedAt: string;
+}
+
+export interface FollowUpNotesPage {
+  items: FollowUpNote[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages?: number;
+}
+
 export interface FollowUpFilters {
   page: number;
   limit: number;
@@ -85,4 +104,3 @@ export interface UpdateFollowUpStatusPayload {
   id: string;
   status: "COMPLETED" | "CANCELLED";
 }
-

@@ -34,35 +34,35 @@ export default function BusinessDetailsQuickActions({
         {/* Edit Business */}
         <Link
           href={`/businesses/form/${business?.id}`}
-          className={`group flex items-center justify-between rounded-xl border border-slate-200/90 bg-white p-3 transition-all hover:border-blue-200 hover:bg-blue-50/30 ${disabledStyles}`}
+          className={`group flex items-center justify-between rounded-xl border border-slate-200/90 bg-white p-3 transition-all hover:border-primary/30 hover:bg-primary/5 ${disabledStyles}`}
         >
           <div className="flex items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-blue-50 text-blue-600 transition-colors group-hover:bg-blue-100">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
               <Edit2 className="size-4" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-800 group-hover:text-blue-600">
+              <p className="text-xs font-semibold text-slate-800 group-hover:text-primary">
                 Edit Business
               </p>
               <p className="text-[11px] text-slate-400">Update business details</p>
             </div>
           </div>
-          <ChevronRight className="size-4 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-blue-500" />
+          <ChevronRight className="size-4 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
         </Link>
 
         {/* Call & WhatsApp (2 Columns) */}
         <div className="grid grid-cols-2 gap-2.5">
           <a
             href={phone ? `tel:${phone}` : undefined}
-            className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-emerald-200 hover:bg-emerald-50/30 ${
+            className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-brand-green/30 hover:bg-brand-green/5 ${
               !phone || isInactive ? "opacity-50 pointer-events-none" : ""
             }`}
           >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-emerald-50 text-emerald-600 transition-colors group-hover:bg-emerald-100">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green-strong transition-colors group-hover:bg-brand-green/15">
               <Phone className="size-3.5" />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-emerald-700">
+              <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand-green-strong">
                 Call
               </p>
               <p className="truncate text-[10px] text-slate-400">Direct phone</p>
@@ -73,15 +73,15 @@ export default function BusinessDetailsQuickActions({
             href={phone ? `https://wa.me/91${phone}` : undefined}
             target="_blank"
             rel="noopener noreferrer"
-            className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-emerald-200 hover:bg-emerald-50/30 ${
+            className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-brand-green/30 hover:bg-brand-green/5 ${
               !phone || isInactive ? "opacity-50 pointer-events-none" : ""
             }`}
           >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-[#ecfdf3] text-[#16a34a] transition-colors group-hover:bg-[#dcfce7]">
+            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green-strong transition-colors group-hover:bg-brand-green/15">
               <WhatsAppIcon className="size-3.5" />
             </div>
             <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-[#16a34a]">
+              <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand-green-strong">
                 WhatsApp
               </p>
               <p className="truncate text-[10px] text-slate-400">Open chat</p>
@@ -98,7 +98,7 @@ export default function BusinessDetailsQuickActions({
           onClick={() => openDeactivateModal(business?.id)}
           className={`group flex items-center justify-between rounded-xl border p-3 text-left transition-all ${
             isInactive
-              ? "border-emerald-200 bg-emerald-50/40 hover:bg-emerald-50 hover:border-emerald-300"
+              ? "border-brand-green/30 bg-brand-green/5 hover:bg-brand-green/10 hover:border-brand-green/40"
               : "border-slate-200/90 bg-white hover:border-red-200 hover:bg-red-50/30"
           }`}
         >
@@ -106,7 +106,7 @@ export default function BusinessDetailsQuickActions({
             <div
               className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
                 isInactive
-                  ? "bg-emerald-100 text-emerald-700"
+                  ? "bg-brand-green/15 text-brand-green-strong"
                   : "bg-slate-100 text-slate-500 group-hover:bg-red-100 group-hover:text-red-600"
               }`}
             >
@@ -120,7 +120,7 @@ export default function BusinessDetailsQuickActions({
               <p
                 className={`text-xs font-semibold ${
                   isInactive
-                    ? "text-emerald-700"
+                    ? "text-brand-green-strong"
                     : "text-slate-800 group-hover:text-red-600"
                 }`}
               >
@@ -136,7 +136,7 @@ export default function BusinessDetailsQuickActions({
           <ChevronRight
             className={`size-4 transition-transform group-hover:translate-x-0.5 ${
               isInactive
-                ? "text-emerald-400 group-hover:text-emerald-600"
+                ? "text-brand-green/70 group-hover:text-brand-green-strong"
                 : "text-slate-300 group-hover:text-red-400"
             }`}
           />

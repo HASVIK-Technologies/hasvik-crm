@@ -1,8 +1,8 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useRef } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
-import { ChartNoAxesCombined, Plus } from "lucide-react";
+import { ChartNoAxesCombined, Filter, Plus } from "lucide-react";
 import Actions from "@/components/common/Actions";
 import {
   BusinessStats,
@@ -14,7 +14,6 @@ import type { BusinessItem } from "@/types/business";
 import {
   useBusinessesQuery,
   useBusinessKpisQuery,
-  useCategoriesQuery,
 } from "@/hooks/use-businesses";
 import { useBusinessListStore } from "@/store/business-list-store";
 import {
@@ -29,6 +28,7 @@ import Breadcrumb from "@/components/common/Breadcrumb";
 const EMPTY_BUSINESSES: BusinessItem[] = [];
 
 function BusinessesContent() {
+  const [showFilters, setShowFilters] = useState(true);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const hasInitializedFromUrl = useRef(false);
@@ -56,9 +56,6 @@ function BusinessesContent() {
     resetAllFilters,
     syncFromParams,
   } = useBusinessListStore();
-
-  // Categories query for category stats count
-  const { data: apiCategories = [] } = useCategoriesQuery();
 
   // 1. Initial URL param synchronization on mount / URL direct landing
   useEffect(() => {
@@ -185,36 +182,14 @@ function BusinessesContent() {
     />
   );
 
-  const fullStatsData = useMemo(() => {
-    const total = kpiData?.total ?? 0;
-    const active = kpiData?.active ?? 0;
-    const deactivated = Math.max(0, total - active);
-    const newCount = kpiData?.new ?? 0;
-    const interested = kpiData?.interested ?? 0;
-    const won = kpiData?.won ?? 0;
-    const followUpToday = businesses.filter((b) => b.nextFollowUpType === "today").length;
-    const categoriesCount = apiCategories.filter(
-      (c) => c.name && c.name !== "All Categories",
-    ).length;
-
-    return {
-      total,
-      active,
-      deactivated,
-      new: newCount,
-      interested,
-      won,
-      followUpToday,
-      categoriesCount,
-    };
-  }, [kpiData, businesses, apiCategories]);
-
   return (
     <ListPageLayout
       breadcrumb={<Breadcrumb items={[{ label: "Businesses" }]} />}
       customSearch={searchControl}
       filters={filterControls}
       showStats={showStats}
+      showFilters={showFilters}
+      onToggleFilters={() => setShowFilters((visible) => !visible)}
       actions={
         <Actions
           primary={{
@@ -227,11 +202,18 @@ function BusinessesContent() {
               label: `${showStats ? "Hide" : "Show"} KPIs`,
               icon: <ChartNoAxesCombined className="size-4" />,
               onSelect: toggleStats,
+              desktopOnly: true,
+            },
+            {
+              label: `${showFilters ? "Hide" : "Show"} Filters`,
+              icon: <Filter className="size-4" />,
+              onSelect: () => setShowFilters((visible) => !visible),
+              desktopOnly: true,
             },
           ]}
         />
       }
-      stats={<BusinessStats stats={fullStatsData} isLoading={isKpisLoading} />}
+      stats={<BusinessStats stats={kpiData} isLoading={isKpisLoading} />}
       content={
         isListError ? (
           <div className="rounded-2xl border border-red-200 bg-red-50 p-12 text-center text-sm text-red-700">

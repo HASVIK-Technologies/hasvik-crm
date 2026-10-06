@@ -11,13 +11,13 @@ const cards = [
     key: "total",
     label: "Total Follow-ups",
     icon: ListChecks,
-    tone: "bg-blue-50 text-blue-600",
+    tone: "bg-primary/10 text-primary",
   },
   {
     key: "today",
     label: "Today",
     icon: CalendarCheck2,
-    tone: "bg-green-50 text-green-600",
+    tone: "bg-brand-green/10 text-brand-green-strong",
   },
   {
     key: "upcoming",

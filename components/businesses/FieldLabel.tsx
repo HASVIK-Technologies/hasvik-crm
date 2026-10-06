@@ -20,7 +20,7 @@ export default function FieldLabel({
     <Label
       htmlFor={htmlFor}
       className={cn(
-        "mb-1.5 font-semibold text-[#163b58]",
+        "mb-1.5 text-sm font-semibold text-slate-700",
         invalid && "text-red-600",
         className,
       )}

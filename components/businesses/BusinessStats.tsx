@@ -4,12 +4,8 @@ import React from "react";
 import {
   Building2,
   Store,
-  AlertCircle,
-  Sparkles,
   Flame,
   Trophy,
-  CalendarCheck2,
-  Tag,
 } from "lucide-react";
 import { Card } from "@/components/ui/card";
 import type { BusinessKpisResponse } from "@/types/business-api";
@@ -25,41 +21,23 @@ export default function BusinessStats({
 }: BusinessStatsProps) {
   const total = stats?.total ?? 0;
   const active = stats?.active ?? 0;
-  const deactivated = stats?.deactivated ?? Math.max(0, total - active);
-  const newCount = stats?.new ?? 0;
   const interested = stats?.interested ?? 0;
   const won = stats?.won ?? 0;
-  const followUpToday = stats?.followUpToday ?? 0;
-  const categoriesCount = stats?.categoriesCount ?? 0;
 
   const cards = [
     {
       label: "Total Businesses",
       value: total,
       icon: Building2,
-      iconBg: "bg-[#e0effe]",
-      iconColor: "text-[#2563eb]",
+      iconBg: "bg-primary/10",
+      iconColor: "text-primary",
     },
     {
       label: "Active Businesses",
       value: active,
       icon: Store,
-      iconBg: "bg-[#dcfce7]",
-      iconColor: "text-[#16a34a]",
-    },
-    {
-      label: "Deactivated Businesses",
-      value: deactivated,
-      icon: AlertCircle,
-      iconBg: "bg-[#fee2e2]",
-      iconColor: "text-[#dc2626]",
-    },
-    {
-      label: "New",
-      value: newCount,
-      icon: Sparkles,
-      iconBg: "bg-[#e0f2fe]",
-      iconColor: "text-[#0284c7]",
+      iconBg: "bg-brand-green/10",
+      iconColor: "text-brand-green-strong",
     },
     {
       label: "Interested",
@@ -75,24 +53,10 @@ export default function BusinessStats({
       iconBg: "bg-[#ede9fe]",
       iconColor: "text-[#7c3aed]",
     },
-    {
-      label: "Follow-up Today",
-      value: followUpToday,
-      icon: CalendarCheck2,
-      iconBg: "bg-[#fffbeb]",
-      iconColor: "text-[#b45309]",
-    },
-    {
-      label: "Business Categories",
-      value: categoriesCount,
-      icon: Tag,
-      iconBg: "bg-[#f3e8ff]",
-      iconColor: "text-[#9333ea]",
-    },
   ];
 
   return (
-    <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-4 lg:grid-cols-4 xl:grid-cols-4 md:gap-4">
+    <div className="grid grid-cols-2 gap-3 md:grid-cols-4 md:gap-4">
       {cards.map((card) => {
         const Icon = card.icon;
 

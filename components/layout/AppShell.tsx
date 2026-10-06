@@ -4,7 +4,6 @@ import Image from "next/image";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import {
-  Bell,
   Building2,
   CalendarCheck2,
   Menu,
@@ -13,7 +12,6 @@ import {
   X,
 } from "lucide-react";
 import { useEffect, useState } from "react";
-import SearchInput from "@/components/common/SearchInput";
 import { useAuthSession, useLogout, useTokenRefresh } from "@/hooks/use-auth";
 import { useAuthStore } from "@/store/auth-store";
 import {
@@ -30,47 +28,42 @@ const navigation = [
   { label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2 },
 ];
 
-const pageDetails: Record<
-  string,
-  { eyebrow: string; title: string; subtitle?: string }
-> = {
+const pageDetails: Record<string, { title: string }> = {
   "/dashboard": {
-    eyebrow: "Overview",
-    title: "Good morning, Amit",
-    subtitle: "Here is what is happening across your business today.",
+    title: "Dashboard",
   },
   "/businesses": {
-    eyebrow: "BUSINESSES",
     title: "All Businesses",
-    subtitle: "Manage and track all your business leads in one place.",
   },
 };
 
 function isActivePath(pathname: string, href: string) {
   const basePath = href.split("#")[0];
-  if (basePath === "/businesses") {
-    return pathname.startsWith("/businesses");
+  if (basePath === "/businesses" || basePath === "/follow-ups") {
+    return pathname === basePath || pathname.startsWith(`${basePath}/`);
   }
   return pathname === basePath;
 }
 
 function getPageDetails(pathname: string) {
+  if (pathname === "/follow-ups") {
+    return { title: "Follow-ups" };
+  }
+
+  if (pathname.startsWith("/follow-ups/")) {
+    return { title: "Follow-up Details" };
+  }
+
   if (pathname === "/businesses/form" || pathname.startsWith("/businesses/form/")) {
     const isEdit = pathname.startsWith("/businesses/form/");
     return {
-      eyebrow: "BUSINESSES",
       title: isEdit ? "Edit Business" : "Add Business",
-      subtitle: isEdit
-        ? "Update business lead details and follow-up."
-        : "Create a new business lead and set up its first follow-up.",
     };
   }
 
   if (pathname.startsWith("/businesses/") && !pathname.startsWith("/businesses/form")) {
     return {
-      eyebrow: "BUSINESS DETAILS",
       title: "Business Details",
-      subtitle: "Review contact information, activity, and next steps.",
     };
   }
 
@@ -88,7 +81,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const authStatus = useAuthStore((state) => state.status);
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
-  const currentPage = getPageDetails(pathname);
+  const pageDetailsForPath = getPageDetails(pathname);
 
   useEffect(() => {
     if (pathname === "/" && authStatus === "authenticated") router.replace("/businesses");
@@ -115,7 +108,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   if (authStatus !== "authenticated" || sessionQuery.isPending) {
     return (
-      <main className="flex min-h-screen items-center justify-center bg-[#f8fafc] text-sm text-slate-500">
+      <main className="flex min-h-screen items-center justify-center bg-background text-sm text-slate-500">
         Restoring your session...
       </main>
     );
@@ -130,6 +123,15 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const displayName = user?.fullName || user?.email || "Hasvik user";
+  const firstName =
+    user?.firstName?.trim() ||
+    user?.fullName?.trim().split(/\s+/)[0] ||
+    user?.email?.split("@")[0] ||
+    "there";
+  const currentPageTitle =
+    pathname === "/dashboard"
+      ? `Good morning, ${firstName}`
+      : pageDetailsForPath.title;
   const displayRole = user?.role || "User";
   const initials = displayName
     .split(" ")
@@ -139,7 +141,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     .toUpperCase();
 
   return (
-    <div className="min-h-screen bg-[#f8fafc] text-[#374151]">
+    <div className="min-h-screen bg-background text-foreground">
       {/* Sidebar for Desktop */}
       <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-[#e4ecf2] bg-white transition-[width] lg:flex ${sidebarCollapsed ? "w-20" : "w-64"}`}>
         {/* Brand Logo Header */}
@@ -160,11 +162,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {/* Sidebar Navigation */}
         <div className={`flex flex-1 flex-col justify-between py-6 ${sidebarCollapsed ? "px-2" : "px-4"}`}>
           <div>
-            {/* MAIN MENU */}
-            <p className={`px-3 text-[11px] font-semibold uppercase tracking-[0.15em] text-[#94a3b8] ${sidebarCollapsed ? "sr-only" : ""}`}>
-              Main menu
-            </p>
-            <nav className="mt-3 space-y-1.5" aria-label="Main navigation">
+            <nav className="space-y-1.5" aria-label="Main navigation">
               {navigation.map((item) => {
                 const Icon = item.icon;
                 const active = isActivePath(pathname, item.href);
@@ -174,7 +172,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     href={item.href}
                     className={`flex rounded-xl text-xs font-semibold transition-all ${sidebarCollapsed ? "flex-col gap-1 px-1 py-2 text-center" : "items-center gap-3 px-3.5 py-2.5"} ${
                       active
-                        ? "bg-[#ecfdf3] text-secondary"
+                        ? "bg-secondary/10 text-brand-green-strong"
                         : "text-[#64748b] hover:bg-[#f8fafc] hover:text-[#0f172a]"
                     }`}
                   >
@@ -227,35 +225,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </button>
               <div>
                 <h1 className="text-xl font-bold tracking-tight text-[#0f172a] sm:text-2xl">
-                  {currentPage.title}
+                  {currentPageTitle}
                 </h1>
               </div>
             </div>
 
-            {/* Right Header Tools: Global Search + Filter + Bell + User */}
+            {/* User Profile in Header */}
             <div className="flex items-center gap-2.5 sm:gap-3">
-              {/* Header Search Box */}
-              <SearchInput
-                wrapperClassName="hidden md:block"
-                placeholder="Search businesses by name, category, city..."
-                className="h-10 w-72 rounded-xl border border-[#e2e8f0] bg-[#f8fafc] pr-4 text-xs text-[#0f172a] placeholder:text-[#94a3b8] focus:border-primary focus:bg-white focus:outline-none xl:w-84"
-              />
-
-              {/* Notifications Button with Red Dot */}
-              <button
-                type="button"
-                aria-label="Notifications"
-                suppressHydrationWarning
-                className="relative flex size-10 items-center justify-center rounded-xl border border-[#e2e8f0] bg-white text-[#64748b] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a]"
-              >
-                <Bell className="size-4" />
-                <span className="absolute right-2.5 top-2.5 size-2 rounded-full bg-[#ef4444] ring-2 ring-white" />
-              </button>
-
-              {/* User Profile in Header */}
               <DropdownMenu>
                 <DropdownMenuTrigger asChild>
-                  <button type="button" aria-label="Open user menu" className="flex size-9 items-center justify-center rounded-full bg-[#e0eafe] text-xs font-bold text-[#2563eb] outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-[#2563eb]">
+                  <button type="button" aria-label="Open user menu" className="flex size-9 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary outline-none ring-offset-2 focus-visible:ring-2 focus-visible:ring-primary">
                     {initials}
                   </button>
                 </DropdownMenuTrigger>

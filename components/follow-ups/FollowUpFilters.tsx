@@ -1,6 +1,6 @@
 "use client";
 
-import { RotateCcw, SlidersHorizontal } from "lucide-react";
+import { Filter, RotateCcw } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -81,12 +81,12 @@ export default function FollowUpFilters({ filters, setFilter, reset }: Props) {
       <div className="hidden lg:flex lg:items-center lg:gap-2.5">
         <Popover>
           <PopoverTrigger asChild>
-            <button type="button" className={`inline-flex h-10 items-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition-colors ${moreFiltersActive ? "border-[#2563eb] bg-[#eff6ff] text-[#2563eb]" : "border-[#e2e8f0] bg-white text-[#334155] hover:bg-[#f8fafc]"}`}>
-              <SlidersHorizontal className="size-3.5 text-[#64748b]" /> More Filters
-              {moreFiltersActive && <span className="flex size-4.5 items-center justify-center rounded-full bg-[#2563eb] text-[10px] font-bold text-white">{[filters.status, filters.type, filters.fromDate || filters.toDate].filter(Boolean).length}</span>}
+            <button type="button" className={`inline-flex h-10 items-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition-colors ${moreFiltersActive ? "border-primary bg-primary/10 text-primary" : "border-[#e2e8f0] bg-white text-[#334155] hover:bg-[#f8fafc]"}`}>
+              <Filter className="size-3.5 text-[#64748b]" /> More Filters
+              {moreFiltersActive && <span className="flex size-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{[filters.status, filters.type, filters.fromDate || filters.toDate].filter(Boolean).length}</span>}
             </button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-[22rem] space-y-3 rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xl"><div className="flex items-center justify-between border-b border-[#f1f5f9] pb-2.5"><h4 className="text-xs font-bold text-[#0f172a]">More Filters</h4>{moreFiltersActive && <button type="button" onClick={() => { setFilter("status", ""); setFilter("type", ""); setFilter("fromDate", ""); setFilter("toDate", ""); }} className="text-[11px] font-medium text-[#2563eb] hover:underline">Reset Extra</button>}</div><div className="flex flex-col gap-3">{extraFilters}</div></PopoverContent>
+          <PopoverContent align="start" className="w-[22rem] space-y-3 rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xl"><div className="flex items-center justify-between border-b border-[#f1f5f9] pb-2.5"><h4 className="text-xs font-bold text-[#0f172a]">More Filters</h4>{moreFiltersActive && <button type="button" onClick={() => { setFilter("status", ""); setFilter("type", ""); setFilter("fromDate", ""); setFilter("toDate", ""); }} className="text-[11px] font-medium text-primary hover:underline">Reset Extra</button>}</div><div className="flex flex-col gap-3">{extraFilters}</div></PopoverContent>
         </Popover>
       </div>
       <div className="flex w-full flex-col gap-2.5 lg:hidden">{extraFilters}</div>

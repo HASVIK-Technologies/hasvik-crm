@@ -1,7 +1,7 @@
 "use client";
 
 import { useState } from "react";
-import { SlidersHorizontal, X } from "lucide-react";
+import { Filter, X } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import OutlinedButton from "../common/OutlinedButton";
 import SearchInput from "../common/SearchInput";
@@ -16,6 +16,8 @@ interface LayoutProps {
   filters?: React.ReactNode;
   stats?: React.ReactNode;
   showStats?: boolean;
+  showFilters?: boolean;
+  onToggleFilters?: () => void;
   actions?: React.ReactNode;
   content?: React.ReactNode;
   footer?: React.ReactNode;
@@ -31,13 +33,16 @@ export default function ListPageLayout({
   filters,
   stats,
   showStats = true,
+  showFilters: controlledShowFilters,
+  onToggleFilters,
   actions,
   content,
   footer,
   className,
 }: LayoutProps) {
-  const [showFilters, setShowFilters] = useState(true);
+  const [internalShowFilters, setInternalShowFilters] = useState(true);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
+  const showFilters = controlledShowFilters ?? internalShowFilters;
 
   const handleFilterToggle = () => {
     if (window.matchMedia("(max-width: 1023px)").matches) {
@@ -45,7 +50,11 @@ export default function ListPageLayout({
       return;
     }
 
-    setShowFilters((visible) => !visible);
+    if (onToggleFilters) {
+      onToggleFilters();
+    } else {
+      setInternalShowFilters((visible) => !visible);
+    }
   };
 
   const search =
@@ -68,16 +77,14 @@ export default function ListPageLayout({
         <div className="flex shrink-0 items-center gap-2">
           {filters && (
             <OutlinedButton
+              className="gap-2 lg:hidden"
               size="sm"
               onClick={handleFilterToggle}
-              aria-expanded={showFilters}
-              aria-label={`${showFilters ? "Hide" : "Show"} filters`}
-              className="gap-2"
+              aria-expanded={filterDrawerOpen}
+              aria-label="Open filters"
             >
-              <SlidersHorizontal className="size-4" />
-              <span className="hidden sm:inline">
-                {showFilters ? "Hide" : "Show"} Filters
-              </span>
+              <Filter className="size-4" />
+              <span className="hidden sm:inline">Filters</span>
             </OutlinedButton>
           )}
           {actions}
