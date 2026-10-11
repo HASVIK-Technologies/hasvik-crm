@@ -16,7 +16,7 @@ const geistMono = Geist_Mono({
 
 export const metadata: Metadata = {
   title: "Hasvik CRM",
-  description: "Business leads. Simple follow-ups. More sales.",
+  description: "A B2B sales CRM for managing business leads and follow-ups.",
 };
 
 export default function RootLayout({

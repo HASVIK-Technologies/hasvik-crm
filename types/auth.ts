@@ -5,6 +5,8 @@ export type AuthUser = {
   firstName: string;
   lastName: string;
   fullName: string;
+  phoneNumber?: string;
+  tenantId?: string;
 };
 
 export type TokenResponse = {

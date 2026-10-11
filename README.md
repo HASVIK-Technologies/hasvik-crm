@@ -32,6 +32,16 @@ Use `useAuthStore` from `store/auth-store.ts` to set or clear the token. The lis
 
 This project uses [`next/font`](https://nextjs.org/docs/app/building-your-application/optimizing/fonts) to automatically optimize and load [Geist](https://vercel.com/font), a new font family for Vercel.
 
+## Tenant signup and subscriptions
+
+The public `/tenant` page creates a workspace and its administrator through `POST /api/tenants`. HASVIK admins can review tenant accounts, edit organization/contact details, and activate or deactivate access at `/tenant-management` using the `/api/tenants` endpoints.
+
+The `/subscriptions` page loads available plans and tenant subscriptions from the API. Standard sign-ins land on `/businesses`; new workspace admins can use the signup completion link to sign in and land on `/subscriptions`. Workspace admins can submit plan requests for HASVIK-admin approval, renew with a confirmation, or cancel their active subscription. HASVIK admins can select tenants, approve pending requests by setting their status to `ACTIVE`, reject them as `REJECTED`, and cancel active subscriptions. All subscription status changes use `PATCH /api/subscriptions/{id}/status`. A tenant without a current subscription is restricted to subscription management for its admin; other workspace users see an access notice and must contact their admin. Cancellation marks a subscription `CANCELLED` while the tenant retains access until the subscription end date. The UI also displays `SUSPENDED` subscription states. Subscription creation and renewal do not process payments; a payment gateway or payment-verification workflow is not exposed by the current API.
+
+## Workspace administration
+
+Tenant admins can manage workspace users at `/users` and business categories at `/business-categories`. Signed-in users can view and update their account details at `/profile`. These pages use the documented `/users` and `/categories` API operations; the backend remains responsible for enforcing role permissions.
+
 ## Learn More
 
 To learn more about Next.js, take a look at the following resources:

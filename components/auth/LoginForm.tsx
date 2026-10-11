@@ -16,6 +16,7 @@ import { useLogin } from "@/hooks/use-auth";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import { Input } from "@/components/ui/input";
+import Link from "next/link";
 import type { LoginFormValues } from "@/types/auth";
 
 export default function LoginForm() {
@@ -32,11 +33,19 @@ export default function LoginForm() {
 
   const onSubmit: SubmitHandler<LoginFormValues> = async (values) => {
     try {
-      await loginMutation.mutateAsync({
+      const session = await loginMutation.mutateAsync({
         email: values.email.trim(),
         password: values.password,
       });
-      router.replace("/businesses");
+      const role = session.user.role.toUpperCase();
+      const returningFromSignup =
+        new URLSearchParams(window.location.search).get("welcome") ===
+        "subscription";
+      router.replace(
+        returningFromSignup && role === "ADMIN"
+          ? "/subscriptions"
+          : "/businesses",
+      );
     } catch {
       // The mutation error is rendered below.
     }
@@ -223,6 +232,16 @@ export default function LoginForm() {
             <p className="mt-8 flex items-center justify-center gap-2 text-center text-xs text-slate-400">
               <ShieldCheck className="size-4 text-brand-green-strong" />
               Your information is protected with secure authentication.
+            </p>
+            <p className="mt-5 text-center text-xs text-slate-500">
+              New to Hasvik?{" "}
+              <Link href="/explore-crm" className="font-semibold text-primary hover:underline">
+                Explore the CRM
+              </Link>
+              {" · "}
+              <Link href="/tenant" className="font-semibold text-primary hover:underline">
+                Tenant signup
+              </Link>
             </p>
           </div>
         </section>
