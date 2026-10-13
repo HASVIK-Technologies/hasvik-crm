@@ -13,6 +13,7 @@ import MobileInput from "@/components/common/MobileInput";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import NumberListField from "@/components/businesses/NumberListField";
 import { cn } from "@/lib/utils";
+import { isValidOptionalEmail } from "@/lib/business/url-validation";
 import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function ContactInfoSection({
@@ -39,19 +40,19 @@ export default function ContactInfoSection({
   const watchedPhoneNumbers = useWatch({ control, name: "phoneNumbers" });
   const watchedWhatsappNumbers = useWatch({ control, name: "whatsappNumbers" });
 
-  const validatePhoneRequired = () => {
-    const values = getValues("phoneNumbers");
-    return (
-      values.some((v) => v.value.trim().length > 0) ||
-      "At least one phone number is required"
-    );
-  };
+  const validateNumber = (
+    value: string,
+    values: { value: string }[],
+    kind: "phone" | "WhatsApp",
+  ) => {
+    const currentValue = value.trim();
+    if (currentValue && !/^\d{10}$/.test(currentValue)) {
+      return `${kind} number must contain exactly 10 digits.`;
+    }
 
-  const validateWhatsappRequired = () => {
-    const values = getValues("whatsappNumbers");
     return (
-      values.some((v) => v.value.trim().length > 0) ||
-      "At least one WhatsApp number is required"
+      values.some((entry) => /^\d{10}$/.test(entry.value.trim())) ||
+      `Enter at least one valid 10-digit ${kind} number.`
     );
   };
 
@@ -115,13 +116,23 @@ export default function ContactInfoSection({
             <Controller
               control={control}
               name={`phoneNumbers.${index}.value` as const}
-              rules={{ validate: validatePhoneRequired }}
+              rules={{
+                validate: (value) =>
+                  validateNumber(value, getValues("phoneNumbers"), "phone"),
+              }}
               render={({ field, fieldState }) => (
-                <MobileInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  invalid={!!fieldState.error}
-                />
+                <div className="min-w-0 flex-1">
+                  <MobileInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    invalid={!!fieldState.error}
+                  />
+                  {fieldState.error && (
+                    <p role="alert" className="mt-1 text-xs text-red-600">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </div>
               )}
             />
           )}
@@ -173,13 +184,27 @@ export default function ContactInfoSection({
             <Controller
               control={control}
               name={`whatsappNumbers.${index}.value` as const}
-              rules={{ validate: validateWhatsappRequired }}
+              rules={{
+                validate: (value) =>
+                  validateNumber(
+                    value,
+                    getValues("whatsappNumbers"),
+                    "WhatsApp",
+                  ),
+              }}
               render={({ field, fieldState }) => (
-                <MobileInput
-                  value={field.value}
-                  onChange={field.onChange}
-                  invalid={!!fieldState.error}
-                />
+                <div className="min-w-0 flex-1">
+                  <MobileInput
+                    value={field.value}
+                    onChange={field.onChange}
+                    invalid={!!fieldState.error}
+                  />
+                  {fieldState.error && (
+                    <p role="alert" className="mt-1 text-xs text-red-600">
+                      {fieldState.error.message}
+                    </p>
+                  )}
+                </div>
               )}
             />
           )}
@@ -195,8 +220,17 @@ export default function ContactInfoSection({
           type="email"
           placeholder="example@email.com"
           aria-invalid={!!errors.email}
-          {...register("email")}
+          {...register("email", {
+            validate: (value) =>
+              isValidOptionalEmail(value) ||
+              "Enter a valid email address.",
+          })}
         />
+        {errors.email && (
+          <p role="alert" className="mt-1 text-xs text-red-600">
+            {errors.email.message}
+          </p>
+        )}
         <p className="mt-1.5 text-xs text-[#8a9eaa]">Business email address</p>
       </div>
     </div>
