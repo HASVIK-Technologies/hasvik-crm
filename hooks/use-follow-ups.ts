@@ -22,7 +22,16 @@ import type {
   UpdateFollowUpPayload,
   UpdateFollowUpStatusPayload,
 } from "@/types/follow-up";
-import { followUpQueryKeys } from "@/lib/query/query-keys";
+import {
+  businessQueryKeys,
+  followUpQueryKeys,
+} from "@/lib/query/query-keys";
+
+function invalidateBusinessQueries(
+  queryClient: ReturnType<typeof useQueryClient>,
+) {
+  return queryClient.invalidateQueries({ queryKey: businessQueryKeys.all });
+}
 
 export function useFollowUpsQuery(filters: FollowUpFilters) {
   return useQuery({
@@ -91,6 +100,7 @@ export function useCreateFollowUp() {
     mutationFn: (payload: CreateFollowUpPayload) => createFollowUp(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
+      invalidateBusinessQueries(queryClient);
     },
   });
 }
@@ -136,6 +146,7 @@ export function useUpdateFollowUp() {
           query.queryKey[0] === followUpQueryKeys.all[0] &&
           query.queryKey[1] !== "detail",
       });
+      invalidateBusinessQueries(queryClient);
     },
   });
 }
@@ -147,6 +158,7 @@ export function useUpdateFollowUpStatus() {
       updateFollowUpStatus(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
+      invalidateBusinessQueries(queryClient);
     },
   });
 }
@@ -164,6 +176,7 @@ export function useCancelFollowUp() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
+      invalidateBusinessQueries(queryClient);
     },
   });
 }
@@ -177,6 +190,7 @@ export function useCompleteFollowUp() {
     },
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
+      invalidateBusinessQueries(queryClient);
     },
   });
 }

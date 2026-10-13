@@ -4,6 +4,7 @@ import { useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
+import { isValidHttpUrl } from "@/lib/business/url-validation";
 import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function AdditionalInfoSection({
@@ -11,7 +12,10 @@ export default function AdditionalInfoSection({
 }: {
   idPrefix?: string;
 }) {
-  const { register } = useFormContext<BusinessFormValues>();
+  const {
+    register,
+    formState: { errors },
+  } = useFormContext<BusinessFormValues>();
 
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 lg:grid-cols-3">
@@ -20,8 +24,18 @@ export default function AdditionalInfoSection({
         <Input
           id={`${idPrefix}website`}
           placeholder="https://www.example.com"
-          {...register("website")}
+          aria-invalid={Boolean(errors.website)}
+          {...register("website", {
+            validate: (value) =>
+              isValidHttpUrl(value) ||
+              "Enter a valid website address (for example, www.example.com).",
+          })}
         />
+        {errors.website && (
+          <p role="alert" className="mt-1 text-xs text-red-600">
+            {errors.website.message}
+          </p>
+        )}
       </div>
 
       <div>
