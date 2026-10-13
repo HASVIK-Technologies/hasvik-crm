@@ -75,6 +75,45 @@ export const STATUS_OPTIONS = [
   { value: "LOST", label: "Lost" },
 ];
 
+export const LEAD_STATUS_DISPLAY_NAMES: Record<string, string> = {
+  NEW: "New",
+  CONTACTED: "Contacted",
+  INTERESTED: "Interested",
+  PROPOSAL_AND_NEGOTIATION: "Proposal & Negotiation",
+  WON: "Won",
+  LOST: "Lost",
+};
+
+export function formatLeadStatus(
+  status?: string | null,
+  statusMap?: Record<string, string>,
+): string {
+  if (!status || status === "-") return "-";
+
+  const trimmed = status.trim();
+  const upper = trimmed.toUpperCase();
+
+  if (statusMap) {
+    if (statusMap[trimmed]) return statusMap[trimmed];
+    if (statusMap[upper]) return statusMap[upper];
+    const match = Object.keys(statusMap).find((k) => k.toUpperCase() === upper);
+    if (match && statusMap[match]) return statusMap[match];
+  }
+
+  if (LEAD_STATUS_DISPLAY_NAMES[upper]) {
+    return LEAD_STATUS_DISPLAY_NAMES[upper];
+  }
+
+  const option = STATUS_OPTIONS.find((opt) => opt.value.toUpperCase() === upper);
+  if (option) return option.label;
+
+  return trimmed
+    .toLowerCase()
+    .split("_")
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(" ");
+}
+
 export const BUSINESS_TYPE_OPTIONS = [
   "Proprietorship",
   "Partnership",

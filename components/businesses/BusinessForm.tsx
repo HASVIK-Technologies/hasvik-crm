@@ -45,6 +45,7 @@ import {
   toFollowUpPayload,
   type BusinessFormValues,
 } from "@/lib/business/form-types";
+import { toDateTimeLocalValue } from "@/lib/forms/date-time";
 
 // Additional Information is built out but hidden from view for now - the
 // team plans to start using it in a future release. Flip this to `true`
@@ -64,7 +65,7 @@ const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
   status: "Status",
   followUpType: "Follow-up Type",
   assignTo: "Assignee",
-  nextFollowupDate: "Next Follow-up Date",
+  nextFollowupDate: "Follow-up Date & Time",
   phoneNumbers: "Phone Number",
   whatsappNumbers: "WhatsApp Number",
 };
@@ -200,12 +201,9 @@ export default function BusinessForm({
           description: data.description || "",
           followUpType: data.followUp?.type || "",
           assignTo: data.followUp?.assignedTo || data.assignedTo || "",
-          nextFollowupDate: data.followUp?.scheduledAt || data.nextFollowupDate
-            ? (data.followUp?.scheduledAt || data.nextFollowupDate || "").slice(
-                0,
-                10,
-              )
-            : "",
+          nextFollowupDate: toDateTimeLocalValue(
+            data.followUp?.scheduledAt || data.nextFollowupDate,
+          ),
           reminder:
             data.followUp?.reminderInMinutes === undefined &&
             (data.reminder === undefined || data.reminder === null)

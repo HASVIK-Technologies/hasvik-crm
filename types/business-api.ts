@@ -12,6 +12,7 @@ export type ApiBusiness = {
   categoryId?: string | null;
   businessType?: string;
   location?: { url?: string } | null;
+  locationUrl?: string;
   status?: string;
   isActive?: boolean;
   phoneNumbers?: PhoneNumber[];
@@ -116,4 +117,5 @@ export type CreateBusinessPayload = {
   assignedTo?: string;
   leadSource?: string;
   followUp?: FollowUpPayload;
+  location?: { url?: string } | null;
 };

@@ -2,16 +2,20 @@
 
 import { Controller, useForm } from "react-hook-form";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { CalendarDays, Loader2, Search, X } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
+import DateTimePicker from "@/components/common/DateTimePicker";
 import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
 import SaveButton from "@/components/common/SaveButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCreateFollowUp } from "@/hooks/use-follow-ups";
 import { getApiErrorMessage } from "@/lib/api/api-error";
-import { fromDateTimeLocalValue } from "@/lib/forms/date-time";
+import {
+  fromDateTimeLocalValue,
+  validateFutureDateTime,
+} from "@/lib/forms/date-time";
 import { parseReminderToMinutes } from "@/lib/follow-ups/api";
 import {
   FOLLOW_UP_REMINDER_OPTIONS,
@@ -46,7 +50,6 @@ function NextFollowUpForm({
   const mutation = useCreateFollowUp();
   const {
     control,
-    register,
     handleSubmit,
     formState: { errors, isSubmitting },
   } = useForm<NextFollowUpFormValues>({
@@ -132,21 +135,22 @@ function NextFollowUpForm({
             >
               Date &amp; Time <span className="text-red-500">*</span>
             </label>
-            <div className="relative">
-              <CalendarDays className="absolute left-3 top-2.5 size-3.5 text-[#64748b]" />
-              <Input
-                id="next-follow-up-date"
-                type="datetime-local"
-                aria-invalid={Boolean(errors.scheduledAt)}
-                {...register("scheduledAt", {
-                  required: "Follow-up date is required.",
-                  validate: (value) =>
-                    Boolean(fromDateTimeLocalValue(value)) ||
-                    "Enter a valid date and time.",
-                })}
-                className="h-10 pl-9 text-xs"
-              />
-            </div>
+            <Controller
+              control={control}
+              name="scheduledAt"
+              rules={{
+                required: "Follow-up date is required.",
+                validate: validateFutureDateTime,
+              }}
+              render={({ field }) => (
+                <DateTimePicker
+                  id="next-follow-up-date"
+                  value={field.value}
+                  onChange={field.onChange}
+                  invalid={Boolean(errors.scheduledAt)}
+                />
+              )}
+            />
             {errors.scheduledAt && (
               <p role="alert" className="mt-1 text-xs text-red-600">
                 {errors.scheduledAt.message}

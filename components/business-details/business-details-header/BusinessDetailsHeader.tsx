@@ -6,6 +6,7 @@ import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import OutlinedButton from "@/components/common/OutlinedButton";
+import { formatLeadStatus } from "@/lib/business/form-options";
 // 1. We define the Props so TypeScript knows what data to expect
 interface HeaderProps {
   business: any;
@@ -16,37 +17,85 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
   // 2. We copy the cleanNumber function here so the WhatsApp button can use it
   const cleanNumber = (num: string) => num.replace(/\D/g, '');
 
+  const savedLocationUrl =
+    business?.locationUrl ||
+    (typeof business?.location === "string"
+      ? business.location
+      : business?.location?.url);
+
+  let cleanLocationUrl = savedLocationUrl;
+  if (cleanLocationUrl && typeof cleanLocationUrl === "string") {
+    const iframeMatch = cleanLocationUrl.match(/src=["']([^"']+)["']/i);
+    if (iframeMatch) {
+      cleanLocationUrl = iframeMatch[1];
+    }
+  }
+
+  const mapPinHref =
+    cleanLocationUrl ||
+    `https://maps.google.com/?q=${encodeURIComponent(
+      [business?.name, business?.address || business?.city]
+        .filter(Boolean)
+        .join(" ")
+        .trim()
+    )}`;
+
+  const rawLeadStatus =
+    (business?.leadStatus && business.leadStatus !== "Active" && business.leadStatus !== "Inactive"
+      ? business.leadStatus
+      : undefined) ||
+    (business?.status && business.status !== "Active" && business.status !== "Inactive"
+      ? business.status
+      : undefined) ||
+    business?.leadStatus;
+
+  const leadStatusDisplay = formatLeadStatus(rawLeadStatus);
+
   return (
-    <CardHeader className="flex flex-row items-start justify-between gap-4 border-b border-[#eef2f6] bg-[#fbfdff] px-5 py-5 sm:px-7">
+    <CardHeader className="flex flex-col gap-4 border-b border-[#eef2f6] bg-[#fbfdff] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
 
       {/* LEFT SIDE: Avatar & Name */}
-      <div className="flex items-start gap-4">
-        <Avatar className="size-16 rounded-2xl">
-          <AvatarFallback className="bg-primary/10 text-xl font-semibold text-primary">
+      <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">
+        <Avatar className="size-13 sm:size-16 rounded-xl sm:rounded-2xl shrink-0">
+          <AvatarFallback className="bg-primary/10 text-base sm:text-xl font-semibold text-primary">
             {business.initials}
           </AvatarFallback>
         </Avatar>
-        <div className="mt-0.5 flex min-w-0 flex-col gap-2">
-          <div className="flex flex-wrap items-center gap-3">
-            <CardTitle className="truncate text-xl tracking-tight text-[#334155] sm:text-2xl">{business.name}</CardTitle>
-            <StatusBadge status={business.status} />
+        <div className="mt-0.5 flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
+          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+            <CardTitle className="text-lg font-bold tracking-tight text-[#334155] sm:text-2xl break-words min-w-0">{business.name}</CardTitle>
+            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+              <StatusBadge status={business.status} />
+              {leadStatusDisplay && leadStatusDisplay !== "-" && (
+                <StatusBadge
+                  status={rawLeadStatus || leadStatusDisplay}
+                  label={leadStatusDisplay}
+                />
+              )}
+            </div>
           </div>
-          <p className="flex items-center gap-2 text-sm text-[#64748b]">
-            <Building2 className="size-4 text-[#94a3b8]" />
-            {business.category} <span className="text-[#cbd5e1]">/</span> {business.city}
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-[#64748b]">
+            <Building2 className="size-3.5 sm:size-4 shrink-0 text-[#94a3b8]" />
+            <span>{business.category}</span>
+            {business.city && (
+              <>
+                <span className="text-[#cbd5e1]">/</span>
+                <span>{business.city}</span>
+              </>
+            )}
           </p>
         </div>
       </div>
 
       {/* RIGHT SIDE: Action Buttons */}
-      <div className="flex items-center gap-2">
+      <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
 
         {/* Your new Phone Component! */}
         <PhoneButton phones={businessData.contactInfo.phones} />
         {/* Maps Button */}
         <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10">
           <a
-            href={`https://maps.google.com/?q=${encodeURIComponent(business.name + " " + (business.address || business.city))}`}
+            href={mapPinHref}
             target="_blank"
             rel="noopener noreferrer"
           >

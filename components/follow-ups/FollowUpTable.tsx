@@ -122,7 +122,9 @@ export default function FollowUpTable({
   ) => {
     if (
       event.target instanceof Element &&
-      event.target.closest("a, button, [role='button'], input, select, textarea")
+      event.target.closest(
+        "a, button, [role='button'], [role='menu'], [role='menuitem'], [data-radix-dropdown-menu-content], [data-radix-popper-content-wrapper], input, select, textarea",
+      )
     ) {
       return;
     }
@@ -201,19 +203,25 @@ export default function FollowUpTable({
                       </p>
                     </div>
                   </div>
-                  <div className="flex shrink-0 flex-col items-end justify-between self-stretch gap-2.5">
+                  <div
+                    className="flex shrink-0 flex-col items-end justify-between self-stretch gap-2.5"
+                    onClick={(e) => e.stopPropagation()}
+                  >
                     <StatusBadge
                       status={item.status}
                       className="rounded-md px-2.5 py-0.5 text-[10px]"
                     />
-                    <div className="flex items-center gap-1.5">
-                      <a href={item.businessPhone ? `tel:${item.businessPhone}` : undefined} aria-label={`Call ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"><Phone className="size-4" /></a>
-                      <a href={item.businessPhone ? `https://wa.me/91${item.businessPhone}` : undefined} target="_blank" rel="noopener noreferrer" aria-label={`WhatsApp ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"><WhatsAppIcon className="size-4" /></a>
+                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <a href={item.businessPhone ? `tel:${item.businessPhone}` : undefined} onClick={(e) => e.stopPropagation()} aria-label={`Call ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"><Phone className="size-4" /></a>
+                      <a href={item.businessPhone ? `https://wa.me/91${item.businessPhone}` : undefined} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} aria-label={`WhatsApp ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"><WhatsAppIcon className="size-4" /></a>
                       <button
                         type="button"
                         aria-label={`View or add notes for ${item.businessName}`}
                         title="View or add notes"
-                        onClick={() => setNotesFollowUp(item)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          setNotesFollowUp(item);
+                        }}
                         className="flex size-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                       >
                         <MessageSquareText className="size-4" />
@@ -221,19 +229,23 @@ export default function FollowUpTable({
                       {canEditFollowUp(item) && <Button
                         size="sm"
                         variant="outline"
-                        onClick={() => onEdit(item)}
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          onEdit(item);
+                        }}
                         className="h-7 gap-1 border-[#d0d5dd] px-2 text-xs font-semibold text-[#344054] hover:bg-[#f8fafc] hover:text-[#0f172a]"
                       >
                         <Pencil className="size-3 text-[#64748b]" /> Edit
                       </Button>}
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
+                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <PlainButton size="icon" aria-label="More actions" className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"><MoreVertical className="size-4" /></PlainButton>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-44 bg-white">
+                        <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenuItem asChild className="cursor-pointer text-xs"><Link href={`/follow-ups/${item.id}`}>View Details</Link></DropdownMenuItem>
                         {canCreateNextFollowUp(item) && onNextFollowUp && (
                             <DropdownMenuItem
+                              onClick={(e) => e.stopPropagation()}
                               onSelect={() => onNextFollowUp(item)}
                               className="cursor-pointer text-xs font-semibold text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong"
                             >
@@ -241,12 +253,20 @@ export default function FollowUpTable({
                             </DropdownMenuItem>
                           )}
                           {canCompleteFollowUp(item) && (
-                            <DropdownMenuItem onSelect={() => onComplete(item)} className="cursor-pointer text-xs text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong">
+                            <DropdownMenuItem
+                              onClick={(e) => e.stopPropagation()}
+                              onSelect={() => onComplete(item)}
+                              className="cursor-pointer text-xs text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong"
+                            >
                               Mark as Completed
                             </DropdownMenuItem>
                           )}
                           {canCancelFollowUp(item) && (
-                            <DropdownMenuItem onSelect={() => onCancel(item)} className="cursor-pointer text-xs text-[#b42318] focus:bg-[#fff1f3] focus:text-[#b42318]">
+                            <DropdownMenuItem
+                              onClick={(e) => e.stopPropagation()}
+                              onSelect={() => onCancel(item)}
+                              className="cursor-pointer text-xs text-[#b42318] focus:bg-[#fff1f3] focus:text-[#b42318]"
+                            >
                               Cancel Follow-up
                             </DropdownMenuItem>
                           )}
@@ -367,8 +387,8 @@ export default function FollowUpTable({
                     <TableCell className="px-4 py-4 text-xs text-[#475569]">
                       {item.assignedToName}
                     </TableCell>
-                    <TableCell className="py-4 pl-4 pr-6">
-                      <div className="flex items-center justify-end gap-2">
+                    <TableCell className="py-4 pl-4 pr-6" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <a
@@ -377,6 +397,7 @@ export default function FollowUpTable({
                                   ? `tel:${item.businessPhone}`
                                   : undefined
                               }
+                              onClick={(e) => e.stopPropagation()}
                               aria-label={`Call ${item.businessName}`}
                               className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"
                             >
@@ -397,6 +418,7 @@ export default function FollowUpTable({
                               }
                               target="_blank"
                               rel="noopener noreferrer"
+                              onClick={(e) => e.stopPropagation()}
                               aria-label={`WhatsApp ${item.businessName}`}
                               className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"
                             >
@@ -412,7 +434,10 @@ export default function FollowUpTable({
                             <button
                               type="button"
                               aria-label={`View or add notes for ${item.businessName}`}
-                              onClick={() => setNotesFollowUp(item)}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNotesFollowUp(item);
+                              }}
                               className="flex size-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                             >
                               <MessageSquareText className="size-4" />
@@ -423,7 +448,7 @@ export default function FollowUpTable({
                           </TooltipContent>
                         </Tooltip>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <PlainButton
                               size="icon"
                               aria-label="More actions"
@@ -435,6 +460,7 @@ export default function FollowUpTable({
                           <DropdownMenuContent
                             align="end"
                             className="w-48 rounded-xl border border-[#e2e8f0] bg-white p-1 shadow-lg"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <DropdownMenuItem asChild className="cursor-pointer text-xs">
                               <Link
@@ -447,6 +473,7 @@ export default function FollowUpTable({
                             </DropdownMenuItem>
 
                             {canEditFollowUp(item) && <DropdownMenuItem
+                              onClick={(e) => e.stopPropagation()}
                               onSelect={() => onEdit(item)}
                               className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#344054] hover:bg-[#f1f5f9] focus:bg-[#f8fafc]"
                             >
@@ -455,6 +482,7 @@ export default function FollowUpTable({
                             </DropdownMenuItem>}
 
                             {canCancelFollowUp(item) && <DropdownMenuItem
+                              onClick={(e) => e.stopPropagation()}
                               onSelect={() => onCancel(item)}
                               className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#b42318] hover:bg-[#fff1f3] focus:bg-[#fff1f3] focus:text-[#b42318]"
                             >
@@ -463,6 +491,7 @@ export default function FollowUpTable({
                             </DropdownMenuItem>}
 
                             {canCompleteFollowUp(item) && <DropdownMenuItem
+                              onClick={(e) => e.stopPropagation()}
                               onSelect={() => onComplete(item)}
                               className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-brand-green-strong hover:bg-brand-green/10 focus:bg-brand-green/10 focus:text-brand-green-strong"
                             >
@@ -470,7 +499,11 @@ export default function FollowUpTable({
                               <span>Mark as Completed</span>
                             </DropdownMenuItem>}
                             {canCreateNextFollowUp(item) && onNextFollowUp && (
-                              <DropdownMenuItem onSelect={() => onNextFollowUp(item)} className="cursor-pointer text-xs font-semibold text-brand-green-strong">
+                              <DropdownMenuItem
+                                onClick={(e) => e.stopPropagation()}
+                                onSelect={() => onNextFollowUp(item)}
+                                className="cursor-pointer text-xs font-semibold text-brand-green-strong"
+                              >
                                 <Plus className="mr-1.5 size-3.5" /> Next Follow-Up
                               </DropdownMenuItem>
                             )}

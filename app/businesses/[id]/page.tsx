@@ -41,7 +41,7 @@ import { ChangeBusinessStatusModal } from "@/components/businesses";
 import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
-import { REMINDER_OPTIONS } from "@/lib/business/form-options";
+import { REMINDER_OPTIONS, formatLeadStatus } from "@/lib/business/form-options";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -90,6 +90,7 @@ const STATIC_BUSINESS_12: BusinessItem = {
   category: "Furniture Shop",
   city: "Ballia",
   status: "Active",
+  leadStatus: "INTERESTED",
   lastFollowUp: "25 Aug 2026 at 11:30 AM",
   nextFollowUp: "Today at 10:00 AM",
   nextFollowUpType: "today",
@@ -159,6 +160,40 @@ export default function BusinessDetails() {
     );
   }
 
+  const savedLocationUrl =
+    business?.locationUrl ||
+    (typeof business?.location === "string"
+      ? business.location
+      : business?.location?.url);
+
+  let cleanLocationUrl = savedLocationUrl;
+  if (cleanLocationUrl && typeof cleanLocationUrl === "string") {
+    const iframeMatch = cleanLocationUrl.match(/src=["']([^"']+)["']/i);
+    if (iframeMatch) {
+      cleanLocationUrl = iframeMatch[1];
+    }
+  }
+
+  const rawLeadStatus =
+    (business?.leadStatus && business.leadStatus !== "Active" && business.leadStatus !== "Inactive"
+      ? business.leadStatus
+      : undefined) ||
+    (business?.status && business.status !== "Active" && business.status !== "Inactive"
+      ? business.status
+      : undefined) ||
+    business?.leadStatus;
+
+  const leadStatusDisplay = formatLeadStatus(rawLeadStatus);
+
+  const mapPinHref =
+    cleanLocationUrl ||
+    `https://maps.google.com/?q=${encodeURIComponent(
+      [business?.name, business?.address || business?.city]
+        .filter(Boolean)
+        .join(" ")
+        .trim()
+    )}`;
+
   return (
     <DetailsPageLayout
       breadcrumb={
@@ -194,22 +229,30 @@ export default function BusinessDetails() {
         <>
           {/* 2. SINGLE MERGED CARD (Full Width) */}
           <Card className="w-full overflow-hidden rounded-2xl border-[#e4ecf2] shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
-            <CardHeader className="flex flex-col gap-5 border-b border-[#e8eef4] bg-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-              <div className="flex min-w-0 items-start gap-4">
-                <Avatar className="size-16 rounded-2xl">
-                  <AvatarFallback className="bg-primary/10 text-xl font-semibold text-primary">
+            <CardHeader className="flex flex-col gap-4 border-b border-[#e8eef4] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
+              <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">
+                <Avatar className="size-13 sm:size-16 rounded-xl sm:rounded-2xl shrink-0">
+                  <AvatarFallback className="bg-primary/10 text-base sm:text-xl font-semibold text-primary">
                     {business.initials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="mt-0.5 flex min-w-0 flex-col gap-2">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <CardTitle className="truncate text-xl font-bold tracking-tight text-[#0f172a] sm:text-2xl">
+                <div className="mt-0.5 flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <CardTitle className="text-lg font-bold tracking-tight text-[#0f172a] sm:text-2xl break-words min-w-0">
                       {business.name}
                     </CardTitle>
-                    <StatusBadge status={isInactive ? "Inactive" : "Active"} />
+                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                      <StatusBadge status={isInactive ? "Inactive" : "Active"} />
+                      {leadStatusDisplay && leadStatusDisplay !== "-" && (
+                        <StatusBadge
+                          status={rawLeadStatus || leadStatusDisplay}
+                          label={leadStatusDisplay}
+                        />
+                      )}
+                    </div>
                   </div>
-                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[#64748b]">
-                    <Building2 className="size-4 shrink-0 text-[#94a3b8]" />
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-[#64748b]">
+                    <Building2 className="size-3.5 sm:size-4 shrink-0 text-[#94a3b8]" />
                     <span>{business.category || "Uncategorized"}</span>
                     {business.city && (
                       <>
@@ -221,7 +264,7 @@ export default function BusinessDetails() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto">
+              <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
                 {businessData.contactInfo.phones?.length > 1 ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
@@ -311,7 +354,7 @@ export default function BusinessDetails() {
                   className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10"
                 >
                   <a
-                    href={`https://maps.google.com/?q=${encodeURIComponent(business.name + " " + (business.address || business.city))}`}
+                    href={mapPinHref}
                     target="_blank"
                     rel="noopener noreferrer"
                   >

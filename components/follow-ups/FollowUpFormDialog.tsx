@@ -3,9 +3,10 @@
 import { useEffect } from "react";
 import { Controller, useForm } from "react-hook-form";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { CalendarDays, Loader2, Search, X } from "lucide-react";
+import { Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
+import DateTimePicker from "@/components/common/DateTimePicker";
 import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
 import FollowUpTypeSelect from "@/components/common/FollowUpTypeSelect";
 import FollowUpAutocomplete from "@/components/follow-ups/FollowUpAutocomplete";
@@ -14,7 +15,11 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useCreateFollowUp, useUpdateFollowUp } from "@/hooks/use-follow-ups";
 import { getApiErrorMessage } from "@/lib/api/api-error";
-import { fromDateTimeLocalValue, toDateTimeLocalValue } from "@/lib/forms/date-time";
+import {
+  fromDateTimeLocalValue,
+  toDateTimeLocalValue,
+  validateFutureDateTime,
+} from "@/lib/forms/date-time";
 import { parseReminderToMinutes } from "@/lib/follow-ups/api";
 import {
   FOLLOW_UP_REMINDER_OPTIONS,
@@ -77,7 +82,6 @@ export default function FollowUpFormDialog({
   const updateMutation = useUpdateFollowUp();
   const {
     control,
-    register,
     handleSubmit,
     reset,
     formState: { errors, isSubmitting },
@@ -200,19 +204,21 @@ export default function FollowUpFormDialog({
                 <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
                   Follow-up date <span className="text-red-500">*</span>
                 </label>
-                <div className="relative">
-                  <CalendarDays className="absolute left-3 top-2.5 size-3.5 text-[#64748b]" />
-                  <Input
-                    type="datetime-local"
-                    aria-invalid={Boolean(errors.scheduledAt)}
-                    {...register("scheduledAt", {
-                      required: "Follow-up date is required.",
-                      validate: (value) =>
-                        Boolean(fromDateTimeLocalValue(value)) || "Enter a valid date and time.",
-                    })}
-                    className="h-10 pl-9 text-xs"
-                  />
-                </div>
+                <Controller
+                  control={control}
+                  name="scheduledAt"
+                  rules={{
+                    required: "Follow-up date is required.",
+                    validate: validateFutureDateTime,
+                  }}
+                  render={({ field }) => (
+                    <DateTimePicker
+                      value={field.value}
+                      onChange={field.onChange}
+                      invalid={Boolean(errors.scheduledAt)}
+                    />
+                  )}
+                />
                 {errors.scheduledAt && <p role="alert" className="mt-1 text-xs text-red-600">{errors.scheduledAt.message}</p>}
               </div>
               <div>

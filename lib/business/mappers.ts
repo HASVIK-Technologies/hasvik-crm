@@ -116,6 +116,12 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     businessType: business.businessType,
     assignedTo: business.assignedTo,
     alternatePhone: getPrimaryNumber(business.whatsappNumbers),
+    location: business.location,
+    locationUrl:
+      (typeof business.location === "object" ? business.location?.url : undefined) ||
+      (typeof business.location === "string" ? business.location : undefined) ||
+      business.locationUrl ||
+      "",
   };
 }
 
@@ -150,6 +156,9 @@ export function toCreateBusinessPayload(
 
   if (values.email.trim()) payload.email = values.email.trim();
   if (values.website.trim()) payload.website = values.website.trim();
+  if (values.locationUrl?.trim()) {
+    payload.location = { url: values.locationUrl.trim() };
+  }
   if (values.assignTo) payload.assignedTo = values.assignTo;
   payload.followUp = toFollowUpPayload(values);
 
