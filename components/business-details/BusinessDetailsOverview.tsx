@@ -1,6 +1,6 @@
 import React from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Building2, Tags, MapPin, Building, Zap, Globe, Mail } from "lucide-react";
+import { Building2, Tags, MapPin, Building, Zap, Globe, Mail, FileText } from "lucide-react";
 import { StatusBadge } from "@/components/common/StatusBadge";
 
 interface OverviewProps {
@@ -71,6 +71,13 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
           ) : (
             <span className="font-medium text-slate-700">-</span>
           )}
+        </div>
+        <div className="flex items-start gap-3 text-sm">
+          <FileText className="w-5 h-5 text-slate-400 shrink-0 mt-0.5" />
+          <div className="w-32 shrink-0 text-slate-500">Description</div>
+          <div className="text-slate-700 font-medium leading-relaxed break-words whitespace-pre-line">
+            {business.description || businessData?.businessInfo?.description || "-"}
+          </div>
         </div>
       </div>
     </div>

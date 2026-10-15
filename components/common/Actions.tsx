@@ -41,7 +41,11 @@ function ActionMenuItem({ action }: { action: ActionItem }) {
 
   if (action.href && !action.disabled) {
     return (
-      <DropdownMenuItem asChild className={className} disabled={action.disabled}>
+      <DropdownMenuItem
+        asChild
+        className={className}
+        disabled={action.disabled}
+      >
         <Link href={action.href}>
           {action.icon && <span className="mr-2">{action.icon}</span>}
           {action.label}
@@ -69,6 +73,14 @@ function ActionButton({ action }: { action: ActionItem }) {
       {action.label}
     </>
   );
+
+  if (action.disabled) {
+    return (
+      <PrimaryButton disabled className="opacity-50 pointer-events-none">
+        {content}
+      </PrimaryButton>
+    );
+  }
 
   if (action.href) {
     return (

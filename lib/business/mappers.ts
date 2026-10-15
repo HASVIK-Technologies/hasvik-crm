@@ -116,6 +116,8 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     businessType: business.businessType,
     assignedTo: business.assignedTo,
     alternatePhone: getPrimaryNumber(business.whatsappNumbers),
+    phoneNumbers: business.phoneNumbers,
+    whatsappNumbers: business.whatsappNumbers,
   };
 }
 

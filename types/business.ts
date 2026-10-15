@@ -26,6 +26,8 @@ export interface BusinessItem {
   businessType?: string;
   assignedTo?: string;
   alternatePhone?: string;
+  phoneNumbers?: any[];
+  whatsappNumbers?: any[];
 }
 
 export interface BusinessStatsData {
