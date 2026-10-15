@@ -22,7 +22,23 @@ export default function BusinessDetailsQuickActions({
     ? "opacity-50 pointer-events-none cursor-not-allowed"
     : "";
 
+  const COUNTRY_CODE = "91";
   const phone = business?.phone ? cleanNumber(business.phone) : "";
+  const primaryWhatsapp =
+    (Array.isArray(business?.whatsappNumbers) &&
+      (business.whatsappNumbers.find((w: any) => w?.isPrimary)?.number ||
+        business.whatsappNumbers[0]?.number)) ||
+    business?.alternatePhone ||
+    "";
+  const whatsappDigits = primaryWhatsapp ? cleanNumber(primaryWhatsapp) : "";
+  const fullWhatsappNumber = whatsappDigits
+    ? whatsappDigits.length === 10
+      ? `${COUNTRY_CODE}${whatsappDigits}`
+      : whatsappDigits
+    : "";
+  const whatsappUrl = fullWhatsappNumber
+    ? `https://wa.me/${fullWhatsappNumber}`
+    : undefined;
 
   return (
     <div className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
@@ -44,7 +60,9 @@ export default function BusinessDetailsQuickActions({
               <p className="text-xs font-semibold text-slate-800 group-hover:text-primary">
                 Edit Business
               </p>
-              <p className="text-[11px] text-slate-400">Update business details</p>
+              <p className="text-[11px] text-slate-400">
+                Update business details
+              </p>
             </div>
           </div>
           <ChevronRight className="size-4 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
@@ -65,16 +83,18 @@ export default function BusinessDetailsQuickActions({
               <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand-green-strong">
                 Call
               </p>
-              <p className="truncate text-[10px] text-slate-400">Direct phone</p>
+              <p className="truncate text-[10px] text-slate-400">
+                Direct phone
+              </p>
             </div>
           </a>
 
           <a
-            href={phone ? `https://wa.me/91${phone}` : undefined}
+            href={whatsappUrl}
             target="_blank"
             rel="noopener noreferrer"
             className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-brand-green/30 hover:bg-brand-green/5 ${
-              !phone || isInactive ? "opacity-50 pointer-events-none" : ""
+              !whatsappUrl || isInactive ? "opacity-50 pointer-events-none" : ""
             }`}
           >
             <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green-strong transition-colors group-hover:bg-brand-green/15">
