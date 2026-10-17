@@ -1,5 +1,6 @@
 import type { FollowUpType } from "@/types/follow-up";
 import type { FollowUpPayload } from "@/types/business-api";
+import { fromDateTimeLocalValue } from "@/lib/forms/date-time";
 
 export type NumberFieldValue = {
   value: string;
@@ -25,6 +26,8 @@ export type BusinessFormValues = {
   description: string;
   followUpType: FollowUpType | "";
   assignTo: string;
+  /** Display name for `assignTo`; used to display the user's full name in the dropdown. Never sent to the API. */
+  assignToName?: string;
   nextFollowupDate: string;
   reminder: string;
 };
@@ -32,6 +35,7 @@ export type BusinessFormValues = {
 export const defaultBusinessFormValues: BusinessFormValues = {
   businessName: "",
   category: "",
+  categoryName: "",
   city: "",
   state: "",
   pincode: "",
@@ -45,6 +49,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   description: "",
   followUpType: "",
   assignTo: "",
+  assignToName: "",
   nextFollowupDate: "",
   reminder: "",
   addAnother: false,
@@ -76,20 +81,18 @@ export function toFollowUpPayload(
   values: BusinessFormValues,
 ): FollowUpPayload {
   if (!values.assignTo || !values.followUpType || !values.nextFollowupDate) {
-    throw new Error("Follow-up type, assignee, and date are required.");
+    throw new Error("Follow-up type, assignee, and date/time are required.");
   }
 
-  const scheduledAt = new Date(
-    `${values.nextFollowupDate}T00:00:00.000Z`,
-  );
-  if (Number.isNaN(scheduledAt.getTime())) {
-    throw new Error("Follow-up date is invalid.");
+  const scheduledAt = fromDateTimeLocalValue(values.nextFollowupDate);
+  if (!scheduledAt) {
+    throw new Error("Follow-up date and time is invalid.");
   }
 
   return {
     assignedTo: values.assignTo,
     type: values.followUpType,
-    scheduledAt: scheduledAt.toISOString(),
+    scheduledAt,
     ...(values.reminder
       ? { reminderInMinutes: Number(values.reminder) }
       : {}),

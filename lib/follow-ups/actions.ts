@@ -16,7 +16,7 @@ export function canCancelFollowUp(followUp: FollowUpItem): boolean {
 
 export function canCompleteFollowUp(followUp: FollowUpItem): boolean {
   const status = getStatus(followUp);
-  return status === "SCHEDULED" || status === "OVERDUE" || status === "CANCELLED";
+  return status === "SCHEDULED" || status === "OVERDUE";
 }
 
 export function canCreateNextFollowUp(followUp: FollowUpItem): boolean {

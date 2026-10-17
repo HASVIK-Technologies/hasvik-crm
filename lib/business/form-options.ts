@@ -75,6 +75,75 @@ export const STATUS_OPTIONS = [
   { value: "LOST", label: "Lost" },
 ];
 
+export const LEAD_STATUS_DISPLAY_NAMES: Record<string, string> = {
+  NEW: "New",
+  CONTACTED: "Contacted",
+  INTERESTED: "Interested",
+  PROPOSAL_AND_NEGOTIATION: "Proposal & Negotiation",
+  WON: "Won",
+  LOST: "Lost",
+};
+
+export function getLeadStatusLabel(status?: string | null): string {
+  if (!status || typeof status !== "string") return "-";
+
+  const trimmed = status.trim();
+  if (!trimmed || trimmed === "-") return "-";
+
+  const upper = trimmed.toUpperCase();
+
+  const option = STATUS_OPTIONS.find(
+    (opt) =>
+      opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
+  );
+  if (option) return option.label;
+
+  if (LEAD_STATUS_DISPLAY_NAMES[upper]) {
+    return LEAD_STATUS_DISPLAY_NAMES[upper];
+  }
+
+  return trimmed
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
+export function formatLeadStatus(
+  status?: string | null,
+  statusMap?: Record<string, string>,
+): string {
+  if (!status || typeof status !== "string") return "-";
+
+  const trimmed = status.trim();
+  if (!trimmed || trimmed === "-") return "-";
+
+  const upper = trimmed.toUpperCase();
+
+  const option = STATUS_OPTIONS.find(
+    (opt) =>
+      opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
+  );
+  if (option) return option.label;
+
+  if (statusMap) {
+    if (statusMap[trimmed] && statusMap[trimmed] !== trimmed) return statusMap[trimmed];
+    if (statusMap[upper] && statusMap[upper] !== upper) return statusMap[upper];
+    const match = Object.keys(statusMap).find((k) => k.toUpperCase() === upper);
+    if (match && statusMap[match] && statusMap[match] !== match) return statusMap[match];
+  }
+
+  if (LEAD_STATUS_DISPLAY_NAMES[upper]) {
+    return LEAD_STATUS_DISPLAY_NAMES[upper];
+  }
+
+  return trimmed
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export const BUSINESS_TYPE_OPTIONS = [
   "Proprietorship",
   "Partnership",

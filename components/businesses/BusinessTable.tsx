@@ -47,6 +47,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
+import { getLeadStatusLabel } from "@/lib/business/form-options";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 
 function formatDisplayString(val: unknown, fallback: string = "-"): string {
@@ -238,7 +239,7 @@ export default function BusinessTable({
                         {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">
-                        Lead status: {formatDisplayString(item.leadStatus, "-")}
+                        Lead status: {getLeadStatusLabel(item.leadStatus)}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
                     </div>
@@ -477,7 +478,7 @@ export default function BusinessTable({
 
                     {/* Lead Status */}
                     <TableCell className="px-4 py-4.5 text-sm">
-                      {formatDisplayString(item.leadStatus, "-")}
+                      {getLeadStatusLabel(item.leadStatus)}
                     </TableCell>
 
                     {/* Status */}

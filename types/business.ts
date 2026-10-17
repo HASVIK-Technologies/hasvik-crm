@@ -26,6 +26,8 @@ export interface BusinessItem {
   businessType?: string;
   assignedTo?: string;
   alternatePhone?: string;
+  location?: { url?: string } | null | string;
+  locationUrl?: string;
 }
 
 export interface BusinessStatsData {
