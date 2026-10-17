@@ -26,6 +26,8 @@ export type BusinessFormValues = {
   description: string;
   followUpType: FollowUpType | "";
   assignTo: string;
+  /** Display name for `assignTo`; used to display the user's full name in the dropdown. Never sent to the API. */
+  assignToName?: string;
   nextFollowupDate: string;
   reminder: string;
 };
@@ -33,6 +35,7 @@ export type BusinessFormValues = {
 export const defaultBusinessFormValues: BusinessFormValues = {
   businessName: "",
   category: "",
+  categoryName: "",
   city: "",
   state: "",
   pincode: "",
@@ -46,6 +49,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   description: "",
   followUpType: "",
   assignTo: "",
+  assignToName: "",
   nextFollowupDate: "",
   reminder: "",
   addAnother: false,

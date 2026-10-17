@@ -5,7 +5,6 @@ import React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import OutlinedButton from "@/components/common/OutlinedButton";
-import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import Actions from "@/components/common/Actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -15,12 +14,14 @@ import businessData from "@/data/businessData.json";
 import BusinessDetailsMap from "../../../components/business-details/BusinessDetailsMap";
 import BusinessDetailsOverview from "../../../components/business-details/BusinessDetailsOverview";
 import BusinessDetailsQuickActions from "../../../components/business-details/BusinessDetailsQuickActions";
-// import PhoneButton from "../../../components/business-details/business-details-header/PhoneButton";
 import BusinessDetailsContacts from "../../../components/business-details/BusinessDetailsContacts";
 import { useBusinessFollowUpsQuery } from "@/hooks/use-business-get-follow-ups";
 import { useModalStore } from "@/store/business-modal-store";
 import { AddFollowUpModal } from "@/components/business-details/AddFollowUpModal";
-
+import {
+  getLocationData,
+  openGoogleMapsOnce,
+} from "@/lib/business/location";
 
 import {
   Edit2,
@@ -37,11 +38,9 @@ import {
   useBusinessQuery,
 } from "@/hooks/use-businesses";
 import { BusinessItem } from "@/types/business";
-import { ChangeBusinessStatusModal } from "@/components/businesses";
-import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
-import { REMINDER_OPTIONS, formatLeadStatus } from "@/lib/business/form-options";
+import { formatLeadStatus } from "@/lib/business/form-options";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -56,28 +55,6 @@ type ContactItem = {
   number: string;
   type: string;
   badgeClass?: string;
-};
-
-type EmailItem = {
-  id: number | string;
-  email: string;
-};
-
-type TabItem = {
-  id: string;
-  label: string;
-};
-
-type FollowUpItem = {
-  id: number | string;
-  date: string;
-  badgeClass?: string;
-  badge?: string;
-  type: string;
-  summary: string;
-  details: string;
-  assignee: string;
-  phone: string;
 };
 
 const STATIC_BUSINESS_12: BusinessItem = {
@@ -160,19 +137,7 @@ export default function BusinessDetails() {
     );
   }
 
-  const savedLocationUrl =
-    business?.locationUrl ||
-    (typeof business?.location === "string"
-      ? business.location
-      : business?.location?.url);
-
-  let cleanLocationUrl = savedLocationUrl;
-  if (cleanLocationUrl && typeof cleanLocationUrl === "string") {
-    const iframeMatch = cleanLocationUrl.match(/src=["']([^"']+)["']/i);
-    if (iframeMatch) {
-      cleanLocationUrl = iframeMatch[1];
-    }
-  }
+  const locationData = getLocationData(business);
 
   const rawLeadStatus =
     (business?.leadStatus && business.leadStatus !== "Active" && business.leadStatus !== "Inactive"
@@ -184,15 +149,6 @@ export default function BusinessDetails() {
     business?.leadStatus;
 
   const leadStatusDisplay = formatLeadStatus(rawLeadStatus);
-
-  const mapPinHref =
-    cleanLocationUrl ||
-    `https://maps.google.com/?q=${encodeURIComponent(
-      [business?.name, business?.address || business?.city]
-        .filter(Boolean)
-        .join(" ")
-        .trim()
-    )}`;
 
   return (
     <DetailsPageLayout
@@ -347,20 +303,33 @@ export default function BusinessDetails() {
                   </OutlinedButton>
                 ) : null}
 
-                <OutlinedButton
-                  asChild
-                  aria-label="View business location"
-                  title="View business location"
-                  className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10"
-                >
-                  <a
-                    href={mapPinHref}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                {locationData.isAvailable ? (
+                  <OutlinedButton
+                    asChild
+                    aria-label="View business location on Google Maps"
+                    title="View business location on Google Maps"
+                    className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10 cursor-pointer"
+                  >
+                    <a
+                      href={locationData.mapLink || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => openGoogleMapsOnce(e, locationData.mapLink)}
+                    >
+                      <MapPin className="h-4 w-4" />
+                    </a>
+                  </OutlinedButton>
+                ) : (
+                  <OutlinedButton
+                    disabled
+                    aria-disabled="true"
+                    aria-label="Location not available"
+                    title="Location not available"
+                    className="h-9 w-9 p-0 flex items-center justify-center text-slate-300 border-gray-200 opacity-50 cursor-not-allowed"
                   >
                     <MapPin className="h-4 w-4" />
-                  </a>
-                </OutlinedButton>
+                  </OutlinedButton>
+                )}
               </div>
             </CardHeader>
 
@@ -406,7 +375,7 @@ export default function BusinessDetails() {
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-slate-500">Address</p>
                     <p className="mt-1 text-sm font-semibold leading-5 text-slate-800">
-                      {business.address || businessData.businessInfo.address || "Address not provided"}
+                      {business.address || (business.city ? business.city : "Location not available")}
                     </p>
                   </div>
                 </div>

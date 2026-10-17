@@ -1,6 +1,6 @@
 "use client";
 
-import { Controller, useFormContext } from "react-hook-form";
+import { Controller, useFormContext, useWatch } from "react-hook-form";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import DateTimePicker from "@/components/common/DateTimePicker";
@@ -17,8 +17,11 @@ export default function FollowUpSection({
 }) {
   const {
     control,
+    setValue,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
+
+  const assignToName = useWatch({ control, name: "assignToName" });
 
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -57,8 +60,13 @@ export default function FollowUpSection({
             </FieldLabel>
             <AssigneeAutocomplete
               value={field.value}
-              label={field.value}
-              onChange={(option) => field.onChange(option?.id ?? "")}
+              label={assignToName || ""}
+              onChange={(option) => {
+                field.onChange(option?.id ?? "");
+                setValue("assignToName", option?.label ?? "", {
+                  shouldDirty: true,
+                });
+              }}
               invalid={Boolean(fieldState.error)}
             />
             {fieldState.error && (

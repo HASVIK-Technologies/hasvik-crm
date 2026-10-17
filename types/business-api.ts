@@ -26,7 +26,55 @@ export type ApiBusiness = {
   category?: string | { _id?: string; name?: string } | null;
   assignedTo?: string;
   leadSource?: string;
-  followUp?: FollowUpPayload;
+  followUp?:
+    | FollowUpPayload
+    | {
+        assignedTo?: string;
+        type?: FollowUpType | string;
+        scheduledAt?: string;
+        completedAt?: string;
+        status?: string;
+        reminderInMinutes?: number;
+      };
+  followUps?: Array<{
+    _id?: string;
+    id?: string;
+    status?: string;
+    type?: string;
+    scheduledAt?: string;
+    completedAt?: string;
+    updatedAt?: string;
+    createdAt?: string;
+    date?: string;
+    followUpDate?: string;
+    isCompleted?: boolean;
+  }>;
+  completedFollowUps?: Array<{
+    _id?: string;
+    id?: string;
+    status?: string;
+    type?: string;
+    scheduledAt?: string;
+    completedAt?: string;
+    updatedAt?: string;
+    createdAt?: string;
+    date?: string;
+    followUpDate?: string;
+    isCompleted?: boolean;
+  }>;
+  lastFollowupDate?: string;
+  lastFollowUpDate?: string;
+  lastCompletedFollowupDate?: string;
+  lastCompletedFollowUpDate?: string;
+  latestCompletedFollowUpDate?: string;
+  lastFollowUp?:
+    | string
+    | {
+        scheduledAt?: string;
+        completedAt?: string;
+        status?: string;
+        date?: string;
+      };
   nextFollowupDate?: string;
   reminder?: string | number;
   description?: string;

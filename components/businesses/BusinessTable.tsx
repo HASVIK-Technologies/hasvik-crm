@@ -47,8 +47,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
-import { useBusinessStatuses } from "@/hooks/use-filter-options";
-import { formatLeadStatus } from "@/lib/business/form-options";
+import { getLeadStatusLabel } from "@/lib/business/form-options";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 
 function formatDisplayString(val: unknown, fallback: string = "-"): string {
@@ -94,7 +93,6 @@ export default function BusinessTable({
   const router = useRouter();
   const [statusModalBusiness, setStatusModalBusiness] = useState<BusinessItem | null>(null);
   const updateStatusMutation = useUpdateBusinessStatus();
-  const { data: leadStatuses = {} } = useBusinessStatuses();
 
   const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
   const sortLabel = isLatest ? "Latest First" : "Oldest First";
@@ -241,7 +239,7 @@ export default function BusinessTable({
                         {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">
-                        Lead status: {formatLeadStatus(item.leadStatus, leadStatuses)}
+                        Lead status: {getLeadStatusLabel(item.leadStatus)}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
                     </div>
@@ -480,7 +478,7 @@ export default function BusinessTable({
 
                     {/* Lead Status */}
                     <TableCell className="px-4 py-4.5 text-sm">
-                      {formatLeadStatus(item.leadStatus, leadStatuses)}
+                      {getLeadStatusLabel(item.leadStatus)}
                     </TableCell>
 
                     {/* Status */}

@@ -43,7 +43,7 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
         <div className="flex items-start gap-3 text-sm">
           <MapPin className="w-5 h-5 text-slate-400 shrink-0" />
           <div className="w-32 shrink-0 text-slate-500">Address</div>
-          <div className="text-slate-700 font-medium leading-relaxed">{business.address || businessData.businessInfo.address}</div>
+          <div className="text-slate-700 font-medium leading-relaxed">{business.address || (business.city ? business.city : "Location not available")}</div>
         </div>
         <div className="flex items-start gap-3 text-sm">
           <Building className="w-5 h-5 text-slate-400 shrink-0" />

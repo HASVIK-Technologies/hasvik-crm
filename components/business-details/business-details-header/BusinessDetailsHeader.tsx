@@ -7,6 +7,8 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import { formatLeadStatus } from "@/lib/business/form-options";
+import { getLocationData, openGoogleMapsOnce } from "@/lib/business/location";
+
 // 1. We define the Props so TypeScript knows what data to expect
 interface HeaderProps {
   business: any;
@@ -14,31 +16,7 @@ interface HeaderProps {
 }
 
 export default function BusinessDetailsHeader({ business, businessData }: HeaderProps) {
-  // 2. We copy the cleanNumber function here so the WhatsApp button can use it
-  const cleanNumber = (num: string) => num.replace(/\D/g, '');
-
-  const savedLocationUrl =
-    business?.locationUrl ||
-    (typeof business?.location === "string"
-      ? business.location
-      : business?.location?.url);
-
-  let cleanLocationUrl = savedLocationUrl;
-  if (cleanLocationUrl && typeof cleanLocationUrl === "string") {
-    const iframeMatch = cleanLocationUrl.match(/src=["']([^"']+)["']/i);
-    if (iframeMatch) {
-      cleanLocationUrl = iframeMatch[1];
-    }
-  }
-
-  const mapPinHref =
-    cleanLocationUrl ||
-    `https://maps.google.com/?q=${encodeURIComponent(
-      [business?.name, business?.address || business?.city]
-        .filter(Boolean)
-        .join(" ")
-        .trim()
-    )}`;
+  const locationData = getLocationData(business);
 
   const rawLeadStatus =
     (business?.leadStatus && business.leadStatus !== "Active" && business.leadStatus !== "Inactive"
@@ -90,18 +68,34 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
       {/* RIGHT SIDE: Action Buttons */}
       <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
 
-        {/* Your new Phone Component! */}
+        {/* Phone Component */}
         <PhoneButton phones={businessData.contactInfo.phones} />
+
         {/* Maps Button */}
-        <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10">
-          <a
-            href={mapPinHref}
-            target="_blank"
-            rel="noopener noreferrer"
+        {locationData.isAvailable ? (
+          <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10 cursor-pointer">
+            <a
+              href={locationData.mapLink || "#"}
+              target="_blank"
+              rel="noopener noreferrer"
+              aria-label="View business location on Google Maps"
+              title="Open in Maps"
+              onClick={(e) => openGoogleMapsOnce(e, locationData.mapLink)}
+            >
+              <MapPin className="h-4 w-4" />
+            </a>
+          </OutlinedButton>
+        ) : (
+          <OutlinedButton
+            disabled
+            aria-disabled="true"
+            aria-label="Location not available"
+            title="Location not available"
+            className="h-9 w-9 p-0 flex items-center justify-center text-slate-300 border-gray-200 opacity-50 cursor-not-allowed"
           >
             <MapPin className="h-4 w-4" />
-          </a>
-        </OutlinedButton>
+          </OutlinedButton>
+        )}
       </div>
 
     </CardHeader>
