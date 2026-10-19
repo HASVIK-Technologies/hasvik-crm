@@ -34,6 +34,7 @@ import {
 import { useModalStore } from "@/store/business-modal-store";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
+import { formatFollowUpType } from "@/lib/business/form-options";
 import { useState } from "react";
 
 interface BusinessDetailsFollowupsProps {
@@ -163,7 +164,7 @@ export default function BusinessDetailsFollowups({
                     </td>
                     <td className="px-4 py-4">
                       <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
-                        {item.type}
+                        {formatFollowUpType(item.type)}
                       </span>
                     </td>
                     <td className="px-4 py-4">

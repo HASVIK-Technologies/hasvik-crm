@@ -39,7 +39,6 @@ import {
 import PlainButton from "@/components/common/PlainButton";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PrimaryButton from "@/components/common/PrimaryButton";
-import { Button } from "@/components/ui/button";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
@@ -226,23 +225,21 @@ export default function FollowUpTable({
                       >
                         <MessageSquareText className="size-4" />
                       </button>
-                      {canEditFollowUp(item) && <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          onEdit(item);
-                        }}
-                        className="h-7 gap-1 border-[#d0d5dd] px-2 text-xs font-semibold text-[#344054] hover:bg-[#f8fafc] hover:text-[#0f172a]"
-                      >
-                        <Pencil className="size-3 text-[#64748b]" /> Edit
-                      </Button>}
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                           <PlainButton size="icon" aria-label="More actions" className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"><MoreVertical className="size-4" /></PlainButton>
                         </DropdownMenuTrigger>
                         <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenuItem asChild className="cursor-pointer text-xs"><Link href={`/follow-ups/${item.id}`}>View Details</Link></DropdownMenuItem>
+                          {canEditFollowUp(item) && (
+                            <DropdownMenuItem
+                              onClick={(e) => e.stopPropagation()}
+                              onSelect={() => onEdit(item)}
+                              className="cursor-pointer text-xs"
+                            >
+                              <Pencil className="mr-1.5 size-3.5 text-[#64748b]" /> Edit
+                            </DropdownMenuItem>
+                          )}
                         {canCreateNextFollowUp(item) && onNextFollowUp && (
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}

@@ -159,6 +159,24 @@ export const FOLLOW_UP_TYPE_OPTIONS = [
   { value: "WHATSAPP", label: "WhatsApp" },
 ];
 
+export function formatFollowUpType(type?: string | null): string {
+  if (!type || typeof type !== "string") return "-";
+  const trimmed = type.trim();
+  if (!trimmed || trimmed === "-") return "-";
+
+  const upper = trimmed.toUpperCase();
+  const option = FOLLOW_UP_TYPE_OPTIONS.find(
+    (opt) => opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
+  );
+  if (option) return option.label;
+
+  return trimmed
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
+
 export const REMINDER_OPTIONS = [
   { value: "5", label: "5 mins" },
   { value: "10", label: "10 mins" },

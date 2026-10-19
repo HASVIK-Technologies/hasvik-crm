@@ -6,6 +6,7 @@ import {
   canEditFollowUp,
   canCreateNextFollowUp,
 } from "../lib/follow-ups/actions.ts";
+import { formatFollowUpType } from "../lib/business/form-options.ts";
 import type { FollowUpItem } from "../types/follow-up.ts";
 
 function makeFollowUp(status: string): FollowUpItem {
@@ -59,5 +60,34 @@ describe("Follow-up Action Rules", () => {
     assert.strictEqual(canCreateNextFollowUp(makeFollowUp("SCHEDULED")), false);
     assert.strictEqual(canCreateNextFollowUp(makeFollowUp("OVERDUE")), false);
     assert.strictEqual(canCreateNextFollowUp(makeFollowUp("CANCELLED")), false);
+  });
+
+  describe("formatFollowUpType", () => {
+    test("maps CALL to Call", () => {
+      assert.strictEqual(formatFollowUpType("CALL"), "Call");
+      assert.strictEqual(formatFollowUpType("call"), "Call");
+    });
+
+    test("maps WHATSAPP to WhatsApp", () => {
+      assert.strictEqual(formatFollowUpType("WHATSAPP"), "WhatsApp");
+      assert.strictEqual(formatFollowUpType("whatsapp"), "WhatsApp");
+    });
+
+    test("maps MEETING to Meeting", () => {
+      assert.strictEqual(formatFollowUpType("MEETING"), "Meeting");
+      assert.strictEqual(formatFollowUpType("meeting"), "Meeting");
+    });
+
+    test("maps EMAIL to Email", () => {
+      assert.strictEqual(formatFollowUpType("EMAIL"), "Email");
+      assert.strictEqual(formatFollowUpType("email"), "Email");
+    });
+
+    test("handles empty/null/fallback values gracefully", () => {
+      assert.strictEqual(formatFollowUpType(null), "-");
+      assert.strictEqual(formatFollowUpType(undefined), "-");
+      assert.strictEqual(formatFollowUpType(""), "-");
+      assert.strictEqual(formatFollowUpType("-"), "-");
+    });
   });
 });
