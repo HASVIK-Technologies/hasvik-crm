@@ -98,6 +98,7 @@ export default function FollowUpSection({
               id={`${idPrefix}nextFollowupDate`}
               value={field.value}
               onChange={field.onChange}
+              minDate={new Date()}
               invalid={Boolean(errors.nextFollowupDate)}
             />
             {errors.nextFollowupDate && (

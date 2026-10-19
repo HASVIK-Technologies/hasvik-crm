@@ -95,7 +95,16 @@ export default function DateTimePicker({
 }: DateTimePickerProps) {
   const [open, setOpen] = useState(false);
 
-  const effectiveMinDate = useMemo(() => minDate ?? new Date(), [minDate]);
+  const [currentDate, setCurrentDate] = useState(() => new Date());
+
+  const handleOpenChange = (nextOpen: boolean) => {
+    if (nextOpen) {
+      setCurrentDate(new Date());
+    }
+    setOpen(nextOpen);
+  };
+
+  const effectiveMinDate = minDate ?? currentDate;
 
   // Derived parsed value from prop
   const parsedValue = useMemo(() => {
@@ -109,16 +118,30 @@ export default function DateTimePicker({
 
   const [viewState, setViewState] = useState<{ year: number; month: number } | null>(null);
 
-  const viewYear =
-    viewState?.year ?? parsedValue?.getFullYear() ?? effectiveMinDate.getFullYear();
-  const viewMonth =
-    viewState?.month ?? parsedValue?.getMonth() ?? effectiveMinDate.getMonth();
+  const isParsedFutureOrPresent = parsedValue
+    ? parsedValue.getTime() >= effectiveMinDate.getTime() - 60_000
+    : false;
 
-  const selectedYear = parsedValue?.getFullYear() ?? null;
-  const selectedMonth = parsedValue?.getMonth() ?? null;
-  const selectedDay = parsedValue?.getDate() ?? null;
-  const selectedHour = parsedValue?.getHours() ?? effectiveMinDate.getHours();
-  const selectedMinute = parsedValue?.getMinutes() ?? effectiveMinDate.getMinutes();
+  const viewYear =
+    viewState?.year ??
+    (isParsedFutureOrPresent
+      ? parsedValue!.getFullYear()
+      : effectiveMinDate.getFullYear());
+  const viewMonth =
+    viewState?.month ??
+    (isParsedFutureOrPresent
+      ? parsedValue!.getMonth()
+      : effectiveMinDate.getMonth());
+
+  const selectedYear = isParsedFutureOrPresent ? parsedValue?.getFullYear() ?? null : null;
+  const selectedMonth = isParsedFutureOrPresent ? parsedValue?.getMonth() ?? null : null;
+  const selectedDay = isParsedFutureOrPresent ? parsedValue?.getDate() ?? null : null;
+  const selectedHour = isParsedFutureOrPresent
+    ? parsedValue?.getHours() ?? effectiveMinDate.getHours()
+    : effectiveMinDate.getHours();
+  const selectedMinute = isParsedFutureOrPresent
+    ? parsedValue?.getMinutes() ?? effectiveMinDate.getMinutes()
+    : effectiveMinDate.getMinutes();
 
   const hoursListRef = useRef<HTMLDivElement>(null);
   const minutesListRef = useRef<HTMLDivElement>(null);
@@ -174,14 +197,18 @@ export default function DateTimePicker({
   };
 
   const emitDateTime = (y: number, m: number, d: number, hr: number, min: number) => {
-    const candidateDate = new Date(y, m, d, hr, min);
     let finalHour = hr;
     let finalMinute = min;
 
+    const candidateDate = new Date(y, m, d, hr, min);
     if (isBeforeThreshold(candidateDate)) {
       const current = new Date();
       finalHour = current.getHours();
       finalMinute = current.getMinutes();
+    }
+
+    if (isBeforeThreshold(new Date(y, m, d, finalHour, finalMinute))) {
+      return;
     }
 
     const isoString = `${y}-${pad(m + 1)}-${pad(d)}T${pad(finalHour)}:${pad(finalMinute)}`;
@@ -199,6 +226,10 @@ export default function DateTimePicker({
       min = current.getMinutes();
     }
 
+    if (isBeforeThreshold(new Date(viewYear, viewMonth, day, hr, min))) {
+      return;
+    }
+
     emitDateTime(viewYear, viewMonth, day, hr, min);
   };
 
@@ -207,6 +238,10 @@ export default function DateTimePicker({
     const m = selectedMonth ?? viewMonth;
     const d = selectedDay ?? now.getDate();
     let min = selectedMinute;
+
+    if (isSelectedDateToday && hr < now.getHours()) {
+      return;
+    }
 
     if (
       isSelectedDateToday &&
@@ -223,6 +258,13 @@ export default function DateTimePicker({
     const y = selectedYear ?? viewYear;
     const m = selectedMonth ?? viewMonth;
     const d = selectedDay ?? now.getDate();
+    if (
+      isSelectedDateToday &&
+      (selectedHour < now.getHours() ||
+        (selectedHour === now.getHours() && min < now.getMinutes()))
+    ) {
+      return;
+    }
     emitDateTime(y, m, d, selectedHour, min);
   };
 
@@ -246,7 +288,7 @@ export default function DateTimePicker({
   const displayString = formatDisplayDateTime(value);
 
   return (
-    <Popover open={open} onOpenChange={setOpen}>
+    <Popover open={open} onOpenChange={handleOpenChange}>
       <PopoverTrigger asChild>
         <button
           id={id}
@@ -444,8 +486,8 @@ export default function DateTimePicker({
                 {MINUTES.map((min) => {
                   const isMinutePast =
                     isSelectedDateToday &&
-                    selectedHour === now.getHours() &&
-                    min < now.getMinutes();
+                    (selectedHour < now.getHours() ||
+                      (selectedHour === now.getHours() && min < now.getMinutes()));
                   const isSelected = selectedMinute === min;
 
                   return (

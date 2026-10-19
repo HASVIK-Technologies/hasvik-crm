@@ -58,12 +58,15 @@ function getDefaultValues(
   followUp?: FollowUpItem,
 ): FormValues {
   if (mode === "edit" && followUp) {
+    const isPast =
+      followUp.scheduledAt &&
+      new Date(followUp.scheduledAt).getTime() < Date.now() - 60_000;
     return {
       business: { id: followUp.businessId, label: followUp.businessName },
       assignee: followUp.assignedToId
         ? { id: followUp.assignedToId, label: followUp.assignedToName }
         : null,
-      scheduledAt: toDateTimeLocalValue(followUp.scheduledAt),
+      scheduledAt: isPast ? "" : toDateTimeLocalValue(followUp.scheduledAt),
       type: (followUp.type as FollowUpType) || "CALL",
       reminder: followUp.reminder ?? "",
     };
@@ -202,19 +205,20 @@ export default function FollowUpFormDialog({
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                  Follow-up date <span className="text-red-500">*</span>
+                  Date &amp; Time <span className="text-red-500">*</span>
                 </label>
                 <Controller
                   control={control}
                   name="scheduledAt"
                   rules={{
-                    required: "Follow-up date is required.",
+                    required: "Follow-up date and time is required.",
                     validate: validateFutureDateTime,
                   }}
                   render={({ field }) => (
                     <DateTimePicker
                       value={field.value}
                       onChange={field.onChange}
+                      minDate={new Date()}
                       invalid={Boolean(errors.scheduledAt)}
                     />
                   )}

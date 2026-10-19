@@ -3,7 +3,7 @@ import type {
   ApiBusiness,
   CreateBusinessPayload,
 } from "@/types/business-api";
-import { toFollowUpPayload } from "@/lib/business/form-types";
+import { toFollowUpPayload } from "./form-types.ts";
 import type {
   BusinessFormValues,
   NumberFieldValue,
@@ -36,11 +36,15 @@ export function formatFollowUpDate(dateVal?: string | Date | null): string {
 export function extractLatestCompletedFollowUpDate(
   business: ApiBusiness,
 ): string {
-  // 1. Check list of completedFollowUps or followUps on the business object
-  const followUpList =
-    business.completedFollowUps ?? business.followUps ?? [];
+  // 1. Check list of completedFollowUps and followUps on the business object
+  const followUpList = [
+    ...(Array.isArray(business.completedFollowUps)
+      ? business.completedFollowUps
+      : []),
+    ...(Array.isArray(business.followUps) ? business.followUps : []),
+  ];
 
-  if (Array.isArray(followUpList) && followUpList.length > 0) {
+  if (followUpList.length > 0) {
     const completedItems = followUpList.filter((item) => {
       const status = String(item.status || "").toUpperCase();
       return status === "COMPLETED" || item.isCompleted === true;
@@ -90,23 +94,57 @@ export function extractLatestCompletedFollowUpDate(
     }
   }
 
-  // 3. Check direct API response fields for completed/last follow-up date
-  const directCandidates = [
+  // 3. Check direct API response fields for completed follow-up date
+  const explicitCompletedCandidates = [
     business.lastCompletedFollowupDate,
     business.lastCompletedFollowUpDate,
     business.latestCompletedFollowUpDate,
-    business.lastFollowupDate,
-    business.lastFollowUpDate,
-    typeof business.lastFollowUp === "string"
-      ? business.lastFollowUp
-      : (business.lastFollowUp as Record<string, unknown> | undefined)
-          ?.completedAt ||
-        (business.lastFollowUp as Record<string, unknown> | undefined)
-          ?.scheduledAt ||
-        (business.lastFollowUp as Record<string, unknown> | undefined)?.date,
   ];
 
-  for (const candidate of directCandidates) {
+  for (const candidate of explicitCompletedCandidates) {
+    if (
+      candidate &&
+      typeof candidate === "string" &&
+      candidate.trim() &&
+      candidate.trim() !== "-"
+    ) {
+      return formatFollowUpDate(candidate);
+    }
+  }
+
+  if (business.lastFollowUp) {
+    if (typeof business.lastFollowUp === "string") {
+      const val = business.lastFollowUp.trim();
+      if (val && val !== "-") {
+        return formatFollowUpDate(val);
+      }
+    } else {
+      const obj = business.lastFollowUp as Record<string, unknown>;
+      const status = String(obj.status || "").toUpperCase();
+      const isCompleted = status === "COMPLETED" || obj.isCompleted === true;
+      if (obj.completedAt && typeof obj.completedAt === "string") {
+        return formatFollowUpDate(obj.completedAt);
+      }
+      if (isCompleted) {
+        const rawDate = (obj.scheduledAt ?? obj.date) as string | undefined;
+        if (
+          rawDate &&
+          typeof rawDate === "string" &&
+          rawDate.trim() &&
+          rawDate.trim() !== "-"
+        ) {
+          return formatFollowUpDate(rawDate);
+        }
+      }
+    }
+  }
+
+  const fallbackDates = [
+    business.lastFollowupDate,
+    business.lastFollowUpDate,
+  ];
+
+  for (const candidate of fallbackDates) {
     if (
       candidate &&
       typeof candidate === "string" &&

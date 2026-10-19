@@ -1,6 +1,6 @@
 import type { FollowUpType } from "@/types/follow-up";
 import type { FollowUpPayload } from "@/types/business-api";
-import { fromDateTimeLocalValue } from "@/lib/forms/date-time";
+import { fromDateTimeLocalValue } from "../forms/date-time.ts";
 
 export type NumberFieldValue = {
   value: string;
@@ -84,7 +84,18 @@ export function toFollowUpPayload(
     throw new Error("Follow-up type, assignee, and date/time are required.");
   }
 
-  const scheduledAt = fromDateTimeLocalValue(values.nextFollowupDate);
+  const rawDate = values.nextFollowupDate.trim();
+  const normalized =
+    rawDate.includes(" ") && !rawDate.includes("T")
+      ? rawDate.replace(" ", "T")
+      : rawDate;
+
+  // Avoid saving a date-only value as 12:00 AM UTC
+  if (!normalized.includes("T") || !normalized.split("T")[1]?.trim()) {
+    throw new Error("Both follow-up date and time are required.");
+  }
+
+  const scheduledAt = fromDateTimeLocalValue(normalized);
   if (!scheduledAt) {
     throw new Error("Follow-up date and time is invalid.");
   }

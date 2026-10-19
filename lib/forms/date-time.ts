@@ -8,7 +8,15 @@ export function toDateTimeLocalValue(value?: string): string {
 
 export function fromDateTimeLocalValue(value: string): string | undefined {
   if (!value) return undefined;
-  const date = new Date(value);
+  const normalized =
+    value.includes(" ") && !value.includes("T")
+      ? value.replace(" ", "T")
+      : value;
+  // If date-only (e.g. YYYY-MM-DD without time), do not parse as 12:00 AM UTC
+  if (!normalized.includes("T") || !normalized.split("T")[1]?.trim()) {
+    return undefined;
+  }
+  const date = new Date(normalized);
   return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
 }
 
@@ -31,8 +39,13 @@ export function getCurrentDateTimeLocalValue(): string {
 }
 
 export function validateFutureDateTime(value: string): true | string {
-  if (!value || !value.includes("T")) return "Enter a valid date and time.";
-  const parsed = fromDateTimeLocalValue(value);
+  if (!value) return "Enter a valid date and time.";
+  const normalized =
+    value.includes(" ") && !value.includes("T")
+      ? value.replace(" ", "T")
+      : value;
+  if (!normalized.includes("T")) return "Enter a valid date and time.";
+  const parsed = fromDateTimeLocalValue(normalized);
   if (!parsed) return "Enter a valid date and time.";
   const selectedDate = new Date(parsed);
   const threshold = new Date(Date.now() - 60_000);

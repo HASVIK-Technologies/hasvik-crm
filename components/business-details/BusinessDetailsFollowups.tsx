@@ -219,6 +219,7 @@ export default function BusinessDetailsFollowups({
                                   e.stopPropagation();
                                   openFollowUpModal(businessId, item);
                                 }}
+                                onSelect={() => openFollowUpModal(businessId, item)}
                               >
                                 Reschedule / Edit
                               </DropdownMenuItem>
@@ -230,6 +231,7 @@ export default function BusinessDetailsFollowups({
                                   e.stopPropagation();
                                   void completeFollowUp(item);
                                 }}
+                                onSelect={() => void completeFollowUp(item)}
                                 disabled={completeMutation.isPending}
                               >
                                 Mark as Completed
@@ -242,6 +244,7 @@ export default function BusinessDetailsFollowups({
                                   e.stopPropagation();
                                   openFollowUpModal(businessId);
                                 }}
+                                onSelect={() => openFollowUpModal(businessId)}
                               >
                                 Schedule Next Follow-up
                               </DropdownMenuItem>
@@ -253,6 +256,7 @@ export default function BusinessDetailsFollowups({
                                   e.stopPropagation();
                                   setCancellingFollowUp(item);
                                 }}
+                                onSelect={() => setCancellingFollowUp(item)}
                               >
                                 Cancel Follow-up
                               </DropdownMenuItem>
@@ -301,7 +305,7 @@ export default function BusinessDetailsFollowups({
                   <strong>
                     {cancellingFollowUp?.businessName || "this business"}
                   </strong>
-                  ? This action cannot be undone.
+                  ?
                 </DialogPrimitive.Description>
               </div>
               <DialogPrimitive.Close asChild>
