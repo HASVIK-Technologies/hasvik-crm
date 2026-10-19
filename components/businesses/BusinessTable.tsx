@@ -47,8 +47,26 @@ import {
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
-import { getLeadStatusLabel } from "@/lib/business/form-options";
+import { STATUS_OPTIONS } from "@/lib/business/form-options";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
+
+function getLeadStatusLabel(status?: string | null): string {
+  if (!status || typeof status !== "string") return "-";
+  const trimmed = status.trim();
+  if (!trimmed || trimmed === "-") return "-";
+
+  const upper = trimmed.toUpperCase();
+  const option = STATUS_OPTIONS.find(
+    (opt) => opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
+  );
+  if (option) return option.label;
+
+  return trimmed
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
 
 function formatDisplayString(val: unknown, fallback: string = "-"): string {
   if (!val) return fallback;
