@@ -47,14 +47,21 @@ function optionFromApi(value: Record<string, unknown>): FollowUpOption {
   const id = String(
     value._id ?? value.id ?? value.userId ?? value.businessId ?? "",
   );
-  const label = String(
-    value.name ??
-      value.businessName ??
-      value.fullName ??
-      value.userName ??
-      value.email ??
-      id,
-  );
+  const resolvedName =
+    (value.fullName && String(value.fullName).trim()) ||
+    ([value.firstName, value.lastName]
+      .filter(Boolean)
+      .map(String)
+      .join(" ")
+      .trim() ||
+      undefined) ||
+    (value.name && String(value.name).trim()) ||
+    (value.businessName && String(value.businessName).trim()) ||
+    (value.userName && String(value.userName).trim()) ||
+    (value.email && String(value.email).trim()) ||
+    id;
+
+  const label = String(resolvedName);
   return {
     id,
     label,

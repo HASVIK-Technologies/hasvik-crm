@@ -45,6 +45,8 @@ import {
   toFollowUpPayload,
   type BusinessFormValues,
 } from "@/lib/business/form-types";
+import type { FollowUpType } from "@/types/follow-up";
+import { toDateTimeLocalValue } from "@/lib/forms/date-time";
 
 // Additional Information is built out but hidden from view for now - the
 // team plans to start using it in a future release. Flip this to `true`
@@ -64,7 +66,7 @@ const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
   status: "Status",
   followUpType: "Follow-up Type",
   assignTo: "Assignee",
-  nextFollowupDate: "Next Follow-up Date",
+  nextFollowupDate: "Follow-up Date & Time",
   phoneNumbers: "Phone Number",
   whatsappNumbers: "WhatsApp Number",
 };
@@ -182,6 +184,37 @@ export default function BusinessForm({
           categoryObj?._id ??
           (typeof rawCategory === "string" ? rawCategory : "");
 
+        const rawAssignedTo = data.followUp?.assignedTo ?? data.assignedTo;
+        let assignedToId = "";
+        let assignedToName = "";
+
+        if (typeof rawAssignedTo === "object" && rawAssignedTo !== null) {
+          const obj = rawAssignedTo as Record<string, unknown>;
+          assignedToId = String(obj._id ?? obj.id ?? "");
+          assignedToName = String(
+            obj.fullName ??
+              ([obj.firstName, obj.lastName]
+                .filter(Boolean)
+                .map(String)
+                .join(" ") ||
+                undefined) ??
+              obj.name ??
+              "",
+          );
+        } else if (typeof rawAssignedTo === "string") {
+          assignedToId = rawAssignedTo;
+        }
+
+        if (!assignedToName && data.followUp) {
+          const fu = data.followUp as Record<string, unknown>;
+          if (
+            typeof fu.assignedToName === "string" &&
+            fu.assignedToName.trim()
+          ) {
+            assignedToName = fu.assignedToName.trim();
+          }
+        }
+
         const loadedValues: BusinessFormValues = {
           businessName: data.name || "",
           category: categoryId || "",
@@ -198,14 +231,12 @@ export default function BusinessForm({
           email: data.email || "",
           website: data.website || "",
           description: data.description || "",
-          followUpType: data.followUp?.type || "",
-          assignTo: data.followUp?.assignedTo || data.assignedTo || "",
-          nextFollowupDate: data.followUp?.scheduledAt || data.nextFollowupDate
-            ? (data.followUp?.scheduledAt || data.nextFollowupDate || "").slice(
-                0,
-                10,
-              )
-            : "",
+          followUpType: (data.followUp?.type as FollowUpType) || "",
+          assignTo: assignedToId || "",
+          assignToName: assignedToName || "",
+          nextFollowupDate: toDateTimeLocalValue(
+            data.followUp?.scheduledAt || data.nextFollowupDate,
+          ),
           reminder:
             data.followUp?.reminderInMinutes === undefined &&
             (data.reminder === undefined || data.reminder === null)
