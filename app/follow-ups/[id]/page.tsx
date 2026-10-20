@@ -112,43 +112,57 @@ export default function FollowUpDetailsPage() {
           />
         }
         actions={
-          (canCompleteFollowUp(followUp) ||
-            canCreateNextFollowUp(followUp) ||
-            canEditFollowUp(followUp) ||
-            canCancelFollowUp(followUp)) && (
-          <Actions
-            primary={
-              canCreateNextFollowUp(followUp)
-                ? {
-                    label: "Next Follow-Up",
-                    icon: <Plus className="size-4" />,
-                    onSelect: () => setNextFollowUpOpen(true),
-                  }
-                : {
-                    label: "Mark as Completed",
-                    icon: <CheckCircle2 className="size-4" />,
-                    onSelect: () => setCompleteOpen(true),
-                  }
-            }
-            secondary={[
-              ...(canEditFollowUp(followUp)
-                ? [{
-                    label: "Edit / Reschedule",
-                    icon: <Pencil className="size-4" />,
-                    onSelect: () => setEditOpen(true),
-                  }]
-                : []),
-              ...(canCancelFollowUp(followUp)
-                ? [{
-                    label: "Cancel Follow-Up",
-                    icon: <Trash2 className="size-4" />,
-                    destructive: true,
-                    onSelect: () => setCancelOpen(true),
-                  }]
-                : []),
-            ]}
-          />
-          )
+          canCreateNextFollowUp(followUp) ? (
+            <Actions
+              primary={{
+                label: "Next Follow-Up",
+                icon: <Plus className="size-4" />,
+                onSelect: () => setNextFollowUpOpen(true),
+              }}
+              secondary={[
+                ...(canEditFollowUp(followUp)
+                  ? [{
+                      label: "Edit / Reschedule",
+                      icon: <Pencil className="size-4" />,
+                      onSelect: () => setEditOpen(true),
+                    }]
+                  : []),
+                ...(canCancelFollowUp(followUp)
+                  ? [{
+                      label: "Cancel Follow-Up",
+                      icon: <Trash2 className="size-4" />,
+                      destructive: true,
+                      onSelect: () => setCancelOpen(true),
+                    }]
+                  : []),
+              ]}
+            />
+          ) : canCompleteFollowUp(followUp) ? (
+            <Actions
+              primary={{
+                label: "Mark as Completed",
+                icon: <CheckCircle2 className="size-4" />,
+                onSelect: () => setCompleteOpen(true),
+              }}
+              secondary={[
+                ...(canEditFollowUp(followUp)
+                  ? [{
+                      label: "Edit / Reschedule",
+                      icon: <Pencil className="size-4" />,
+                      onSelect: () => setEditOpen(true),
+                    }]
+                  : []),
+                ...(canCancelFollowUp(followUp)
+                  ? [{
+                      label: "Cancel Follow-Up",
+                      icon: <Trash2 className="size-4" />,
+                      destructive: true,
+                      onSelect: () => setCancelOpen(true),
+                    }]
+                  : []),
+              ]}
+            />
+          ) : null
         }
         content={
           <FollowUpDetails followUp={followUp} />

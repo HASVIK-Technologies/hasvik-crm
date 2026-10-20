@@ -18,6 +18,8 @@ import { useFollowUpAutocomplete } from "@/hooks/use-follow-ups";
 import type { FollowUpOption } from "@/types/follow-up";
 import { cn } from "@/lib/utils";
 
+import { useAuthStore } from "@/store/auth-store";
+
 interface FollowUpAutocompleteProps {
   kind: "business" | "user";
   value?: string;
@@ -40,10 +42,16 @@ export default function FollowUpAutocomplete({
   const [debouncedSearch, setDebouncedSearch] = useState("");
   const path =
     kind === "business" ? "/businesses/autocomplete" : "/users/autocomplete";
+
+  const isLabelMissingOrRawId = Boolean(
+    !label || (value && label.trim().toLowerCase() === value.trim().toLowerCase()),
+  );
+  const shouldFetchOptions = open || Boolean(value && isLabelMissingOrRawId);
+
   const { data: options = [], isLoading } = useFollowUpAutocomplete(
     path,
     debouncedSearch,
-    open,
+    shouldFetchOptions,
   );
 
   useEffect(() => {
@@ -53,6 +61,23 @@ export default function FollowUpAutocomplete({
     );
     return () => window.clearTimeout(timer);
   }, [search]);
+
+  const matchedOption = options.find((opt) => opt.id === value);
+  const authUser = kind === "user" ? useAuthStore.getState().user : null;
+  const authUserMatch =
+    authUser &&
+    (authUser.userId === value ||
+      ("_id" in authUser &&
+        (authUser as { _id?: string })._id === value))
+      ? authUser.fullName || `${authUser.firstName} ${authUser.lastName}`.trim()
+      : undefined;
+
+  const displayLabel =
+    (!isLabelMissingOrRawId ? label : undefined) ??
+    matchedOption?.label ??
+    authUserMatch ??
+    (!isLabelMissingOrRawId ? label : undefined) ??
+    "";
 
   const Icon = kind === "business" ? Search : UserRound;
   return (
@@ -69,7 +94,7 @@ export default function FollowUpAutocomplete({
         >
           <span className="flex min-w-0 items-center gap-2">
             <Icon className="size-3.5 shrink-0 text-[#64748b]" />
-            <span className="truncate">{label || placeholder}</span>
+            <span className="truncate">{displayLabel || placeholder}</span>
           </span>
           <span className="flex items-center gap-1">
             <span

@@ -313,7 +313,7 @@ export function createBusiness(
     initials: computedInitials,
     avatarBg: data.avatarBg || "bg-[#e0eafe]",
     avatarTextColor: data.avatarTextColor || "text-[#2e90fa]",
-    lastFollowUp: data.lastFollowUp || "Just created",
+    lastFollowUp: data.lastFollowUp || "-",
     nextFollowUp: data.nextFollowUp || "Today",
     nextFollowUpType: data.nextFollowUpType || "today",
   };

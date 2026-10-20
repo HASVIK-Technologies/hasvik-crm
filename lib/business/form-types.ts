@@ -1,5 +1,6 @@
 import type { FollowUpType } from "@/types/follow-up";
 import type { FollowUpPayload } from "@/types/business-api";
+import { fromDateTimeLocalValue } from "../forms/date-time.ts";
 
 export type NumberFieldValue = {
   value: string;
@@ -34,6 +35,7 @@ export type BusinessFormValues = {
 export const defaultBusinessFormValues: BusinessFormValues = {
   businessName: "",
   category: "",
+  categoryName: "",
   city: "",
   state: "",
   pincode: "",
@@ -79,20 +81,29 @@ export function toFollowUpPayload(
   values: BusinessFormValues,
 ): FollowUpPayload {
   if (!values.assignTo || !values.followUpType || !values.nextFollowupDate) {
-    throw new Error("Follow-up type, assignee, and date are required.");
+    throw new Error("Follow-up type, assignee, and date/time are required.");
   }
 
-  const scheduledAt = new Date(
-    `${values.nextFollowupDate}T00:00:00.000Z`,
-  );
-  if (Number.isNaN(scheduledAt.getTime())) {
-    throw new Error("Follow-up date is invalid.");
+  const rawDate = values.nextFollowupDate.trim();
+  const normalized =
+    rawDate.includes(" ") && !rawDate.includes("T")
+      ? rawDate.replace(" ", "T")
+      : rawDate;
+
+  // Avoid saving a date-only value as 12:00 AM UTC
+  if (!normalized.includes("T") || !normalized.split("T")[1]?.trim()) {
+    throw new Error("Both follow-up date and time are required.");
+  }
+
+  const scheduledAt = fromDateTimeLocalValue(normalized);
+  if (!scheduledAt) {
+    throw new Error("Follow-up date and time is invalid.");
   }
 
   return {
     assignedTo: values.assignTo,
     type: values.followUpType,
-    scheduledAt: scheduledAt.toISOString(),
+    scheduledAt,
     ...(values.reminder
       ? { reminderInMinutes: Number(values.reminder) }
       : {}),

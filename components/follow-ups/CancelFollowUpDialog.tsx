@@ -52,7 +52,7 @@ export default function CancelFollowUpDialog({
                 <span className="font-semibold text-[#0f172a]">
                   &ldquo;{businessName}&rdquo;
                 </span>
-                . This action cannot be undone.
+                .
               </AlertDialogPrimitive.Description>
             </div>
           </div>
