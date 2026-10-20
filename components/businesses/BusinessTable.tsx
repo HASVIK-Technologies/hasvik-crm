@@ -47,7 +47,26 @@ import {
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
+import { STATUS_OPTIONS } from "@/lib/business/form-options";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
+
+function getLeadStatusLabel(status?: string | null): string {
+  if (!status || typeof status !== "string") return "-";
+  const trimmed = status.trim();
+  if (!trimmed || trimmed === "-") return "-";
+
+  const upper = trimmed.toUpperCase();
+  const option = STATUS_OPTIONS.find(
+    (opt) => opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
+  );
+  if (option) return option.label;
+
+  return trimmed
+    .split(/[_\s]+/)
+    .filter(Boolean)
+    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
+    .join(" ");
+}
 
 function formatDisplayString(val: unknown, fallback: string = "-"): string {
   if (!val) return fallback;
@@ -95,6 +114,24 @@ export default function BusinessTable({
 
   const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
   const sortLabel = isLatest ? "Latest First" : "Oldest First";
+
+  const handleRowClick = (
+    event: React.MouseEvent<HTMLElement>,
+    businessId: string | number,
+    isActive: boolean,
+  ) => {
+    if (!isActive) return;
+    if (
+      event.target instanceof Element &&
+      event.target.closest(
+        "a, button, [role='button'], [role='menu'], [role='menuitem'], [data-radix-dropdown-menu-content], [data-radix-popper-content-wrapper], input, select, textarea",
+      )
+    ) {
+      return;
+    }
+
+    router.push(`/businesses/${businessId}`);
+  };
 
   const handleOpenStatusModal = (item: BusinessItem) => {
     setStatusModalBusiness(item);
@@ -206,10 +243,8 @@ export default function BusinessTable({
               {businesses.map((item) => (
                 <div
                   key={item.id}
-                  onClick={
-                    item.status === "Active"
-                      ? () => router.push(`/businesses/${item.id}`)
-                      : undefined
+                  onClick={(event) =>
+                    handleRowClick(event, item.id, item.status === "Active")
                   }
                   className={`flex items-start justify-between gap-3 rounded-2xl border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all md:gap-4 md:p-4 ${
                     item.status === "Active"
@@ -238,7 +273,7 @@ export default function BusinessTable({
                         {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">
-                        Lead status: {formatDisplayString(item.leadStatus, "-")}
+                        Lead status: {getLeadStatusLabel(item.leadStatus)}
                       </p>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
                     </div>
@@ -268,7 +303,7 @@ export default function BusinessTable({
                     </div>
 
                     {/* Action Icons (Phone + WhatsApp + More) */}
-                    <div className="flex items-center gap-2">
+                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <a
@@ -309,7 +344,7 @@ export default function BusinessTable({
                             <MoreVertical className="size-4" />
                           </PlainButton>
                         </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-36 bg-white">
+                        <DropdownMenuContent align="end" className="w-36 bg-white" onClick={(e) => e.stopPropagation()}>
                           {item.status === "Active" && (
                             <>
                               <DropdownMenuItem
@@ -317,6 +352,7 @@ export default function BusinessTable({
                                   e.stopPropagation();
                                   router.push(`/businesses/${item.id}`);
                                 }}
+                                onSelect={() => router.push(`/businesses/${item.id}`)}
                                 className="cursor-pointer text-xs"
                               >
                                 View Details
@@ -326,6 +362,7 @@ export default function BusinessTable({
                                   e.stopPropagation();
                                   router.push(`/businesses/form/${item.id}`);
                                 }}
+                                onSelect={() => router.push(`/businesses/form/${item.id}`)}
                                 className="cursor-pointer text-xs"
                               >
                                 Edit Business
@@ -337,6 +374,7 @@ export default function BusinessTable({
                               e.stopPropagation();
                               handleOpenStatusModal(item);
                             }}
+                            onSelect={() => handleOpenStatusModal(item)}
                             className="cursor-pointer text-xs"
                           >
                             {item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}
@@ -433,10 +471,8 @@ export default function BusinessTable({
                 businesses.map((item) => (
                   <TableRow
                     key={item.id}
-                    onClick={
-                      item.status === "Active"
-                        ? () => router.push(`/businesses/${item.id}`)
-                        : undefined
+                    onClick={(event) =>
+                      handleRowClick(event, item.id, item.status === "Active")
                     }
                     className={`border-b border-[#f1f5f9] transition-colors ${
                       item.status === "Active"
@@ -477,7 +513,7 @@ export default function BusinessTable({
 
                     {/* Lead Status */}
                     <TableCell className="px-4 py-4.5 text-sm">
-                      {formatDisplayString(item.leadStatus, "-")}
+                      {getLeadStatusLabel(item.leadStatus)}
                     </TableCell>
 
                     {/* Status */}
@@ -509,7 +545,10 @@ export default function BusinessTable({
                     </TableCell>
 
                     {/* Actions (Call, WhatsApp, 3 dots) */}
-                    <TableCell className="py-4.5 pl-4 pr-6 text-right">
+                    <TableCell
+                      className="py-4.5 pl-4 pr-6 text-right"
+                      onClick={(e) => e.stopPropagation()}
+                    >
                       <div className="flex items-center justify-end gap-2.5">
                         {/* Phone Call */}
                         <Tooltip>
@@ -554,7 +593,7 @@ export default function BusinessTable({
                               <MoreVertical className="size-4.5" />
                             </PlainButton>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-36 bg-white">
+                          <DropdownMenuContent align="end" className="w-36 bg-white" onClick={(e) => e.stopPropagation()}>
                             {item.status === "Active" && (
                               <>
                                 <DropdownMenuItem
@@ -562,6 +601,7 @@ export default function BusinessTable({
                                     e.stopPropagation();
                                     router.push(`/businesses/${item.id}`);
                                   }}
+                                  onSelect={() => router.push(`/businesses/${item.id}`)}
                                   className="cursor-pointer text-xs"
                                 >
                                   View Details
@@ -571,6 +611,7 @@ export default function BusinessTable({
                                     e.stopPropagation();
                                     router.push(`/businesses/form/${item.id}`);
                                   }}
+                                  onSelect={() => router.push(`/businesses/form/${item.id}`)}
                                   className="cursor-pointer text-xs"
                                 >
                                   Edit Business
@@ -582,6 +623,7 @@ export default function BusinessTable({
                                 e.stopPropagation();
                                 handleOpenStatusModal(item);
                               }}
+                              onSelect={() => handleOpenStatusModal(item)}
                               className="cursor-pointer text-xs"
                             >
                               {item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}

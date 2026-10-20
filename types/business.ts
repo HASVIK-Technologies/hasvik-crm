@@ -28,6 +28,8 @@ export interface BusinessItem {
   alternatePhone?: string;
   phoneNumbers?: any[];
   whatsappNumbers?: any[];
+  location?: { url?: string } | null | string;
+  locationUrl?: string;
 }
 
 export interface BusinessStatsData {

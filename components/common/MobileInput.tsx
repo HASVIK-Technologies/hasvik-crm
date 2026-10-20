@@ -29,8 +29,9 @@ export default function MobileInput({
       <Input
         type="tel"
         inputMode="numeric"
-        pattern="[0-9]*"
+        pattern="[0-9]{10}"
         maxLength={10}
+        autoComplete="tel-national"
         placeholder="Mobile number"
         className="border-0 shadow-none focus-visible:ring-0 aria-invalid:ring-0"
         value={value}

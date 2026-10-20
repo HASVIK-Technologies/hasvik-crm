@@ -14,6 +14,7 @@ import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { FollowUpNotes } from "@/components/follow-ups/FollowUpNotes";
 import { useBusinessQuery } from "@/hooks/use-businesses";
+import { formatFollowUpType } from "@/lib/business/form-options";
 import type { FollowUpItem } from "@/types/follow-up";
 
 function dateTime(value: string) {
@@ -114,7 +115,7 @@ export default function FollowUpDetails({
               <div>
                 <p className="text-sm text-[#64748b]">Follow-up type</p>
                 <p className="mt-1 text-sm font-semibold text-[#0f172a]">
-                  {followUp.type}
+                  {formatFollowUpType(followUp.type)}
                 </p>
               </div>
             </div>

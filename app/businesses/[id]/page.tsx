@@ -5,7 +5,6 @@ import React from "react";
 import Link from "next/link";
 import { useParams } from "next/navigation";
 import OutlinedButton from "@/components/common/OutlinedButton";
-import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import Actions from "@/components/common/Actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/common/StatusBadge";
@@ -15,11 +14,14 @@ import businessData from "@/data/businessData.json";
 import BusinessDetailsMap from "../../../components/business-details/BusinessDetailsMap";
 import BusinessDetailsOverview from "../../../components/business-details/BusinessDetailsOverview";
 import BusinessDetailsQuickActions from "../../../components/business-details/BusinessDetailsQuickActions";
-// import PhoneButton from "../../../components/business-details/business-details-header/PhoneButton";
 import BusinessDetailsContacts from "../../../components/business-details/BusinessDetailsContacts";
 import { useBusinessFollowUpsQuery } from "@/hooks/use-business-get-follow-ups";
 import { useModalStore } from "@/store/business-modal-store";
 import { AddFollowUpModal } from "@/components/business-details/AddFollowUpModal";
+import {
+  getLocationData,
+  openGoogleMapsOnce,
+} from "@/lib/business/location";
 
 import {
   Edit2,
@@ -34,11 +36,9 @@ import {
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import { BusinessItem } from "@/types/business";
-import { ChangeBusinessStatusModal } from "@/components/businesses";
-import { Button } from "@/components/ui/button";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
-import { REMINDER_OPTIONS } from "@/lib/business/form-options";
+import { formatLeadStatus } from "@/lib/business/form-options";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -55,28 +55,6 @@ type ContactItem = {
   badgeClass?: string;
 };
 
-type EmailItem = {
-  id: number | string;
-  email: string;
-};
-
-type TabItem = {
-  id: string;
-  label: string;
-};
-
-type FollowUpItem = {
-  id: number | string;
-  date: string;
-  badgeClass?: string;
-  badge?: string;
-  type: string;
-  summary: string;
-  details: string;
-  assignee: string;
-  phone: string;
-};
-
 const STATIC_BUSINESS_12: BusinessItem = {
   id: 12,
   name: "Hasvik Technology",
@@ -87,6 +65,7 @@ const STATIC_BUSINESS_12: BusinessItem = {
   category: "Furniture Shop",
   city: "Ballia",
   status: "Active",
+  leadStatus: "INTERESTED",
   lastFollowUp: "25 Aug 2026 at 11:30 AM",
   nextFollowUp: "Today at 10:00 AM",
   nextFollowUpType: "today",
@@ -193,6 +172,19 @@ export default function BusinessDetails() {
     );
   }
 
+  const locationData = getLocationData(business);
+
+  const rawLeadStatus =
+    (business?.leadStatus && business.leadStatus !== "Active" && business.leadStatus !== "Inactive"
+      ? business.leadStatus
+      : undefined) ||
+    (business?.status && business.status !== "Active" && business.status !== "Inactive"
+      ? business.status
+      : undefined) ||
+    business?.leadStatus;
+
+  const leadStatusDisplay = formatLeadStatus(rawLeadStatus);
+
   return (
     <DetailsPageLayout
       breadcrumb={
@@ -229,22 +221,30 @@ export default function BusinessDetails() {
         <>
           {/* 2. SINGLE MERGED CARD (Full Width) */}
           <Card className="w-full overflow-hidden rounded-2xl border-[#e4ecf2] shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
-            <CardHeader className="flex flex-col gap-5 border-b border-[#e8eef4] bg-white px-5 py-5 sm:flex-row sm:items-center sm:justify-between sm:px-7">
-              <div className="flex min-w-0 items-start gap-4">
-                <Avatar className="size-16 rounded-2xl">
-                  <AvatarFallback className="bg-primary/10 text-xl font-semibold text-primary">
+            <CardHeader className="flex flex-col gap-4 border-b border-[#e8eef4] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
+              <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">
+                <Avatar className="size-13 sm:size-16 rounded-xl sm:rounded-2xl shrink-0">
+                  <AvatarFallback className="bg-primary/10 text-base sm:text-xl font-semibold text-primary">
                     {business.initials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="mt-0.5 flex min-w-0 flex-col gap-2">
-                  <div className="flex flex-wrap items-center gap-3">
-                    <CardTitle className="truncate text-xl font-bold tracking-tight text-[#0f172a] sm:text-2xl">
+                <div className="mt-0.5 flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
+                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
+                    <CardTitle className="text-lg font-bold tracking-tight text-[#0f172a] sm:text-2xl break-words min-w-0">
                       {business.name}
                     </CardTitle>
-                    <StatusBadge status={isInactive ? "Inactive" : "Active"} />
+                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+                      <StatusBadge status={isInactive ? "Inactive" : "Active"} />
+                      {leadStatusDisplay && leadStatusDisplay !== "-" && (
+                        <StatusBadge
+                          status={rawLeadStatus || leadStatusDisplay}
+                          label={leadStatusDisplay}
+                        />
+                      )}
+                    </div>
                   </div>
-                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-sm text-[#64748b]">
-                    <Building2 className="size-4 shrink-0 text-[#94a3b8]" />
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-[#64748b]">
+                    <Building2 className="size-3.5 sm:size-4 shrink-0 text-[#94a3b8]" />
                     <span>{business.category || "Uncategorized"}</span>
                     {business.city && (
                       <>
@@ -351,23 +351,33 @@ export default function BusinessDetails() {
                   </OutlinedButton>
                 ) : null}
 
-                {/* Map Button */}
-                <OutlinedButton
-                  asChild
-                  aria-label="View business location"
-                  title="View business location"
-                  className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10"
-                >
-                  <a
-                    href={`https://maps.google.com/?q=${encodeURIComponent(
-                      business.name + " " + (business.address || business.city)
-                    )}`}
-                    target="_blank"
-                    rel="noopener noreferrer"
+                {locationData.isAvailable ? (
+                  <OutlinedButton
+                    asChild
+                    aria-label="View business location on Google Maps"
+                    title="View business location on Google Maps"
+                    className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10 cursor-pointer"
+                  >
+                    <a
+                      href={locationData.mapLink || "#"}
+                      target="_blank"
+                      rel="noopener noreferrer"
+                      onClick={(e) => openGoogleMapsOnce(e, locationData.mapLink)}
+                    >
+                      <MapPin className="h-4 w-4" />
+                    </a>
+                  </OutlinedButton>
+                ) : (
+                  <OutlinedButton
+                    disabled
+                    aria-disabled="true"
+                    aria-label="Location not available"
+                    title="Location not available"
+                    className="h-9 w-9 p-0 flex items-center justify-center text-slate-300 border-gray-200 opacity-50 cursor-not-allowed"
                   >
                     <MapPin className="h-4 w-4" />
-                  </a>
-                </OutlinedButton>
+                  </OutlinedButton>
+                )}
               </div>
             </CardHeader>
 
@@ -437,9 +447,7 @@ export default function BusinessDetails() {
                       Address
                     </p>
                     <p className="mt-1 text-sm font-semibold leading-5 text-slate-800">
-                      {business.address ||
-                        businessData.businessInfo.address ||
-                        "Address not provided"}
+                      {business.address || (business.city ? business.city : "Location not available")}
                     </p>
                   </div>
                 </div>

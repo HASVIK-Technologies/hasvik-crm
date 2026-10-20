@@ -34,6 +34,7 @@ import {
 import { useModalStore } from "@/store/business-modal-store";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
+import { formatFollowUpType } from "@/lib/business/form-options";
 import { useState } from "react";
 
 interface BusinessDetailsFollowupsProps {
@@ -98,7 +99,9 @@ export default function BusinessDetailsFollowups({
   ) => {
     if (
       event.target instanceof Element &&
-      event.target.closest("a, button, [role='button'], input, select, textarea")
+      event.target.closest(
+        "a, button, [role='button'], [role='menu'], [role='menuitem'], [data-radix-dropdown-menu-content], [data-radix-popper-content-wrapper], input, select, textarea",
+      )
     ) {
       return;
     }
@@ -161,7 +164,7 @@ export default function BusinessDetailsFollowups({
                     </td>
                     <td className="px-4 py-4">
                       <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
-                        {item.type}
+                        {formatFollowUpType(item.type)}
                       </span>
                     </td>
                     <td className="px-4 py-4">
@@ -173,19 +176,22 @@ export default function BusinessDetailsFollowups({
                     <td className="px-4 py-4 text-sm text-slate-600">
                       {item.assignedToName || "Unassigned"}
                     </td>
-                    <td className="px-5 py-4 sm:px-6">
-                      <div className="flex items-center justify-end gap-1">
+                    <td className="px-5 py-4 sm:px-6" onClick={(e) => e.stopPropagation()}>
+                      <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                         <button
                           type="button"
                           aria-label={`View or add notes for follow-up on ${formatScheduledAt(item.scheduledAt)}`}
                           title="View or add notes"
-                          onClick={() => setNotesFollowUp(item)}
+                          onClick={(e) => {
+                            e.stopPropagation();
+                            setNotesFollowUp(item);
+                          }}
                           className="inline-flex size-9 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
                         >
                           <MessageSquareText className="size-4" />
                         </button>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild>
+                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
                               aria-label={`Actions for follow-up on ${formatScheduledAt(item.scheduledAt)}`}
@@ -197,6 +203,7 @@ export default function BusinessDetailsFollowups({
                           <DropdownMenuContent
                             align="end"
                             className="w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg"
+                            onClick={(e) => e.stopPropagation()}
                           >
                             <DropdownMenuItem
                               asChild
@@ -209,9 +216,11 @@ export default function BusinessDetailsFollowups({
                             {canEditFollowUp(item) && (
                               <DropdownMenuItem
                                 className="cursor-pointer rounded-md p-2 text-xs font-medium text-slate-700"
-                                onClick={() =>
-                                  openFollowUpModal(businessId, item)
-                                }
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openFollowUpModal(businessId, item);
+                                }}
+                                onSelect={() => openFollowUpModal(businessId, item)}
                               >
                                 Reschedule / Edit
                               </DropdownMenuItem>
@@ -219,7 +228,11 @@ export default function BusinessDetailsFollowups({
                             {canCompleteFollowUp(item) && (
                               <DropdownMenuItem
                                 className="cursor-pointer rounded-md p-2 text-xs font-medium text-brand-green-strong"
-                                onClick={() => void completeFollowUp(item)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  void completeFollowUp(item);
+                                }}
+                                onSelect={() => void completeFollowUp(item)}
                                 disabled={completeMutation.isPending}
                               >
                                 Mark as Completed
@@ -228,7 +241,11 @@ export default function BusinessDetailsFollowups({
                             {canCreateNextFollowUp(item) && (
                               <DropdownMenuItem
                                 className="cursor-pointer rounded-md p-2 text-xs font-medium text-brand-green-strong"
-                                onClick={() => openFollowUpModal(businessId)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openFollowUpModal(businessId);
+                                }}
+                                onSelect={() => openFollowUpModal(businessId)}
                               >
                                 Schedule Next Follow-up
                               </DropdownMenuItem>
@@ -236,7 +253,11 @@ export default function BusinessDetailsFollowups({
                             {canCancelFollowUp(item) && (
                               <DropdownMenuItem
                                 className="mt-1 cursor-pointer rounded-md p-2 text-xs font-medium text-red-600 focus:bg-red-50 focus:text-red-700"
-                                onClick={() => setCancellingFollowUp(item)}
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  setCancellingFollowUp(item);
+                                }}
+                                onSelect={() => setCancellingFollowUp(item)}
                               >
                                 Cancel Follow-up
                               </DropdownMenuItem>
@@ -285,7 +306,7 @@ export default function BusinessDetailsFollowups({
                   <strong>
                     {cancellingFollowUp?.businessName || "this business"}
                   </strong>
-                  ? This action cannot be undone.
+                  ?
                 </DialogPrimitive.Description>
               </div>
               <DialogPrimitive.Close asChild>
