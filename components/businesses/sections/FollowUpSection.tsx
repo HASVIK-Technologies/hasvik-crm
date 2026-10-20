@@ -18,7 +18,6 @@ export default function FollowUpSection({
 }) {
   const {
     control,
-    register,
     setValue,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
