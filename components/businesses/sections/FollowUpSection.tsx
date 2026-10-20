@@ -22,7 +22,7 @@ export default function FollowUpSection({
     setValue,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
-  const assigneeName = useWatch({ control, name: "assignToName" });
+  const assignToName = useWatch({ control, name: "assignToName" });
 
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
