@@ -34,25 +34,7 @@ export default function BusinessDetailsMap({ business }: MapProps) {
   }
 
   return (
-    <div className="mt-6 bg-white border border-slate-200 rounded-xl p-6 shadow-sm">
-      <div className="flex items-center justify-between mb-4">
-        <h3 className="text-lg font-bold text-slate-800">Location</h3>
-        <Button
-          variant="outline"
-          size="sm"
-          asChild
-          className="gap-1.5 text-primary border-slate-200 hover:bg-primary/5 cursor-pointer"
-        >
-          <a
-            href={locationData.mapLink || "#"}
-            target="_blank"
-            rel="noopener noreferrer"
-            onClick={(e) => openGoogleMapsOnce(e, locationData.mapLink)}
-          >
-            <ExternalLink className="w-4 h-4" /> Open in Maps
-          </a>
-        </Button>
-      </div>
+    <div className="mt-6 bg-white border border-slate-200 rounded-xl p-2 shadow-sm">
       <div className="bg-slate-100 rounded-lg h-90 relative overflow-hidden border border-slate-200">
         <iframe
           src={locationData.embedSrc}

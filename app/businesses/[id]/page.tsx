@@ -34,9 +34,7 @@ import {
   AlertCircle,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
-import {
-  useBusinessQuery,
-} from "@/hooks/use-businesses";
+import { useBusinessQuery } from "@/hooks/use-businesses";
 import { BusinessItem } from "@/types/business";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
@@ -83,7 +81,6 @@ export default function BusinessDetails() {
 
   const params = useParams();
 
-
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const stringId = typeof rawId === "string" ? rawId : "";
   const { data: followUps } = useBusinessFollowUpsQuery(stringId);
@@ -94,11 +91,49 @@ export default function BusinessDetails() {
     isLoading,
   } = useBusinessQuery(typeof rawId === "string" ? rawId : undefined);
   const numericId = typeof rawId === "string" ? parseInt(rawId, 10) : NaN;
-  // For /businesses/12, always provide the static Hasvik Technology data as requested
   const business =
     apiBusiness ?? (numericId === 12 ? STATIC_BUSINESS_12 : undefined);
   const { openFollowUpModal, openDeactivateModal } = useModalStore();
   const isInactive = business?.isActive === false;
+  const upcomingFollowUps = Array.isArray(followUps)
+    ? followUps
+        .filter((f: any) => f.status === "SCHEDULED")
+        .sort(
+          (a: any, b: any) =>
+            new Date(a.scheduledAt).getTime() -
+            new Date(b.scheduledAt).getTime()
+        )
+    : [];
+  const nextFollowUp =
+    upcomingFollowUps.length > 0 ? upcomingFollowUps[0] : null;
+  const completedFollowUps = Array.isArray(followUps)
+    ? followUps
+        .filter((f: any) => f.status === "COMPLETED")
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.scheduledAt).getTime() -
+            new Date(a.scheduledAt).getTime()
+        )
+    : [];
+  const lastFollowUpItem =
+    completedFollowUps.length > 0 ? completedFollowUps[0] : null;
+  const dateFmt = new Intl.DateTimeFormat("en-IN", {
+    dateStyle: "medium",
+    timeStyle: "short",
+  });
+  const headerPhones: any[] =
+    business?.phoneNumbers && business.phoneNumbers.length > 0
+      ? business.phoneNumbers
+      : business?.phone
+      ? [{ number: business.phone, isPrimary: true }]
+      : [];
+
+  const headerWhatsapps: any[] =
+    business?.whatsappNumbers && business.whatsappNumbers.length > 0
+      ? business.whatsappNumbers
+      : business?.alternatePhone
+      ? [{ number: business.alternatePhone, isPrimary: true }]
+      : [];
 
   if (isError) {
     return (
@@ -165,18 +200,19 @@ export default function BusinessDetails() {
           primary={{
             label: "Edit Business",
             icon: <Edit2 className="size-4" />,
-            href: `/businesses/form/${business.id}`
+            href: `/businesses/form/${business.id}`,
+            disabled: isInactive,
           }}
           secondary={[
             {
               label: "Add Follow Up",
               disabled: isInactive, // Lock it if inactive!
-              onSelect: () => openFollowUpModal(String(business?.id)) // Open the modal!
+              onSelect: () => openFollowUpModal(String(business?.id)), // Open the modal!
             },
             {
               label: isInactive ? "Activate" : "Deactivate",
               // Open the Deactivate/Activate modal!
-              onSelect: () => openDeactivateModal(String(business?.id))
+              onSelect: () => openDeactivateModal(String(business?.id)),
             },
           ]}
         />
@@ -212,7 +248,9 @@ export default function BusinessDetails() {
                     <span>{business.category || "Uncategorized"}</span>
                     {business.city && (
                       <>
-                        <span aria-hidden="true" className="text-[#cbd5e1]">·</span>
+                        <span aria-hidden="true" className="text-[#cbd5e1]">
+                          ·
+                        </span>
                         <span>{business.city}</span>
                       </>
                     )}
@@ -220,18 +258,23 @@ export default function BusinessDetails() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
-                {businessData.contactInfo.phones?.length > 1 ? (
+              <div className="flex items-center gap-2 self-end sm:self-auto">
+                {/* Phone Dropdown / Single Button */}
+                {headerPhones.length > 1 ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <OutlinedButton aria-label="Call business" title="Call business" className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10">
+                      <OutlinedButton
+                        aria-label="Call business"
+                        title="Call business"
+                        className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
+                      >
                         <Phone className="h-4 w-4" />
                       </OutlinedButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {businessData.contactInfo.phones.map((p: ContactItem) => (
+                      {headerPhones.map((p: any, idx: number) => (
                         <DropdownMenuItem
-                          key={p.id}
+                          key={p.id || p._id || idx}
                           asChild
                           className="cursor-pointer"
                         >
@@ -239,62 +282,67 @@ export default function BusinessDetails() {
                             href={`tel:${cleanNumber(p.number)}`}
                             className="w-full"
                           >
-                            {p.number} ({p.type})
+                            {p.number} (
+                            {p.type || (p.isPrimary ? "Primary" : "Secondary")})
                           </a>
                         </DropdownMenuItem>
                       ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                ) : businessData.contactInfo.phones?.length === 1 ? (
+                ) : headerPhones.length === 1 ? (
                   <OutlinedButton
                     asChild
                     aria-label="Call business"
                     className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                   >
-                    <a
-                      href={`tel:${cleanNumber(businessData.contactInfo.phones[0].number)}`}
-                    >
+                    <a href={`tel:${cleanNumber(headerPhones[0].number)}`}>
                       <Phone className="h-4 w-4" />
                     </a>
                   </OutlinedButton>
                 ) : null}
 
-                {businessData.contactInfo.whatsapps?.length > 1 ? (
+                {/* WhatsApp Dropdown / Single Button */}
+                {headerWhatsapps.length > 1 ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
-                      <OutlinedButton aria-label="Message business on WhatsApp" title="Message business on WhatsApp" className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10">
+                      <OutlinedButton
+                        aria-label="Message business on WhatsApp"
+                        title="Message business on WhatsApp"
+                        className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
+                      >
                         <WhatsAppIcon className="h-4 w-4" />
                       </OutlinedButton>
                     </DropdownMenuTrigger>
                     <DropdownMenuContent align="end">
-                      {businessData.contactInfo.whatsapps.map(
-                        (w: ContactItem) => (
-                          <DropdownMenuItem
-                            key={w.id}
-                            asChild
-                            className="cursor-pointer"
+                      {headerWhatsapps.map((w: any, idx: number) => (
+                        <DropdownMenuItem
+                          key={w.id || w._id || idx}
+                          asChild
+                          className="cursor-pointer"
+                        >
+                          <a
+                            href={`https://wa.me/91${cleanNumber(w.number)}`}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="w-full"
                           >
-                            <a
-                              href={`https://wa.me/91${cleanNumber(w.number)}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              className="w-full"
-                            >
-                              {w.number} ({w.type})
-                            </a>
-                          </DropdownMenuItem>
-                        ),
-                      )}
+                            {w.number} (
+                            {w.type || (w.isPrimary ? "Primary" : "Secondary")})
+                          </a>
+                        </DropdownMenuItem>
+                      ))}
                     </DropdownMenuContent>
                   </DropdownMenu>
-                ) : businessData.contactInfo.whatsapps?.length === 1 ? (
+                ) : headerWhatsapps.length === 1 ? (
                   <OutlinedButton
                     asChild
                     aria-label="Message business on WhatsApp"
                     className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                   >
                     <a
-                      href={`https://wa.me/91${cleanNumber(businessData.contactInfo.whatsapps[0].number)}`}
+                      href={`https://wa.me/91${cleanNumber(
+                        headerWhatsapps[0].number
+                      )}`}
                       target="_blank"
                       rel="noopener noreferrer"
                     >
@@ -338,25 +386,39 @@ export default function BusinessDetails() {
                 <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
                   <Users className="mt-0.5 size-4 shrink-0 text-slate-400" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">Assigned to</p>
+                    <p className="text-xs font-medium text-slate-500">
+                      Assigned to
+                    </p>
                     <p className="mt-1 truncate text-sm font-semibold text-slate-800">
-                      {business.assignedTo || "Unassigned"}
+                      {nextFollowUp
+                        ? nextFollowUp.assignedToName
+                        : business.assignedTo || "Unassigned"}
                     </p>
                   </div>
                 </div>
                 <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
                   <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">Next follow-up</p>
+                    <p className="text-xs font-medium text-slate-500">
+                      Next follow-up
+                    </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-slate-800">
-                        {business.nextFollowUp || "Not scheduled"}
-                      </p>
-                      {business.nextFollowUpType && (
-                        <StatusBadge
-                          status={business.nextFollowUpType}
-                          className="h-5 py-0 text-[10px]"
-                        />
+                      {nextFollowUp ? (
+                        <>
+                          <p className="text-sm font-semibold text-slate-800">
+                            {dateFmt.format(new Date(nextFollowUp.scheduledAt))}
+                          </p>
+                          <Link
+                            href={`/follow-ups/${nextFollowUp.id}`}
+                            className="inline-flex h-5 items-center rounded-full bg-blue-50 px-2 text-[10px] font-semibold text-blue-700 hover:bg-blue-100 transition-colors"
+                          >
+                            View
+                          </Link>
+                        </>
+                      ) : (
+                        <p className="text-sm font-semibold text-slate-800 w-full text-center">
+                          -
+                        </p>
                       )}
                     </div>
                   </div>
@@ -364,16 +426,26 @@ export default function BusinessDetails() {
                 <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
                   <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">Last follow-up</p>
-                    <p className="mt-1 truncate text-sm font-semibold text-slate-800">
-                      {business.lastFollowUp || "No previous follow-up"}
+                    <p className="text-xs font-medium text-slate-500">
+                      Last follow-up
+                    </p>
+                    <p
+                      className={`mt-1 truncate text-sm font-semibold text-slate-800${
+                        !lastFollowUpItem ? " w-full text-center" : ""
+                      }`}
+                    >
+                      {lastFollowUpItem
+                        ? dateFmt.format(new Date(lastFollowUpItem.scheduledAt))
+                        : "-"}
                     </p>
                   </div>
                 </div>
                 <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
                   <MapPin className="mt-0.5 size-4 shrink-0 text-slate-400" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">Address</p>
+                    <p className="text-xs font-medium text-slate-500">
+                      Address
+                    </p>
                     <p className="mt-1 text-sm font-semibold leading-5 text-slate-800">
                       {business.address || (business.city ? business.city : "Location not available")}
                     </p>
@@ -387,7 +459,9 @@ export default function BusinessDetails() {
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="max-w-full justify-start overflow-x-auto">
               {businessData.tabs
-                .filter((tab: any) => tab.id !== "activity-log" && tab.id !== "Notes")
+                .filter(
+                  (tab: any) => tab.id !== "activity-log" && tab.id !== "Notes"
+                )
                 .map((tab: any) => (
                   <TabsTrigger
                     key={tab.id}
@@ -399,11 +473,9 @@ export default function BusinessDetails() {
                     {/* Contacts: Deleted the old number code! */}
                     {/* Follow-ups: Using the REAL TanStack count! */}
                     {tab.id === "follow-ups" && ` (${realFollowUpsCount})`}
-
                   </TabsTrigger>
                 ))}
             </TabsList>
-
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="mt-6">
               <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-6">
@@ -414,25 +486,20 @@ export default function BusinessDetails() {
                 <BusinessDetailsQuickActions
                   business={business}
                   cleanNumber={cleanNumber}
-
                 />
               </div>
               <BusinessDetailsMap business={business} />
             </TabsContent>
-
             {/* CONTACTS TAB */}
             <TabsContent value="contacts" className="mt-6">
-              <BusinessDetailsContacts businessData={businessData} />
+              <BusinessDetailsContacts business={business} />
             </TabsContent>
-
             {/* FOLLOW-UPS TAB */}
             <TabsContent value="follow-ups" className="mt-6">
               <BusinessDetailsFollowups />
-
             </TabsContent>
             {/* NOTES TAB 
             <TabsContent value="notes" className="mt-6"></TabsContent> */}
-
           </Tabs>
           {/* New Follow-up Modal */}
           <AddFollowUpModal businessName={business?.name || "Business"} />
