@@ -26,7 +26,7 @@ export type BusinessFormValues = {
   description: string;
   followUpType: FollowUpType | "";
   assignTo: string;
-  /** Display name for `assignTo`; used to display the user's full name in the dropdown. Never sent to the API. */
+  /** Display name for the selected assignee; never sent to the API. */
   assignToName?: string;
   nextFollowupDate: string;
   reminder: string;

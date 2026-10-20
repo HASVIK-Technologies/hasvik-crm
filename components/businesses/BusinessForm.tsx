@@ -26,6 +26,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import SecondaryButton from "@/components/common/SecondaryButton";
 import SaveButton from "@/components/common/SaveButton";
+import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
 
 import FormSection from "@/components/businesses/FormSection";
 import BusinessInfoSection from "@/components/businesses/sections/BusinessInfoSection";
@@ -45,6 +46,7 @@ import {
   toFollowUpPayload,
   type BusinessFormValues,
 } from "@/lib/business/form-types";
+import { normalizeHttpUrl } from "@/lib/business/url-validation";
 import type { FollowUpType } from "@/types/follow-up";
 import { toDateTimeLocalValue } from "@/lib/forms/date-time";
 
@@ -53,6 +55,7 @@ import { toDateTimeLocalValue } from "@/lib/forms/date-time";
 // when it's ready to go live; the mobile stepper below picks up the extra
 // step automatically, no other changes needed.
 const SHOW_ADDITIONAL_INFORMATION = true;
+const MAX_FORM_STEP_INDEX = SHOW_ADDITIONAL_INFORMATION ? 3 : 2;
 
 // Friendly labels used to build the "Please fill in..." summary banner from
 // whatever react-hook-form's `errors` object contains.
@@ -64,6 +67,9 @@ const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
   pincode: "Pincode",
   address: "Address",
   status: "Status",
+  email: "Email",
+  website: "Website",
+  locationUrl: "Location URL",
   followUpType: "Follow-up Type",
   assignTo: "Assignee",
   nextFollowupDate: "Follow-up Date & Time",
@@ -90,8 +96,127 @@ const isBusinessInfoComplete = (values: BusinessFormValues) =>
   Boolean(values.status);
 
 const isContactInfoComplete = (values: BusinessFormValues) =>
-  (values.phoneNumbers ?? []).some((p) => p.value.trim().length > 0) &&
-  (values.whatsappNumbers ?? []).some((w) => w.value.trim().length > 0);
+  isNumberListComplete(values.phoneNumbers) &&
+  isNumberListComplete(values.whatsappNumbers);
+
+const isNumberListComplete = (numbers: BusinessFormValues["phoneNumbers"]) =>
+  numbers.some((number) => /^\d{10}$/.test(number.value.trim())) &&
+  numbers.every(
+    (number) => !number.value.trim() || /^\d{10}$/.test(number.value.trim()),
+  );
+
+interface BusinessFormDraft {
+  values: BusinessFormValues;
+  currentStep: number;
+}
+
+function isBusinessFormValues(value: unknown): value is BusinessFormValues {
+  if (!value || typeof value !== "object") return false;
+  const values = value as Record<string, unknown>;
+  const stringFields = [
+    "businessName",
+    "category",
+    "city",
+    "state",
+    "pincode",
+    "address",
+    "status",
+    "locationUrl",
+    "email",
+    "website",
+    "description",
+    "followUpType",
+    "assignTo",
+    "nextFollowupDate",
+    "reminder",
+  ];
+
+  return (
+    stringFields.every((field) => typeof values[field] === "string") &&
+    (values.categoryName === undefined ||
+      typeof values.categoryName === "string") &&
+    (values.assignToName === undefined ||
+      typeof values.assignToName === "string") &&
+    typeof values.addAnother === "boolean" &&
+    ["phoneNumbers", "whatsappNumbers"].every(
+      (field) =>
+        Array.isArray(values[field]) &&
+        (values[field] as unknown[]).every(
+          (entry) =>
+            Boolean(entry) &&
+            typeof entry === "object" &&
+            typeof (entry as Record<string, unknown>).value === "string",
+        ),
+    )
+  );
+}
+
+function readBusinessFormDraft(key: string): BusinessFormDraft | undefined {
+  try {
+    const serialized = window.localStorage.getItem(key);
+    if (!serialized) return undefined;
+
+    const draft: unknown = JSON.parse(serialized);
+    const currentStep =
+      draft && typeof draft === "object"
+        ? (draft as Record<string, unknown>).currentStep
+        : undefined;
+    if (
+      !draft ||
+      typeof draft !== "object" ||
+      !isBusinessFormValues((draft as Record<string, unknown>).values) ||
+      typeof currentStep !== "number" ||
+      !Number.isInteger(currentStep)
+    ) {
+      console.error("Ignoring invalid saved business form draft.");
+      window.localStorage.removeItem(key);
+      return undefined;
+    }
+
+    return draft as BusinessFormDraft;
+  } catch (error: unknown) {
+    console.error("Unable to restore saved business form draft:", error);
+    return undefined;
+  }
+}
+
+function clearBusinessFormDraft(key: string) {
+  try {
+    window.localStorage.removeItem(key);
+  } catch (error: unknown) {
+    console.error("Unable to clear saved business form draft:", error);
+  }
+}
+
+function hasBusinessFormChanged(
+  values: BusinessFormValues,
+  baseline: BusinessFormValues,
+) {
+  const normalize = (formValues: BusinessFormValues) => ({
+    addAnother: formValues.addAnother,
+    businessName: formValues.businessName,
+    category: formValues.category,
+    categoryName: formValues.categoryName ?? "",
+    city: formValues.city,
+    state: formValues.state,
+    pincode: formValues.pincode,
+    address: formValues.address,
+    status: formValues.status,
+    locationUrl: formValues.locationUrl,
+    phoneNumbers: formValues.phoneNumbers.map(({ value }) => value),
+    whatsappNumbers: formValues.whatsappNumbers.map(({ value }) => value),
+    email: formValues.email,
+    website: formValues.website,
+    description: formValues.description,
+    followUpType: formValues.followUpType,
+    assignTo: formValues.assignTo,
+    assignToName: formValues.assignToName ?? "",
+    nextFollowupDate: formValues.nextFollowupDate,
+    reminder: formValues.reminder,
+  });
+
+  return JSON.stringify(normalize(values)) !== JSON.stringify(normalize(baseline));
+}
 
 export default function BusinessForm({
   initialValues,
@@ -109,23 +234,33 @@ export default function BusinessForm({
 
   const targetId = businessId || searchParams.get("id") || undefined;
   const isEditMode = Boolean(targetId);
+  const draftKey = `hasvik-crm:business-form:${targetId ?? "new"}`;
 
   // Captured once on mount - this is the snapshot Reset restores to,
   // independent of anything the person types afterward.
   const [initialSnapshot] = useState<BusinessFormValues>(
     () => initialValues ?? defaultBusinessFormValues,
   );
+  const [draftBaseline, setDraftBaseline] =
+    useState<BusinessFormValues>(initialSnapshot);
 
   const methods = useForm<BusinessFormValues>({
     defaultValues: initialSnapshot,
     mode: "onChange",
     shouldUnregister: false,
   });
-  const { control, handleSubmit, reset } = methods;
+  const {
+    control,
+    handleSubmit,
+    reset,
+    formState: { isDirty },
+  } = methods;
 
   const [currentStep, setCurrentStep] = useState(0);
   const [submitError, setSubmitError] = useState<string | null>(null);
   const [isLoadingBusiness, setIsLoadingBusiness] = useState(isEditMode);
+  const [isDraftReady, setIsDraftReady] = useState(false);
+  const [isDiscardDialogOpen, setIsDiscardDialogOpen] = useState(false);
   const [loadError, setLoadError] = useState<string | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -138,11 +273,69 @@ export default function BusinessForm({
   // In edit mode this holds the values loaded from the API, so "Reset"
   // can restore them instead of clearing the form.
   const savedValuesRef = useRef<BusinessFormValues | null>(null);
-
+  const historyGuardRef = useRef<{
+    state: Record<string, unknown>;
+    url: string;
+    historyLength: number;
+  } | null>(null);
+  const allowNextPopRef = useRef(false);
+  const pendingNavigationRef = useRef<
+    { type: "route"; href: string } | { type: "browser-back" } | null
+  >(null);
   const watchedValues = useWatch({ control }) as BusinessFormValues;
+  const hasUnsavedChanges =
+    isDraftReady &&
+    hasBusinessFormChanged(watchedValues, draftBaseline);
+  const hasUnsavedChangesRef = useRef(hasUnsavedChanges);
+  useEffect(() => {
+    hasUnsavedChangesRef.current = hasUnsavedChanges;
+  }, [hasUnsavedChanges]);
   const isFormComplete =
     isBusinessInfoComplete(watchedValues) &&
     isContactInfoComplete(watchedValues);
+
+  useEffect(() => {
+    if (targetId) return;
+
+    const draft = readBusinessFormDraft(draftKey);
+    if (draft) {
+      reset(draft.values);
+      // Hydrate the form from browser storage after the client mounts.
+      // eslint-disable-next-line react-hooks/set-state-in-effect
+      setCurrentStep(
+        Math.max(0, Math.min(draft.currentStep, MAX_FORM_STEP_INDEX)),
+      );
+    }
+    setIsDraftReady(true);
+  }, [draftKey, reset, targetId]);
+
+  useEffect(() => {
+    const serializedDraft = JSON.stringify({
+      values: watchedValues,
+      currentStep,
+    });
+    if (!isDraftReady || isSubmitting) return;
+    if (
+      currentStep === 0 &&
+      !hasBusinessFormChanged(watchedValues, draftBaseline)
+    ) {
+      return;
+    }
+
+    try {
+      window.localStorage.setItem(draftKey, serializedDraft);
+    } catch (error: unknown) {
+      console.error("Unable to save business form draft:", error);
+    }
+  }, [
+    currentStep,
+    draftBaseline,
+    draftKey,
+    isDraftReady,
+    isSubmitting,
+    watchedValues,
+  ]);
+
   useEffect(() => {
     if (!targetId) {
       return;
@@ -248,7 +441,18 @@ export default function BusinessForm({
         };
 
         savedValuesRef.current = loadedValues;
+        setDraftBaseline(loadedValues);
+        const draft = readBusinessFormDraft(draftKey);
         reset(loadedValues);
+        if (draft) {
+          reset(draft.values, { keepDefaultValues: true });
+        }
+        if (draft) {
+          setCurrentStep(
+            Math.max(0, Math.min(draft.currentStep, MAX_FORM_STEP_INDEX)),
+          );
+        }
+        setIsDraftReady(true);
 
         setIsLoadingBusiness(false);
       })
@@ -259,19 +463,155 @@ export default function BusinessForm({
             err instanceof Error ? err.message : "Not found"
           }`,
         );
+        setIsDraftReady(true);
         setIsLoadingBusiness(false);
       });
 
     return () => {
       isMounted = false;
     };
-  }, [targetId, reset]);
+  }, [draftKey, targetId, reset]);
 
-  const handleBackToBusinesses = () => router.push("/businesses");
+  const requestNavigation = (href: string) => {
+    if (hasUnsavedChangesRef.current) {
+      pendingNavigationRef.current = { type: "route", href };
+      setIsDiscardDialogOpen(true);
+      return;
+    }
+    router.replace(href);
+  };
+
+  const handleBackToBusinesses = () => requestNavigation("/businesses");
+
+  useEffect(() => {
+    if (!isDraftReady) return;
+
+    let guard = historyGuardRef.current;
+    if (!guard || guard.url !== window.location.href) {
+      guard = {
+        state: {
+          ...(window.history.state &&
+          typeof window.history.state === "object"
+            ? window.history.state
+            : {}),
+          businessFormHistoryGuard: true,
+        },
+        url: window.location.href,
+        historyLength: window.history.length,
+      };
+      historyGuardRef.current = guard;
+      window.history.pushState(guard.state, "", guard.url);
+    }
+
+    const handlePopState = (event: PopStateEvent) => {
+      if (allowNextPopRef.current) {
+        allowNextPopRef.current = false;
+        return;
+      }
+      if (!hasUnsavedChangesRef.current) {
+        event.stopImmediatePropagation();
+        allowNextPopRef.current = true;
+        window.history.back();
+        return;
+      }
+
+      event.stopImmediatePropagation();
+      const activeGuard = historyGuardRef.current;
+      if (activeGuard) {
+        window.history.pushState(activeGuard.state, "", activeGuard.url);
+      }
+      pendingNavigationRef.current = { type: "browser-back" };
+      setIsDiscardDialogOpen(true);
+    };
+
+    window.addEventListener("popstate", handlePopState, true);
+
+    const handleDocumentClick = (event: MouseEvent) => {
+      if (
+        event.defaultPrevented ||
+        event.button !== 0 ||
+        event.metaKey ||
+        event.ctrlKey ||
+        event.shiftKey ||
+        event.altKey
+      ) {
+        return;
+      }
+
+      const target = event.target;
+      if (!(target instanceof Element)) return;
+      const link = target.closest<HTMLAnchorElement>("a[href]");
+      if (
+        !link ||
+        link.target === "_blank" ||
+        link.hasAttribute("download") ||
+        !hasUnsavedChangesRef.current
+      ) {
+        return;
+      }
+
+      const destination = new URL(link.href, window.location.href);
+      if (
+        destination.origin !== window.location.origin ||
+        (destination.pathname === window.location.pathname &&
+          destination.search === window.location.search &&
+          destination.hash === window.location.hash)
+      ) {
+        return;
+      }
+
+      event.preventDefault();
+      event.stopPropagation();
+      event.stopImmediatePropagation();
+      pendingNavigationRef.current = {
+        type: "route",
+        href: `${destination.pathname}${destination.search}${destination.hash}`,
+      };
+      setIsDiscardDialogOpen(true);
+    };
+
+    document.addEventListener("click", handleDocumentClick, true);
+    return () => {
+      window.removeEventListener("popstate", handlePopState, true);
+      document.removeEventListener("click", handleDocumentClick, true);
+    };
+  }, [isDraftReady]);
+
+  const cancelDiscardChanges = () => {
+    pendingNavigationRef.current = null;
+    setIsDiscardDialogOpen(false);
+  };
+
+  const discardChangesAndLeave = () => {
+    const pendingNavigation = pendingNavigationRef.current;
+    pendingNavigationRef.current = null;
+    setIsDiscardDialogOpen(false);
+    clearBusinessFormDraft(draftKey);
+    reset(savedValuesRef.current ?? initialSnapshot);
+    setSubmitError(null);
+    setCurrentStep(0);
+
+    if (pendingNavigation?.type === "browser-back") {
+      allowNextPopRef.current = true;
+      const guard = historyGuardRef.current;
+      if (guard && guard.historyLength > 1) {
+        window.history.go(-2);
+      } else {
+        router.replace("/businesses");
+      }
+      return;
+    }
+
+    if (pendingNavigation?.type === "route") {
+      router.replace(pendingNavigation.href);
+    }
+  };
 
   const handleReset = () => {
     // Edit mode -> back to the saved values; add mode -> empty form.
-    reset(savedValuesRef.current ?? initialSnapshot);
+    clearBusinessFormDraft(draftKey);
+    const valuesToReset = savedValuesRef.current ?? initialSnapshot;
+    reset(valuesToReset);
     setSubmitError(null);
     setCurrentStep(0);
   };
@@ -329,6 +669,13 @@ export default function BusinessForm({
     return true;
   })();
 
+  const isStepAccessible = (stepIndex: number) =>
+    steps.slice(0, stepIndex).every((step) => {
+      if (step.key === "business") return isBusinessInfoComplete(watchedValues);
+      if (step.key === "contact") return isContactInfoComplete(watchedValues);
+      return true;
+    });
+
   const goNext = () => {
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
@@ -344,13 +691,19 @@ export default function BusinessForm({
     const payload: Record<string, unknown> = {
       name: values.businessName.trim(),
       status: values.status || "Active",
-      email: values.email.trim() || undefined,
-      website: values.website.trim() || undefined,
+      email: isEditMode
+        ? values.email.trim() || null
+        : values.email.trim() || undefined,
+      website: isEditMode
+        ? normalizeHttpUrl(values.website) || null
+        : normalizeHttpUrl(values.website) || undefined,
       address: values.address.trim() || undefined,
       city: values.city.trim() || undefined,
       state: values.state.trim() || undefined,
       pincode: values.pincode.trim() || undefined,
-      description: values.description || undefined,
+      description: isEditMode
+        ? values.description
+        : values.description || undefined,
       phoneNumbers: values.phoneNumbers
         .filter((p) => p.value.trim())
         .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
@@ -364,8 +717,8 @@ export default function BusinessForm({
       payload.categoryId = values.category;
     }
 
-    if (values.locationUrl.trim()) {
-      payload.location = { url: values.locationUrl.trim() };
+    if (values.locationUrl.trim() || isEditMode) {
+      payload.location = { url: normalizeHttpUrl(values.locationUrl) };
     }
 
     if (!isEditMode) {
@@ -376,11 +729,14 @@ export default function BusinessForm({
     try {
       if (isEditMode && targetId) {
         await updateMutation.mutateAsync({ id: targetId, payload });
-        router.push(`/businesses/${targetId}`);
+        setDraftBaseline(values);
+        clearBusinessFormDraft(draftKey);
+        router.replace(`/businesses/${targetId}`);
       } else {
         await createMutation.mutateAsync(payload);
         // Stay on the form so the next business can be added right away.
         // (The success toast is shown by useCreateBusinessMutation.)
+        clearBusinessFormDraft(draftKey);
         reset(defaultBusinessFormValues);
         setCurrentStep(0);
       }
@@ -509,7 +865,9 @@ export default function BusinessForm({
                     <SaveButton
                       type="submit"
                       size="lg"
-                      disabled={!isFormComplete || isSubmitting}
+                      disabled={
+                        !isFormComplete || (isEditMode && !isDirty) || isSubmitting
+                      }
                       className="w-full sm:w-auto"
                     >
                       <Save className="size-4" />
@@ -533,19 +891,24 @@ export default function BusinessForm({
                       key={step.key}
                       className="flex flex-1 items-center last:flex-none"
                     >
-                      <div
+                      <button
+                        type="button"
+                        aria-current={isActive ? "step" : undefined}
+                        aria-label={`Go to ${step.title}`}
+                        disabled={!isStepAccessible(index)}
+                        onClick={() => setCurrentStep(index)}
                         className={cn(
-                          "flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors",
+                          "flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed",
                           isCompleted &&
                             "border-brand-green bg-brand-green text-secondary-foreground",
                           isActive && "border-brand-green text-brand-green-strong",
                           !isActive &&
                             !isCompleted &&
-                            "border-[#dce8ee] text-[#8a9eaa]",
+                            "border-[#dce8ee] text-[#8a9eaa] disabled:opacity-50",
                         )}
                       >
                         {isCompleted ? <Check className="size-4" /> : index + 1}
-                      </div>
+                      </button>
                       {index < steps.length - 1 && (
                         <div
                           className={cn(
@@ -591,7 +954,11 @@ export default function BusinessForm({
                       </OutlinedButton>
                       <SaveButton
                         type="submit"
-                        disabled={!isFormComplete || isSubmitting}
+                        disabled={
+                          !isFormComplete ||
+                          (isEditMode && !isDirty) ||
+                          isSubmitting
+                        }
                         className="w-full sm:w-auto"
                       >
                         <Save className="size-4" />
@@ -647,7 +1014,9 @@ export default function BusinessForm({
                 <SaveButton
                   type="submit"
                   size="lg"
-                  disabled={!isFormComplete || isSubmitting}
+                  disabled={
+                    !isFormComplete || (isEditMode && !isDirty) || isSubmitting
+                  }
                   className="w-full sm:w-auto"
                 >
                   <Save className="size-4" />
@@ -658,6 +1027,14 @@ export default function BusinessForm({
           </>
         )}
       </form>
+      <ManagementConfirmDialog
+        open={isDiscardDialogOpen}
+        title="Discard changes?"
+        description="You have unsaved changes to this business. If you leave now, those changes will be discarded."
+        confirmLabel="Discard changes"
+        onCancel={cancelDiscardChanges}
+        onConfirm={discardChangesAndLeave}
+      />
     </FormProvider>
   );
 }
