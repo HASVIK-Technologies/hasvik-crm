@@ -465,8 +465,6 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
       (typeof business.location === "string" ? business.location : undefined) ||
       business.locationUrl ||
       "",
-    phoneNumbers: business.phoneNumbers,
-    whatsappNumbers: business.whatsappNumbers,
   };
 }
 

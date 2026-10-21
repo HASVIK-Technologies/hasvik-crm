@@ -419,7 +419,7 @@ export default function BusinessDetails() {
                       {lastFollowUpItem
                         ? dateFmt.format(
                             new Date(
-                              lastFollowUpItem.completedAt ??
+                              (lastFollowUpItem as { completedAt?: string }).completedAt ??
                                 lastFollowUpItem.scheduledAt
                             )
                           )

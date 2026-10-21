@@ -26,8 +26,6 @@ export interface BusinessItem {
   businessType?: string;
   assignedTo?: string;
   alternatePhone?: string;
-  phoneNumbers?: any[];
-  whatsappNumbers?: any[];
   location?: { url?: string } | null | string;
   locationUrl?: string;
   phoneNumbers?: PhoneNumberItem[];
