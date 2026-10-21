@@ -67,6 +67,18 @@ export type ApiBusiness = {
   lastCompletedFollowupDate?: string;
   lastCompletedFollowUpDate?: string;
   latestCompletedFollowUpDate?: string;
+  lastFollowup?:
+    | string
+    | {
+        scheduledAt?: string;
+        completedAt?: string;
+        status?: string;
+        date?: string;
+        followUpDate?: string;
+        updatedAt?: string;
+        createdAt?: string;
+      }
+    | Array<unknown>;
   lastFollowUp?:
     | string
     | {
@@ -74,8 +86,60 @@ export type ApiBusiness = {
         completedAt?: string;
         status?: string;
         date?: string;
+        followUpDate?: string;
+        updatedAt?: string;
+        createdAt?: string;
+      }
+    | Array<unknown>;
+  lastFollowups?:
+    | string
+    | Array<unknown>
+    | {
+        scheduledAt?: string;
+        completedAt?: string;
+        status?: string;
+        date?: string;
+        followUpDate?: string;
       };
+  nextFollowups?:
+    | string
+    | Array<{
+        _id?: string;
+        id?: string;
+        status?: string;
+        type?: string;
+        scheduledAt?: string;
+        completedAt?: string;
+        date?: string;
+        followUpDate?: string;
+        createdAt?: string;
+      }>
+    | {
+        scheduledAt?: string;
+        date?: string;
+        followUpDate?: string;
+        status?: string;
+      };
+  nextFollowup?:
+    | string
+    | {
+        scheduledAt?: string;
+        date?: string;
+        followUpDate?: string;
+        status?: string;
+      }
+    | Array<unknown>;
+  nextFollowUp?:
+    | string
+    | {
+        scheduledAt?: string;
+        date?: string;
+        followUpDate?: string;
+        status?: string;
+      }
+    | Array<unknown>;
   nextFollowupDate?: string;
+  nextFollowUpDate?: string;
   reminder?: string | number;
   description?: string;
   notes?: string;

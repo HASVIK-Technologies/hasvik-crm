@@ -2,7 +2,9 @@ import { test, describe } from "node:test";
 import assert from "node:assert";
 import {
   extractLatestCompletedFollowUpDate,
+  extractNextFollowUpDate,
   formatFollowUpDate,
+  toBusinessItem,
 } from "../lib/business/mappers.ts";
 import {
   validateFutureDateTime,
@@ -121,6 +123,154 @@ describe("Business Follow-up & Date Validation", () => {
       const result = extractLatestCompletedFollowUpDate(business);
       assert.notStrictEqual(result, "-");
       assert.ok(result.includes("Jul") || result.includes("07"));
+    });
+
+    test("extracts lastFollowup when provided as string from API", () => {
+      const business = {
+        _id: "biz-6",
+        name: "Test Business 6",
+        lastFollowup: "2026-09-12T10:00:00Z",
+      } as unknown as ApiBusiness;
+
+      const result = extractLatestCompletedFollowUpDate(business);
+      assert.notStrictEqual(result, "-");
+      assert.ok(result.includes("Sep") || result.includes("09"));
+    });
+
+    test("extracts lastFollowup when provided as object with date/completedAt", () => {
+      const business = {
+        _id: "biz-7",
+        name: "Test Business 7",
+        lastFollowup: {
+          date: "2026-08-10T14:30:00Z",
+        },
+      } as unknown as ApiBusiness;
+
+      const result = extractLatestCompletedFollowUpDate(business);
+      assert.notStrictEqual(result, "-");
+      assert.ok(result.includes("Aug") || result.includes("08"));
+    });
+
+    test("shows completed follow-up date instead of business creation date", () => {
+      const business: ApiBusiness = {
+        _id: "biz-8",
+        name: "Test Business 8",
+        createdAt: "2024-01-15T08:00:00Z",
+        followUps: [
+          {
+            id: "fu-8",
+            status: "COMPLETED",
+            createdAt: "2026-02-01T10:00:00Z",
+            completedAt: "2026-09-18T14:00:00Z",
+          },
+        ],
+      };
+
+      const result = extractLatestCompletedFollowUpDate(business);
+      assert.notStrictEqual(result, "-");
+      // Must reflect September 2026, never January 2024 or February 2026
+      assert.ok(result.includes("Sep") || result.includes("09"), "Must show completed date in September");
+      assert.ok(!result.includes("Jan") && !result.includes("2024"), "Must NOT show business creation date");
+
+      const item = toBusinessItem(business);
+      assert.strictEqual(item.lastFollowUp, result);
+      assert.ok(!item.lastFollowUp.includes("2024"), "BusinessItem lastFollowUp must NOT show business creation date");
+    });
+
+    test("returns '-' when business has creation date but no completed follow-ups", () => {
+      const business: ApiBusiness = {
+        _id: "biz-9",
+        name: "Test Business 9",
+        createdAt: "2024-03-20T10:00:00Z",
+        followUps: [
+          {
+            id: "fu-9",
+            status: "SCHEDULED",
+            createdAt: "2024-03-20T10:00:00Z",
+            scheduledAt: "2026-12-25T11:00:00Z",
+          },
+        ],
+      };
+
+      const result = extractLatestCompletedFollowUpDate(business);
+      assert.strictEqual(result, "-");
+
+      const item = toBusinessItem(business);
+      assert.strictEqual(item.lastFollowUp, "-", "Last Follow-up column must be '-' and not business creation date");
+    });
+
+    test("ignores non-completed follow-up object in lastFollowup", () => {
+      const business = {
+        _id: "biz-10",
+        name: "Test Business 10",
+        createdAt: "2024-05-10T10:00:00Z",
+        lastFollowup: {
+          status: "SCHEDULED",
+          scheduledAt: "2026-11-20T10:00:00Z",
+          createdAt: "2024-05-10T10:00:00Z",
+        },
+      } as unknown as ApiBusiness;
+
+      const result = extractLatestCompletedFollowUpDate(business);
+      assert.strictEqual(result, "-");
+    });
+  });
+
+  describe("extractNextFollowUpDate and toBusinessItem mapping", () => {
+    test("extracts nextFollowups when provided as array of objects", () => {
+      const business = {
+        _id: "biz-next-1",
+        name: "Next Biz",
+        nextFollowups: [
+          {
+            scheduledAt: "2026-11-20T10:00:00Z",
+            status: "SCHEDULED",
+          },
+        ],
+      } as unknown as ApiBusiness;
+
+      const dateStr = extractNextFollowUpDate(business);
+      assert.strictEqual(dateStr, "2026-11-20T10:00:00Z");
+
+      const item = toBusinessItem(business);
+      assert.notStrictEqual(item.nextFollowUp, "-");
+      assert.ok(item.nextFollowUp.includes("2026"));
+    });
+
+    test("extracts nextFollowups when provided as single object", () => {
+      const business = {
+        _id: "biz-next-2",
+        name: "Next Biz 2",
+        nextFollowups: {
+          scheduledAt: "2026-12-05T15:00:00Z",
+        },
+      } as unknown as ApiBusiness;
+
+      const dateStr = extractNextFollowUpDate(business);
+      assert.strictEqual(dateStr, "2026-12-05T15:00:00Z");
+
+      const item = toBusinessItem(business);
+      assert.notStrictEqual(item.nextFollowUp, "-");
+    });
+
+    test("maps lastFollowup and nextFollowups together on toBusinessItem", () => {
+      const business = {
+        _id: "biz-full",
+        name: "Full Followup Biz",
+        lastFollowup: "2026-10-01T10:00:00Z",
+        nextFollowups: [
+          {
+            scheduledAt: "2026-11-15T12:00:00Z",
+            status: "SCHEDULED",
+          },
+        ],
+      } as unknown as ApiBusiness;
+
+      const item = toBusinessItem(business);
+      assert.notStrictEqual(item.lastFollowUp, "-");
+      assert.ok(item.lastFollowUp.includes("Oct") || item.lastFollowUp.includes("10"));
+      assert.notStrictEqual(item.nextFollowUp, "-");
+      assert.ok(item.nextFollowUp.includes("Nov") || item.nextFollowUp.includes("11"));
     });
   });
 

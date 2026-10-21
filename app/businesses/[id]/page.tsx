@@ -37,7 +37,6 @@ import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import {
   useBusinessQuery,
 } from "@/hooks/use-businesses";
-import { BusinessItem } from "@/types/business";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import { formatLeadStatus } from "@/lib/business/form-options";
@@ -57,32 +56,10 @@ type ContactItem = {
   badgeClass?: string;
 };
 
-const STATIC_BUSINESS_12: BusinessItem = {
-  id: 12,
-  name: "Hasvik Technology",
-  phone: "9876543210",
-  initials: "HT",
-  avatarBg: "bg-primary/10",
-  avatarTextColor: "text-primary",
-  category: "Furniture Shop",
-  city: "Ballia",
-  status: "Active",
-  leadStatus: "INTERESTED",
-  lastFollowUp: "25 Aug 2026 at 11:30 AM",
-  nextFollowUp: "Today at 10:00 AM",
-  nextFollowUpType: "today",
-  owner: "Contact 1 (Owner)",
-  address: "Ballia, U.P.",
-  leadSource: "Website",
-  businessType: "Retailer",
-  assignedTo: "Amit Sharma",
-};
-
 export default function BusinessDetails() {
   const cleanNumber = (num: string) => num.replace(/\D/g, "");
 
   const params = useParams();
-
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const stringId = typeof rawId === "string" ? rawId : "";
@@ -93,10 +70,7 @@ export default function BusinessDetails() {
     isError,
     isLoading,
   } = useBusinessQuery(typeof rawId === "string" ? rawId : undefined);
-  const numericId = typeof rawId === "string" ? parseInt(rawId, 10) : NaN;
-  // For /businesses/12, always provide the static Hasvik Technology data as requested
-  const business =
-    apiBusiness ?? (numericId === 12 ? STATIC_BUSINESS_12 : undefined);
+  const business = apiBusiness;
   const { openFollowUpModal, openDeactivateModal } = useModalStore();
   const isInactive = business?.isActive === false;
 
@@ -349,14 +323,22 @@ export default function BusinessDetails() {
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-slate-500">Next follow-up</p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
-                      <p className="text-sm font-semibold text-slate-800">
-                        {business.nextFollowUp || "Not scheduled"}
-                      </p>
-                      {business.nextFollowUpType && (
-                        <StatusBadge
-                          status={business.nextFollowUpType}
-                          className="h-5 py-0 text-[10px]"
-                        />
+                      {business.nextFollowUp && business.nextFollowUp !== "-" ? (
+                        <>
+                          <p className="text-sm font-semibold text-slate-800">
+                            {business.nextFollowUp}
+                          </p>
+                          {business.nextFollowUpType && business.nextFollowUpType !== "none" && (
+                            <StatusBadge
+                              status={business.nextFollowUpType}
+                              className="h-5 py-0 text-[10px]"
+                            />
+                          )}
+                        </>
+                      ) : (
+                        <p className="text-sm font-semibold text-slate-800">
+                          Not scheduled
+                        </p>
                       )}
                     </div>
                   </div>
@@ -366,7 +348,9 @@ export default function BusinessDetails() {
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-slate-500">Last follow-up</p>
                     <p className="mt-1 truncate text-sm font-semibold text-slate-800">
-                      {business.lastFollowUp || "No previous follow-up"}
+                      {business.lastFollowUp && business.lastFollowUp !== "-"
+                        ? business.lastFollowUp
+                        : "No previous follow-up"}
                     </p>
                   </div>
                 </div>
@@ -386,22 +370,15 @@ export default function BusinessDetails() {
           {/* 3. --- TABS SECTION --- */}
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="max-w-full justify-start overflow-x-auto">
-              {businessData.tabs
-                .filter((tab: any) => tab.id !== "activity-log" && tab.id !== "Notes")
-                .map((tab: any) => (
-                  <TabsTrigger
-                    key={tab.id}
-                    value={tab.id}
-                    className="flex-none"
-                  >
-                    {tab.label}
-
-                    {/* Contacts: Deleted the old number code! */}
-                    {/* Follow-ups: Using the REAL TanStack count! */}
-                    {tab.id === "follow-ups" && ` (${realFollowUpsCount})`}
-
-                  </TabsTrigger>
-                ))}
+              <TabsTrigger value="overview" className="flex-none">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="contacts" className="flex-none">
+                Contacts
+              </TabsTrigger>
+              <TabsTrigger value="follow-ups" className="flex-none">
+                Follow-ups ({realFollowUpsCount})
+              </TabsTrigger>
             </TabsList>
 
             {/* OVERVIEW TAB */}
@@ -430,9 +407,6 @@ export default function BusinessDetails() {
               <BusinessDetailsFollowups />
 
             </TabsContent>
-            {/* NOTES TAB 
-            <TabsContent value="notes" className="mt-6"></TabsContent> */}
-
           </Tabs>
           {/* New Follow-up Modal */}
           <AddFollowUpModal businessName={business?.name || "Business"} />
