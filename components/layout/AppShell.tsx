@@ -21,7 +21,7 @@ import {
 } from "lucide-react";
 import { useEffect, useState } from "react";
 import { useAuthSession, useLogout, useTokenRefresh } from "@/hooks/use-auth";
-import { useTenantQuery, useTenantsQuery } from "@/hooks/use-tenants";
+import { useTenantQuery } from "@/hooks/use-tenants";
 import { useSubscriptionsQuery } from "@/hooks/use-subscriptions";
 import { useAuthStore } from "@/store/auth-store";
 import { getApiErrorMessage } from "@/lib/api/api-error";
@@ -52,12 +52,12 @@ function isPublicPath(pathname: string) {
   return pathname === "/" || pathname === "/explore-crm" || pathname === "/tenant";
 }
 
-function isTenantAdmin(role?: string) {
-  return role?.toUpperCase() === "ADMIN";
+function isTenantAdmin(user?: { role?: string; isSuperAdmin?: boolean } | null) {
+  return !user?.isSuperAdmin && user?.role?.toUpperCase() === "ADMIN";
 }
 
-function isHasvikAdmin(role?: string) {
-  return role?.toUpperCase() === "ADMIN";
+function isHasvikAdmin(user?: { isSuperAdmin?: boolean } | null) {
+  return user?.isSuperAdmin ?? false;
 }
 
 function isNavigationItemVisible(
@@ -67,7 +67,7 @@ function isNavigationItemVisible(
 ) {
   if (hasvikAdmin) return true;
   if (item.href === "/subscriptions") return tenantAdmin;
-  if (item.href === "/tenant-management") return false;
+  if (item.href === "/tenant-management") return tenantAdmin;
   if (item.href === "/users" || item.href === "/business-categories") {
     return tenantAdmin;
   }
@@ -154,26 +154,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const pageDetailsForPath = getPageDetails(pathname);
-  const tenantAdmin = isTenantAdmin(user?.role);
-  const hasvikAdmin = isHasvikAdmin(user?.role);
+  const tenantAdmin = isTenantAdmin(user);
+  const hasvikAdmin = isHasvikAdmin(user);
   const tenantQuery = useTenantQuery(
     user?.tenantId,
     !publicPath && !hasvikAdmin,
-  );
-  const tenantsQuery = useTenantsQuery(
-    !publicPath && !hasvikAdmin && !user?.tenantId,
-    user?.userId,
   );
   const subscriptionsQuery = useSubscriptionsQuery(
     user?.userId,
     !publicPath && authStatus === "authenticated" && !hasvikAdmin,
   );
-  const resolvedTenantId =
-    user?.tenantId ??
-    tenantsQuery.data?.find(
-      (tenant) =>
-        tenant.contactEmail?.toLowerCase() === user?.email.toLowerCase(),
-    )?.id;
+  const resolvedTenantId = user?.tenantId;
   const tenantSubscription = subscriptionsQuery.data?.some(
     (subscription) =>
       getSubscriptionTenantId(subscription) === resolvedTenantId &&
@@ -182,16 +173,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const subscriptionAccessError =
     !hasvikAdmin &&
     (subscriptionsQuery.isError ||
-      tenantsQuery.isError ||
-      (!user?.tenantId &&
-        !tenantsQuery.isPending &&
-        !tenantsQuery.isError &&
-        !resolvedTenantId));
+      (Boolean(user?.tenantId) && tenantQuery.isError) ||
+      (!user?.tenantId && !subscriptionsQuery.isPending));
   const subscriptionAccessPending =
     !hasvikAdmin &&
     authStatus === "authenticated" &&
     (subscriptionsQuery.isPending ||
-      (!user?.tenantId && tenantsQuery.isPending));
+      (Boolean(user?.tenantId) && tenantQuery.isPending));
   const subscriptionAccessBlocked =
     !hasvikAdmin &&
     authStatus === "authenticated" &&
@@ -210,7 +198,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     if (
       subscriptionAccessBlocked &&
       tenantAdmin &&
-      pathname !== "/subscriptions"
+      pathname !== "/subscriptions" &&
+      pathname !== "/tenant-management"
     ) {
       router.replace("/subscriptions");
     }
@@ -226,8 +215,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       pathname === "/subscriptions" &&
       authStatus === "authenticated" &&
       user &&
-      !isTenantAdmin(user.role) &&
-      !isHasvikAdmin(user.role)
+      !isTenantAdmin(user) &&
+      !isHasvikAdmin(user)
     ) {
       router.replace("/businesses");
     }
@@ -235,16 +224,17 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       pathname === "/tenant-management" &&
       authStatus === "authenticated" &&
       user &&
-      !isHasvikAdmin(user.role)
+      !isHasvikAdmin(user) &&
+      !isTenantAdmin(user)
     ) {
-      router.replace(isTenantAdmin(user.role) ? "/subscriptions" : "/businesses");
+      router.replace("/businesses");
     }
     if (
       (pathname === "/users" || pathname === "/business-categories") &&
       authStatus === "authenticated" &&
       user &&
-      !isTenantAdmin(user.role) &&
-      !isHasvikAdmin(user.role)
+      !isTenantAdmin(user) &&
+      !isHasvikAdmin(user)
     ) {
       router.replace("/businesses");
     }
@@ -282,7 +272,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     );
   }
 
-  if (pathname === "/tenant-management" && !hasvikAdmin) {
+  if (pathname === "/tenant-management" && !tenantAdmin && !hasvikAdmin) {
     return (
       <main className="flex min-h-screen items-center justify-center bg-background text-sm text-slate-500">
         Redirecting to your workspace…
@@ -320,12 +310,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     pathname === "/dashboard"
       ? `Good morning, ${firstName}`
       : pageDetailsForPath.title;
-  const displayRole = user?.role || "User";
-  const resolvedTenant = tenantsQuery.data?.find(
-    (tenant) => tenant.id === resolvedTenantId,
-  );
-  const currentTenantName =
-    tenantQuery.data?.name ?? resolvedTenant?.name;
+  const displayRole = hasvikAdmin ? "SUPER ADMIN" : user?.role || "User";
+  const currentTenantName = tenantQuery.data?.name;
   const initials = displayName
     .split(" ")
     .map((part) => part[0])
@@ -576,7 +562,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 </h1>
                 <p className="mt-2 text-sm leading-6 text-slate-600">
                   {subscriptionAccessError
-                    ? "We couldn’t verify your workspace subscription. Please try again shortly or contact your workspace administrator."
+                    ? user?.tenantId
+                      ? "We couldn’t verify your workspace subscription. Please try again shortly or contact your workspace administrator."
+                      : "Your account is missing a workspace ID. Contact your workspace administrator to restore access."
                     : "Your workspace does not currently have an active subscription. Contact your workspace administrator to choose or renew a plan."}
                 </p>
                 {subscriptionsQuery.isError && (
@@ -584,16 +572,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     {getApiErrorMessage(subscriptionsQuery.error)}
                   </p>
                 )}
-                {tenantsQuery.isError && (
+                {tenantQuery.isError && (
                   <p className="mt-3 text-xs text-rose-700">
-                    {getApiErrorMessage(tenantsQuery.error)}
+                    {getApiErrorMessage(tenantQuery.error)}
                   </p>
                 )}
                 <button
                   type="button"
                   onClick={() => {
                     void subscriptionsQuery.refetch();
-                    if (tenantsQuery.isError) void tenantsQuery.refetch();
+                    if (tenantQuery.isError) void tenantQuery.refetch();
                   }}
                   className="mt-5 rounded-xl bg-primary px-4 py-2.5 text-xs font-semibold text-white transition hover:bg-primary/90"
                 >
@@ -602,7 +590,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               </section>
             ) : subscriptionAccessBlocked &&
               tenantAdmin &&
-              pathname !== "/subscriptions" ? (
+              pathname !== "/subscriptions" &&
+              pathname !== "/tenant-management" ? (
               <div className="flex min-h-64 items-center justify-center text-sm text-slate-500">
                 Redirecting to subscription management…
               </div>
@@ -620,7 +609,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       }`}
                     >
                       {subscriptionAccessError
-                        ? "We couldn’t verify your workspace subscription. Refresh the page or contact support before continuing."
+                        ? user?.tenantId
+                          ? "We couldn’t verify your workspace subscription. Refresh the page or contact support before continuing."
+                          : "Your account is missing a workspace ID. Contact your workspace administrator to restore access."
                         : "Your workspace does not have an active subscription. Choose a plan or wait for HASVIK admin approval; other workspace pages remain unavailable until access is active."}
                     </div>
                   )}

@@ -2,6 +2,7 @@ export type AuthUser = {
   userId: string;
   email: string;
   role: string;
+  isSuperAdmin: boolean;
   firstName: string;
   lastName: string;
   fullName: string;

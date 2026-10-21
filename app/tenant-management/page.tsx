@@ -1,20 +1,47 @@
 "use client";
 
-import { useState, type FormEvent } from "react";
+import { useMemo, useState, type FormEvent } from "react";
+import { Dialog as DialogPrimitive } from "radix-ui";
 import {
   Building2,
-  CalendarDays,
   Check,
   CreditCard,
+  Filter,
   LoaderCircle,
-  Pencil,
+  RefreshCw,
+  UsersRound,
   X,
 } from "lucide-react";
+import Actions from "@/components/common/Actions";
 import Breadcrumb from "@/components/common/Breadcrumb";
+import ListPagination from "@/components/common/ListPagination";
+import ListTableToolbar from "@/components/common/ListTableToolbar";
+import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
+import ManagementRowActions from "@/components/common/ManagementRowActions";
+import ListPageLayout from "@/components/layout/ListPageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import { useTenantsQuery, useUpdateTenant, useUpdateTenantStatus } from "@/hooks/use-tenants";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
 import { useSubscriptionPlansQuery, useSubscriptionsQuery } from "@/hooks/use-subscriptions";
+import {
+  useTenantsQuery,
+  useUpdateTenant,
+  useUpdateTenantStatus,
+} from "@/hooks/use-tenants";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import {
   getSubscriptionTenantId,
@@ -22,26 +49,10 @@ import {
 } from "@/lib/subscriptions/access";
 import { useAuthStore } from "@/store/auth-store";
 import type { Subscription, SubscriptionPlan } from "@/types/subscription";
-import type { Tenant } from "@/types/tenant";
+import type { Tenant, UpdateTenantPayload } from "@/types/tenant";
 
 type TenantFilter = "ALL" | "ACTIVE" | "INACTIVE";
-type TenantDraft = {
-  name: string;
-  contactEmail: string;
-  contactPhone: string;
-};
-
-function StatusBadge({ active }: { active: boolean }) {
-  return (
-    <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${
-        active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
-      }`}
-    >
-      {active ? "Active" : "Inactive"}
-    </span>
-  );
-}
+type TenantDraft = Required<Pick<UpdateTenantPayload, "name" | "contactEmail" | "contactPhone">>;
 
 function getPlanId(plan: SubscriptionPlan | string | undefined) {
   if (typeof plan === "string") return plan;
@@ -64,409 +75,560 @@ function formatDate(value?: string) {
     : new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(date);
 }
 
-function ActiveSubscriptionDetails({
+function StatusBadge({ active }: { active: boolean }) {
+  return (
+    <span
+      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${
+        active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+      }`}
+    >
+      {active ? "Active" : "Inactive"}
+    </span>
+  );
+}
+
+function getActiveSubscription(
+  subscriptions: Subscription[],
+  tenantId: string,
+) {
+  return subscriptions
+    .filter(
+      (subscription) =>
+        getSubscriptionTenantId(subscription) === tenantId &&
+        hasCurrentSubscriptionAccess(subscription),
+    )
+    .sort(
+      (a, b) =>
+        Number(b.status?.toUpperCase() === "ACTIVE") -
+        Number(a.status?.toUpperCase() === "ACTIVE"),
+    )[0];
+}
+
+function SubscriptionSummary({
   subscription,
   plans,
 }: {
   subscription?: Subscription;
   plans: SubscriptionPlan[];
 }) {
+  const planId = getPlanId(subscription?.planId);
+  const plan =
+    subscription?.plan ??
+    plans.find((availablePlan) => getPlanId(availablePlan) === planId);
+
   if (!subscription) {
-    return (
-      <div className="mt-3 flex items-center gap-2 rounded-xl border border-amber-200 bg-amber-50 px-3 py-2.5 text-[11px] text-amber-900">
-        <CreditCard className="size-3.5 shrink-0" />
-        No active subscription
-      </div>
-    );
+    return <span className="text-xs text-slate-500">No active subscription</span>;
   }
 
-  const planId = getPlanId(subscription.planId);
-  const plan =
-    subscription.plan ??
-    plans.find((availablePlan) => getPlanId(availablePlan) === planId);
-  const planName = plan?.name ?? "Subscription plan";
-  const status = subscription.status?.toUpperCase() ?? "UNKNOWN";
-
   return (
-    <div className="mt-3 rounded-xl border border-emerald-100 bg-emerald-50/60 px-3 py-3">
-      <div className="flex flex-wrap items-center gap-2">
+    <div className="min-w-40">
+      <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
         <CreditCard className="size-3.5 text-emerald-700" />
-        <span className="text-xs font-bold text-emerald-950">{planName}</span>
-        <span
-          className={`rounded-full px-2 py-0.5 text-[9px] font-bold uppercase ${
-            status === "CANCELLED"
-              ? "bg-amber-100 text-amber-800"
-              : "bg-emerald-100 text-emerald-800"
-          }`}
-        >
-          {status === "CANCELLED" ? "Cancels at period end" : status}
-        </span>
-      </div>
-      <p className="mt-1.5 flex items-center gap-1.5 text-[10px] text-emerald-900/75">
-        <CalendarDays className="size-3" />
-        {subscription.startDate
-          ? `Since ${formatDate(subscription.startDate)}`
-          : "Start date not set"}
-        {" · "}
-        {subscription.endDate
-          ? `Renews/ends ${formatDate(subscription.endDate)}`
-          : "End date not set"}
+        {plan?.name ?? "Subscription plan"}
       </p>
-      <p className="mt-1 text-[10px] text-emerald-900/75">
+      <p className="mt-1 text-[10px] text-slate-500">
+        {subscription.endDate
+          ? `Ends ${formatDate(subscription.endDate)}`
+          : "End date not set"}
         {plan
-          ? `${formatPrice(plan.price, plan.currency)} · ${plan.billingCycle.toLowerCase()}`
-          : "Plan pricing unavailable"}
-        {" · "}
-        {subscription.autoRenew ? "Auto-renew on" : "Auto-renew off"}
+          ? ` · ${formatPrice(plan.price, plan.currency)}`
+          : ""}
       </p>
     </div>
   );
 }
 
 function TenantEditor({
-  tenant,
   draft,
+  error,
   saving,
   onChange,
   onCancel,
   onSubmit,
 }: {
-  tenant: Tenant;
   draft: TenantDraft;
+  error: string;
   saving: boolean;
   onChange: (draft: TenantDraft) => void;
   onCancel: () => void;
   onSubmit: (event: FormEvent<HTMLFormElement>) => void;
 }) {
   return (
-    <form onSubmit={onSubmit} className="grid gap-3 sm:grid-cols-2">
-      <label className="space-y-1">
-        <span className="text-[10px] font-semibold text-slate-500">Organization name</span>
+    <form onSubmit={onSubmit} className="space-y-4">
+      <label className="block space-y-1.5">
+        <span className="text-xs font-semibold text-slate-700">Organization name</span>
         <Input
           value={draft.name}
           onChange={(event) => onChange({ ...draft, name: event.target.value })}
           required
-          className="h-9 rounded-lg text-xs"
+          className="h-10 rounded-lg"
         />
       </label>
-      <label className="space-y-1">
-        <span className="text-[10px] font-semibold text-slate-500">Contact email</span>
+      <label className="block space-y-1.5">
+        <span className="text-xs font-semibold text-slate-700">Contact email</span>
         <Input
           type="email"
           value={draft.contactEmail}
           onChange={(event) =>
             onChange({ ...draft, contactEmail: event.target.value })
           }
-          className="h-9 rounded-lg text-xs"
+          className="h-10 rounded-lg"
         />
       </label>
-      <label className="space-y-1">
-        <span className="text-[10px] font-semibold text-slate-500">Contact phone</span>
+      <label className="block space-y-1.5">
+        <span className="text-xs font-semibold text-slate-700">Contact phone</span>
         <Input
           type="tel"
           value={draft.contactPhone}
           onChange={(event) =>
             onChange({ ...draft, contactPhone: event.target.value })
           }
-          className="h-9 rounded-lg text-xs"
+          className="h-10 rounded-lg"
         />
       </label>
-      <div className="flex gap-2 sm:col-span-2">
-        <Button type="submit" size="sm" disabled={saving} className="rounded-lg">
-          {saving && <LoaderCircle className="size-3.5 animate-spin" />}
-          Save changes
-        </Button>
-        <Button
-          type="button"
-          size="sm"
-          variant="outline"
-          disabled={saving}
-          onClick={onCancel}
-          className="rounded-lg"
-        >
+      {error && (
+        <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
+          {error}
+        </p>
+      )}
+      <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+        <Button type="button" variant="outline" disabled={saving} onClick={onCancel} className="rounded-lg">
           Cancel
         </Button>
+        <Button type="submit" disabled={saving} className="rounded-lg">
+          {saving && <LoaderCircle className="size-4 animate-spin" />}
+          Save changes
+        </Button>
       </div>
-      <span className="sr-only">Editing {tenant.name}</span>
     </form>
   );
 }
 
 export default function TenantManagementPage() {
-  const userId = useAuthStore((state) => state.user?.userId);
-  const tenantsQuery = useTenantsQuery(true, userId);
-  const subscriptionsQuery = useSubscriptionsQuery(userId);
+  const user = useAuthStore((state) => state.user);
+  const hasvikAdmin = user?.isSuperAdmin ?? false;
+  const tenantAdmin = !hasvikAdmin && user?.role.toUpperCase() === "ADMIN";
+  const tenantsQuery = useTenantsQuery(true, user?.userId);
+  const subscriptionsQuery = useSubscriptionsQuery(user?.userId);
   const plansQuery = useSubscriptionPlansQuery();
   const updateMutation = useUpdateTenant();
   const statusMutation = useUpdateTenantStatus();
+  const [search, setSearch] = useState("");
   const [filter, setFilter] = useState<TenantFilter>("ALL");
-  const [editingId, setEditingId] = useState<string>();
+  const [sortValue, setSortValue] = useState("name:asc");
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const [showStats, setShowStats] = useState(true);
+  const [showFilters, setShowFilters] = useState(true);
+  const [editingTenant, setEditingTenant] = useState<Tenant | null>(null);
   const [draft, setDraft] = useState<TenantDraft>();
+  const [formError, setFormError] = useState("");
+  const [tenantToToggle, setTenantToToggle] = useState<Tenant | null>(null);
   const [notice, setNotice] = useState("");
-  const tenants = tenantsQuery.data ?? [];
+  const [operationError, setOperationError] = useState("");
+  const tenants = useMemo(
+    () => tenantsQuery.data ?? [],
+    [tenantsQuery.data],
+  );
+  const tenantsPending = tenantsQuery.isPending;
+  const tenantsError = tenantsQuery.isError;
+  const tenantsErrorValue = tenantsQuery.error;
   const subscriptions = subscriptionsQuery.data ?? [];
   const plans = plansQuery.data ?? [];
   const activeCount = tenants.filter((tenant) => tenant.isActive).length;
   const inactiveCount = tenants.length - activeCount;
-  const visibleTenants = tenants.filter((tenant) => {
-    if (filter === "ACTIVE") return tenant.isActive;
-    if (filter === "INACTIVE") return !tenant.isActive;
-    return true;
-  });
+  const filteredTenants = useMemo(() => {
+    const query = search.trim().toLowerCase();
+    const matching = tenants.filter((tenant) => {
+      if (filter === "ACTIVE" && !tenant.isActive) return false;
+      if (filter === "INACTIVE" && tenant.isActive) return false;
+      return (
+        !query ||
+        `${tenant.name} ${tenant.fullName ?? ""} ${tenant.contactEmail ?? ""} ${tenant.contactPhone ?? ""}`
+          .toLowerCase()
+          .includes(query)
+      );
+    });
+    const [field, direction] = sortValue.split(":");
+    return matching.sort((a, b) => {
+      const comparison =
+        field === "createdAt"
+          ? (a.createdAt ?? "").localeCompare(b.createdAt ?? "")
+          : a.name.localeCompare(b.name);
+      return direction === "desc" ? -comparison : comparison;
+    });
+  }, [filter, search, sortValue, tenants]);
+  const pagedTenants = filteredTenants.slice((page - 1) * limit, page * limit);
 
-  function startEditing(tenant: Tenant) {
-    setEditingId(tenant.id);
+  function openEdit(tenant: Tenant) {
+    setEditingTenant(tenant);
     setDraft({
       name: tenant.name,
       contactEmail: tenant.contactEmail ?? "",
       contactPhone: tenant.contactPhone ?? "",
     });
-    setNotice("");
+    setFormError("");
+  }
+
+  function closeEditor() {
+    setEditingTenant(null);
+    setDraft(undefined);
+    setFormError("");
   }
 
   async function saveTenant(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!editingId || !draft) return;
-    setNotice("");
+    if (!editingTenant || !draft) return;
+    setFormError("");
     try {
       await updateMutation.mutateAsync({
-        id: editingId,
+        id: editingTenant.id,
         payload: {
           name: draft.name.trim(),
           contactEmail: draft.contactEmail.trim(),
           contactPhone: draft.contactPhone.trim(),
         },
       });
-      setEditingId(undefined);
-      setDraft(undefined);
+      closeEditor();
       setNotice("Tenant details saved.");
     } catch (error) {
-      setNotice(getApiErrorMessage(error));
+      setFormError(getApiErrorMessage(error));
     }
   }
 
-  async function toggleTenantStatus(tenant: Tenant) {
-    setNotice("");
+  async function toggleTenantStatus() {
+    if (!tenantToToggle) return;
+    setOperationError("");
     try {
       await statusMutation.mutateAsync({
-        id: tenant.id,
-        isActive: !tenant.isActive,
+        id: tenantToToggle.id,
+        isActive: !tenantToToggle.isActive,
       });
       setNotice(
-        `${tenant.name} has been ${tenant.isActive ? "deactivated" : "activated"}.`,
+        `${tenantToToggle.name} has been ${tenantToToggle.isActive ? "deactivated" : "activated"}.`,
       );
+      setTenantToToggle(null);
     } catch (error) {
-      setNotice(getApiErrorMessage(error));
+      setOperationError(getApiErrorMessage(error));
     }
+  }
+
+  function changeSort(value: string) {
+    setSortValue(value);
+    setPage(1);
   }
 
   return (
-    <div className="mx-auto flex w-full max-w-[1440px] flex-col gap-6">
-      <Breadcrumb items={[{ label: "Tenant management" }]} />
-
-      <section className="grid grid-cols-1 gap-3 sm:grid-cols-3">
-        {[
-          { label: "Tenants", value: tenants.length, icon: Building2, color: "text-primary", bg: "bg-blue-50" },
-          { label: "Active tenants", value: activeCount, icon: Check, color: "text-emerald-700", bg: "bg-emerald-50" },
-          { label: "Inactive tenants", value: inactiveCount, icon: X, color: "text-slate-600", bg: "bg-slate-100" },
-        ].map(({ label, value, icon: Icon, color, bg }) => (
-          <article
-            key={label}
-            className="flex items-center gap-3 rounded-2xl border border-[#e4ecf2] bg-white p-4 shadow-[0_4px_16px_rgba(20,40,60,0.03)] sm:p-5"
-          >
-            <span className={`flex size-10 items-center justify-center rounded-xl ${bg} ${color}`}>
-              <Icon className="size-4" />
-            </span>
-            <span>
-              <span className="block text-xl font-bold leading-tight text-[#0f172a]">{value}</span>
-              <span className="mt-1 block text-xs font-medium text-[#64748b]">{label}</span>
-            </span>
-          </article>
-        ))}
-      </section>
-
-      {notice && (
-        <p role="status" className="rounded-xl border border-slate-200 bg-white px-4 py-3 text-xs text-slate-700">
-          {notice}
-        </p>
-      )}
-
-      <section className="overflow-hidden rounded-2xl border border-[#e4ecf2] bg-white shadow-[0_4px_16px_rgba(20,40,60,0.03)]">
-        <div className="flex flex-col gap-4 border-b border-[#edf2f7] px-4 py-4 sm:flex-row sm:items-center sm:justify-between sm:px-5">
-          <div>
-            <h2 className="text-sm font-bold text-[#0f172a]">Tenant workspaces</h2>
-            <p className="mt-1 text-xs text-[#64748b]">
-              View tenant accounts, active subscription details, update contact details, and manage access.
-            </p>
+    <>
+      <ListPageLayout
+        breadcrumb={<Breadcrumb items={[{ label: "Tenant management" }]} />}
+        searchValue={search}
+        onSearchChange={(value) => {
+          setSearch(value);
+          setPage(1);
+        }}
+        searchPlaceholder="Search tenants by name or contact"
+        filters={
+          <div className="flex flex-wrap items-center gap-3">
+            <label htmlFor="tenant-status-filter" className="text-xs font-medium text-slate-600">
+              Status
+            </label>
+            <Select
+              value={filter}
+              onValueChange={(value) => {
+                setFilter(value as TenantFilter);
+                setPage(1);
+              }}
+            >
+              <SelectTrigger id="tenant-status-filter" size="sm" className="w-40 rounded-lg text-xs">
+                <SelectValue />
+              </SelectTrigger>
+              <SelectContent className="bg-white">
+                <SelectItem value="ALL" className="text-xs">All statuses</SelectItem>
+                <SelectItem value="ACTIVE" className="text-xs">Active</SelectItem>
+                <SelectItem value="INACTIVE" className="text-xs">Inactive</SelectItem>
+              </SelectContent>
+            </Select>
           </div>
-          <div
-            role="group"
-            aria-label="Filter tenants by status"
-            className="flex flex-wrap gap-1 rounded-xl border border-[#e4ecf2] bg-white p-1"
-          >
-            {([
-              ["ALL", "All"],
-              ["ACTIVE", "Active"],
-              ["INACTIVE", "Inactive"],
-            ] as const).map(([value, label]) => (
-              <button
-                key={value}
-                type="button"
-                onClick={() => setFilter(value)}
-                aria-pressed={filter === value}
-                className={`rounded-lg px-3 py-2 text-[10px] font-semibold transition-colors ${
-                  filter === value
-                    ? "bg-primary text-white"
-                    : "text-slate-600 hover:bg-slate-50"
-                }`}
-              >
-                {label}
-              </button>
+        }
+        showFilters={showFilters}
+        onToggleFilters={() => setShowFilters((visible) => !visible)}
+        showStats={showStats}
+        stats={
+          <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
+            {[
+              { label: "Tenants", value: tenants.length, icon: UsersRound, tone: "text-primary bg-blue-50" },
+              { label: "Active tenants", value: activeCount, icon: Check, tone: "text-emerald-700 bg-emerald-50" },
+              { label: "Inactive tenants", value: inactiveCount, icon: X, tone: "text-slate-600 bg-slate-100" },
+            ].map(({ label, value, icon: Icon, tone }) => (
+              <article key={label} className="flex items-center gap-3 rounded-2xl border border-[#e4ecf2] bg-white p-4 shadow-[0_4px_16px_rgba(20,40,60,0.03)] sm:p-5">
+                <span className={`flex size-10 items-center justify-center rounded-xl ${tone}`}>
+                  <Icon className="size-4" />
+                </span>
+                <span>
+                  <span className="block text-xl font-bold text-slate-900">{value}</span>
+                  <span className="mt-1 block text-xs text-slate-500">{label}</span>
+                </span>
+              </article>
             ))}
           </div>
-        </div>
-
-        {tenantsQuery.isPending ? (
-          <div className="flex min-h-48 items-center justify-center gap-2 text-sm text-slate-500">
-            <LoaderCircle className="size-4 animate-spin" />
-            Loading tenants…
-          </div>
-        ) : tenantsQuery.isError ? (
-          <div className="px-5 py-14 text-center">
-            <p role="alert" className="text-sm font-semibold text-slate-800">
-              Tenants couldn’t be loaded
-            </p>
-            <p className="mt-1 text-xs text-slate-500">
-              {getApiErrorMessage(tenantsQuery.error)}
-            </p>
-            <Button
-              type="button"
-              variant="outline"
-              size="sm"
-              onClick={() => void tenantsQuery.refetch()}
-              className="mt-4 rounded-lg"
-            >
-              Try again
-            </Button>
-          </div>
-        ) : visibleTenants.length === 0 ? (
-          <div className="px-5 py-14 text-center">
-            <Building2 className="mx-auto size-7 text-slate-300" />
-            <p className="mt-3 text-sm font-semibold text-slate-800">
-              {tenants.length === 0 ? "No tenants found" : "No tenants in this view"}
-            </p>
-            <p className="mx-auto mt-1 max-w-md text-xs leading-5 text-slate-500">
-              {tenants.length === 0
-                ? "New workspaces created through tenant signup will appear here."
-                : "Choose another status filter to view tenant accounts."}
-            </p>
-          </div>
-        ) : (
-          <div className="divide-y divide-[#edf2f7]">
-            {visibleTenants.map((tenant) => {
-              const isEditing = editingId === tenant.id;
-              return (
-                <article key={tenant.id} className="p-4 sm:p-5">
-                  <div className="flex flex-col gap-4 lg:flex-row lg:items-start lg:justify-between">
-                    <div className="min-w-0 flex-1">
-                      {isEditing && draft ? (
-                        <TenantEditor
-                          tenant={tenant}
-                          draft={draft}
-                          saving={updateMutation.isPending}
-                          onChange={setDraft}
-                          onCancel={() => {
-                            setEditingId(undefined);
-                            setDraft(undefined);
-                          }}
-                          onSubmit={(event) => void saveTenant(event)}
-                        />
-                      ) : (
-                        <>
-                          <div className="flex flex-wrap items-center gap-2">
-                            <h3 className="text-sm font-bold text-slate-900">{tenant.name}</h3>
-                            <StatusBadge active={tenant.isActive} />
+        }
+        actions={
+          <Actions
+            primary={{
+              label: "Refresh tenants",
+              onSelect: () => {
+                void tenantsQuery.refetch();
+              },
+              icon: <RefreshCw className="size-4" />,
+            }}
+            menuItems={[
+              { label: showStats ? "Hide KPIs" : "Show KPIs", onSelect: () => setShowStats((visible) => !visible) },
+              { label: showFilters ? "Hide filters" : "Show filters", onSelect: () => setShowFilters((visible) => !visible), icon: <Filter className="size-4" /> },
+            ]}
+          />
+        }
+        content={
+          <section className="overflow-hidden rounded-2xl border border-[#e4ecf2] bg-white shadow-[0_4px_16px_rgba(20,40,60,0.03)]">
+            <ListTableToolbar
+              title={hasvikAdmin ? "Tenant workspaces" : "My workspace"}
+              total={filteredTenants.length}
+              sortValue={sortValue}
+              sortOptions={[
+                { value: "name:asc", label: "Name A–Z" },
+                { value: "name:desc", label: "Name Z–A" },
+                { value: "createdAt:desc", label: "Newest first" },
+                { value: "createdAt:asc", label: "Oldest first" },
+              ]}
+              onSortChange={changeSort}
+            />
+            {notice && (
+              <p role="status" className="border-b border-slate-100 px-4 py-3 text-xs text-slate-700">
+                {notice}
+              </p>
+            )}
+            {operationError && (
+              <p role="alert" className="border-b border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+                {operationError}
+              </p>
+            )}
+            {subscriptionsQuery.isError && (
+              <p role="alert" className="border-b border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+                Subscription details couldn’t be loaded. {getApiErrorMessage(subscriptionsQuery.error)}
+              </p>
+            )}
+            {plansQuery.isError && (
+              <p role="alert" className="border-b border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+                Plan details couldn’t be loaded. {getApiErrorMessage(plansQuery.error)}
+              </p>
+            )}
+            {tenantsPending ? (
+              <div className="flex min-h-44 items-center justify-center">
+                <LoaderCircle className="size-5 animate-spin text-primary" />
+                <span className="ml-2 text-sm text-slate-500">Loading tenants…</span>
+              </div>
+            ) : tenantsError ? (
+              <div className="px-5 py-12 text-center">
+                <p role="alert" className="text-sm font-semibold text-slate-900">Tenants couldn’t be loaded</p>
+                <p className="mt-1 text-xs text-slate-500">{getApiErrorMessage(tenantsErrorValue)}</p>
+                <Button
+                  variant="outline"
+                  size="sm"
+                  onClick={() => void tenantsQuery.refetch()}
+                  className="mt-4 rounded-lg"
+                >
+                  Try again
+                </Button>
+              </div>
+            ) : pagedTenants.length === 0 ? (
+              <div className="px-5 py-14 text-center">
+                <Building2 className="mx-auto size-7 text-slate-300" />
+                <p className="mt-3 text-sm font-semibold text-slate-800">
+                  {tenants.length === 0
+                    ? "No tenants found"
+                    : "No tenants match your filters"}
+                </p>
+                <p className="mt-1 text-xs text-slate-500">
+                  {tenants.length === 0
+                    ? "Tenant workspaces will appear here when they are available."
+                    : "Try another search or status filter."}
+                </p>
+              </div>
+            ) : (
+              <>
+                <div data-layout-mobile className="flex flex-col gap-3 p-3 md:gap-4 md:p-4">
+                  {pagedTenants.map((tenant) => (
+                    <article key={tenant.id} className="rounded-2xl border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] sm:p-4">
+                      <div className="flex items-start justify-between gap-3">
+                        <div className="flex min-w-0 items-start gap-3">
+                          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary">
+                            <Building2 className="size-4" />
+                          </span>
+                          <div className="min-w-0">
+                            <p className="truncate text-sm font-bold text-slate-900">{tenant.name}</p>
+                            <p className="mt-0.5 break-all text-xs text-slate-600">{tenant.contactEmail || "No contact email"}</p>
+                            <p className="mt-1 text-[11px] text-slate-500">{tenant.contactPhone || "No contact phone"}</p>
+                            <div className="mt-2"><StatusBadge active={tenant.isActive} /></div>
                           </div>
-                          <p className="mt-1 text-xs text-slate-600">
-                            {tenant.fullName ? `${tenant.fullName} · ` : ""}
-                            {tenant.contactEmail || "No contact email"} · {tenant.contactPhone || "No contact phone"}
-                          </p>
-                          {subscriptionsQuery.isError ? (
-                            <p role="alert" className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] text-rose-800">
-                              Subscription details couldn’t be loaded. {getApiErrorMessage(subscriptionsQuery.error)}
-                            </p>
-                          ) : subscriptionsQuery.isPending ? (
-                            <div className="mt-3 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-[11px] text-slate-500">
-                              <LoaderCircle className="size-3.5 animate-spin" />
-                              Loading subscription details…
+                        </div>
+                        <TenantActions
+                          tenant={tenant}
+                          canManageTenants={hasvikAdmin || tenantAdmin}
+                          disabled={statusMutation.isPending}
+                          onEdit={() => openEdit(tenant)}
+                          onToggle={() => setTenantToToggle(tenant)}
+                        />
+                      </div>
+                      <div className="mt-3 border-t border-slate-100 pt-3">
+                        <SubscriptionSummary
+                          subscription={getActiveSubscription(subscriptions, tenant.id)}
+                          plans={plans}
+                        />
+                      </div>
+                    </article>
+                  ))}
+                </div>
+                <div data-layout-desktop>
+                  <Table className="w-full min-w-[850px] text-left">
+                    <TableHeader className="text-[11px] font-semibold text-[#64748b]">
+                      <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
+                        <TableHead className="py-4 pl-6 pr-4">Workspace</TableHead>
+                        <TableHead className="px-4 py-4">Contact</TableHead>
+                        <TableHead className="px-4 py-4">Subscription</TableHead>
+                        <TableHead className="px-4 py-4">Status</TableHead>
+                        <TableHead className="py-4 pl-4 pr-6 text-right">Actions</TableHead>
+                      </TableRow>
+                    </TableHeader>
+                    <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
+                      {pagedTenants.map((tenant) => (
+                        <TableRow key={tenant.id} className="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80">
+                          <TableCell className="py-4 pl-6 pr-4">
+                            <div className="flex items-center gap-3">
+                              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-primary">
+                                <Building2 className="size-4" />
+                              </span>
+                              <div className="min-w-0">
+                                <p className="truncate text-sm font-bold text-[#0f172a]">{tenant.name}</p>
+                                <p className="mt-0.5 text-xs text-[#64748b]">{tenant.fullName || "Workspace account"}</p>
+                              </div>
                             </div>
-                          ) : (
-                            <>
-                              {plansQuery.isError && (
-                                <p role="alert" className="mt-3 rounded-xl border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] text-rose-800">
-                                  Plan pricing couldn’t be loaded. {getApiErrorMessage(plansQuery.error)}
-                                </p>
-                              )}
-                              {plansQuery.isPending ? (
-                                <div className="mt-3 flex items-center gap-2 rounded-xl border border-slate-200 bg-slate-50 px-3 py-2.5 text-[11px] text-slate-500">
-                                  <LoaderCircle className="size-3.5 animate-spin" />
-                                  Loading plan details…
-                                </div>
-                              ) : (
-                                <ActiveSubscriptionDetails
-                                  subscription={subscriptions
-                                    .filter(
-                                      (subscription) =>
-                                        getSubscriptionTenantId(subscription) === tenant.id &&
-                                        hasCurrentSubscriptionAccess(subscription),
-                                    )
-                                    .sort(
-                                      (a, b) =>
-                                        Number(b.status?.toUpperCase() === "ACTIVE") -
-                                        Number(a.status?.toUpperCase() === "ACTIVE"),
-                                    )[0]}
-                                  plans={plans}
-                                />
-                              )}
-                            </>
-                          )}
-                          <Button
-                            type="button"
-                            size="sm"
-                            variant="ghost"
-                            disabled={statusMutation.isPending}
-                            onClick={() => startEditing(tenant)}
-                            className="mt-2 h-8 rounded-lg px-2 text-xs text-primary"
-                          >
-                            <Pencil className="size-3.5" />
-                            Edit details
-                          </Button>
-                        </>
-                      )}
-                    </div>
+                          </TableCell>
+                          <TableCell className="px-4 py-4">
+                            <p className="text-xs text-slate-700">{tenant.contactEmail || "No contact email"}</p>
+                            <p className="mt-1 text-[11px] text-slate-500">{tenant.contactPhone || "No contact phone"}</p>
+                          </TableCell>
+                          <TableCell className="px-4 py-4">
+                            <SubscriptionSummary
+                              subscription={getActiveSubscription(subscriptions, tenant.id)}
+                              plans={plans}
+                            />
+                          </TableCell>
+                          <TableCell className="px-4 py-4"><StatusBadge active={tenant.isActive} /></TableCell>
+                          <TableCell className="py-4 pl-4 pr-6">
+                            <TenantActions
+                              tenant={tenant}
+                              canManageTenants={hasvikAdmin || tenantAdmin}
+                              disabled={statusMutation.isPending}
+                              onEdit={() => openEdit(tenant)}
+                              onToggle={() => setTenantToToggle(tenant)}
+                            />
+                          </TableCell>
+                        </TableRow>
+                      ))}
+                    </TableBody>
+                  </Table>
+                </div>
+                <ListPagination
+                  total={filteredTenants.length}
+                  page={page}
+                  limit={limit}
+                  onPageChange={setPage}
+                  onLimitChange={(nextLimit) => {
+                    setLimit(nextLimit);
+                    setPage(1);
+                  }}
+                />
+              </>
+            )}
+          </section>
+        }
+      />
 
-                    {!isEditing && (
-                      <Button
-                        type="button"
-                        size="sm"
-                        variant="outline"
-                        disabled={statusMutation.isPending || updateMutation.isPending}
-                        onClick={() => void toggleTenantStatus(tenant)}
-                        className="h-9 shrink-0 rounded-lg"
-                      >
-                        {statusMutation.isPending && statusMutation.variables?.id === tenant.id ? (
-                          <LoaderCircle className="size-3.5 animate-spin" />
-                        ) : null}
-                        {tenant.isActive ? "Deactivate tenant" : "Activate tenant"}
-                      </Button>
-                    )}
-                  </div>
-                </article>
-              );
-            })}
-          </div>
-        )}
-      </section>
-    </div>
+      <DialogPrimitive.Root
+        open={Boolean(editingTenant)}
+        onOpenChange={(open) => {
+          if (!open && !updateMutation.isPending) closeEditor();
+        }}
+      >
+        <DialogPrimitive.Portal>
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
+          <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">
+            <div className="mb-5">
+              <DialogPrimitive.Title className="text-lg font-bold text-slate-900">
+                Edit workspace details
+              </DialogPrimitive.Title>
+              <DialogPrimitive.Description className="mt-1 text-xs leading-5 text-slate-500">
+                Update the organization name and contact information.
+              </DialogPrimitive.Description>
+            </div>
+            {draft && (
+              <TenantEditor
+                draft={draft}
+                error={formError}
+                saving={updateMutation.isPending}
+                onChange={setDraft}
+                onCancel={closeEditor}
+                onSubmit={(event) => void saveTenant(event)}
+              />
+            )}
+          </DialogPrimitive.Content>
+        </DialogPrimitive.Portal>
+      </DialogPrimitive.Root>
+
+      <ManagementConfirmDialog
+        open={Boolean(tenantToToggle)}
+        title={tenantToToggle?.isActive ? "Deactivate tenant?" : "Activate tenant?"}
+        description={
+          tenantToToggle
+            ? `${tenantToToggle.name} will be ${tenantToToggle.isActive ? "unable" : "able"} to access the workspace.`
+            : ""
+        }
+        confirmLabel={tenantToToggle?.isActive ? "Deactivate tenant" : "Activate tenant"}
+        destructive={Boolean(tenantToToggle?.isActive)}
+        pending={statusMutation.isPending}
+        onCancel={() => setTenantToToggle(null)}
+        onConfirm={() => void toggleTenantStatus()}
+      />
+    </>
+  );
+}
+
+function TenantActions({
+  tenant,
+  canManageTenants,
+  disabled,
+  onEdit,
+  onToggle,
+}: {
+  tenant: Tenant;
+  canManageTenants: boolean;
+  disabled: boolean;
+  onEdit: () => void;
+  onToggle: () => void;
+}) {
+  return (
+    <ManagementRowActions
+      editLabel={`Edit ${tenant.name}`}
+      {...(canManageTenants
+        ? {
+            actionLabel: tenant.isActive ? "Deactivate tenant" : "Activate tenant",
+            actionDestructive: tenant.isActive,
+            onAction: onToggle,
+          }
+        : {})}
+      disabled={disabled}
+      showEdit={canManageTenants}
+      onEdit={onEdit}
+    />
   );
 }

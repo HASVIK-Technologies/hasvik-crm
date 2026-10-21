@@ -47,9 +47,15 @@ export function useCreateSubscription() {
   return useMutation({
     mutationFn: (payload: CreateSubscriptionPayload) =>
       createSubscription(payload),
-    onSuccess: () => {
+    onSuccess: (subscription) => {
       void refreshSubscriptions();
-      toast.success("Subscription request created.");
+      toast.success(
+        subscription.status?.toUpperCase() === "ACTIVE"
+          ? "Subscription activated."
+          : subscription.status?.toUpperCase() === "PENDING"
+            ? "Subscription request created."
+            : "Subscription created.",
+      );
     },
   });
 }
@@ -85,7 +91,7 @@ export function useUpdateSubscriptionStatus() {
       void refreshSubscriptions();
       toast.success(
         variables.status === "ACTIVE"
-          ? "Subscription request approved."
+          ? "Subscription activated."
           : variables.status === "CANCELLED"
             ? "Subscription cancelled. Access remains available until the current term ends."
             : variables.status === "REJECTED"
