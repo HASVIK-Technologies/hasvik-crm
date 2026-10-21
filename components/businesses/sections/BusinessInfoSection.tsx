@@ -9,6 +9,7 @@ import FormCityAutocomplete from "@/components/common/form-controls/FormCityAuto
 import FormLeadStatusSelect from "@/components/common/form-controls/FormLeadStatusSelect";
 import StateAutocomplete from "@/components/common/StateAutocomplete";
 import { STATE_OPTIONS } from "@/lib/business/form-options";
+import { isValidHttpUrl } from "@/lib/business/url-validation";
 import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function BusinessInfoSection({
@@ -166,8 +167,18 @@ export default function BusinessInfoSection({
           id={`${idPrefix}locationUrl`}
           type="url"
           placeholder="https://maps.google.com/..."
-          {...register("locationUrl")}
+          aria-invalid={Boolean(errors.locationUrl)}
+          {...register("locationUrl", {
+            validate: (value) =>
+              isValidHttpUrl(value) ||
+              "Enter a valid location URL.",
+          })}
         />
+        {errors.locationUrl && (
+          <p role="alert" className="mt-1 text-xs text-red-600">
+            {errors.locationUrl.message}
+          </p>
+        )}
       </div>
     </div>
   );

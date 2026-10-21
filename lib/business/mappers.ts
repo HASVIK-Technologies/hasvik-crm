@@ -457,6 +457,8 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     businessType: business.businessType,
     assignedTo: business.assignedTo,
     alternatePhone: getPrimaryNumber(business.whatsappNumbers),
+    phoneNumbers: business.phoneNumbers,
+    whatsappNumbers: business.whatsappNumbers,
     location: business.location,
     locationUrl:
       (typeof business.location === "object" ? business.location?.url : undefined) ||

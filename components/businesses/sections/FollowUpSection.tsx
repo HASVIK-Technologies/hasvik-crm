@@ -1,6 +1,7 @@
 "use client";
 
 import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { Input } from "@/components/ui/input";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import DateTimePicker from "@/components/common/DateTimePicker";
@@ -20,7 +21,6 @@ export default function FollowUpSection({
     setValue,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
-
   const assignToName = useWatch({ control, name: "assignToName" });
 
   return (
