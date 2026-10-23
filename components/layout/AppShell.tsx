@@ -389,7 +389,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <div className={sidebarCollapsed ? "lg:pl-20" : "lg:pl-64"}>
         {/* Sticky Header matching screenshot */}
         <header className="sticky top-0 z-20 border-b border-[#e4ecf2] bg-white/95 backdrop-blur">
-          <div className="flex h-20 items-center justify-between px-5 sm:px-8">
+          <div className="flex h-16 items-center justify-between px-3 sm:h-20 sm:px-8">
             {/* Left Header Title / Eyebrow */}
             <div className="flex items-center gap-3">
               <button
@@ -405,7 +405,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 )}
               </button>
               <div>
-                <h1 className="text-xl font-bold tracking-tight text-[#0f172a] sm:text-2xl">
+                <h1 className="max-w-[52vw] truncate text-lg font-bold tracking-tight text-[#0f172a] sm:max-w-none sm:text-2xl">
                   {currentPageTitle}
                 </h1>
               </div>
@@ -511,40 +511,52 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
           </div>
 
-          {/* Mobile Navigation Dropdown */}
-          {mobileMenuOpen && (
-            <nav
-              className="border-t border-[#f1f5f9] bg-white px-5 py-3 lg:hidden"
-              aria-label="Mobile navigation"
-            >
-              {navigation
-                .filter((item) =>
-                  isNavigationItemVisible(item, tenantAdmin, hasvikAdmin),
-                )
-                .map((item) => {
-                const Icon = item.icon;
-                const active = isActivePath(pathname, item.href);
-                return (
-                  <Link
-                    key={item.label}
-                    href={item.href}
-                    onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold ${
-                      active
-                        ? "bg-brand-green text-[#06210b]"
-                        : "text-[#64748b] hover:bg-[#f8fafc]"
-                    }`}
-                  >
-                    <Icon className="size-4" />
-                    {item.label}
-                  </Link>
-                );
-                })}
-            </nav>
-          )}
         </header>
 
-        <main className="min-h-[calc(100vh-5rem)] px-3 py-4 sm:px-5 sm:py-5 lg:px-7 lg:py-6">
+        {mobileMenuOpen && (
+          <>
+            <button type="button" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-[1px] lg:hidden" />
+            <nav
+              className="fixed inset-y-0 left-0 z-40 flex w-[min(20rem,88vw)] flex-col overflow-y-auto bg-[#0868b8] px-4 py-5 text-white shadow-2xl lg:hidden"
+              aria-label="Mobile navigation"
+            >
+              <div className="mb-6 flex h-14 shrink-0 items-center justify-between border-b border-white/15 pb-4">
+                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex h-10 w-40 items-center border-l-2 border-brand-green bg-white px-3">
+                  <Image src="/logo.png" alt="Hasvik" width={120} height={36} className="h-auto w-28" />
+                </Link>
+                <button type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu" className="flex size-10 items-center justify-center text-white/80 hover:bg-white/10 hover:text-white"><X className="size-5" /></button>
+              </div>
+              <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-white/50">Workspace</p>
+              <div className="min-h-0 flex-1 overflow-y-auto">
+                {navigation
+                  .filter((item) =>
+                    isNavigationItemVisible(item, tenantAdmin, hasvikAdmin),
+                  )
+                  .map((item) => {
+                  const Icon = item.icon;
+                  const active = isActivePath(pathname, item.href);
+                  return (
+                    <Link
+                      key={item.label}
+                      href={item.href}
+                      onClick={() => setMobileMenuOpen(false)}
+                      className={`mb-1 flex items-center gap-3 border-l-3 px-3.5 py-3 text-sm font-semibold ${
+                        active
+                          ? "border-brand-green bg-white/14 text-brand-growth"
+                          : "border-transparent text-white/75 hover:bg-white/8 hover:text-white"
+                      }`}
+                    >
+                      <Icon className="size-4" />
+                      {item.label}
+                    </Link>
+                  );
+                  })}
+              </div>
+            </nav>
+          </>
+        )}
+
+        <main className="min-h-[calc(100vh-4rem)] px-3 py-4 sm:min-h-[calc(100vh-5rem)] sm:px-5 sm:py-5 lg:px-7 lg:py-6">
           <div className="mx-auto w-full">
             {subscriptionAccessPending ? (
               <div className="flex min-h-64 items-center justify-center text-sm text-slate-500">

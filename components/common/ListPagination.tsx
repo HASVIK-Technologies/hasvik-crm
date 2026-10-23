@@ -69,7 +69,7 @@ export default function ListPagination({
                 size="icon-sm"
                 type="button"
                 onClick={() => onPageChange(pageNumber)}
-                className="size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc]"
+                className="hidden size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc] sm:inline-flex"
               >
                 {pageNumber}
               </OutlinedButton>

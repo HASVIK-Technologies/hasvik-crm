@@ -126,19 +126,20 @@ export default function Actions({
         )}
       </div>
 
-      <div className="lg:hidden">
-        <DropdownMenu>
+      <div className="flex items-center gap-2 lg:hidden">
+        <ActionButton action={primary} />
+        {secondaryActions.filter((action) => !action.desktopOnly).length > 0 && <DropdownMenu>
           <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild>
               <OutlinedButton size="icon" aria-label="More actions">
                 <MoreVertical className="size-4" />
               </OutlinedButton>
           </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
           <DropdownMenuContent align="end" className="w-48 bg-white">
-            {allActions.map((action) => (
+            {allActions.slice(1).map((action) => (
               <ActionMenuItem key={action.label} action={action} />
             ))}
           </DropdownMenuContent>
-        </DropdownMenu>
+        </DropdownMenu>}
       </div>
     </div>
   );

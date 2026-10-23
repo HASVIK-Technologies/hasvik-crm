@@ -548,7 +548,7 @@ export default function FollowUpTable({
               {visiblePages.map((pageNum) => page === pageNum ? (
                 <PrimaryButton key={pageNum} size="icon-sm" type="button" onClick={() => onPage(pageNum)} className="size-8.5 rounded-lg p-0 text-sm font-semibold shadow-sm">{pageNum}</PrimaryButton>
               ) : (
-                <OutlinedButton key={pageNum} size="icon-sm" type="button" onClick={() => onPage(pageNum)} className="size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc]">{pageNum}</OutlinedButton>
+                <OutlinedButton key={pageNum} size="icon-sm" type="button" onClick={() => onPage(pageNum)} className="hidden size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc] sm:inline-flex">{pageNum}</OutlinedButton>
               ))}
               <OutlinedButton size="icon-sm" type="button" disabled={page >= totalPages} onClick={() => onPage(Math.min(totalPages, page + 1))} className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc]"><ChevronRight className="size-4" /></OutlinedButton>
             </div>

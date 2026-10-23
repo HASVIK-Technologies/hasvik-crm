@@ -32,18 +32,18 @@ export default function KpiCards({
     <section
       aria-label="Key performance indicators"
       className={cn(
-        "grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-[repeat(auto-fit,minmax(210px,1fr))]",
+        "grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-[repeat(auto-fit,minmax(210px,1fr))]",
         className,
       )}
     >
       {items.map(({ label, value, icon: Icon, tone = "blue" }) => (
         <article
           key={label}
-          className="flex min-h-20 items-center gap-4 border border-slate-200 bg-white px-5 py-4 shadow-[0_1px_2px_rgba(15,23,42,0.035)]"
+          className="flex min-h-20 items-center gap-2.5 border border-slate-200 bg-white px-3 py-3 shadow-[0_1px_2px_rgba(15,23,42,0.035)] sm:gap-4 sm:px-5 sm:py-4"
         >
           <span
             className={cn(
-              "flex size-11 shrink-0 items-center justify-center",
+              "flex size-9 shrink-0 items-center justify-center sm:size-11",
               toneStyles[tone],
             )}
           >
@@ -53,11 +53,11 @@ export default function KpiCards({
             {loading ? (
               <span className="mb-1.5 block h-7 w-14 animate-pulse bg-slate-100" />
             ) : (
-              <span className="block text-2xl font-bold tracking-tight text-slate-900">
+              <span className="block text-xl font-bold tracking-tight text-slate-900 sm:text-2xl">
                 {value}
               </span>
             )}
-            <span className="mt-0.5 block truncate text-xs font-medium text-slate-500">
+            <span className="mt-0.5 block text-[10px] font-medium leading-tight text-slate-500 sm:text-xs">
               {label}
             </span>
           </span>

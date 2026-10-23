@@ -75,8 +75,8 @@ export default function ListPageLayout({
     ) : null;
 
   return (
-    <PageContainer className={`flex flex-col gap-7 ${className ?? ""}`}>
-      <section className="flex flex-row items-center justify-between gap-4">
+    <PageContainer className={`flex flex-col gap-4 sm:gap-6 lg:gap-7 ${className ?? ""}`}>
+      <section className="flex flex-row items-center justify-between gap-2 sm:gap-4">
         {breadcrumb}
         <div className="flex shrink-0 items-center gap-2">
           {filters && (
