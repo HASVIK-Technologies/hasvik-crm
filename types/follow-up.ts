@@ -70,6 +70,11 @@ export interface FollowUpFilters {
   tab: "all" | "today" | "upcoming" | "overdue";
 }
 
+export type FollowUpQueryFilters = Omit<FollowUpFilters, "page" | "limit"> & {
+  page?: number;
+  limit?: number;
+};
+
 export interface FollowUpKpis {
   total: number;
   today: number;

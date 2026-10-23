@@ -19,6 +19,8 @@ const initialFilters: FollowUpFilters = {
 };
 
 interface FollowUpListState extends FollowUpFilters {
+  view: "table" | "calendar";
+  calendarMonth: string;
   showStats: boolean;
   showFilters: boolean;
   highlightedFollowUpId: string | null;
@@ -29,6 +31,8 @@ interface FollowUpListState extends FollowUpFilters {
     value: FollowUpFilters[K],
   ) => void;
   setTab: (tab: FollowUpFilters["tab"]) => void;
+  setView: (view: "table" | "calendar") => void;
+  setCalendarMonth: (month: string) => void;
   reset: () => void;
   toggleStats: () => void;
   toggleFilters: () => void;
@@ -38,6 +42,8 @@ interface FollowUpListState extends FollowUpFilters {
 
 export const useFollowUpListStore = create<FollowUpListState>((set) => ({
   ...initialFilters,
+  view: "table",
+  calendarMonth: new Date().toISOString().slice(0, 7),
   showStats: true,
   showFilters: true,
   highlightedFollowUpId: null,
@@ -49,6 +55,8 @@ export const useFollowUpListStore = create<FollowUpListState>((set) => ({
       page: key === "page" ? value : 1,
     } as Partial<FollowUpListState>),
   setTab: (tab) => set({ tab, page: 1 }),
+  setView: (view) => set({ view, page: 1 }),
+  setCalendarMonth: (calendarMonth) => set({ calendarMonth, page: 1 }),
   reset: () => set(initialFilters),
   toggleStats: () => set((state) => ({ showStats: !state.showStats })),
   toggleFilters: () => set((state) => ({ showFilters: !state.showFilters })),

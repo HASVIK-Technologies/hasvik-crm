@@ -33,6 +33,7 @@ interface FollowUpFormDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialBusiness?: FollowUpOption;
+  initialScheduledAt?: string;
   followUp?: FollowUpItem;
 }
 
@@ -56,6 +57,7 @@ function getDefaultValues(
   mode: "create" | "edit",
   initialBusiness?: FollowUpOption,
   followUp?: FollowUpItem,
+  initialScheduledAt?: string,
 ): FormValues {
   if (mode === "edit" && followUp) {
     const isPast =
@@ -71,7 +73,13 @@ function getDefaultValues(
       reminder: followUp.reminder ?? "",
     };
   }
-  return { ...emptyValues, business: initialBusiness ?? null };
+  return {
+    ...emptyValues,
+    business: initialBusiness ?? null,
+    scheduledAt: initialScheduledAt
+      ? toDateTimeLocalValue(initialScheduledAt)
+      : "",
+  };
 }
 
 export default function FollowUpFormDialog({
@@ -79,6 +87,7 @@ export default function FollowUpFormDialog({
   open,
   onOpenChange,
   initialBusiness,
+  initialScheduledAt,
   followUp,
 }: FollowUpFormDialogProps) {
   const createMutation = useCreateFollowUp();
@@ -89,13 +98,13 @@ export default function FollowUpFormDialog({
     reset,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
-    defaultValues: getDefaultValues(mode, initialBusiness, followUp),
+    defaultValues: getDefaultValues(mode, initialBusiness, followUp, initialScheduledAt),
     mode: "onChange",
   });
 
   useEffect(() => {
-    if (open) reset(getDefaultValues(mode, initialBusiness, followUp));
-  }, [mode, open, initialBusiness, followUp, reset]);
+    if (open) reset(getDefaultValues(mode, initialBusiness, followUp, initialScheduledAt));
+  }, [mode, open, initialBusiness, initialScheduledAt, followUp, reset]);
 
   const submit = async (values: FormValues) => {
     const scheduledAt = fromDateTimeLocalValue(values.scheduledAt);
@@ -130,7 +139,7 @@ export default function FollowUpFormDialog({
         toast.success("Follow-up created successfully.");
       }
       onOpenChange(false);
-      reset(getDefaultValues(mode, initialBusiness, followUp));
+      reset(getDefaultValues(mode, initialBusiness, followUp, initialScheduledAt));
     } catch (error: unknown) {
       toast.error(getApiErrorMessage(error));
     }

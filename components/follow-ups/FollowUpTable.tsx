@@ -42,6 +42,7 @@ import PrimaryButton from "@/components/common/PrimaryButton";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
+import FollowUpViewToggle, { type FollowUpView } from "@/components/follow-ups/FollowUpViewToggle";
 import { formatFollowUpType } from "@/lib/business/form-options";
 import { useState } from "react";
 import { useFollowUpHighlight } from "@/hooks/use-follow-up-highlight";
@@ -97,6 +98,8 @@ interface FollowUpTableProps {
   onCancel: (item: FollowUpItem) => void;
   onComplete: (item: FollowUpItem) => void;
   onNextFollowUp?: (item: FollowUpItem) => void;
+  view: FollowUpView;
+  onViewChange: (view: FollowUpView) => void;
 }
 
 export default function FollowUpTable({
@@ -111,6 +114,8 @@ export default function FollowUpTable({
   onCancel,
   onComplete,
   onNextFollowUp,
+  view,
+  onViewChange,
 }: FollowUpTableProps) {
   const router = useRouter();
   const [notesFollowUp, setNotesFollowUp] = useState<FollowUpItem | null>(null);
@@ -164,6 +169,7 @@ export default function FollowUpTable({
             Follow-ups{" "}
             <span className="font-medium text-[#64748b]">({total})</span>
           </h2>
+          <FollowUpViewToggle value={view} onChange={onViewChange} />
         </div>
         <div data-layout-mobile>
           {loading ? (

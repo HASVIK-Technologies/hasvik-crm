@@ -1,5 +1,5 @@
 import type { BusinessKpiParams, BusinessQueryParams } from "@/types/business-api";
-import type { FollowUpFilters } from "@/types/follow-up";
+import type { FollowUpFilters, FollowUpQueryFilters } from "@/types/follow-up";
 
 export const businessQueryKeys = {
   all: ["businesses"] as const,
@@ -22,7 +22,7 @@ export const businessQueryKeys = {
 export const followUpQueryKeys = {
   all: ["follow-ups"] as const,
   lists: () => [...followUpQueryKeys.all, "list"] as const,
-  list: (filters: FollowUpFilters) =>
+  list: (filters: FollowUpQueryFilters) =>
     [...followUpQueryKeys.lists(), filters] as const,
   kpis: (params?: Partial<FollowUpFilters>) =>
     [...followUpQueryKeys.all, "kpis", params] as const,

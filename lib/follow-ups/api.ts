@@ -3,6 +3,7 @@ import { apiClient } from "@/lib/api/api-client";
 import type {
   CreateFollowUpPayload,
   FollowUpFilters,
+  FollowUpQueryFilters,
   FollowUpItem,
   FollowUpKpis,
   FollowUpOption,
@@ -250,13 +251,12 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
  * Query parameters: page, limit, businessId, assignedTo, status, type, fromDate, toDate, search
  */
 export async function getFollowUps(
-  filters: FollowUpFilters,
+  filters: FollowUpQueryFilters,
   signal?: AbortSignal,
 ) {
-  const params: Record<string, string | number> = {
-    page: filters.page,
-    limit: filters.limit,
-  };
+  const params: Record<string, string | number> = {};
+  if (filters.page !== undefined) params.page = filters.page;
+  if (filters.limit !== undefined) params.limit = filters.limit;
   if (filters.search && filters.search.trim()) {
     params.search = filters.search.trim();
   }
@@ -291,7 +291,7 @@ export async function getFollowUps(
   const totalPages =
     root.totalPages ??
     (!Array.isArray(nested) ? nested?.totalPages : undefined) ??
-    Math.max(1, Math.ceil(total / filters.limit));
+    (filters.limit ? Math.max(1, Math.ceil(total / filters.limit)) : 1);
 
   return {
     items: rows.map((item) => toFollowUpItem(item as Record<string, unknown>)),

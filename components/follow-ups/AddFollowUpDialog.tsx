@@ -7,6 +7,7 @@ interface AddFollowUpDialogProps {
   open: boolean;
   onOpenChange: (open: boolean) => void;
   initialBusiness?: FollowUpOption;
+  initialScheduledAt?: string;
 }
 
 export default function AddFollowUpDialog(props: AddFollowUpDialogProps) {

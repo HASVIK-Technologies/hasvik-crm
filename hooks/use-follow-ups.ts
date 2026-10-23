@@ -18,6 +18,7 @@ import {
 import type {
   CreateFollowUpPayload,
   FollowUpFilters,
+  FollowUpQueryFilters,
   FollowUpItem,
   UpdateFollowUpPayload,
   UpdateFollowUpStatusPayload,
@@ -33,7 +34,7 @@ function invalidateBusinessQueries(
   return queryClient.invalidateQueries({ queryKey: businessQueryKeys.all });
 }
 
-export function useFollowUpsQuery(filters: FollowUpFilters) {
+export function useFollowUpsQuery(filters: FollowUpQueryFilters) {
   return useQuery({
     queryKey: followUpQueryKeys.list(filters),
     queryFn: ({ signal }) => getFollowUps(filters, signal),

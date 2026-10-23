@@ -9,6 +9,7 @@ import ListPageLayout from "@/components/layout/ListPageLayout";
 import FollowUpFilters from "@/components/follow-ups/FollowUpFilters";
 import FollowUpStats from "@/components/follow-ups/FollowUpStats";
 import FollowUpTable from "@/components/follow-ups/FollowUpTable";
+import FollowUpCalendar from "@/components/follow-ups/FollowUpCalendar";
 import SearchWithSuggestions from "@/components/businesses/SearchWithSuggestions";
 import AddFollowUpDialog from "@/components/follow-ups/AddFollowUpDialog";
 import FollowUpEditDialog from "@/components/follow-ups/FollowUpEditDialog";
@@ -31,6 +32,7 @@ import { useFollowUpListStore } from "@/store/follow-up-list-store";
 import type {
   FollowUpFilters as FollowUpFilterState,
   FollowUpItem,
+  FollowUpQueryFilters,
 } from "@/types/follow-up";
 
 function dayBoundary(offset: number, end = false) {
@@ -40,15 +42,41 @@ function dayBoundary(offset: number, end = false) {
   return date.toISOString();
 }
 
+function monthBoundary(month: string, end = false) {
+  const [year, monthIndex] = month.split("-").map(Number);
+  const date = end
+    ? new Date(year, monthIndex, 0, 23, 59, 59, 999)
+    : new Date(year, monthIndex - 1, 1, 0, 0, 0, 0);
+  return date.toISOString();
+}
+
 export default function FollowupsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
+  const [initialScheduledAt, setInitialScheduledAt] = useState<string>();
   const [editFollowUp, setEditFollowUp] = useState<FollowUpItem>();
   const [cancelFollowUp, setCancelFollowUp] = useState<FollowUpItem>();
   const [completeFollowUp, setCompleteFollowUp] = useState<FollowUpItem>();
   const [nextFollowUp, setNextFollowUp] = useState<FollowUpItem>();
   const filters = useFollowUpListStore();
 
-  const queryFilters = useMemo<FollowUpFilterState>(() => {
+  const queryFilters = useMemo<FollowUpQueryFilters>(() => {
+    const commonFilters = {
+      search: filters.search,
+      businessId: filters.businessId,
+      businessName: filters.businessName,
+      assignedTo: filters.assignedTo,
+      assignedToName: filters.assignedToName,
+      status: filters.status,
+      type: filters.type,
+    };
+    if (filters.view === "calendar") {
+      return {
+        ...commonFilters,
+        fromDate: monthBoundary(filters.calendarMonth),
+        toDate: monthBoundary(filters.calendarMonth, true),
+        tab: "all",
+      };
+    }
     const dates =
       filters.tab === "today"
         ? { fromDate: dayBoundary(0), toDate: dayBoundary(0, true) }
@@ -57,7 +85,13 @@ export default function FollowupsPage() {
           : filters.tab === "overdue"
             ? { fromDate: "", toDate: dayBoundary(-1, true) }
             : { fromDate: filters.fromDate, toDate: filters.toDate };
-    return { ...filters, ...dates };
+    return {
+      ...commonFilters,
+      page: filters.page,
+      limit: filters.limit,
+      tab: filters.tab,
+      ...dates,
+    };
   }, [filters]);
 
   const kpiFilters = useMemo<Partial<FollowUpFilterState>>(() => {
@@ -180,7 +214,10 @@ export default function FollowupsPage() {
           <Actions
             primary={{
               label: "Add Follow-up",
-              onSelect: () => setDialogOpen(true),
+              onSelect: () => {
+                setInitialScheduledAt(undefined);
+                setDialogOpen(true);
+              },
               icon: <Plus className="size-4" />,
             }}
             menuItems={[
@@ -214,35 +251,66 @@ export default function FollowupsPage() {
         }
         content={
           <div className="space-y-4">
-            <div className="flex items-center gap-1 overflow-x-auto border-b border-[#e7edf3]">
-              {(["all", "today", "upcoming", "overdue"] as const).map((tab) => (
-                <button
-                  type="button"
-                  key={tab}
-                  onClick={() => filters.setTab(tab)}
-                  className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-primary text-primary" : "border-transparent text-[#64748b] hover:text-[#334155]"}`}
-                >
-                  {tab}
-                </button>
-              ))}
-            </div>
-            <FollowUpTable
-              items={listQuery.data?.items ?? []}
-              total={listQuery.data?.total ?? 0}
-              page={filters.page}
-              limit={filters.limit}
-              loading={listQuery.isFetching}
-              onPage={(page) => setFilter("page", page)}
-              onItemsPerPageChange={(limit) => setFilter("limit", limit)}
-              onEdit={requestEdit}
-              onCancel={requestCancel}
-              onComplete={requestComplete}
-              onNextFollowUp={requestNextFollowUp}
-            />
+            {filters.view === "table" && (
+              <div className="flex items-center gap-1 overflow-x-auto border-b border-[#e7edf3]">
+                {(["all", "today", "upcoming", "overdue"] as const).map((tab) => (
+                  <button
+                    type="button"
+                    key={tab}
+                    onClick={() => filters.setTab(tab)}
+                    className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-primary text-primary" : "border-transparent text-[#64748b] hover:text-[#334155]"}`}
+                  >
+                    {tab}
+                  </button>
+                ))}
+              </div>
+            )}
+            {filters.view === "calendar" ? (
+              <FollowUpCalendar
+                items={listQuery.data?.items ?? []}
+                total={listQuery.data?.total ?? 0}
+                loading={listQuery.isFetching}
+                month={filters.calendarMonth}
+                view={filters.view}
+                onMonthChange={filters.setCalendarMonth}
+                onViewChange={filters.setView}
+                onAddFollowUp={(scheduledAt) => {
+                  setInitialScheduledAt(scheduledAt);
+                  setDialogOpen(true);
+                }}
+                onEdit={requestEdit}
+                onCancel={requestCancel}
+                onComplete={requestComplete}
+                onNextFollowUp={requestNextFollowUp}
+              />
+            ) : (
+              <FollowUpTable
+                items={listQuery.data?.items ?? []}
+                total={listQuery.data?.total ?? 0}
+                page={filters.page}
+                limit={filters.limit}
+                loading={listQuery.isFetching}
+                onPage={(page) => setFilter("page", page)}
+                onItemsPerPageChange={(limit) => setFilter("limit", limit)}
+                onEdit={requestEdit}
+                onCancel={requestCancel}
+                onComplete={requestComplete}
+                onNextFollowUp={requestNextFollowUp}
+                view={filters.view}
+                onViewChange={filters.setView}
+              />
+            )}
           </div>
         }
       />
-      <AddFollowUpDialog open={dialogOpen} onOpenChange={setDialogOpen} />
+      <AddFollowUpDialog
+        open={dialogOpen}
+        initialScheduledAt={initialScheduledAt}
+        onOpenChange={(open) => {
+          setDialogOpen(open);
+          if (!open) setInitialScheduledAt(undefined);
+        }}
+      />
       {editFollowUp && (
         <FollowUpEditDialog
           followUp={editFollowUp}
