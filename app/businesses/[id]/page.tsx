@@ -18,10 +18,7 @@ import BusinessDetailsContacts from "../../../components/business-details/Busine
 import { useBusinessFollowUpsQuery } from "@/hooks/use-business-get-follow-ups";
 import { useModalStore } from "@/store/business-modal-store";
 import { AddFollowUpModal } from "@/components/business-details/AddFollowUpModal";
-import {
-  getLocationData,
-  openGoogleMapsOnce,
-} from "@/lib/business/location";
+import { getLocationData, openGoogleMapsOnce } from "@/lib/business/location";
 
 import {
   Edit2,
@@ -175,10 +172,14 @@ export default function BusinessDetails() {
   const locationData = getLocationData(business);
 
   const rawLeadStatus =
-    (business?.leadStatus && business.leadStatus !== "Active" && business.leadStatus !== "Inactive"
+    (business?.leadStatus &&
+    business.leadStatus !== "Active" &&
+    business.leadStatus !== "Inactive"
       ? business.leadStatus
       : undefined) ||
-    (business?.status && business.status !== "Active" && business.status !== "Inactive"
+    (business?.status &&
+    business.status !== "Active" &&
+    business.status !== "Inactive"
       ? business.status
       : undefined) ||
     business?.leadStatus;
@@ -234,7 +235,9 @@ export default function BusinessDetails() {
                       {business.name}
                     </CardTitle>
                     <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-                      <StatusBadge status={isInactive ? "Inactive" : "Active"} />
+                      <StatusBadge
+                        status={isInactive ? "Inactive" : "Active"}
+                      />
                       {leadStatusDisplay && leadStatusDisplay !== "-" && (
                         <StatusBadge
                           status={rawLeadStatus || leadStatusDisplay}
@@ -259,97 +262,107 @@ export default function BusinessDetails() {
               </div>
 
               <div className="flex items-center gap-2 self-end sm:self-auto">
-                {/* Phone Dropdown / Single Button */}
-                {headerPhones.length > 1 ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                {!isInactive && (
+                  <>
+                    {/* Phone Dropdown / Single Button */}
+                    {headerPhones.length > 1 ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <OutlinedButton
+                            aria-label="Call business"
+                            title="Call business"
+                            className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
+                          >
+                            <Phone className="h-4 w-4" />
+                          </OutlinedButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {headerPhones.map((p: any, idx: number) => (
+                            <DropdownMenuItem
+                              key={p.id || p._id || idx}
+                              asChild
+                              className="cursor-pointer"
+                            >
+                              <a
+                                href={`tel:${cleanNumber(p.number)}`}
+                                className="w-full"
+                              >
+                                {p.number} (
+                                {p.type ||
+                                  (p.isPrimary ? "Primary" : "Secondary")}
+                                )
+                              </a>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : headerPhones.length === 1 ? (
                       <OutlinedButton
+                        asChild
                         aria-label="Call business"
-                        title="Call business"
                         className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                       >
-                        <Phone className="h-4 w-4" />
+                        <a href={`tel:${cleanNumber(headerPhones[0].number)}`}>
+                          <Phone className="h-4 w-4" />
+                        </a>
                       </OutlinedButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {headerPhones.map((p: any, idx: number) => (
-                        <DropdownMenuItem
-                          key={p.id || p._id || idx}
-                          asChild
-                          className="cursor-pointer"
-                        >
-                          <a
-                            href={`tel:${cleanNumber(p.number)}`}
-                            className="w-full"
-                          >
-                            {p.number} (
-                            {p.type || (p.isPrimary ? "Primary" : "Secondary")})
-                          </a>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : headerPhones.length === 1 ? (
-                  <OutlinedButton
-                    asChild
-                    aria-label="Call business"
-                    className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
-                  >
-                    <a href={`tel:${cleanNumber(headerPhones[0].number)}`}>
-                      <Phone className="h-4 w-4" />
-                    </a>
-                  </OutlinedButton>
-                ) : null}
+                    ) : null}
 
-                {/* WhatsApp Dropdown / Single Button */}
-                {headerWhatsapps.length > 1 ? (
-                  <DropdownMenu>
-                    <DropdownMenuTrigger asChild>
+                    {/* WhatsApp Dropdown / Single Button */}
+                    {headerWhatsapps.length > 1 ? (
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <OutlinedButton
+                            aria-label="Message business on WhatsApp"
+                            title="Message business on WhatsApp"
+                            className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
+                          >
+                            <WhatsAppIcon className="h-4 w-4" />
+                          </OutlinedButton>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {headerWhatsapps.map((w: any, idx: number) => (
+                            <DropdownMenuItem
+                              key={w.id || w._id || idx}
+                              asChild
+                              className="cursor-pointer"
+                            >
+                              <a
+                                href={`https://wa.me/91${cleanNumber(
+                                  w.number
+                                )}`}
+                                target="_blank"
+                                rel="noopener noreferrer"
+                                className="w-full"
+                              >
+                                {w.number} (
+                                {w.type ||
+                                  (w.isPrimary ? "Primary" : "Secondary")}
+                                )
+                              </a>
+                            </DropdownMenuItem>
+                          ))}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
+                    ) : headerWhatsapps.length === 1 ? (
                       <OutlinedButton
+                        asChild
                         aria-label="Message business on WhatsApp"
-                        title="Message business on WhatsApp"
                         className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                       >
-                        <WhatsAppIcon className="h-4 w-4" />
-                      </OutlinedButton>
-                    </DropdownMenuTrigger>
-                    <DropdownMenuContent align="end">
-                      {headerWhatsapps.map((w: any, idx: number) => (
-                        <DropdownMenuItem
-                          key={w.id || w._id || idx}
-                          asChild
-                          className="cursor-pointer"
+                        <a
+                          href={`https://wa.me/91${cleanNumber(
+                            headerWhatsapps[0].number
+                          )}`}
+                          target="_blank"
+                          rel="noopener noreferrer"
                         >
-                          <a
-                            href={`https://wa.me/91${cleanNumber(w.number)}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="w-full"
-                          >
-                            {w.number} (
-                            {w.type || (w.isPrimary ? "Primary" : "Secondary")})
-                          </a>
-                        </DropdownMenuItem>
-                      ))}
-                    </DropdownMenuContent>
-                  </DropdownMenu>
-                ) : headerWhatsapps.length === 1 ? (
-                  <OutlinedButton
-                    asChild
-                    aria-label="Message business on WhatsApp"
-                    className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
-                  >
-                    <a
-                      href={`https://wa.me/91${cleanNumber(
-                        headerWhatsapps[0].number
-                      )}`}
-                      target="_blank"
-                      rel="noopener noreferrer"
-                    >
-                      <WhatsAppIcon className="h-4 w-4" />
-                    </a>
-                  </OutlinedButton>
-                ) : null}
+                          <WhatsAppIcon className="h-4 w-4" />
+                        </a>
+                      </OutlinedButton>
+                    ) : null}
+                  </>
+                )}
 
                 {locationData.isAvailable ? (
                   <OutlinedButton
@@ -362,7 +375,9 @@ export default function BusinessDetails() {
                       href={locationData.mapLink || "#"}
                       target="_blank"
                       rel="noopener noreferrer"
-                      onClick={(e) => openGoogleMapsOnce(e, locationData.mapLink)}
+                      onClick={(e) =>
+                        openGoogleMapsOnce(e, locationData.mapLink)
+                      }
                     >
                       <MapPin className="h-4 w-4" />
                     </a>
@@ -447,7 +462,10 @@ export default function BusinessDetails() {
                       Address
                     </p>
                     <p className="mt-1 text-sm font-semibold leading-5 text-slate-800">
-                      {business.address || (business.city ? business.city : "Location not available")}
+                      {business.address ||
+                        (business.city
+                          ? business.city
+                          : "Location not available")}
                     </p>
                   </div>
                 </div>

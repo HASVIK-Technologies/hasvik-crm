@@ -68,46 +68,48 @@ export default function BusinessDetailsQuickActions({
           <ChevronRight className="size-4 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
         </Link>
 
-        {/* Call & WhatsApp (2 Columns) */}
-        <div className="grid grid-cols-2 gap-2.5">
-          <a
-            href={phone ? `tel:${phone}` : undefined}
-            className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-brand-green/30 hover:bg-brand-green/5 ${
-              !phone || isInactive ? "opacity-50 pointer-events-none" : ""
-            }`}
-          >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green-strong transition-colors group-hover:bg-brand-green/15">
-              <Phone className="size-3.5" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand-green-strong">
-                Call
-              </p>
-              <p className="truncate text-[10px] text-slate-400">
-                Direct phone
-              </p>
-            </div>
-          </a>
+        {/* Call & WhatsApp (2 Columns) - Only visible for active businesses */}
+        {!isInactive && (
+          <div className="grid grid-cols-2 gap-2.5">
+            <a
+              href={phone ? `tel:${phone}` : undefined}
+              className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-brand-green/30 hover:bg-brand-green/5 ${
+                !phone ? "opacity-50 pointer-events-none" : ""
+              }`}
+            >
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green-strong transition-colors group-hover:bg-brand-green/15">
+                <Phone className="size-3.5" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand-green-strong">
+                  Call
+                </p>
+                <p className="truncate text-[10px] text-slate-400">
+                  Direct phone
+                </p>
+              </div>
+            </a>
 
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-brand-green/30 hover:bg-brand-green/5 ${
-              !whatsappUrl || isInactive ? "opacity-50 pointer-events-none" : ""
-            }`}
-          >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green-strong transition-colors group-hover:bg-brand-green/15">
-              <WhatsAppIcon className="size-3.5" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand-green-strong">
-                WhatsApp
-              </p>
-              <p className="truncate text-[10px] text-slate-400">Open chat</p>
-            </div>
-          </a>
-        </div>
+            <a
+              href={whatsappUrl}
+              target="_blank"
+              rel="noopener noreferrer"
+              className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-brand-green/30 hover:bg-brand-green/5 ${
+                !whatsappUrl ? "opacity-50 pointer-events-none" : ""
+              }`}
+            >
+              <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green-strong transition-colors group-hover:bg-brand-green/15">
+                <WhatsAppIcon className="size-3.5" />
+              </div>
+              <div className="min-w-0">
+                <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand-green-strong">
+                  WhatsApp
+                </p>
+                <p className="truncate text-[10px] text-slate-400">Open chat</p>
+              </div>
+            </a>
+          </div>
+        )}
 
         {/* Divider */}
         <div className="my-0.5 border-t border-slate-100" />
