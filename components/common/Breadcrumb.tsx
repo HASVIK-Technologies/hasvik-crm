@@ -16,10 +16,14 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
         return (
           <span key={index} className="flex items-center gap-1.5">
             {index > 0 && <ChevronRight className="size-4 sm:size-4.5 md:size-5 text-gray-300" />}
-            {item.href && !isLast ? (
+            {item.href ? (
               <Link
                 href={item.href}
-                className="font-medium text-secondary hover:underline"
+                className={
+                  isLast
+                    ? "font-semibold text-secondary hover:underline"
+                    : "font-medium text-secondary hover:underline"
+                }
               >
                 {item.label}
               </Link>

@@ -1,11 +1,4 @@
 {
-  "tabs": [
-    { "id": "overview", "label": "Overview" },
-    { "id": "contacts", "label": "Contacts" },
-    { "id": "follow-ups", "label": "Follow-ups" },
-    { "id": "Notes", "label": "Notes" },
-    { "id": "activity-log", "label": "Activity Log" }
-  ],
   "headerInfo": {
     "initials": "SB",
     "name": "Shree Balaji Traders",

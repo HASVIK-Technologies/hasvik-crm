@@ -35,7 +35,6 @@ import {
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinessQuery } from "@/hooks/use-businesses";
-import { BusinessItem } from "@/types/business";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import { formatLeadStatus } from "@/lib/business/form-options";
@@ -55,27 +54,6 @@ type ContactItem = {
   badgeClass?: string;
 };
 
-const STATIC_BUSINESS_12: BusinessItem = {
-  id: 12,
-  name: "Hasvik Technology",
-  phone: "9876543210",
-  initials: "HT",
-  avatarBg: "bg-primary/10",
-  avatarTextColor: "text-primary",
-  category: "Furniture Shop",
-  city: "Ballia",
-  status: "Active",
-  leadStatus: "INTERESTED",
-  lastFollowUp: "25 Aug 2026 at 11:30 AM",
-  nextFollowUp: "Today at 10:00 AM",
-  nextFollowUpType: "today",
-  owner: "Contact 1 (Owner)",
-  address: "Ballia, U.P.",
-  leadSource: "Website",
-  businessType: "Retailer",
-  assignedTo: "Amit Sharma",
-};
-
 export default function BusinessDetails() {
   const cleanNumber = (num: string) => num.replace(/\D/g, "");
 
@@ -90,9 +68,7 @@ export default function BusinessDetails() {
     isError,
     isLoading,
   } = useBusinessQuery(typeof rawId === "string" ? rawId : undefined);
-  const numericId = typeof rawId === "string" ? parseInt(rawId, 10) : NaN;
-  const business =
-    apiBusiness ?? (numericId === 12 ? STATIC_BUSINESS_12 : undefined);
+  const business = apiBusiness;
   const { openFollowUpModal, openDeactivateModal } = useModalStore();
   const isInactive = business?.isActive === false;
   const upcomingFollowUps = Array.isArray(followUps)
@@ -415,8 +391,20 @@ export default function BusinessDetails() {
                             View
                           </Link>
                         </>
+                      ) : business?.nextFollowUp && business.nextFollowUp !== "-" ? (
+                        <>
+                          <p className="text-sm font-semibold text-slate-800">
+                            {business.nextFollowUp}
+                          </p>
+                          {business.nextFollowUpType && business.nextFollowUpType !== "none" && (
+                            <StatusBadge
+                              status={business.nextFollowUpType}
+                              className="h-5 py-0 text-[10px]"
+                            />
+                          )}
+                        </>
                       ) : (
-                        <p className="text-sm font-semibold text-slate-800 w-full text-center">
+                        <p className="text-sm font-semibold text-slate-800">
                           -
                         </p>
                       )}
@@ -426,16 +414,17 @@ export default function BusinessDetails() {
                 <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
                   <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">
-                      Last follow-up
-                    </p>
-                    <p
-                      className={`mt-1 truncate text-sm font-semibold text-slate-800${
-                        !lastFollowUpItem ? " w-full text-center" : ""
-                      }`}
-                    >
+                    <p className="text-xs font-medium text-slate-500">Last follow-up</p>
+                    <p className="mt-1 truncate text-sm font-semibold text-slate-800">
                       {lastFollowUpItem
-                        ? dateFmt.format(new Date(lastFollowUpItem.scheduledAt))
+                        ? dateFmt.format(
+                            new Date(
+                              (lastFollowUpItem as { completedAt?: string }).completedAt ??
+                                lastFollowUpItem.scheduledAt
+                            )
+                          )
+                        : business?.lastFollowUp && business.lastFollowUp !== "-"
+                        ? business.lastFollowUp
                         : "-"}
                     </p>
                   </div>
@@ -458,23 +447,15 @@ export default function BusinessDetails() {
           {/* 3. --- TABS SECTION --- */}
           <Tabs defaultValue="overview" className="w-full">
             <TabsList className="max-w-full justify-start overflow-x-auto">
-              {businessData.tabs
-                .filter(
-                  (tab: any) => tab.id !== "activity-log" && tab.id !== "Notes"
-                )
-                .map((tab: any) => (
-                  <TabsTrigger
-                    key={tab.id}
-                    value={tab.id}
-                    className="flex-none"
-                  >
-                    {tab.label}
-
-                    {/* Contacts: Deleted the old number code! */}
-                    {/* Follow-ups: Using the REAL TanStack count! */}
-                    {tab.id === "follow-ups" && ` (${realFollowUpsCount})`}
-                  </TabsTrigger>
-                ))}
+              <TabsTrigger value="overview" className="flex-none">
+                Overview
+              </TabsTrigger>
+              <TabsTrigger value="contacts" className="flex-none">
+                Contacts
+              </TabsTrigger>
+              <TabsTrigger value="follow-ups" className="flex-none">
+                Follow-ups ({realFollowUpsCount})
+              </TabsTrigger>
             </TabsList>
             {/* OVERVIEW TAB */}
             <TabsContent value="overview" className="mt-6">
@@ -498,8 +479,6 @@ export default function BusinessDetails() {
             <TabsContent value="follow-ups" className="mt-6">
               <BusinessDetailsFollowups />
             </TabsContent>
-            {/* NOTES TAB 
-            <TabsContent value="notes" className="mt-6"></TabsContent> */}
           </Tabs>
           {/* New Follow-up Modal */}
           <AddFollowUpModal businessName={business?.name || "Business"} />

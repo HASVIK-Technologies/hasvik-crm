@@ -33,9 +33,143 @@ export function formatFollowUpDate(dateVal?: string | Date | null): string {
   }).format(date);
 }
 
+function extractDateFromFollowUpEntry(entry: unknown): string | undefined {
+  if (!entry) return undefined;
+  if (typeof entry === "string") {
+    const trimmed = entry.trim();
+    return trimmed && trimmed !== "-" ? trimmed : undefined;
+  }
+  if (entry instanceof Date && !Number.isNaN(entry.getTime())) {
+    return entry.toISOString();
+  }
+  if (typeof entry === "object") {
+    const obj = entry as Record<string, unknown>;
+    const raw =
+      obj.scheduledAt ??
+      obj.nextFollowupDate ??
+      obj.nextFollowUpDate ??
+      obj.followUpDate ??
+      obj.date ??
+      obj.completedAt;
+    if (typeof raw === "string") {
+      const trimmed = raw.trim();
+      return trimmed && trimmed !== "-" ? trimmed : undefined;
+    }
+    if (raw instanceof Date && !Number.isNaN(raw.getTime())) {
+      return raw.toISOString();
+    }
+  }
+  return undefined;
+}
+
+export function extractNextFollowUpDate(
+  business: ApiBusiness,
+): string | undefined {
+  const b = business as Record<string, unknown>;
+
+  const candidates = [
+    b.nextFollowups,
+    b.nextFollowup,
+    b.nextFollowUp,
+    b.nextFollowupDate,
+    b.nextFollowUpDate,
+    b.nextFollowUpDateTime,
+    b.nextFollowupDateTime,
+  ];
+
+  for (const candidate of candidates) {
+    if (!candidate) continue;
+
+    // 1. Direct string
+    if (typeof candidate === "string") {
+      const trimmed = candidate.trim();
+      if (trimmed && trimmed !== "-") return trimmed;
+    }
+
+    // 2. Array of follow-ups
+    if (Array.isArray(candidate) && candidate.length > 0) {
+      const pendingItems = candidate.filter((item: unknown) => {
+        if (!item || typeof item !== "object") return true;
+        const status = String((item as Record<string, unknown>).status || "").toUpperCase();
+        return status !== "COMPLETED" && status !== "CANCELLED";
+      });
+
+      const listToSearch = pendingItems.length > 0 ? pendingItems : candidate;
+
+      let earliestTime = Infinity;
+      let earliestDateStr: string | undefined;
+
+      for (const item of listToSearch) {
+        const rawDate = extractDateFromFollowUpEntry(item);
+        if (rawDate) {
+          const cleaned = rawDate.replace(/\s+at\s+/i, " ");
+          const time = new Date(cleaned).getTime();
+          if (!Number.isNaN(time)) {
+            if (time < earliestTime) {
+              earliestTime = time;
+              earliestDateStr = rawDate;
+            }
+          } else if (!earliestDateStr) {
+            earliestDateStr = rawDate;
+          }
+        }
+      }
+
+      if (earliestDateStr) return earliestDateStr;
+    }
+
+    // 3. Single object
+    if (typeof candidate === "object") {
+      const dateStr = extractDateFromFollowUpEntry(candidate);
+      if (dateStr) return dateStr;
+    }
+  }
+
+  // Fallback 1: check business.followUps array for scheduled follow-ups
+  if (Array.isArray(business.followUps) && business.followUps.length > 0) {
+    const scheduled = business.followUps.filter((item) => {
+      const status = String(item.status || "").toUpperCase();
+      return status === "SCHEDULED" || (!status && !item.isCompleted);
+    });
+
+    let earliestTime = Infinity;
+    let earliestDateStr: string | undefined;
+
+    for (const item of scheduled) {
+      const rawDate = extractDateFromFollowUpEntry(item);
+      if (rawDate) {
+        const cleaned = rawDate.replace(/\s+at\s+/i, " ");
+        const time = new Date(cleaned).getTime();
+        if (!Number.isNaN(time) && time < earliestTime) {
+          earliestTime = time;
+          earliestDateStr = rawDate;
+        } else if (Number.isNaN(time) && !earliestDateStr) {
+          earliestDateStr = rawDate;
+        }
+      }
+    }
+
+    if (earliestDateStr) return earliestDateStr;
+  }
+
+  // Fallback 2: check single business.followUp object
+  if (business.followUp) {
+    const fu = business.followUp as Record<string, unknown>;
+    const status = String(fu.status || "").toUpperCase();
+    if (status !== "COMPLETED" && status !== "CANCELLED") {
+      const dateStr = extractDateFromFollowUpEntry(fu);
+      if (dateStr) return dateStr;
+    }
+  }
+
+  return undefined;
+}
+
 export function extractLatestCompletedFollowUpDate(
   business: ApiBusiness,
 ): string {
+  const b = business as Record<string, unknown>;
+
   // 1. Check list of completedFollowUps and followUps on the business object
   const followUpList = [
     ...(Array.isArray(business.completedFollowUps)
@@ -57,14 +191,13 @@ export function extractLatestCompletedFollowUpDate(
       for (const item of completedItems) {
         const rawDate =
           item.completedAt ??
-          item.scheduledAt ??
           item.followUpDate ??
           item.date ??
-          item.updatedAt ??
-          item.createdAt;
+          item.scheduledAt;
 
         if (rawDate) {
-          const time = new Date(rawDate).getTime();
+          const cleaned = typeof rawDate === "string" ? rawDate.replace(/\s+at\s+/i, " ") : rawDate;
+          const time = new Date(cleaned).getTime();
           if (!Number.isNaN(time) && time > latestTime) {
             latestTime = time;
             latestDateStr = rawDate;
@@ -85,7 +218,7 @@ export function extractLatestCompletedFollowUpDate(
     const fu = business.followUp as Record<string, unknown>;
     const status = String(fu.status || "").toUpperCase();
     if (status === "COMPLETED" || fu.isCompleted === true) {
-      const rawDate = (fu.completedAt ?? fu.scheduledAt ?? fu.date) as
+      const rawDate = (fu.completedAt ?? fu.followUpDate ?? fu.date ?? fu.scheduledAt) as
         | string
         | undefined;
       if (rawDate) {
@@ -96,9 +229,9 @@ export function extractLatestCompletedFollowUpDate(
 
   // 3. Check direct API response fields for completed follow-up date
   const explicitCompletedCandidates = [
-    business.lastCompletedFollowupDate,
-    business.lastCompletedFollowUpDate,
-    business.latestCompletedFollowUpDate,
+    b.lastCompletedFollowupDate,
+    b.lastCompletedFollowUpDate,
+    b.latestCompletedFollowUpDate,
   ];
 
   for (const candidate of explicitCompletedCandidates) {
@@ -112,36 +245,101 @@ export function extractLatestCompletedFollowUpDate(
     }
   }
 
-  if (business.lastFollowUp) {
-    if (typeof business.lastFollowUp === "string") {
-      const val = business.lastFollowUp.trim();
+  // 4. Check lastFollowup / lastFollowUp / lastFollowups from API response
+  const lastFollowUpCandidates = [
+    b.lastFollowup,
+    b.lastFollowUp,
+    b.lastFollowups,
+  ];
+
+  for (const candidate of lastFollowUpCandidates) {
+    if (!candidate) continue;
+
+    if (typeof candidate === "string") {
+      const val = candidate.trim();
       if (val && val !== "-") {
         return formatFollowUpDate(val);
       }
-    } else {
-      const obj = business.lastFollowUp as Record<string, unknown>;
-      const status = String(obj.status || "").toUpperCase();
-      const isCompleted = status === "COMPLETED" || obj.isCompleted === true;
-      if (obj.completedAt && typeof obj.completedAt === "string") {
-        return formatFollowUpDate(obj.completedAt);
+    } else if (Array.isArray(candidate) && candidate.length > 0) {
+      const completedCandidateItems = candidate.filter((item: unknown) => {
+        if (!item || typeof item !== "object") return true;
+        const status = String((item as Record<string, unknown>).status || "").toUpperCase();
+        return (
+          status === "COMPLETED" ||
+          (item as Record<string, unknown>).isCompleted === true ||
+          Boolean((item as Record<string, unknown>).completedAt)
+        );
+      });
+
+      let latestTime = -Infinity;
+      let latestDateStr: string | undefined;
+
+      for (const item of completedCandidateItems) {
+        if (!item) continue;
+        let rawDate: string | undefined;
+        if (typeof item === "string") {
+          rawDate = item.trim();
+        } else if (typeof item === "object") {
+          const obj = item as Record<string, unknown>;
+          const d =
+            obj.completedAt ??
+            obj.followUpDate ??
+            obj.date ??
+            obj.scheduledAt;
+          if (typeof d === "string") rawDate = d.trim();
+          else if (d instanceof Date && !Number.isNaN(d.getTime())) {
+            rawDate = d.toISOString();
+          }
+        }
+
+        if (rawDate && rawDate !== "-") {
+          const cleaned = rawDate.replace(/\s+at\s+/i, " ");
+          const time = new Date(cleaned).getTime();
+          if (!Number.isNaN(time) && time > latestTime) {
+            latestTime = time;
+            latestDateStr = rawDate;
+          } else if (Number.isNaN(time) && !latestDateStr) {
+            latestDateStr = rawDate;
+          }
+        }
       }
-      if (isCompleted) {
-        const rawDate = (obj.scheduledAt ?? obj.date) as string | undefined;
-        if (
-          rawDate &&
-          typeof rawDate === "string" &&
-          rawDate.trim() &&
-          rawDate.trim() !== "-"
-        ) {
+
+      if (latestDateStr) {
+        return formatFollowUpDate(latestDateStr);
+      }
+    } else if (typeof candidate === "object") {
+      const obj = candidate as Record<string, unknown>;
+      const status = String(obj.status || "").toUpperCase();
+      const isCompleted =
+        status === "COMPLETED" ||
+        obj.isCompleted === true ||
+        Boolean(obj.completedAt);
+
+      if (status && status !== "COMPLETED" && !obj.completedAt && !obj.isCompleted) {
+        continue;
+      }
+
+      const rawDate =
+        obj.completedAt ??
+        obj.followUpDate ??
+        obj.date ??
+        (isCompleted ? obj.scheduledAt : undefined);
+
+      if (rawDate) {
+        if (typeof rawDate === "string") {
+          const val = rawDate.trim();
+          if (val && val !== "-") return formatFollowUpDate(val);
+        } else if (rawDate instanceof Date && !Number.isNaN(rawDate.getTime())) {
           return formatFollowUpDate(rawDate);
         }
       }
     }
   }
 
+  // 5. Fallback date fields
   const fallbackDates = [
-    business.lastFollowupDate,
-    business.lastFollowUpDate,
+    b.lastFollowupDate,
+    b.lastFollowUpDate,
   ];
 
   for (const candidate of fallbackDates) {
@@ -155,19 +353,32 @@ export function extractLatestCompletedFollowUpDate(
     }
   }
 
-  // 4. Missing follow-up data: gracefully return "-"; NEVER substitute creation date.
+  // 6. Missing follow-up data: gracefully return "-"; NEVER substitute creation date.
   return "-";
 }
 
-function parseFollowUp(dateStr?: string): {
+export function parseFollowUp(dateStr?: string): {
   nextFollowUp: string;
   nextFollowUpType: BusinessItem["nextFollowUpType"];
 } {
-  if (!dateStr) return { nextFollowUp: "-", nextFollowUpType: "none" };
+  if (!dateStr || dateStr.trim() === "-") {
+    return { nextFollowUp: "-", nextFollowUpType: "none" };
+  }
 
-  const date = new Date(dateStr);
+  const trimmed = dateStr.trim();
+  const lower = trimmed.toLowerCase();
+
+  if (lower === "today" || lower.startsWith("today ")) {
+    return { nextFollowUp: trimmed, nextFollowUpType: "today" };
+  }
+  if (lower === "tomorrow" || lower.startsWith("tomorrow ")) {
+    return { nextFollowUp: trimmed, nextFollowUpType: "tomorrow" };
+  }
+
+  const cleaned = trimmed.replace(/\s+at\s+/i, " ");
+  const date = new Date(cleaned);
   if (Number.isNaN(date.getTime())) {
-    return { nextFollowUp: dateStr, nextFollowUpType: "none" };
+    return { nextFollowUp: trimmed, nextFollowUpType: "date" };
   }
 
   const now = new Date();
@@ -206,7 +417,8 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     .slice(0, 2)
     .join("")
     .toUpperCase();
-  const followUpInfo = parseFollowUp(business.nextFollowupDate);
+  const nextDateRaw = extractNextFollowUpDate(business);
+  const followUpInfo = parseFollowUp(nextDateRaw);
   const rawCategory = business.category;
   const categoryName =
     rawCategory && typeof rawCategory === "object"
@@ -233,7 +445,7 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     lastFollowUp: extractLatestCompletedFollowUpDate(business),
     nextFollowUp: followUpInfo.nextFollowUp,
     nextFollowUpType: followUpInfo.nextFollowUpType,
-    nextFollowupDate: business.nextFollowupDate,
+    nextFollowupDate: nextDateRaw ?? business.nextFollowupDate,
     reminder: business.reminder,
     description: business.description,
     notes: business.notes,
@@ -254,6 +466,98 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
       business.locationUrl ||
       "",
   };
+}
+
+export type WhatsAppNumberEntry = {
+  number: string;
+  label: string;
+  type: "whatsapp" | "phone";
+  isPrimary?: boolean;
+};
+
+export function formatWhatsAppUrl(numberStr: string): string {
+  const clean = numberStr.replace(/\D/g, "");
+  if (!clean) return "";
+  return clean.length === 10 ? `https://wa.me/91${clean}` : `https://wa.me/${clean}`;
+}
+
+export function getWhatsAppNumbers(business: {
+  name?: string;
+  phone?: string;
+  alternatePhone?: string;
+  whatsappNumbers?: Array<{ number?: string; name?: string; isPrimary?: boolean; type?: string }>;
+  phoneNumbers?: Array<{ number?: string; name?: string; isPrimary?: boolean; type?: string }>;
+}): WhatsAppNumberEntry[] {
+  const result: WhatsAppNumberEntry[] = [];
+  const seenDigits = new Set<string>();
+
+  const addNumber = (
+    rawNumber: string | undefined | null,
+    sourceType: "whatsapp" | "phone",
+    isPrimary?: boolean,
+    customName?: string,
+  ) => {
+    if (!rawNumber) return;
+    const trimmed = rawNumber.trim();
+    if (!trimmed) return;
+    const digits = trimmed.replace(/\D/g, "");
+    if (!digits || seenDigits.has(digits)) return;
+    seenDigits.add(digits);
+
+    let label: string;
+    const hasCustomName = Boolean(
+      customName &&
+        customName.trim() &&
+        customName.trim().toLowerCase() !== (business.name || "").trim().toLowerCase(),
+    );
+
+    if (sourceType === "whatsapp") {
+      if (hasCustomName) {
+        label = isPrimary
+          ? `${customName!.trim()} (WhatsApp • Primary)`
+          : `${customName!.trim()} (WhatsApp)`;
+      } else {
+        label = isPrimary ? "WhatsApp (Primary)" : "WhatsApp";
+      }
+    } else {
+      if (hasCustomName) {
+        label = isPrimary
+          ? `${customName!.trim()} (Phone • Primary)`
+          : `${customName!.trim()} (Phone)`;
+      } else {
+        label = isPrimary ? "Phone (Primary)" : "Phone";
+      }
+    }
+
+    result.push({
+      number: trimmed,
+      label,
+      type: sourceType,
+      isPrimary,
+    });
+  };
+
+  if (Array.isArray(business.whatsappNumbers)) {
+    for (const w of business.whatsappNumbers) {
+      addNumber(w.number, "whatsapp", w.isPrimary, w.name);
+    }
+  }
+
+  if (Array.isArray(business.phoneNumbers)) {
+    for (const p of business.phoneNumbers) {
+      addNumber(p.number, "phone", p.isPrimary, p.name);
+    }
+  }
+
+  if (business.alternatePhone) {
+    addNumber(business.alternatePhone, "whatsapp", false);
+  }
+
+  if (business.phone) {
+    addNumber(business.phone, "phone", true);
+  }
+
+  return result;
 }
 
 function toNumberEntries(

@@ -42,6 +42,7 @@ import PrimaryButton from "@/components/common/PrimaryButton";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
+import { formatFollowUpType } from "@/lib/business/form-options";
 import { useState } from "react";
 import {
   canCancelFollowUp,
@@ -197,7 +198,7 @@ export default function FollowUpTable({
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.businessCity || "-"}{item.businessPhone ? ` • ${item.businessPhone}` : ""}</p>
                       <p className="mt-2 text-xs font-medium text-[#475569]">{formatDate(item.scheduledAt)} at {formatTime(item.scheduledAt)}</p>
                       <p className="mt-1 text-xs text-[#64748b]">
-                        {item.type} · {item.assignedToName}
+                        {formatFollowUpType(item.type)} · {item.assignedToName}
                         {item.reminder ? ` · 🔔 ${item.reminder}` : ""}
                       </p>
                     </div>
@@ -373,7 +374,7 @@ export default function FollowUpTable({
                       {formatTime(item.scheduledAt)}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-xs font-medium text-[#475569]">
-                      {item.type}
+                      {formatFollowUpType(item.type)}
                     </TableCell>
                     <TableCell className="px-4 py-4">
                       <StatusBadge

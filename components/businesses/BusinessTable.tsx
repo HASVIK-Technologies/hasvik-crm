@@ -48,6 +48,7 @@ import { cn } from "@/lib/utils";
 import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
 import { STATUS_OPTIONS } from "@/lib/business/form-options";
+import { getWhatsAppNumbers, formatWhatsAppUrl } from "@/lib/business/mappers";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 
 function getLeadStatusLabel(status?: string | null): string {
@@ -79,6 +80,94 @@ function formatDisplayString(val: unknown, fallback: string = "-"): string {
     return String((val as { name?: unknown }).name || fallback);
   }
   return String(val);
+}
+
+function RowWhatsAppButton({
+  item,
+  size = "md",
+}: {
+  item: BusinessItem;
+  size?: "sm" | "md";
+}) {
+  const whatsappNumbers = getWhatsAppNumbers(item);
+  const buttonSizeClass = size === "sm" ? "size-7" : "size-8.5";
+  const iconSizeClass = size === "sm" ? "size-4" : "size-4.5";
+
+  if (whatsappNumbers.length === 0) {
+    return (
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <button
+            type="button"
+            disabled
+            onClick={(e) => e.stopPropagation()}
+            aria-label={`No WhatsApp or phone numbers for ${item.name}`}
+            className={cn(
+              "flex items-center justify-center rounded-lg text-[#94a3b8] opacity-40 cursor-not-allowed",
+              buttonSizeClass,
+            )}
+          >
+            <WhatsAppIcon className={iconSizeClass} />
+          </button>
+        </TooltipTrigger>
+        <TooltipContent>No numbers available</TooltipContent>
+      </Tooltip>
+    );
+  }
+
+  return (
+    <DropdownMenu>
+      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+        <button
+          type="button"
+          aria-label={`WhatsApp numbers for ${item.name}`}
+          title={`WhatsApp numbers for ${item.name}`}
+          className={cn(
+            "flex items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10 focus:outline-none",
+            buttonSizeClass,
+          )}
+        >
+          <WhatsAppIcon className={iconSizeClass} />
+        </button>
+      </DropdownMenuTrigger>
+      <DropdownMenuContent
+        align="end"
+        className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-[#e4ecf2] bg-white p-1.5 shadow-lg"
+        onClick={(e) => e.stopPropagation()}
+      >
+        <div className="px-2.5 py-1.5 text-[11px] font-semibold text-[#64748b]">
+          WhatsApp / Phone Numbers
+        </div>
+        <div className="flex flex-col gap-0.5">
+          {whatsappNumbers.map((entry, idx) => (
+            <DropdownMenuItem
+              key={`${entry.number}-${idx}`}
+              asChild
+              className="cursor-pointer rounded-lg p-0"
+            >
+              <a
+                href={formatWhatsAppUrl(entry.number)}
+                target="_blank"
+                rel="noopener noreferrer"
+                onClick={(e) => e.stopPropagation()}
+                className="flex w-full items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-[#f8fafc]"
+              >
+                <div className="flex items-center gap-2 min-w-0">
+                  <WhatsAppIcon className="size-3.5 shrink-0 text-brand-green-strong" />
+                  <span className="font-semibold text-[#0f172a] truncate">
+                    {entry.number}
+                  </span>
+                </div>
+                <span className="shrink-0 rounded bg-[#f1f5f9] px-1.5 py-0.5 text-[10px] font-medium text-[#64748b]">
+                  {entry.label}
+                </span>
+              </a>
+            </DropdownMenuItem>
+          ))}
+        </div>
+      </DropdownMenuContent>
+    </DropdownMenu>
+  );
 }
 
 interface BusinessTableProps {
@@ -272,9 +361,18 @@ export default function BusinessTable({
                       <p className="mt-0.5 text-xs text-[#64748b]">
                         {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
                       </p>
-                      <p className="mt-0.5 text-xs text-[#64748b]">
-                        Lead status: {getLeadStatusLabel(item.leadStatus)}
-                      </p>
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-[#64748b]">
+                        <span>Lead status:</span>
+                        {getLeadStatusLabel(item.leadStatus) !== "-" ? (
+                          <StatusBadge
+                            status={item.leadStatus || getLeadStatusLabel(item.leadStatus)}
+                            label={getLeadStatusLabel(item.leadStatus)}
+                            className="rounded-md px-2 py-0.5 text-[10px]"
+                          />
+                        ) : (
+                          <span className="text-[#94a3b8]">-</span>
+                        )}
+                      </div>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
                     </div>
                   </div>
@@ -318,21 +416,7 @@ export default function BusinessTable({
                         <TooltipContent>Call {item.name}</TooltipContent>
                       </Tooltip>
 
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <a
-                            href={`https://wa.me/91${item.phone}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            onClick={(e) => e.stopPropagation()}
-                            aria-label={`WhatsApp ${item.name}`}
-                            className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10"
-                          >
-                            <WhatsAppIcon className="size-4" />
-                          </a>
-                        </TooltipTrigger>
-                        <TooltipContent>WhatsApp {item.name}</TooltipContent>
-                      </Tooltip>
+                      <RowWhatsAppButton item={item} size="sm" />
 
                       <DropdownMenu>
                         <DropdownMenuTrigger asChild>
@@ -512,8 +596,16 @@ export default function BusinessTable({
                     </TableCell>
 
                     {/* Lead Status */}
-                    <TableCell className="px-4 py-4.5 text-sm">
-                      {getLeadStatusLabel(item.leadStatus)}
+                    <TableCell className="px-4 py-4.5">
+                      {getLeadStatusLabel(item.leadStatus) !== "-" ? (
+                        <StatusBadge
+                          status={item.leadStatus || getLeadStatusLabel(item.leadStatus)}
+                          label={getLeadStatusLabel(item.leadStatus)}
+                          className="rounded-md px-3 py-1 text-xs"
+                        />
+                      ) : (
+                        <span className="text-[#94a3b8]">-</span>
+                      )}
                     </TableCell>
 
                     {/* Status */}
@@ -566,21 +658,7 @@ export default function BusinessTable({
                         </Tooltip>
 
                         {/* WhatsApp / Message */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <a
-                              href={`https://wa.me/91${item.phone}`}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              aria-label={`WhatsApp ${item.name}`}
-                              className="flex size-8.5 items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10"
-                            >
-                              <WhatsAppIcon className="size-4.5" />
-                            </a>
-                          </TooltipTrigger>
-                          <TooltipContent>WhatsApp {item.name}</TooltipContent>
-                        </Tooltip>
+                        <RowWhatsAppButton item={item} size="md" />
 
                         {/* 3 Dots Menu */}
                         <DropdownMenu>

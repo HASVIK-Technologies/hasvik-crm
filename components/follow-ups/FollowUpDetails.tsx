@@ -1,5 +1,6 @@
 "use client";
 
+import Link from "next/link";
 import {
   Bell,
   CalendarClock,
@@ -70,15 +71,26 @@ export default function FollowUpDetails({
       {/* Top Banner Card */}
       <div className="flex flex-wrap items-start justify-between gap-4 rounded-2xl border border-[#e4ecf2] bg-white p-5 shadow-[0_4px_20px_rgba(20,40,60,0.04)] sm:p-7">
         <div className="flex min-w-0 items-center gap-4">
-          <Avatar className="size-16 rounded-2xl bg-primary/10 text-xl font-semibold text-primary">
-            <AvatarFallback className="bg-transparent text-inherit">
-              {initials(followUp.businessName)}
-            </AvatarFallback>
-          </Avatar>
+          <Link
+            href={`/businesses/${followUp.businessId}`}
+            className="transition-opacity hover:opacity-85"
+            title={`View ${followUp.businessName}`}
+          >
+            <Avatar className="size-16 rounded-2xl bg-primary/10 text-xl font-semibold text-primary">
+              <AvatarFallback className="bg-transparent text-inherit">
+                {initials(followUp.businessName)}
+              </AvatarFallback>
+            </Avatar>
+          </Link>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
               <h1 className="truncate text-xl font-bold tracking-tight text-[#334155] sm:text-2xl">
-                {followUp.businessName}
+                <Link
+                  href={`/businesses/${followUp.businessId}`}
+                  className="transition-colors hover:text-primary hover:underline"
+                >
+                  {followUp.businessName}
+                </Link>
               </h1>
               <StatusBadge
                 status={followUp.status}
