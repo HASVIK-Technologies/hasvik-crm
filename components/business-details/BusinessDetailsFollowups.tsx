@@ -5,14 +5,20 @@ import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
   AlertCircle,
+  CheckCircle2,
+  Eye,
   MessageSquareText,
   MoreVertical,
+  Pencil,
+  Plus,
+  Trash2,
   X,
 } from "lucide-react";
 import { toast } from "sonner";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -178,28 +184,32 @@ export default function BusinessDetailsFollowups({
                     </td>
                     <td className="px-5 py-4 sm:px-6" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
-                        <button
-                          type="button"
-                          aria-label={`View or add notes for follow-up on ${formatScheduledAt(item.scheduledAt)}`}
-                          title="View or add notes"
-                          onClick={(e) => {
-                            e.stopPropagation();
-                            setNotesFollowUp(item);
-                          }}
-                          className="inline-flex size-9 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                        >
-                          <MessageSquareText className="size-4" />
-                        </button>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <button
+                              type="button"
+                              aria-label={`View or add notes for follow-up on ${formatScheduledAt(item.scheduledAt)}`}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                setNotesFollowUp(item);
+                              }}
+                              className="inline-flex size-8 items-center justify-center border border-transparent text-brand-blue transition-colors hover:bg-blue-50 focus-visible:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/20"
+                            >
+                              <MessageSquareText className="size-4" />
+                            </button>
+                          </TooltipTrigger>
+                          <TooltipContent>View or add notes</TooltipContent>
+                        </Tooltip>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
                               aria-label={`Actions for follow-up on ${formatScheduledAt(item.scheduledAt)}`}
-                              className="rounded-md p-1.5 outline-none hover:bg-slate-100"
+                              className="flex size-8 items-center justify-center border border-transparent text-slate-500 outline-none hover:bg-slate-100 hover:text-slate-800"
                             >
-                              <MoreVertical className="size-4 text-slate-500" />
+                              <MoreVertical className="size-4" />
                             </button>
-                          </DropdownMenuTrigger>
+                          </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                           <DropdownMenuContent
                             align="end"
                             className="w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg"
@@ -207,27 +217,27 @@ export default function BusinessDetailsFollowups({
                           >
                             <DropdownMenuItem
                               asChild
-                              className="cursor-pointer rounded-md p-2 text-xs font-medium text-slate-700"
+                              className="cursor-pointer gap-2 p-2 text-xs font-medium text-slate-700"
                             >
-                              <Link href={`/follow-ups/${item.id}`}>
-                                View Details
+                              <Link href={`/follow-ups/${item.id}`} className="flex items-center gap-2">
+                                <Eye className="size-3.5" /> <span>View Details</span>
                               </Link>
                             </DropdownMenuItem>
                             {canEditFollowUp(item) && (
                               <DropdownMenuItem
-                                className="cursor-pointer rounded-md p-2 text-xs font-medium text-slate-700"
+                                className="cursor-pointer gap-2 p-2 text-xs font-medium text-slate-700"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   openFollowUpModal(businessId, item);
                                 }}
                                 onSelect={() => openFollowUpModal(businessId, item)}
                               >
-                                Reschedule / Edit
+                                <Pencil className="size-3.5" /> <span>Reschedule / Edit</span>
                               </DropdownMenuItem>
                             )}
                             {canCompleteFollowUp(item) && (
                               <DropdownMenuItem
-                                className="cursor-pointer rounded-md p-2 text-xs font-medium text-brand-green-strong"
+                                className="cursor-pointer gap-2 p-2 text-xs font-medium text-brand-green-strong"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   void completeFollowUp(item);
@@ -235,31 +245,31 @@ export default function BusinessDetailsFollowups({
                                 onSelect={() => void completeFollowUp(item)}
                                 disabled={completeMutation.isPending}
                               >
-                                Mark as Completed
+                                <CheckCircle2 className="size-3.5" /> <span>Mark as Completed</span>
                               </DropdownMenuItem>
                             )}
                             {canCreateNextFollowUp(item) && (
                               <DropdownMenuItem
-                                className="cursor-pointer rounded-md p-2 text-xs font-medium text-brand-green-strong"
+                                className="cursor-pointer gap-2 p-2 text-xs font-medium text-brand-green-strong"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   openFollowUpModal(businessId);
                                 }}
                                 onSelect={() => openFollowUpModal(businessId)}
                               >
-                                Schedule Next Follow-up
+                                <Plus className="size-3.5" /> <span>Schedule Next Follow-up</span>
                               </DropdownMenuItem>
                             )}
                             {canCancelFollowUp(item) && (
                               <DropdownMenuItem
-                                className="mt-1 cursor-pointer rounded-md p-2 text-xs font-medium text-red-600 focus:bg-red-50 focus:text-red-700"
+                                className="mt-1 cursor-pointer gap-2 p-2 text-xs font-medium text-red-600 focus:bg-red-50 focus:text-red-700"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setCancellingFollowUp(item);
                                 }}
                                 onSelect={() => setCancellingFollowUp(item)}
                               >
-                                Cancel Follow-up
+                                <Trash2 className="size-3.5" /> <span>Cancel Follow-up</span>
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>

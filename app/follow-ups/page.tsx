@@ -174,6 +174,8 @@ export default function FollowupsPage() {
         showStats={showStats}
         showFilters={showFilters}
         onToggleFilters={() => setShowFilters((visible) => !visible)}
+        onResetFilters={filters.reset}
+        resultCount={listQuery.data?.total ?? 0}
         actions={
           <Actions
             primary={{

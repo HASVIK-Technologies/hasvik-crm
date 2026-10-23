@@ -12,7 +12,7 @@ export default function SaveButton({
     <Button
       variant="default"
       className={cn(
-        "h-9 rounded-lg bg-primary px-4 font-semibold text-primary-foreground shadow-sm hover:bg-primary/90",
+        "h-10 border-brand-blue bg-brand-blue px-4 text-sm font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.12)] hover:bg-[#0662ad]",
         className,
       )}
       {...props}

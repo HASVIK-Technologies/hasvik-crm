@@ -704,6 +704,12 @@ export default function SubscriptionsPage() {
       ) : undefined}
       showFilters={showFilters}
       onToggleFilters={() => setShowFilters((visible) => !visible)}
+      onResetFilters={() => {
+        setSearch("");
+        setCycleFilter("ALL");
+        setStatusFilter(hasvikAdmin ? "PENDING" : "ALL");
+      }}
+      resultCount={visibleSubscriptions.length}
       showStats={false}
       actions={
         <Actions

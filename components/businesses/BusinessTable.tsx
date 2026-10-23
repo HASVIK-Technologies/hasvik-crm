@@ -10,6 +10,9 @@ import {
   ChevronLeft,
   ChevronRight,
   Building2,
+  Eye,
+  Pencil,
+  Power,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import OutlinedButton from "@/components/common/OutlinedButton";
@@ -103,7 +106,7 @@ function RowWhatsAppButton({
             onClick={(e) => e.stopPropagation()}
             aria-label={`No WhatsApp or phone numbers for ${item.name}`}
             className={cn(
-              "flex items-center justify-center rounded-lg text-[#94a3b8] opacity-40 cursor-not-allowed",
+              "flex items-center justify-center border border-transparent text-slate-400 opacity-40 cursor-not-allowed",
               buttonSizeClass,
             )}
           >
@@ -117,19 +120,23 @@ function RowWhatsAppButton({
 
   return (
     <DropdownMenu>
-      <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-        <button
-          type="button"
-          aria-label={`WhatsApp numbers for ${item.name}`}
-          title={`WhatsApp numbers for ${item.name}`}
-          className={cn(
-            "flex items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10 focus:outline-none",
-            buttonSizeClass,
-          )}
-        >
-          <WhatsAppIcon className={iconSizeClass} />
-        </button>
-      </DropdownMenuTrigger>
+      <Tooltip>
+        <TooltipTrigger asChild>
+          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+            <button
+              type="button"
+              aria-label={`WhatsApp numbers for ${item.name}`}
+              className={cn(
+                "flex items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus:outline-none focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20",
+                buttonSizeClass,
+              )}
+            >
+              <WhatsAppIcon className={iconSizeClass} />
+            </button>
+          </DropdownMenuTrigger>
+        </TooltipTrigger>
+        <TooltipContent>WhatsApp {item.name}</TooltipContent>
+      </Tooltip>
       <DropdownMenuContent
         align="end"
         className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-[#e4ecf2] bg-white p-1.5 shadow-lg"
@@ -253,7 +260,7 @@ export default function BusinessTable({
 
   return (
     <TooltipProvider>
-      <div className="overflow-hidden rounded-2xl border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
+      <div className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
         {/* Top Bar */}
         <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
@@ -295,7 +302,7 @@ export default function BusinessTable({
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={`skeleton-mobile-${i}`}
-                  className="animate-pulse rounded-2xl border border-[#eaf0f6] bg-white p-4 shadow-sm space-y-3"
+                  className="animate-pulse border border-[#eaf0f6] bg-white p-4 shadow-sm space-y-3"
                 >
                   <div className="flex items-center gap-3">
                     <div className="size-10 rounded-full bg-[#f1f5f9]" />
@@ -335,7 +342,7 @@ export default function BusinessTable({
                   onClick={(event) =>
                     handleRowClick(event, item.id, item.status === "Active")
                   }
-                  className={`flex items-start justify-between gap-3 rounded-2xl border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all md:gap-4 md:p-4 ${
+                  className={`flex items-start justify-between gap-3 border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all md:gap-4 md:p-4 ${
                     item.status === "Active"
                       ? "cursor-pointer hover:border-primary/40 hover:shadow-md"
                       : ""
@@ -408,7 +415,7 @@ export default function BusinessTable({
                             href={`tel:${item.phone}`}
                             onClick={(e) => e.stopPropagation()}
                             aria-label={`Call ${item.name}`}
-                            className="flex size-7 items-center justify-center rounded-lg text-[#059669] transition-colors hover:bg-[#ecfdf3]"
+                            className="flex size-7 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20"
                           >
                             <Phone className="size-4" />
                           </a>
@@ -419,16 +426,22 @@ export default function BusinessTable({
                       <RowWhatsAppButton item={item} size="sm" />
 
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild>
-                          <PlainButton
-                            size="icon"
-                            onClick={(e) => e.stopPropagation()}
-                            className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"
-                          >
-                            <MoreVertical className="size-4" />
-                          </PlainButton>
-                        </DropdownMenuTrigger>
-                        <DropdownMenuContent align="end" className="w-36 bg-white" onClick={(e) => e.stopPropagation()}>
+                        <Tooltip>
+                          <TooltipTrigger asChild>
+                            <DropdownMenuTrigger asChild>
+                              <PlainButton
+                                size="icon"
+                                aria-label={`More actions for ${item.name}`}
+                                onClick={(e) => e.stopPropagation()}
+                                className="size-7 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                              >
+                                <MoreVertical className="size-4" />
+                              </PlainButton>
+                            </DropdownMenuTrigger>
+                          </TooltipTrigger>
+                          <TooltipContent>More actions</TooltipContent>
+                        </Tooltip>
+                        <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
                           {item.status === "Active" && (
                             <>
                               <DropdownMenuItem
@@ -437,9 +450,9 @@ export default function BusinessTable({
                                   router.push(`/businesses/${item.id}`);
                                 }}
                                 onSelect={() => router.push(`/businesses/${item.id}`)}
-                                className="cursor-pointer text-xs"
+                                className="cursor-pointer gap-2 text-xs"
                               >
-                                View Details
+                                <Eye className="size-3.5" /> <span>View Details</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={(e) => {
@@ -447,9 +460,9 @@ export default function BusinessTable({
                                   router.push(`/businesses/form/${item.id}`);
                                 }}
                                 onSelect={() => router.push(`/businesses/form/${item.id}`)}
-                                className="cursor-pointer text-xs"
+                                className="cursor-pointer gap-2 text-xs"
                               >
-                                Edit Business
+                                <Pencil className="size-3.5" /> <span>Edit Business</span>
                               </DropdownMenuItem>
                             </>
                           )}
@@ -459,9 +472,9 @@ export default function BusinessTable({
                               handleOpenStatusModal(item);
                             }}
                             onSelect={() => handleOpenStatusModal(item)}
-                            className="cursor-pointer text-xs"
+                            className="cursor-pointer gap-2 text-xs"
                           >
-                            {item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}
+                            <Power className="size-3.5" /> <span>{item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}</span>
                           </DropdownMenuItem>
                         </DropdownMenuContent>
                       </DropdownMenu>
@@ -649,7 +662,7 @@ export default function BusinessTable({
                               href={`tel:${item.phone}`}
                               onClick={(e) => e.stopPropagation()}
                               aria-label={`Call ${item.name}`}
-                              className="flex size-8.5 items-center justify-center rounded-lg text-[#059669] transition-colors hover:bg-[#ecfdf3]"
+                              className="flex size-8 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20"
                             >
                               <Phone className="size-4.5" />
                             </a>
@@ -662,16 +675,21 @@ export default function BusinessTable({
 
                         {/* 3 Dots Menu */}
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                            <PlainButton
-                              size="icon-sm"
-                              aria-label={`More actions for ${item.name}`}
-                              className="size-8.5 rounded-lg text-[#94a3b8] hover:bg-[#f1f5f9] hover:text-[#334155]"
-                            >
-                              <MoreVertical className="size-4.5" />
-                            </PlainButton>
-                          </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="w-36 bg-white" onClick={(e) => e.stopPropagation()}>
+                          <Tooltip>
+                            <TooltipTrigger asChild>
+                              <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                                <PlainButton
+                                  size="icon-sm"
+                                  aria-label={`More actions for ${item.name}`}
+                                  className="size-8 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                                >
+                                  <MoreVertical className="size-4" />
+                                </PlainButton>
+                              </DropdownMenuTrigger>
+                            </TooltipTrigger>
+                            <TooltipContent>More actions</TooltipContent>
+                          </Tooltip>
+                          <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
                             {item.status === "Active" && (
                               <>
                                 <DropdownMenuItem
@@ -680,9 +698,9 @@ export default function BusinessTable({
                                     router.push(`/businesses/${item.id}`);
                                   }}
                                   onSelect={() => router.push(`/businesses/${item.id}`)}
-                                  className="cursor-pointer text-xs"
+                                  className="cursor-pointer gap-2 text-xs"
                                 >
-                                  View Details
+                                  <Eye className="size-3.5" /> <span>View Details</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={(e) => {
@@ -690,9 +708,9 @@ export default function BusinessTable({
                                     router.push(`/businesses/form/${item.id}`);
                                   }}
                                   onSelect={() => router.push(`/businesses/form/${item.id}`)}
-                                  className="cursor-pointer text-xs"
+                                  className="cursor-pointer gap-2 text-xs"
                                 >
-                                  Edit Business
+                                  <Pencil className="size-3.5" /> <span>Edit Business</span>
                                 </DropdownMenuItem>
                               </>
                             )}
@@ -702,9 +720,9 @@ export default function BusinessTable({
                                 handleOpenStatusModal(item);
                               }}
                               onSelect={() => handleOpenStatusModal(item)}
-                              className="cursor-pointer text-xs"
+                              className="cursor-pointer gap-2 text-xs"
                             >
-                              {item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}
+                              <Power className="size-3.5" /> <span>{item.status?.toLowerCase() === "active" ? "Deactivate" : "Activate"}</span>
                             </DropdownMenuItem>
                           </DropdownMenuContent>
                         </DropdownMenu>

@@ -5,6 +5,7 @@ import { Dialog as DialogPrimitive } from "radix-ui";
 import {
   Building2,
   Check,
+  ChartNoAxesCombined,
   CreditCard,
   Filter,
   LoaderCircle,
@@ -13,6 +14,7 @@ import {
   X,
 } from "lucide-react";
 import Actions from "@/components/common/Actions";
+import KpiCards from "@/components/common/KpiCards";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import ListPagination from "@/components/common/ListPagination";
 import ListTableToolbar from "@/components/common/ListTableToolbar";
@@ -354,25 +356,19 @@ export default function TenantManagementPage() {
         }
         showFilters={showFilters}
         onToggleFilters={() => setShowFilters((visible) => !visible)}
+        onResetFilters={() => {
+          setSearch("");
+          setFilter("ALL");
+          setPage(1);
+        }}
+        resultCount={filteredTenants.length}
         showStats={showStats}
         stats={
-          <div className="grid grid-cols-2 gap-3 xl:grid-cols-3">
-            {[
+          <KpiCards items={[
               { label: "Tenants", value: tenants.length, icon: UsersRound, tone: "text-primary bg-blue-50" },
               { label: "Active tenants", value: activeCount, icon: Check, tone: "text-emerald-700 bg-emerald-50" },
               { label: "Inactive tenants", value: inactiveCount, icon: X, tone: "text-slate-600 bg-slate-100" },
-            ].map(({ label, value, icon: Icon, tone }) => (
-              <article key={label} className="flex items-center gap-3 rounded-2xl border border-[#e4ecf2] bg-white p-4 shadow-[0_4px_16px_rgba(20,40,60,0.03)] sm:p-5">
-                <span className={`flex size-10 items-center justify-center rounded-xl ${tone}`}>
-                  <Icon className="size-4" />
-                </span>
-                <span>
-                  <span className="block text-xl font-bold text-slate-900">{value}</span>
-                  <span className="mt-1 block text-xs text-slate-500">{label}</span>
-                </span>
-              </article>
-            ))}
-          </div>
+            ].map((item, index) => ({ ...item, tone: (["blue", "green", "slate"] as const)[index] }))} />
         }
         actions={
           <Actions
@@ -384,7 +380,7 @@ export default function TenantManagementPage() {
               icon: <RefreshCw className="size-4" />,
             }}
             menuItems={[
-              { label: showStats ? "Hide KPIs" : "Show KPIs", onSelect: () => setShowStats((visible) => !visible) },
+              { label: showStats ? "Hide KPIs" : "Show KPIs", icon: <ChartNoAxesCombined className="size-4" />, onSelect: () => setShowStats((visible) => !visible) },
               { label: showFilters ? "Hide filters" : "Show filters", onSelect: () => setShowFilters((visible) => !visible), icon: <Filter className="size-4" /> },
             ]}
           />

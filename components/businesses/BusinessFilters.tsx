@@ -107,10 +107,10 @@ export default function BusinessFilters({
         <PopoverTrigger asChild>
           <button
             type="button"
-            className={`inline-flex h-10 items-center justify-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition-colors shrink-0 shadow-[0_1px_2px_rgba(0,0,0,0.02)] ${
+            className={`inline-flex h-10 items-center justify-center gap-2 border px-3.5 text-xs font-semibold shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-colors shrink-0 ${
               isMoreFiltersActive
-                ? "border-primary bg-primary/10 text-primary"
-                : "border-[#e2e8f0] bg-white text-[#334155] hover:bg-[#f8fafc]"
+                ? "border-brand-blue bg-blue-50 text-brand-blue"
+                : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
             }`}
           >
             <Filter className="size-3.5 text-[#64748b]" />
@@ -124,7 +124,7 @@ export default function BusinessFilters({
         </PopoverTrigger>
         <PopoverContent
           align="start"
-          className="w-72 p-4 space-y-3.5 bg-white border border-[#e2e8f0] shadow-xl rounded-2xl z-50"
+          className="z-50 w-80 space-y-4 border border-slate-200 bg-white p-4 shadow-xl"
         >
           <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-2.5">
             <div className="flex items-center gap-1.5">
@@ -196,7 +196,8 @@ export default function BusinessFilters({
         <button
           type="button"
           onClick={onResetFilters}
-          className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-dashed border-[#cbd5e1] bg-white px-3 text-xs font-semibold text-[#64748b] hover:border-red-300 hover:bg-red-50 hover:text-red-600 transition-colors shrink-0"
+          data-inline-filter-reset
+          className="inline-flex h-10 items-center gap-1.5 border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-600 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors shrink-0 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
           title="Reset all filters"
         >
           <RotateCcw className="size-3" />

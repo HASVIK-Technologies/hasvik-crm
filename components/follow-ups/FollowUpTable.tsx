@@ -155,7 +155,7 @@ export default function FollowUpTable({
   return (
     <>
     <TooltipProvider>
-      <div className="overflow-hidden rounded-2xl border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
+      <div className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
         <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
           <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
             Follow-ups{" "}
@@ -166,7 +166,7 @@ export default function FollowUpTable({
           {loading ? (
             <div className="flex flex-col gap-3 p-3 md:gap-4 md:p-4">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div key={`follow-up-mobile-skeleton-${index}`} className="space-y-3 rounded-2xl border border-[#eaf0f6] bg-white p-4 shadow-sm">
+                <div key={`follow-up-mobile-skeleton-${index}`} className="space-y-3 border border-[#eaf0f6] bg-white p-4 shadow-sm">
                   <div className="flex animate-pulse items-center gap-3"><div className="size-10 rounded-full bg-[#f1f5f9]" /><div className="flex-1 space-y-1.5"><div className="h-4 w-32 rounded bg-[#f1f5f9]" /><div className="h-3 w-20 rounded bg-[#f1f5f9]" /></div></div>
                   <div className="h-3 w-48 animate-pulse rounded bg-[#f1f5f9]" />
                 </div>
@@ -183,7 +183,7 @@ export default function FollowUpTable({
                   aria-label={`Open follow-up details for ${item.businessName}`}
                   onClick={(event) => handleRowClick(event, item.id)}
                   onKeyDown={(event) => handleRowKeyDown(event, item.id)}
-                  className="flex cursor-pointer items-start justify-between gap-3 rounded-2xl border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:p-4"
+                  className="flex cursor-pointer items-start justify-between gap-3 border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:p-4"
                 >
                   <div className="flex min-w-0 items-start gap-3">
                     <Link href={`/follow-ups/${item.id}`} className="shrink-0">
@@ -212,26 +212,30 @@ export default function FollowUpTable({
                       className="rounded-md px-2.5 py-0.5 text-[10px]"
                     />
                     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      <a href={item.businessPhone ? `tel:${item.businessPhone}` : undefined} onClick={(e) => e.stopPropagation()} aria-label={`Call ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"><Phone className="size-4" /></a>
-                      <a href={item.businessPhone ? `https://wa.me/91${item.businessPhone}` : undefined} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} aria-label={`WhatsApp ${item.businessName}`} className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"><WhatsAppIcon className="size-4" /></a>
-                      <button
-                        type="button"
-                        aria-label={`View or add notes for ${item.businessName}`}
-                        title="View or add notes"
-                        onClick={(e) => {
-                          e.stopPropagation();
-                          setNotesFollowUp(item);
-                        }}
-                        className="flex size-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
-                      >
-                        <MessageSquareText className="size-4" />
-                      </button>
+                      <Tooltip><TooltipTrigger asChild><a href={item.businessPhone ? `tel:${item.businessPhone}` : undefined} onClick={(e) => e.stopPropagation()} aria-label={`Call ${item.businessName}`} className="flex size-8 items-center justify-center border border-transparent text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 aria-disabled:pointer-events-none aria-disabled:opacity-40"><Phone className="size-4" /></a></TooltipTrigger><TooltipContent>Call {item.businessName}</TooltipContent></Tooltip>
+                      <Tooltip><TooltipTrigger asChild><a href={item.businessPhone ? `https://wa.me/91${item.businessPhone}` : undefined} target="_blank" rel="noopener noreferrer" onClick={(e) => e.stopPropagation()} aria-label={`WhatsApp ${item.businessName}`} className="flex size-8 items-center justify-center border border-transparent text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 aria-disabled:pointer-events-none aria-disabled:opacity-40"><WhatsAppIcon className="size-4" /></a></TooltipTrigger><TooltipContent>WhatsApp {item.businessName}</TooltipContent></Tooltip>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <button
+                            type="button"
+                            aria-label={`View or add notes for ${item.businessName}`}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              setNotesFollowUp(item);
+                            }}
+                            className="flex size-8 items-center justify-center border border-transparent text-brand-blue transition-colors hover:bg-blue-50 focus-visible:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/20"
+                          >
+                            <MessageSquareText className="size-4" />
+                          </button>
+                        </TooltipTrigger>
+                        <TooltipContent>View or add notes</TooltipContent>
+                      </Tooltip>
                       <DropdownMenu>
-                        <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <PlainButton size="icon" aria-label="More actions" className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"><MoreVertical className="size-4" /></PlainButton>
-                        </DropdownMenuTrigger>
+                        <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <PlainButton size="icon" aria-label="More actions" className="size-8 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"><MoreVertical className="size-4" /></PlainButton>
+                        </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                         <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenuItem asChild className="cursor-pointer text-xs"><Link href={`/follow-ups/${item.id}`}>View Details</Link></DropdownMenuItem>
+                          <DropdownMenuItem asChild className="cursor-pointer gap-2 text-xs"><Link href={`/follow-ups/${item.id}`}><Eye className="size-3.5" /><span>View Details</span></Link></DropdownMenuItem>
                           {canEditFollowUp(item) && (
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
@@ -256,7 +260,7 @@ export default function FollowUpTable({
                               onSelect={() => onComplete(item)}
                               className="cursor-pointer text-xs text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong"
                             >
-                              Mark as Completed
+                              <CheckCircle2 className="mr-1.5 size-3.5" /> Mark as Completed
                             </DropdownMenuItem>
                           )}
                           {canCancelFollowUp(item) && (
@@ -265,7 +269,7 @@ export default function FollowUpTable({
                               onSelect={() => onCancel(item)}
                               className="cursor-pointer text-xs text-[#b42318] focus:bg-[#fff1f3] focus:text-[#b42318]"
                             >
-                              Cancel Follow-up
+                              <Trash2 className="mr-1.5 size-3.5" /> Cancel Follow-up
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -397,7 +401,7 @@ export default function FollowUpTable({
                               }
                               onClick={(e) => e.stopPropagation()}
                               aria-label={`Call ${item.businessName}`}
-                              className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"
+                              className="flex size-8 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 aria-disabled:pointer-events-none aria-disabled:opacity-40"
                             >
                               <Phone className="size-4" />
                             </a>
@@ -418,7 +422,7 @@ export default function FollowUpTable({
                               rel="noopener noreferrer"
                               onClick={(e) => e.stopPropagation()}
                               aria-label={`WhatsApp ${item.businessName}`}
-                              className="flex size-7 items-center justify-center rounded-lg text-brand-green-strong transition-colors hover:bg-brand-green/10 aria-disabled:pointer-events-none aria-disabled:opacity-40"
+                              className="flex size-8 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 aria-disabled:pointer-events-none aria-disabled:opacity-40"
                             >
                               <WhatsAppIcon className="size-4" />
                             </a>
@@ -436,7 +440,7 @@ export default function FollowUpTable({
                                 e.stopPropagation();
                                 setNotesFollowUp(item);
                               }}
-                              className="flex size-8 items-center justify-center rounded-lg text-primary transition-colors hover:bg-primary/10 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                              className="flex size-8 items-center justify-center border border-transparent text-brand-blue transition-colors hover:bg-blue-50 focus-visible:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/20"
                             >
                               <MessageSquareText className="size-4" />
                             </button>
@@ -446,15 +450,15 @@ export default function FollowUpTable({
                           </TooltipContent>
                         </Tooltip>
                         <DropdownMenu>
-                          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <PlainButton
                               size="icon"
                               aria-label="More actions"
-                              className="size-7 text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+                              className="size-8 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"
                             >
                               <MoreVertical className="size-4" />
                             </PlainButton>
-                          </DropdownMenuTrigger>
+                          </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                           <DropdownMenuContent
                             align="end"
                             className="w-48 rounded-xl border border-[#e2e8f0] bg-white p-1 shadow-lg"

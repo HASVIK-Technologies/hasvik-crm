@@ -34,7 +34,7 @@ export default function FollowUpDateRange({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="flex h-10 w-full items-center justify-between rounded-xl border border-[#e2e8f0] bg-white px-3 text-left text-xs font-medium text-[#334155]"
+          className="flex h-10 w-full items-center justify-between border border-slate-300 bg-white px-3 text-left text-xs font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-slate-400 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/15"
         >
           <span className="flex min-w-0 items-center gap-2">
             <CalendarDays className="size-3.5 shrink-0 text-[#64748b]" />

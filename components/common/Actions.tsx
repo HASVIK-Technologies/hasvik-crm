@@ -1,7 +1,7 @@
 "use client";
 
 import Link from "next/link";
-import { MoreVertical } from "lucide-react";
+import { CircleDot, MoreVertical } from "lucide-react";
 import PrimaryButton from "./PrimaryButton";
 import OutlinedButton from "./OutlinedButton";
 import {
@@ -11,6 +11,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 
 export interface ActionItem {
   label: string;
@@ -47,8 +48,8 @@ function ActionMenuItem({ action }: { action: ActionItem }) {
         disabled={action.disabled}
       >
         <Link href={action.href}>
-          {action.icon && <span className="mr-2">{action.icon}</span>}
-          {action.label}
+          <span className="mr-2 flex size-4 shrink-0 items-center justify-center">{action.icon ?? <CircleDot className="size-3.5" />}</span>
+          <span>{action.label}</span>
         </Link>
       </DropdownMenuItem>
     );
@@ -60,8 +61,8 @@ function ActionMenuItem({ action }: { action: ActionItem }) {
       disabled={action.disabled}
       className={className}
     >
-      {action.icon && <span className="mr-2">{action.icon}</span>}
-      {action.label}
+      <span className="mr-2 flex size-4 shrink-0 items-center justify-center">{action.icon ?? <CircleDot className="size-3.5" />}</span>
+      <span>{action.label}</span>
     </DropdownMenuItem>
   );
 }
@@ -111,11 +112,11 @@ export default function Actions({
         <ActionButton action={primary} />
         {secondaryActions.length > 0 && (
           <DropdownMenu>
-            <DropdownMenuTrigger asChild>
-              <OutlinedButton size="icon" aria-label="More actions">
-                <MoreVertical className="size-4" />
-              </OutlinedButton>
-            </DropdownMenuTrigger>
+            <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild>
+                <OutlinedButton size="icon" aria-label="More actions">
+                  <MoreVertical className="size-4" />
+                </OutlinedButton>
+            </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
             <DropdownMenuContent align="end" className="w-44 bg-white">
               {secondaryActions.map((action) => (
                 <ActionMenuItem key={action.label} action={action} />
@@ -127,11 +128,11 @@ export default function Actions({
 
       <div className="lg:hidden">
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <OutlinedButton size="icon" aria-label="More actions">
-              <MoreVertical className="size-4" />
-            </OutlinedButton>
-          </DropdownMenuTrigger>
+          <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild>
+              <OutlinedButton size="icon" aria-label="More actions">
+                <MoreVertical className="size-4" />
+              </OutlinedButton>
+          </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
           <DropdownMenuContent align="end" className="w-48 bg-white">
             {allActions.map((action) => (
               <ActionMenuItem key={action.label} action={action} />

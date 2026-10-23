@@ -59,12 +59,12 @@ export default function LoginForm() {
     <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
       <div className="pointer-events-none absolute -left-40 -top-40 size-[28rem] rounded-full bg-brand-cyan/10 blur-3xl" />
       <div className="pointer-events-none absolute -bottom-48 -right-40 size-[32rem] rounded-full bg-brand-growth/10 blur-3xl" />
-      <div className="relative grid w-full max-w-6xl overflow-hidden rounded-3xl border border-slate-200/80 bg-white shadow-[0_32px_90px_-36px_rgba(8,62,105,0.28)] lg:min-h-[680px] lg:grid-cols-[1.05fr_0.95fr]">
+      <div className="relative grid w-full max-w-6xl overflow-hidden border border-slate-200/80 bg-white shadow-[0_32px_90px_-36px_rgba(8,62,105,0.28)] lg:min-h-[680px] lg:grid-cols-[1.05fr_0.95fr]">
         <section className="relative hidden overflow-hidden bg-gradient-to-br from-[#075aa3] via-[#0876d1] to-[#064b89] p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
           <div className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full border-[40px] border-brand-cyan/20" />
           <div className="pointer-events-none absolute -bottom-36 -left-28 size-96 rounded-full border-[52px] border-brand-growth/15" />
           <div className="relative">
-            <div className="inline-flex rounded-2xl border border-white/15 bg-white px-5 py-3 shadow-lg">
+            <div className="inline-flex border border-white/15 bg-white px-5 py-3 shadow-lg">
               <Image
                 src="/logo.png"
                 alt="Hasvik"
@@ -76,8 +76,8 @@ export default function LoginForm() {
               />
             </div>
             <div className="mt-20 max-w-lg">
-              <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/90">
-                <span className="size-2 rounded-full bg-brand-growth shadow-[0_0_10px_rgba(99,211,41,0.7)]" />
+              <p className="mb-5 inline-flex items-center gap-2 border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/90">
+                <span className="size-2 bg-brand-growth shadow-[0_0_10px_rgba(99,211,41,0.7)]" />
                 Business, moving forward
               </p>
               <h1 className="text-4xl font-semibold leading-[1.15] tracking-tight text-white xl:text-5xl">
@@ -91,9 +91,9 @@ export default function LoginForm() {
               </p>
             </div>
           </div>
-          <div className="relative flex items-center justify-between gap-4 rounded-2xl border border-white/15 bg-white/10 p-4 shadow-sm backdrop-blur">
+          <div className="relative flex items-center justify-between gap-4 border border-white/15 bg-white/10 p-4 shadow-sm backdrop-blur">
             <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center rounded-xl bg-brand-growth/15 text-brand-growth">
+              <div className="flex size-10 items-center justify-center bg-brand-growth/15 text-brand-growth">
                 <ArrowUpRight className="size-5" />
               </div>
               <div>
@@ -105,14 +105,14 @@ export default function LoginForm() {
                 </p>
               </div>
             </div>
-            <div className="hidden size-2.5 rounded-full bg-brand-growth shadow-[0_0_10px_rgba(99,211,41,0.7)] sm:block" />
+            <div className="hidden size-2.5 bg-brand-growth shadow-[0_0_10px_rgba(99,211,41,0.7)] sm:block" />
           </div>
         </section>
 
         <section className="flex min-h-[620px] items-center justify-center px-6 py-12 sm:px-12 lg:px-14 xl:px-16">
           <div className="w-full max-w-sm">
             <div className="mb-12 lg:hidden">
-              <div className="inline-flex rounded-xl border border-slate-100 bg-white px-4 py-2.5 shadow-sm">
+              <div className="inline-flex border border-slate-100 bg-white px-4 py-2.5 shadow-sm">
                 <Image
                   src="/logo.png"
                   alt="Hasvik"
@@ -151,7 +151,7 @@ export default function LoginForm() {
                     autoComplete="email"
                     placeholder="you@company.com"
                     aria-invalid={Boolean(errors.email)}
-                    className="h-12 rounded-xl border-slate-200 pl-11 pr-4 text-sm shadow-sm placeholder:text-slate-400 focus-visible:border-primary focus-visible:ring-primary/20"
+                    className="h-12 border-slate-200 pl-11 pr-4 text-sm shadow-sm placeholder:text-slate-400 focus-visible:border-brand-blue focus-visible:ring-brand-blue/20"
                     {...register("email", {
                       required: "Email is required",
                       pattern: {
@@ -177,7 +177,7 @@ export default function LoginForm() {
                     autoComplete="current-password"
                     placeholder="Enter your password"
                     aria-invalid={Boolean(errors.password)}
-                    className="h-12 rounded-xl border-slate-200 pl-11 pr-12 text-sm shadow-sm placeholder:text-slate-400 focus-visible:border-primary focus-visible:ring-primary/20"
+                    className="h-12 border-slate-200 pl-11 pr-12 text-sm shadow-sm placeholder:text-slate-400 focus-visible:border-brand-blue focus-visible:ring-brand-blue/20"
                     {...register("password", { required: "Password is required" })}
                   />
                   <button
@@ -224,7 +224,7 @@ export default function LoginForm() {
               <PrimaryButton
                 type="submit"
                 disabled={loginMutation.isPending}
-                className="mt-3 h-12 w-full rounded-xl text-base font-semibold shadow-[0_8px_18px_-8px_rgba(8,118,209,0.65)]"
+                className="mt-3 h-12 w-full text-base font-semibold shadow-[0_8px_18px_-8px_rgba(8,118,209,0.65)]"
               >
                 {loginMutation.isPending ? "Signing in..." : "Sign in"}
               </PrimaryButton>

@@ -10,7 +10,7 @@ export default function PrimaryButton({ className, ...props }: PrimaryButtonProp
     <Button
       variant="default"
       className={cn(
-        "bg-primary text-white border-primary hover:bg-primary/90 rounded-sm p-4 text-base font-normal",
+        "h-10 gap-2 border-primary bg-primary px-4 text-sm font-semibold text-white shadow-[0_1px_2px_rgba(15,23,42,0.12)] hover:bg-brand-green-strong",
         className
       )}
       {...props}

@@ -18,6 +18,8 @@ interface LayoutProps {
   showStats?: boolean;
   showFilters?: boolean;
   onToggleFilters?: () => void;
+  onResetFilters?: () => void;
+  resultCount?: number;
   actions?: React.ReactNode;
   content?: React.ReactNode;
   footer?: React.ReactNode;
@@ -35,6 +37,8 @@ export default function ListPageLayout({
   showStats = true,
   showFilters: controlledShowFilters,
   onToggleFilters,
+  onResetFilters,
+  resultCount,
   actions,
   content,
   footer,
@@ -71,8 +75,8 @@ export default function ListPageLayout({
     ) : null;
 
   return (
-    <PageContainer className={`flex flex-col gap-6 ${className ?? ""}`}>
-      <section className="flex gap-4 flex-row items-center justify-between">
+    <PageContainer className={`flex flex-col gap-7 ${className ?? ""}`}>
+      <section className="flex flex-row items-center justify-between gap-4">
         {breadcrumb}
         <div className="flex shrink-0 items-center gap-2">
           {filters && (
@@ -84,7 +88,7 @@ export default function ListPageLayout({
               aria-label="Open filters"
             >
               <Filter className="size-4" />
-              <span className="hidden sm:inline">Filters</span>
+              <span>Filters</span>
             </OutlinedButton>
           )}
           {actions}
@@ -92,10 +96,10 @@ export default function ListPageLayout({
       </section>
       <div className="w-full lg:hidden">{search}</div>
       {showFilters && (filters || search) && (
-        <div className="hidden grow lg:flex p-4 rounded-2xl border border-[#e4ecf2] shadow-[0_2px_12px_rgba(20,40,60,0.03)] bg-white overflow-visible">
-          <div className="flex w-full flex-col lg:flex-row gap-4 items-center">
-            {search && <div className="w-full lg:w-72 xl:w-80 shrink-0">{search}</div>}
-            {filters && <div className="min-w-0 flex-1 w-full border-l border-[#e2e8f0] pl-4">{filters}</div>}
+        <div className="hidden grow border border-slate-200 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] lg:flex overflow-visible">
+          <div className="flex w-full items-center gap-3">
+            {search && <div className="w-full shrink-0 lg:w-80 xl:w-96">{search}</div>}
+            {filters && <div className="min-w-0 flex-1">{filters}</div>}
           </div>
         </div>
       )}
@@ -112,8 +116,8 @@ export default function ListPageLayout({
         >
           <DialogPrimitive.Portal>
             <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 lg:hidden" />
-            <DialogPrimitive.Content className="fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col gap-6 overflow-y-auto bg-white p-5 shadow-2xl outline-none lg:hidden">
-              <div className="flex items-center justify-between">
+            <DialogPrimitive.Content className="filter-drawer fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-white shadow-2xl outline-none lg:hidden">
+              <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5">
                 <DialogPrimitive.Title className="text-lg font-bold text-[#0f172a]">
                   Filters
                 </DialogPrimitive.Title>
@@ -124,7 +128,26 @@ export default function ListPageLayout({
                   <X className="size-5" />
                 </DialogPrimitive.Close>
               </div>
-              {filters}
+              <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
+                {filters}
+              </div>
+              <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4 shadow-[0_-6px_18px_rgba(15,23,42,0.05)]">
+                <button
+                  type="button"
+                  onClick={onResetFilters}
+                  disabled={!onResetFilters}
+                  className="h-11 border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                >
+                  Reset Filters
+                </button>
+                <button
+                  type="button"
+                  onClick={() => setFilterDrawerOpen(false)}
+                  className="h-11 border border-brand-green bg-brand-green px-3 text-sm font-semibold text-white hover:bg-brand-green-strong"
+                >
+                  Show Results{typeof resultCount === "number" ? ` (${resultCount})` : ""}
+                </button>
+              </div>
             </DialogPrimitive.Content>
           </DialogPrimitive.Portal>
         </DialogPrimitive.Root>

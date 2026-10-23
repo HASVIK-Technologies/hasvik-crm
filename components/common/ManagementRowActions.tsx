@@ -1,7 +1,9 @@
 "use client";
 
-import { MoreVertical, Pencil } from "lucide-react";
+import { MoreVertical, Pencil, Power, Trash2 } from "lucide-react";
+import TableActionButton from "@/components/common/TableActionButton";
 import { Button } from "@/components/ui/button";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -29,38 +31,41 @@ export default function ManagementRowActions({
   return (
     <div className="flex items-center justify-end gap-1.5">
       {showEdit && (
-        <Button
-          type="button"
-          variant="ghost"
-          size="icon"
+        <TableActionButton
+          tooltip={editLabel}
+          tone="brand"
           onClick={onEdit}
           aria-label={editLabel}
-          title={editLabel}
-          className="size-8 rounded-lg text-[#64748b] hover:bg-[#f1f5f9] hover:text-primary"
         >
           <Pencil className="size-4" />
-        </Button>
+        </TableActionButton>
       )}
       {actionLabel && onAction && (
         <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button
-              type="button"
-              variant="ghost"
-              size="icon"
-              aria-label={`More actions for ${editLabel.replace(/^Edit /, "")}`}
-              className="size-8 rounded-lg text-[#94a3b8] hover:bg-[#f8fafc] hover:text-[#0f172a]"
-            >
-              <MoreVertical className="size-4" />
-            </Button>
-          </DropdownMenuTrigger>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <DropdownMenuTrigger asChild>
+                <Button
+                  type="button"
+                  variant="ghost"
+                  size="icon"
+                  aria-label={`More actions for ${editLabel.replace(/^Edit /, "")}`}
+                  className="size-8 border border-transparent text-slate-500 shadow-none hover:bg-slate-100 hover:text-slate-800"
+                >
+                  <MoreVertical className="size-4" />
+                </Button>
+              </DropdownMenuTrigger>
+            </TooltipTrigger>
+            <TooltipContent side="top">More actions</TooltipContent>
+          </Tooltip>
           <DropdownMenuContent align="end" className="w-40 bg-white">
             <DropdownMenuItem
               onSelect={onAction}
               disabled={disabled}
-              className={`cursor-pointer text-xs ${actionDestructive ? "text-rose-700 focus:text-rose-700" : "text-emerald-700 focus:text-emerald-700"}`}
+              className={`cursor-pointer gap-2 text-xs ${actionDestructive ? "text-rose-700 focus:text-rose-700" : "text-emerald-700 focus:text-emerald-700"}`}
             >
-              {actionLabel}
+              {actionDestructive ? <Trash2 className="size-3.5" /> : <Power className="size-3.5" />}
+              <span>{actionLabel}</span>
             </DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>

@@ -4,6 +4,7 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
   Check,
+  ChartNoAxesCombined,
   CircleAlert,
   FolderKanban,
   LoaderCircle,
@@ -14,6 +15,7 @@ import {
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Actions from "@/components/common/Actions";
+import KpiCards from "@/components/common/KpiCards";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
 import ManagementRowActions from "@/components/common/ManagementRowActions";
@@ -153,24 +155,17 @@ export default function BusinessCategoriesPage() {
       searchPlaceholder="Search categories"
       showStats={showStats}
       stats={
-        <section className="grid grid-cols-2 gap-3 xl:grid-cols-3">
-          {[
+        <KpiCards items={[
             { label: "All categories", value: total, icon: FolderKanban, tone: "text-primary bg-blue-50" },
             { label: "Active on page", value: activeCount, icon: Check, tone: "text-emerald-700 bg-emerald-50" },
             { label: "Inactive on page", value: inactiveCount, icon: CircleAlert, tone: "text-amber-700 bg-amber-50" },
-          ].map(({ label, value, icon: Icon, tone }) => (
-            <article key={label} className="flex items-center gap-3 rounded-2xl border border-[#e4ecf2] bg-white p-4 shadow-[0_4px_16px_rgba(20,40,60,0.03)] sm:p-5">
-              <span className={`flex size-10 items-center justify-center rounded-xl ${tone}`}><Icon className="size-4" /></span>
-              <span><span className="block text-xl font-bold text-slate-900">{value}</span><span className="mt-1 block text-xs text-slate-500">{label}</span></span>
-            </article>
-          ))}
-        </section>
+          ].map((item, index) => ({ ...item, tone: (["blue", "green", "amber"] as const)[index] }))} />
       }
       actions={
         <Actions
           primary={{ label: "Add category", onSelect: openCreate, icon: <Plus className="size-4" /> }}
           menuItems={[
-            { label: showStats ? "Hide KPIs" : "Show KPIs", onSelect: () => setShowStats((visible) => !visible) },
+            { label: showStats ? "Hide KPIs" : "Show KPIs", icon: <ChartNoAxesCombined className="size-4" />, onSelect: () => setShowStats((visible) => !visible) },
           ]}
         />
       }

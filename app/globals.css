@@ -51,42 +51,43 @@
 }
 
 :root {
-  --brand-blue: #0876d1;
-  --brand-cyan: #08a9e6;
-  --brand-green: #20b83f;
-  --brand-green-strong: #147a29;
-  --brand-growth: #63d329;
-  --background: #f8fafc;
+  --brand-blue: #0870c9;
+  --brand-cyan: #1499d6;
+  --brand-green: #18a849;
+  --brand-green-strong: #117a35;
+  --brand-growth: #57c84d;
+  --background: #f6f8fb;
   --foreground: oklch(0.145 0 0);
   --card: oklch(1 0 0);
   --card-foreground: oklch(0.145 0 0);
   --popover: oklch(1 0 0);
   --popover-foreground: oklch(0.145 0 0);
-  --primary: var(--brand-blue);
+  /* Green is the primary action colour; blue is reserved for navigation and submits. */
+  --primary: var(--brand-green);
   --primary-foreground: #ffffff;
   --secondary: var(--brand-green);
   --secondary-foreground: #06210b;
-  --muted: oklch(0.97 0 0);
-  --muted-foreground: oklch(0.556 0 0);
-  --accent: oklch(0.97 0 0);
+  --muted: #f1f5f9;
+  --muted-foreground: #64748b;
+  --accent: #eef4f8;
   --accent-foreground: oklch(0.205 0 0);
   --destructive: oklch(0.577 0.245 27.325);
-  --border: oklch(0.922 0 0);
-  --input: oklch(0.922 0 0);
-  --ring: var(--brand-blue);
+  --border: #dfe7ef;
+  --input: #d7e1eb;
+  --ring: var(--brand-green);
   --chart-1: var(--brand-blue);
   --chart-2: var(--brand-cyan);
   --chart-3: var(--brand-green);
   --chart-4: var(--brand-growth);
   --chart-5: oklch(0.556 0 0);
   --radius: 0.5rem;
-  --sidebar: oklch(0.985 0 0);
-  --sidebar-foreground: oklch(0.145 0 0);
+  --sidebar: var(--brand-blue);
+  --sidebar-foreground: #ffffff;
   --sidebar-primary: var(--brand-blue);
   --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: color-mix(in srgb, var(--brand-blue) 8%, white);
-  --sidebar-accent-foreground: var(--brand-blue);
-  --sidebar-border: oklch(0.922 0 0);
+  --sidebar-accent: var(--brand-green);
+  --sidebar-accent-foreground: #06210b;
+  --sidebar-border: color-mix(in srgb, white 22%, transparent);
   --sidebar-ring: oklch(0.708 0 0);
 }
 
@@ -97,7 +98,7 @@
   --card-foreground: oklch(0.985 0 0);
   --popover: oklch(0.205 0 0);
   --popover-foreground: oklch(0.985 0 0);
-  --primary: var(--brand-blue);
+  --primary: var(--brand-green);
   --primary-foreground: #ffffff;
   --secondary: var(--brand-green);
   --secondary-foreground: #06210b;
@@ -108,7 +109,7 @@
   --destructive: oklch(0.704 0.191 22.216);
   --border: oklch(1 0 0 / 10%);
   --input: oklch(1 0 0 / 15%);
-  --ring: var(--brand-blue);
+  --ring: var(--brand-green);
   --chart-1: var(--brand-blue);
   --chart-2: var(--brand-cyan);
   --chart-3: var(--brand-green);
@@ -130,6 +131,40 @@
   }
   body {
     @apply bg-background text-foreground;
+    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+  }
+
+  /* Hasvik uses a crisp, square visual language across controls and surfaces. */
+  button,
+  input,
+  textarea,
+  select,
+  [role="button"],
+  [data-slot="button"],
+  [data-slot="input"],
+  [data-slot="textarea"],
+  [data-slot="select-trigger"],
+  [data-slot="select-content"],
+  [data-slot="card"] {
+    border-radius: 0 !important;
+  }
+
+  [data-slot="table-header"] {
+    background-color: #f8fafc;
+  }
+
+  /* Form confirmations are intentionally blue, distinct from green primary actions. */
+  button[type="submit"]:not([data-variant="outline"]),
+  input[type="submit"] {
+    background-color: var(--brand-blue) !important;
+    border-color: var(--brand-blue) !important;
+    color: #ffffff !important;
+  }
+
+  button[type="submit"]:not([data-variant="outline"]):hover,
+  input[type="submit"]:hover {
+    background-color: #0667b8 !important;
+    border-color: #0667b8 !important;
   }
  
 }
@@ -143,6 +178,37 @@
 
   .layout-content [data-layout-desktop] {
     display: none;
+  }
+
+  .filter-drawer [data-filter-controls] {
+    display: flex !important;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.875rem;
+  }
+
+  .filter-drawer [data-filter-controls] > *,
+  .filter-drawer [data-filter-controls] [data-mobile-filter-field] {
+    width: 100% !important;
+    max-width: none !important;
+  }
+
+  .filter-drawer [data-inline-filter-reset] {
+    display: none !important;
+  }
+
+  .filter-drawer label:has([data-slot="select-trigger"]) {
+    display: flex;
+    width: 100%;
+    flex-direction: column;
+    align-items: stretch;
+    gap: 0.5rem;
+  }
+
+  .filter-drawer [data-slot="select-trigger"],
+  .filter-drawer [data-slot="popover-trigger"] {
+    width: 100% !important;
   }
 }
 

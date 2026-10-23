@@ -13,7 +13,7 @@ export default function OutlinedButton({
     <Button
       variant="outline"
       className={cn(
-        "border-primary text-primary! bg-white! hover:bg-primary/5! rounded-sm p-4 text-base font-normal",
+        "h-10 border-slate-300 bg-white! px-4 text-sm font-semibold text-slate-700! shadow-none hover:border-brand-blue hover:bg-blue-50! hover:text-brand-blue!",
         className,
       )}
       {...props}

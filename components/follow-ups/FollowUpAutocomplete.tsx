@@ -87,8 +87,8 @@ export default function FollowUpAutocomplete({
           type="button"
           aria-expanded={open}
           className={cn(
-            "flex h-10 w-full items-center justify-between rounded-xl border border-[#e2e8f0] bg-white px-3 text-xs font-medium text-[#334155]",
-            value && "border-primary/50 bg-primary/5",
+            "flex h-10 w-full items-center justify-between border border-slate-300 bg-white px-3 text-xs font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-slate-400 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/15",
+            value && "border-brand-blue/60 bg-blue-50/40",
             invalid && "border-red-500",
           )}
         >
@@ -115,7 +115,7 @@ export default function FollowUpAutocomplete({
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-72 overflow-hidden rounded-2xl bg-white p-0"
+        className="w-(--radix-popover-trigger-width) overflow-hidden border border-slate-200 bg-white p-0 shadow-xl"
       >
         <div className="border-b border-[#f1f5f9] p-2.5">
           <div className="relative">

@@ -190,6 +190,8 @@ function BusinessesContent() {
       showStats={showStats}
       showFilters={showFilters}
       onToggleFilters={() => setShowFilters((visible) => !visible)}
+      onResetFilters={resetAllFilters}
+      resultCount={totalCount}
       actions={
         <Actions
           primary={{

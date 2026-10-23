@@ -315,10 +315,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Sidebar for Desktop */}
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-[#e4ecf2] bg-white transition-[width] lg:flex ${sidebarCollapsed ? "w-20" : "w-64"}`}>
-        {/* Brand Logo Header */}
-        <div className={`flex h-20 items-center border-b border-[#f1f5f9] ${sidebarCollapsed ? "justify-center px-3" : "px-6"}`}>
-          <Link href="/dashboard" aria-label="Hasvik home">
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-white/10 bg-[#0868b8] text-white transition-[width] lg:flex ${sidebarCollapsed ? "w-20" : "w-64"}`}>
+        {/* Brand area stays visually connected to the navigation rail. */}
+        <div className={`flex h-20 items-center border-b border-white/12 ${sidebarCollapsed ? "justify-center px-2" : "px-4"}`}>
+          <Link
+            href="/dashboard"
+            aria-label="Hasvik home"
+            className={`flex h-12 items-center border-l-2 border-brand-green bg-white shadow-[0_4px_14px_rgba(0,35,72,0.16)] ${sidebarCollapsed ? "w-12 justify-center px-1.5" : "w-full px-4"}`}
+          >
             <Image
               src="/logo.png"
               alt="Hasvik"
@@ -326,15 +330,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               height={42}
               priority
               style={{ height: "auto" }}
-              className={sidebarCollapsed ? "w-10 object-cover object-left" : "w-32"}
+              className={sidebarCollapsed ? "w-10" : "w-32"}
             />
           </Link>
         </div>
 
         {/* Sidebar Navigation */}
-        <div className={`flex flex-1 flex-col justify-between py-6 ${sidebarCollapsed ? "px-2" : "px-4"}`}>
+        <div className={`flex flex-1 flex-col justify-between py-7 ${sidebarCollapsed ? "px-2" : "px-4"}`}>
           <div>
-            <nav className="space-y-1.5" aria-label="Main navigation">
+            <p className={`mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-white/50 ${sidebarCollapsed ? "sr-only" : ""}`}>Workspace</p>
+            <nav className="space-y-1" aria-label="Main navigation">
               {navigation
                 .filter((item) =>
                   isNavigationItemVisible(item, tenantAdmin, hasvikAdmin),
@@ -346,10 +351,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`flex rounded-xl text-xs font-semibold transition-all ${sidebarCollapsed ? "flex-col gap-1 px-1 py-2 text-center" : "items-center gap-3 px-3.5 py-2.5"} ${
+                    className={`flex border-l-3 text-xs font-semibold transition-all duration-150 ${sidebarCollapsed ? "flex-col gap-1 px-1 py-2 text-center" : "items-center gap-3 px-3 py-2.5"} ${
                       active
-                        ? "bg-secondary/10 text-brand-green-strong"
-                        : "text-[#64748b] hover:bg-[#f8fafc] hover:text-[#0f172a]"
+                        ? "border-brand-growth bg-white/14 text-brand-growth shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
+                        : "border-transparent text-white/75 hover:bg-white/8 hover:text-white"
                     }`}
                   >
                     <Icon
@@ -365,13 +370,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Sidebar collapse control */}
-          <div className="border-t border-[#f1f5f9] pt-4">
+          <div className="border-t border-white/15 pt-4">
             <button
               type="button"
               aria-label={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
               title={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
               onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
-              className={`flex w-full items-center rounded-xl p-2.5 text-[#64748b] transition-colors hover:bg-[#f8fafc] hover:text-[#0f172a] ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
+              className={`flex w-full items-center border-l-3 border-transparent p-2.5 text-white/75 transition-colors hover:bg-white/8 hover:text-white ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
             >
               {sidebarCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
               {!sidebarCollapsed && <span className="text-xs font-semibold">Collapse navigation</span>}
@@ -391,7 +396,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 type="button"
                 aria-label={mobileMenuOpen ? "Close menu" : "Open menu"}
                 onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-                className="rounded-xl p-2 text-[#64748b] hover:bg-[#f1f5f9] lg:hidden"
+                className="p-2 text-[#64748b] hover:bg-[#f1f5f9] lg:hidden"
               >
                 {mobileMenuOpen ? (
                   <X className="size-5" />
@@ -524,9 +529,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     key={item.label}
                     href={item.href}
                     onClick={() => setMobileMenuOpen(false)}
-                    className={`flex items-center gap-3 rounded-xl px-3.5 py-2.5 text-xs font-semibold ${
+                    className={`flex items-center gap-3 px-3.5 py-2.5 text-xs font-semibold ${
                       active
-                        ? "bg-[#ecfdf3] text-secondary"
+                        ? "bg-brand-green text-[#06210b]"
                         : "text-[#64748b] hover:bg-[#f8fafc]"
                     }`}
                   >

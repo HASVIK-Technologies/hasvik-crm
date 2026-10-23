@@ -94,7 +94,7 @@ export default function SearchWithSuggestions({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={cn(
-          "h-10 w-full rounded-xl border border-[#e2e8f0] bg-white pl-10 pr-9 text-xs sm:text-sm text-[#0f172a] shadow-[0_1px_2px_rgba(0,0,0,0.02)] placeholder:text-[#94a3b8] transition-all hover:border-[#cbd5e1] focus:border-primary focus:outline-none focus:ring-2 focus:ring-primary/20",
+          "h-10 w-full border border-slate-300 bg-white pl-10 pr-9 text-xs sm:text-sm text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.05)] placeholder:text-slate-400 transition-all hover:border-slate-400 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/15",
           Boolean(inputValue) && "border-primary/40",
           className,
         )}

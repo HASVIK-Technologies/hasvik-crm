@@ -44,16 +44,16 @@ export default function FollowUpFilters({ filters, setFilter, reset }: Props) {
   const moreFiltersActive = Boolean(filters.status || filters.type || filters.fromDate || filters.toDate);
   const extraFilters = (
     <>
-      <div className="w-full sm:w-40">
+      <div className="w-full">
         <FollowUpStatusSelect value={filters.status} onChange={(value) => setFilter("status", value)} />
       </div>
-      <div className="w-full sm:w-36">
+      <div className="w-full">
         <Select value={filters.type || "ALL"} onValueChange={(value) => setFilter("type", value === "ALL" ? "" : value)}>
           <SelectTrigger className="h-10 rounded-xl bg-white text-xs"><SelectValue placeholder="All Types" /></SelectTrigger>
           <SelectContent className="bg-white"><SelectItem value="ALL">All Types</SelectItem><SelectItem value="CALL">Call</SelectItem><SelectItem value="MEETING">Meeting</SelectItem><SelectItem value="EMAIL">Email</SelectItem><SelectItem value="WHATSAPP">WhatsApp</SelectItem></SelectContent>
         </Select>
       </div>
-      <div className="w-full sm:w-56"><FollowUpDateRange from={filters.fromDate} to={filters.toDate} onChange={(from, to) => { setFilter("fromDate", from); setFilter("toDate", to); }} /></div>
+      <div className="w-full"><FollowUpDateRange from={filters.fromDate} to={filters.toDate} onChange={(from, to) => { setFilter("fromDate", from); setFilter("toDate", to); }} /></div>
     </>
   );
   return (
@@ -81,12 +81,12 @@ export default function FollowUpFilters({ filters, setFilter, reset }: Props) {
       <div className="hidden lg:flex lg:items-center lg:gap-2.5">
         <Popover>
           <PopoverTrigger asChild>
-            <button type="button" className={`inline-flex h-10 items-center gap-2 rounded-xl border px-3.5 text-xs font-semibold transition-colors ${moreFiltersActive ? "border-primary bg-primary/10 text-primary" : "border-[#e2e8f0] bg-white text-[#334155] hover:bg-[#f8fafc]"}`}>
+            <button type="button" className={`inline-flex h-10 items-center gap-2 border px-3.5 text-xs font-semibold shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-colors ${moreFiltersActive ? "border-brand-blue bg-blue-50 text-brand-blue" : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"}`}>
               <Filter className="size-3.5 text-[#64748b]" /> More Filters
               {moreFiltersActive && <span className="flex size-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">{[filters.status, filters.type, filters.fromDate || filters.toDate].filter(Boolean).length}</span>}
             </button>
           </PopoverTrigger>
-          <PopoverContent align="start" className="w-[22rem] space-y-3 rounded-2xl border border-[#e2e8f0] bg-white p-4 shadow-xl"><div className="flex items-center justify-between border-b border-[#f1f5f9] pb-2.5"><h4 className="text-xs font-bold text-[#0f172a]">More Filters</h4>{moreFiltersActive && <button type="button" onClick={() => { setFilter("status", ""); setFilter("type", ""); setFilter("fromDate", ""); setFilter("toDate", ""); }} className="text-[11px] font-medium text-primary hover:underline">Reset Extra</button>}</div><div className="flex flex-col gap-3">{extraFilters}</div></PopoverContent>
+          <PopoverContent align="start" className="w-[22rem] space-y-4 border border-slate-200 bg-white p-4 shadow-xl"><div className="flex items-center justify-between border-b border-slate-100 pb-3"><h4 className="text-xs font-bold text-slate-900">More Filters</h4>{moreFiltersActive && <button type="button" onClick={() => { setFilter("status", ""); setFilter("type", ""); setFilter("fromDate", ""); setFilter("toDate", ""); }} className="text-[11px] font-medium text-brand-blue hover:underline">Reset Extra</button>}</div><div className="flex flex-col gap-3">{extraFilters}</div></PopoverContent>
         </Popover>
       </div>
       <div className="flex w-full flex-col gap-2.5 lg:hidden">{extraFilters}</div>
@@ -94,7 +94,8 @@ export default function FollowUpFilters({ filters, setFilter, reset }: Props) {
         <button
           type="button"
           onClick={reset}
-          className="inline-flex h-10 items-center gap-1.5 rounded-xl border border-dashed border-[#cbd5e1] px-3 text-xs font-semibold text-[#64748b] hover:border-red-300 hover:text-red-600"
+          data-inline-filter-reset
+          className="inline-flex h-10 items-center gap-1.5 border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-600 shadow-[0_1px_2px_rgba(15,23,42,0.04)] hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
         >
           <RotateCcw className="size-3" /> Reset
         </button>
