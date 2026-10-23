@@ -1,5 +1,7 @@
 "use client";
 
+import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
+
 import { useMemo, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
@@ -46,6 +48,7 @@ function categoryId(category: BusinessCategory) {
 }
 
 export default function BusinessCategoriesPage() {
+  const { highlightItem, isItemHighlighted } = useListActionHighlight("categories");
   const [search, setSearch] = useState("");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -121,6 +124,7 @@ export default function BusinessCategoriesPage() {
         const id = categoryId(editingCategory);
         if (!id) throw new Error("This category has no ID and cannot be updated.");
         await updateMutation.mutateAsync({ id, payload });
+        highlightItem(id);
       } else {
         await createMutation.mutateAsync(payload);
       }
@@ -138,6 +142,7 @@ export default function BusinessCategoriesPage() {
     const activate = changingStatusCategory.isActive === false;
     try {
       await statusMutation.mutateAsync({ id, isActive: activate });
+      highlightItem(id);
       setChangingStatusCategory(null);
     } catch {
       // The API interceptor displays the request error.
@@ -205,7 +210,7 @@ export default function BusinessCategoriesPage() {
                 const id = categoryId(category) || `${category.name}-${index}`;
                 const active = category.isActive !== false;
                 return (
-                  <article key={id} className="flex items-start justify-between gap-3 rounded-2xl border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] sm:p-4">
+                  <article key={id} className={`flex items-start justify-between gap-3 rounded-2xl border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 sm:p-4 ${isItemHighlighted(id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}>
                     <div className="flex min-w-0 items-start gap-3">
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-primary"><Tags className="size-4" /></span>
                       <div className="min-w-0">
@@ -245,7 +250,7 @@ export default function BusinessCategoriesPage() {
                     const id = categoryId(category) || `${category.name}-${index}`;
                     const active = category.isActive !== false;
                     return (
-                      <TableRow key={id} className="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80">
+                      <TableRow key={id} className={`border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
                         <TableCell className="py-4 pl-6 pr-4">
                           <div className="flex items-center gap-3">
                             <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-primary"><Tags className="size-4" /></span>

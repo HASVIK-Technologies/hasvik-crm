@@ -1,5 +1,7 @@
 "use client";
 
+import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
+
 import { useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
@@ -63,6 +65,7 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 export default function UsersPage() {
+  const { highlightItem, isItemHighlighted } = useListActionHighlight("users");
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<UserRole | "ALL">("ALL");
   const [page, setPage] = useState(1);
@@ -141,6 +144,7 @@ export default function UsersPage() {
             ...(password ? { password } : {}),
           },
         });
+        highlightItem(id);
       } else {
         const payload: CreateUserPayload = { fullName, email, role, password };
         await createMutation.mutateAsync(payload);
@@ -158,6 +162,7 @@ export default function UsersPage() {
     if (!id) return;
     try {
       await deleteMutation.mutateAsync(id);
+      highlightItem(id);
       setDeactivatingUser(null);
     } catch {
       // The API interceptor displays the request error.
@@ -258,7 +263,7 @@ export default function UsersPage() {
                     const id = userId(user) || `${user.email}-${index}`;
                     const initials = user.fullName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
                     return (
-                      <article key={id} className="flex items-start justify-between gap-3 rounded-2xl border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] sm:p-4">
+                      <article key={id} className={`flex items-start justify-between gap-3 rounded-2xl border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 sm:p-4 ${isItemHighlighted(id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}>
                         <div className="flex min-w-0 items-start gap-3">
                           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-xs font-bold text-primary">{initials}</span>
                           <span className="min-w-0">
@@ -299,7 +304,7 @@ export default function UsersPage() {
                         const id = userId(user) || `${user.email}-${index}`;
                         const initials = user.fullName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
                         return (
-                          <TableRow key={id} className="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80">
+                          <TableRow key={id} className={`border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
                             <TableCell className="py-4 pl-6 pr-4">
                               <div className="flex items-center gap-3">
                                 <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-xs font-bold text-primary">{initials}</span>

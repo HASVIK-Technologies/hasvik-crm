@@ -1,5 +1,7 @@
 "use client";
 
+import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
+
 import { useMemo, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
@@ -208,6 +210,7 @@ function TenantEditor({
 }
 
 export default function TenantManagementPage() {
+  const { highlightItem, isItemHighlighted } = useListActionHighlight("tenants");
   const user = useAuthStore((state) => state.user);
   const hasvikAdmin = isSuperAdmin(user);
   const tenantAdmin = isTenantAdmin(user);
@@ -292,6 +295,7 @@ export default function TenantManagementPage() {
           contactPhone: draft.contactPhone.trim(),
         },
       });
+      highlightItem(editingTenant.id);
       closeEditor();
       setNotice("Tenant details saved.");
     } catch (error) {
@@ -307,6 +311,7 @@ export default function TenantManagementPage() {
         id: tenantToToggle.id,
         isActive: !tenantToToggle.isActive,
       });
+      highlightItem(tenantToToggle.id);
       setNotice(
         `${tenantToToggle.name} has been ${tenantToToggle.isActive ? "deactivated" : "activated"}.`,
       );
@@ -455,7 +460,7 @@ export default function TenantManagementPage() {
               <>
                 <div data-layout-mobile className="flex flex-col gap-3 p-3 md:gap-4 md:p-4">
                   {pagedTenants.map((tenant) => (
-                    <article key={tenant.id} className="rounded-2xl border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] sm:p-4">
+                    <article key={tenant.id} className={`rounded-2xl border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 sm:p-4 ${isItemHighlighted(tenant.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex min-w-0 items-start gap-3">
                           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary">
@@ -498,7 +503,7 @@ export default function TenantManagementPage() {
                     </TableHeader>
                     <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
                       {pagedTenants.map((tenant) => (
-                        <TableRow key={tenant.id} className="border-b border-[#f1f5f9] transition-colors hover:bg-[#f8fafc]/80">
+                        <TableRow key={tenant.id} className={`border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(tenant.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
                           <TableCell className="py-4 pl-6 pr-4">
                             <div className="flex items-center gap-3">
                               <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-primary">

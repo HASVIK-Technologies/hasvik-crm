@@ -42,8 +42,6 @@ function dayBoundary(offset: number, end = false) {
 
 export default function FollowupsPage() {
   const [dialogOpen, setDialogOpen] = useState(false);
-  const [showStats, setShowStats] = useState(true);
-  const [showFilters, setShowFilters] = useState(true);
   const [editFollowUp, setEditFollowUp] = useState<FollowUpItem>();
   const [cancelFollowUp, setCancelFollowUp] = useState<FollowUpItem>();
   const [completeFollowUp, setCompleteFollowUp] = useState<FollowUpItem>();
@@ -129,6 +127,7 @@ export default function FollowupsPage() {
     }
     try {
       await completeMutation.mutateAsync(completeFollowUp.id);
+      filters.highlightFollowUp(completeFollowUp.id);
       toast.success("Follow-up marked as completed");
       setCompleteFollowUp(undefined);
     } catch {
@@ -143,6 +142,7 @@ export default function FollowupsPage() {
     }
     try {
       await cancelMutation.mutateAsync(cancelFollowUp.id);
+      filters.highlightFollowUp(cancelFollowUp.id);
       toast.success("Follow-up cancelled");
       setCancelFollowUp(undefined);
     } catch {
@@ -171,9 +171,9 @@ export default function FollowupsPage() {
       <ListPageLayout
         breadcrumb={<Breadcrumb items={[{ label: "Follow-ups" }]} />}
         customSearch={searchControl}
-        showStats={showStats}
-        showFilters={showFilters}
-        onToggleFilters={() => setShowFilters((visible) => !visible)}
+        showStats={filters.showStats}
+        showFilters={filters.showFilters}
+        onToggleFilters={filters.toggleFilters}
         onResetFilters={filters.reset}
         resultCount={listQuery.data?.total ?? 0}
         actions={
@@ -185,15 +185,15 @@ export default function FollowupsPage() {
             }}
             menuItems={[
               {
-                label: `${showStats ? "Hide" : "Show"} KPIs`,
+                label: `${filters.showStats ? "Hide" : "Show"} KPIs`,
                 icon: <ChartNoAxesCombined className="size-4" />,
-                onSelect: () => setShowStats((visible) => !visible),
+                onSelect: filters.toggleStats,
                 desktopOnly: true,
               },
               {
-                label: `${showFilters ? "Hide" : "Show"} Filters`,
+                label: `${filters.showFilters ? "Hide" : "Show"} Filters`,
                 icon: <Filter className="size-4" />,
-                onSelect: () => setShowFilters((visible) => !visible),
+                onSelect: filters.toggleFilters,
                 desktopOnly: true,
               },
             ]}

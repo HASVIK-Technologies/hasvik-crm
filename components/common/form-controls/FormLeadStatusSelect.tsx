@@ -8,6 +8,7 @@ import {
   SelectTrigger,
 } from "@/components/ui/select";
 import { useBusinessStatuses } from "@/hooks/use-filter-options";
+import { formatLeadStatus, getLeadStatusVisual, STATUS_OPTIONS } from "@/lib/business/form-options";
 
 interface FormLeadStatusSelectProps {
   id?: string;
@@ -27,6 +28,9 @@ export default function FormLeadStatusSelect({
   invalid,
 }: FormLeadStatusSelectProps) {
   const { data: statuses = {} } = useBusinessStatuses();
+  const statusKeys = Object.keys(statuses).length > 0
+    ? Object.keys(statuses)
+    : STATUS_OPTIONS.map((option) => option.value);
 
   return (
     <div>
@@ -35,14 +39,18 @@ export default function FormLeadStatusSelect({
       </FieldLabel>
       <Select value={value} onValueChange={onChange}>
         <SelectTrigger id={id} aria-invalid={invalid} className="w-full">
-          <span className="truncate text-left">
-            {value ? statuses[value] ?? value : "Select status"}
+          <span className="flex items-center gap-2 truncate text-left">
+            {value && <span className={`size-2 shrink-0 ${getLeadStatusVisual(value).dot}`} />}
+            {value ? formatLeadStatus(value, statuses) : "Select status"}
           </span>
         </SelectTrigger>
         <SelectContent>
-          {Object.entries(statuses).map(([status, displayName]) => (
+          {statusKeys.map((status) => (
             <SelectItem key={status} value={status}>
-              {displayName}
+              <span className="flex items-center gap-2">
+                <span className={`size-2 shrink-0 ${getLeadStatusVisual(status).dot}`} />
+                {formatLeadStatus(status, statuses)}
+              </span>
             </SelectItem>
           ))}
         </SelectContent>

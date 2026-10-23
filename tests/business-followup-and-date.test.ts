@@ -6,6 +6,7 @@ import {
   formatFollowUpDate,
   toBusinessItem,
 } from "../lib/business/mappers.ts";
+import { formatLeadStatus, getLeadStatusLabel } from "../lib/business/form-options.ts";
 import {
   validateFutureDateTime,
   validateFutureDate,
@@ -390,6 +391,30 @@ describe("Business Follow-up & Date Validation", () => {
       assert.strictEqual(payload.type, "Call");
       assert.ok(payload.scheduledAt);
       assert.strictEqual(payload.reminderInMinutes, 15);
+    });
+  });
+
+  describe("lead status display labels", () => {
+    test("uses the canonical user-friendly label for every backend lead status", () => {
+      assert.strictEqual(getLeadStatusLabel("NEW"), "New Lead");
+      assert.strictEqual(getLeadStatusLabel("CONTACTED"), "Contacted");
+      assert.strictEqual(
+        getLeadStatusLabel("PROPOSAL_AND_NEGOTIATION"),
+        "Proposal & Negotiation",
+      );
+      assert.strictEqual(getLeadStatusLabel("INTERESTED"), "Interested");
+      assert.strictEqual(getLeadStatusLabel("WON"), "Won");
+      assert.strictEqual(getLeadStatusLabel("LOST"), "Lost");
+    });
+
+    test("does not leak raw enum values when API labels are raw or missing", () => {
+      assert.strictEqual(
+        formatLeadStatus("PROPOSAL_AND_NEGOTIATION", {
+          PROPOSAL_AND_NEGOTIATION: "PROPOSAL_AND_NEGOTIATION",
+        }),
+        "Proposal & Negotiation",
+      );
+      assert.strictEqual(formatLeadStatus("FOLLOW_UP_REQUIRED"), "Follow Up Required");
     });
   });
 });

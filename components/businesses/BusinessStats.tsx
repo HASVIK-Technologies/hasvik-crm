@@ -47,7 +47,7 @@ export default function BusinessStats({
       label: "Won",
       value: won,
       icon: Trophy,
-      tone: "violet",
+      tone: "green",
     },
   ];
 

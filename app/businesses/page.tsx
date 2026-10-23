@@ -1,12 +1,13 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
+import React, { Suspense, useEffect, useMemo, useRef } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import { ChartNoAxesCombined, Filter, Plus } from "lucide-react";
 import Actions from "@/components/common/Actions";
 import {
   BusinessStats,
   BusinessFilters,
+  BusinessKanban,
   BusinessTable,
   SearchWithSuggestions,
 } from "@/components/businesses";
@@ -28,7 +29,6 @@ import Breadcrumb from "@/components/common/Breadcrumb";
 const EMPTY_BUSINESSES: BusinessItem[] = [];
 
 function BusinessesContent() {
-  const [showFilters, setShowFilters] = useState(true);
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const hasInitializedFromUrl = useRef(false);
@@ -44,6 +44,8 @@ function BusinessesContent() {
     status,
     isActive,
     showStats,
+    showFilters,
+    view,
     setPage,
     setLimit,
     setSortBy,
@@ -53,6 +55,8 @@ function BusinessesContent() {
     setStatus,
     setIsActive,
     toggleStats,
+    toggleFilters,
+    setView,
     resetAllFilters,
     syncFromParams,
   } = useBusinessListStore();
@@ -189,7 +193,7 @@ function BusinessesContent() {
       filters={filterControls}
       showStats={showStats}
       showFilters={showFilters}
-      onToggleFilters={() => setShowFilters((visible) => !visible)}
+      onToggleFilters={toggleFilters}
       onResetFilters={resetAllFilters}
       resultCount={totalCount}
       actions={
@@ -209,7 +213,7 @@ function BusinessesContent() {
             {
               label: `${showFilters ? "Hide" : "Show"} Filters`,
               icon: <Filter className="size-4" />,
-              onSelect: () => setShowFilters((visible) => !visible),
+              onSelect: toggleFilters,
               desktopOnly: true,
             },
           ]}
@@ -229,19 +233,35 @@ function BusinessesContent() {
             </button>
           </div>
         ) : (
-          <BusinessTable
-            businesses={businesses}
-            totalCount={totalCount}
-            isLoading={isListLoading}
-            sortOrder={sortBy}
-            onSortOrderChange={setSortBy}
-            currentPage={page}
-            totalPages={totalPages}
-            itemsPerPage={limit}
-            onPageChange={setPage}
-            onItemsPerPageChange={setLimit}
-            onClearFilters={resetAllFilters}
-          />
+          view === "kanban" ? (
+            <BusinessKanban
+              businesses={businesses}
+              totalCount={totalCount}
+              isLoading={isListLoading}
+              view={view}
+              onViewChange={setView}
+              currentPage={page}
+              itemsPerPage={limit}
+              onPageChange={setPage}
+              onItemsPerPageChange={setLimit}
+            />
+          ) : (
+            <BusinessTable
+              businesses={businesses}
+              totalCount={totalCount}
+              isLoading={isListLoading}
+              sortOrder={sortBy}
+              onSortOrderChange={setSortBy}
+              currentPage={page}
+              totalPages={totalPages}
+              itemsPerPage={limit}
+              onPageChange={setPage}
+              onItemsPerPageChange={setLimit}
+              onClearFilters={resetAllFilters}
+              view={view}
+              onViewChange={setView}
+            />
+          )
         )
       }
     />

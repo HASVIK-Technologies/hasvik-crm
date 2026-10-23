@@ -46,13 +46,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 import BusinessDetailsFollowups from "@/components/business-details/BusinessDetailsFollowups";
 import { DeactivateBusinessModal } from "@/components/business-details/DeactivateBusinessModal";
-
-type ContactItem = {
-  id: number | string;
-  number: string;
-  type: string;
-  badgeClass?: string;
-};
+import { useBusinessListStore } from "@/store/business-list-store";
 
 export default function BusinessDetails() {
   const cleanNumber = (num: string) => num.replace(/\D/g, "");
@@ -61,6 +55,9 @@ export default function BusinessDetails() {
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const stringId = typeof rawId === "string" ? rawId : "";
+  React.useEffect(() => {
+    if (stringId) useBusinessListStore.getState().highlightBusiness(stringId, true);
+  }, [stringId]);
   const { data: followUps } = useBusinessFollowUpsQuery(stringId);
   const realFollowUpsCount = Array.isArray(followUps) ? followUps.length : 0;
   const {

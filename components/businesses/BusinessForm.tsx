@@ -49,6 +49,7 @@ import {
 import { normalizeHttpUrl } from "@/lib/business/url-validation";
 import type { FollowUpType } from "@/types/follow-up";
 import { toDateTimeLocalValue } from "@/lib/forms/date-time";
+import { useBusinessListStore } from "@/store/business-list-store";
 
 // Additional Information is built out but hidden from view for now - the
 // team plans to start using it in a future release. Flip this to `true`
@@ -235,6 +236,10 @@ export default function BusinessForm({
   const targetId = businessId || searchParams.get("id") || undefined;
   const isEditMode = Boolean(targetId);
   const draftKey = `hasvik-crm:business-form:${targetId ?? "new"}`;
+
+  useEffect(() => {
+    if (targetId) useBusinessListStore.getState().highlightBusiness(targetId, true);
+  }, [targetId]);
 
   // Captured once on mount - this is the snapshot Reset restores to,
   // independent of anything the person types afterward.

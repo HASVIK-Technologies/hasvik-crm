@@ -75,6 +75,52 @@ export const STATUS_OPTIONS = [
   { value: "LOST", label: "Lost" },
 ];
 
+/** Shared semantic palette for the sales lifecycle. */
+export const LEAD_STATUS_VISUALS: Record<
+  string,
+  { badge: string; accent: string; dot: string }
+> = {
+  NEW: {
+    badge: "border-blue-200 bg-blue-50 text-blue-700",
+    accent: "bg-blue-500",
+    dot: "bg-blue-500",
+  },
+  CONTACTED: {
+    badge: "border-cyan-200 bg-cyan-50 text-cyan-800",
+    accent: "bg-cyan-500",
+    dot: "bg-cyan-500",
+  },
+  INTERESTED: {
+    badge: "border-amber-200 bg-amber-50 text-amber-800",
+    accent: "bg-amber-500",
+    dot: "bg-amber-500",
+  },
+  PROPOSAL_AND_NEGOTIATION: {
+    badge: "border-violet-200 bg-violet-50 text-violet-700",
+    accent: "bg-violet-500",
+    dot: "bg-violet-500",
+  },
+  WON: {
+    badge: "border-emerald-200 bg-emerald-50 text-emerald-800",
+    accent: "bg-emerald-500",
+    dot: "bg-emerald-500",
+  },
+  LOST: {
+    badge: "border-rose-200 bg-rose-50 text-rose-800",
+    accent: "bg-rose-500",
+    dot: "bg-rose-500",
+  },
+};
+
+export function getLeadStatusVisual(status?: string | null) {
+  const normalized = status?.trim().toUpperCase() ?? "";
+  return LEAD_STATUS_VISUALS[normalized] ?? {
+    badge: "border-slate-200 bg-slate-100 text-slate-700",
+    accent: "bg-slate-400",
+    dot: "bg-slate-400",
+  };
+}
+
 export const LEAD_STATUS_DISPLAY_NAMES: Record<string, string> = {
   NEW: "New",
   CONTACTED: "Contacted",

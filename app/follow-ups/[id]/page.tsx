@@ -1,7 +1,7 @@
 "use client";
 
 import { useParams } from "next/navigation";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { toast } from "sonner";
 import { CheckCircle2, Pencil, Plus, Trash2 } from "lucide-react";
 import Breadcrumb from "@/components/common/Breadcrumb";
@@ -23,6 +23,7 @@ import {
   canCreateNextFollowUp,
   canEditFollowUp,
 } from "@/lib/follow-ups/actions";
+import { useFollowUpListStore } from "@/store/follow-up-list-store";
 
 export default function FollowUpDetailsPage() {
   const [editOpen, setEditOpen] = useState(false);
@@ -32,6 +33,9 @@ export default function FollowUpDetailsPage() {
 
   const params = useParams<{ id: string }>();
   const id = Array.isArray(params?.id) ? params.id[0] : params?.id;
+  useEffect(() => {
+    if (id) useFollowUpListStore.getState().highlightFollowUp(id, true);
+  }, [id]);
   const query = useFollowUpQuery(id);
   const cancelMutation = useCancelFollowUp();
   const completeMutation = useCompleteFollowUp();
@@ -40,6 +44,7 @@ export default function FollowUpDetailsPage() {
     if (!id || !query.data || !canCancelFollowUp(query.data)) return;
     try {
       await cancelMutation.mutateAsync(id);
+      useFollowUpListStore.getState().highlightFollowUp(id, true);
       toast.success("Follow-up cancelled");
       setCancelOpen(false);
     } catch {
@@ -51,6 +56,7 @@ export default function FollowUpDetailsPage() {
     if (!id || !query.data || !canCompleteFollowUp(query.data)) return;
     try {
       await completeMutation.mutateAsync(id);
+      useFollowUpListStore.getState().highlightFollowUp(id, true);
       toast.success("Follow-up marked as completed");
       setCompleteOpen(false);
     } catch {

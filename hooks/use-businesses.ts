@@ -25,6 +25,7 @@ import type {
   BusinessesResult,
 } from "@/types/business-api";
 import type { BusinessFormValues } from "@/lib/business/form-types";
+import { useBusinessListStore } from "@/store/business-list-store";
 
 const defaultQueryParams: Required<
   Pick<BusinessQueryParams, "page" | "limit" | "sortBy">
@@ -51,13 +52,56 @@ export async function getBusinesses(
   };
 }
 
-export function useBusinessesQuery(params: BusinessQueryParams) {
+export function useBusinessesQuery(
+  params: BusinessQueryParams,
+  options?: { enabled?: boolean },
+) {
   return useQuery({
     queryKey: businessQueryKeys.list(params),
     queryFn: ({ signal }) => getBusinesses(params, signal),
     placeholderData: (previousData) => previousData,
     retry: 2,
     retryDelay: 1000,
+    enabled: options?.enabled ?? true,
+  });
+}
+
+export function useUpdateBusinessLeadStatus() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, status }: { id: string | number; status: string }) =>
+      updateBusinessData(String(id), { status }),
+    onSuccess: (_, variables) => {
+      useBusinessListStore.getState().highlightBusiness(variables.id);
+      queryClient.setQueriesData(
+        { queryKey: businessQueryKeys.lists() },
+        (oldData: BusinessesResult | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            businesses: oldData.businesses.map((item) =>
+              String(item.id) === String(variables.id)
+                ? { ...item, leadStatus: variables.status }
+                : item,
+            ),
+          };
+        },
+      );
+      queryClient.invalidateQueries({ queryKey: businessQueryKeys.all });
+      queryClient.invalidateQueries({
+        queryKey: businessQueryKeys.detail(String(variables.id)),
+      });
+      toast.success("Lead stage updated.");
+    },
+    onError: (error) => {
+      const message = axios.isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message
+        : error instanceof Error
+          ? error.message
+          : undefined;
+      toast.error(message || "Failed to update lead stage.");
+    },
   });
 }
 
@@ -108,6 +152,7 @@ export function useUpdateBusinessStatus() {
       return result;
     },
     onSuccess: (_, variables) => {
+      useBusinessListStore.getState().highlightBusiness(variables.id);
       queryClient.setQueriesData(
         { queryKey: businessQueryKeys.lists() },
         (oldData: BusinessesResult | undefined) => {

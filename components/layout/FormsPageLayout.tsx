@@ -1,4 +1,5 @@
 import PageContainer from "./PageContainer";
+import ScrollToTopOnRoute from "@/components/common/ScrollToTopOnRoute";
 
 interface FormsPageLayoutProps {
   content: React.ReactNode;
@@ -11,6 +12,7 @@ export default function FormsPageLayout({
 }: FormsPageLayoutProps) {
   return (
     <PageContainer className="flex flex-col gap-6">
+      <ScrollToTopOnRoute />
       {breadcrumb}
       {content}
     </PageContainer>

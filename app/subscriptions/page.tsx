@@ -1,5 +1,7 @@
 "use client";
 
+import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
+
 import { useMemo, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { QRCodeSVG } from "qrcode.react";
@@ -400,6 +402,7 @@ function SubscriptionRow({
 }
 
 export default function SubscriptionsPage() {
+  const { highlightItem, isItemHighlighted } = useListActionHighlight("subscriptions");
   const user = useAuthStore((state) => state.user);
   const hasvikAdmin = isSuperAdmin(user);
   const tenantAdmin = isTenantAdmin(user);
@@ -581,6 +584,7 @@ export default function SubscriptionsPage() {
     setOperationError("");
     try {
       await statusMutation.mutateAsync({ id, status: "ACTIVE" });
+      highlightItem(id);
       setNotice("Subscription request approved.");
     } catch (error) {
       setOperationError(getApiErrorMessage(error));
@@ -591,6 +595,7 @@ export default function SubscriptionsPage() {
     setOperationError("");
     try {
       await renewMutation.mutateAsync({ id });
+      highlightItem(id);
       setNotice("Subscription renewed.");
       return true;
     } catch (error) {
@@ -605,6 +610,7 @@ export default function SubscriptionsPage() {
     setOperationError("");
     try {
       await statusMutation.mutateAsync({ id, status: "REJECTED" });
+      highlightItem(id);
       setSubscriptionToReject(null);
       setNotice("Subscription request rejected.");
     } catch (error) {
@@ -618,6 +624,7 @@ export default function SubscriptionsPage() {
     setOperationError("");
     try {
       await statusMutation.mutateAsync({ id, status: "CANCELLED" });
+      highlightItem(id);
       setSubscriptionToCancel(null);
       setNotice(
         `Subscription cancelled. Access remains active until ${formatDate(subscriptionToCancel?.endDate)}.`,
@@ -874,9 +881,10 @@ export default function SubscriptionsPage() {
                     (hasvikAdmin ? "Tenant" : ownTenantName ?? "Your workspace");
                   const busyThisSubscription =
                     busy && getRecordId(subscription) === busySubscriptionId;
+                  const subscriptionId = getRecordId(subscription) || `${tenantId}-${planId}`;
                   return (
+                    <div key={subscriptionId} className={`transition-all duration-500 ${isItemHighlighted(subscriptionId) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
                     <SubscriptionRow
-                      key={getRecordId(subscription) || `${tenantId}-${planId}`}
                       subscription={subscription}
                       plan={plans.find((plan) => getPlanId(plan) === planId)}
                       tenantName={tenantName}
@@ -891,6 +899,7 @@ export default function SubscriptionsPage() {
                       onCancel={setSubscriptionToCancel}
                       onReject={setSubscriptionToReject}
                     />
+                    </div>
                   );
                 })}
               </div>

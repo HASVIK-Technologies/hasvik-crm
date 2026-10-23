@@ -8,6 +8,12 @@ import {
 
 export interface BusinessListStoreState extends BusinessListStateFilters {
   showStats: boolean;
+  showFilters: boolean;
+  view: BusinessListView;
+  kanbanScrollLeft: number;
+  highlightedBusinessId: string | null;
+  highlightRevision: number;
+  scrollToHighlightedBusiness: boolean;
 
   // Actions
   setPage: (page: number) => void;
@@ -19,9 +25,16 @@ export interface BusinessListStoreState extends BusinessListStateFilters {
   setStatus: (status: string) => void;
   setIsActive: (isActive: boolean | undefined) => void;
   toggleStats: () => void;
+  toggleFilters: () => void;
+  setView: (view: BusinessListView) => void;
+  setKanbanScrollLeft: (scrollLeft: number) => void;
+  highlightBusiness: (id: string | number, scrollToItem?: boolean) => void;
+  clearBusinessHighlight: (revision: number) => void;
   resetAllFilters: () => void;
   syncFromParams: (filters: Partial<BusinessListStateFilters>) => void;
 }
+
+export type BusinessListView = "table" | "kanban";
 
 export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
   page: DEFAULT_BUSINESS_QUERY.page,
@@ -34,6 +47,12 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
   status: DEFAULT_BUSINESS_QUERY.status,
   isActive: DEFAULT_BUSINESS_QUERY.isActive,
   showStats: true,
+  showFilters: true,
+  view: "table",
+  kanbanScrollLeft: 0,
+  highlightedBusinessId: null,
+  highlightRevision: 0,
+  scrollToHighlightedBusiness: false,
 
   // Rule: Pagination: change page only; preserve filters/search/sort/limit
   setPage: (page: number) => set({ page }),
@@ -62,6 +81,26 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
     set({ isActive, page: 1 }),
 
   toggleStats: () => set((state) => ({ showStats: !state.showStats })),
+
+  toggleFilters: () => set((state) => ({ showFilters: !state.showFilters })),
+
+  setView: (view) => set({ view }),
+
+  setKanbanScrollLeft: (kanbanScrollLeft) => set({ kanbanScrollLeft }),
+
+  highlightBusiness: (id, scrollToItem = false) =>
+    set((state) => ({
+      highlightedBusinessId: String(id),
+      highlightRevision: state.highlightRevision + 1,
+      scrollToHighlightedBusiness: scrollToItem,
+    })),
+
+  clearBusinessHighlight: (revision) =>
+    set((state) =>
+      state.highlightRevision === revision
+        ? { highlightedBusinessId: null, scrollToHighlightedBusiness: false }
+        : state,
+    ),
 
   resetAllFilters: () =>
     set({

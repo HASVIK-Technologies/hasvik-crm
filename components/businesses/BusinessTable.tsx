@@ -50,27 +50,11 @@ import {
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
-import { STATUS_OPTIONS } from "@/lib/business/form-options";
+import { getLeadStatusLabel } from "@/lib/business/form-options";
 import { getWhatsAppNumbers, formatWhatsAppUrl } from "@/lib/business/mappers";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
-
-function getLeadStatusLabel(status?: string | null): string {
-  if (!status || typeof status !== "string") return "-";
-  const trimmed = status.trim();
-  if (!trimmed || trimmed === "-") return "-";
-
-  const upper = trimmed.toUpperCase();
-  const option = STATUS_OPTIONS.find(
-    (opt) => opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
-  );
-  if (option) return option.label;
-
-  return trimmed
-    .split(/[_\s]+/)
-    .filter(Boolean)
-    .map((word) => word.charAt(0).toUpperCase() + word.slice(1).toLowerCase())
-    .join(" ");
-}
+import BusinessViewToggle, { type BusinessView } from "./BusinessViewToggle";
+import { useBusinessHighlight } from "@/hooks/use-business-highlight";
 
 function formatDisplayString(val: unknown, fallback: string = "-"): string {
   if (!val) return fallback;
@@ -88,9 +72,11 @@ function formatDisplayString(val: unknown, fallback: string = "-"): string {
 function RowWhatsAppButton({
   item,
   size = "md",
+  onAction,
 }: {
   item: BusinessItem;
   size?: "sm" | "md";
+  onAction?: () => void;
 }) {
   const whatsappNumbers = getWhatsAppNumbers(item);
   const buttonSizeClass = size === "sm" ? "size-7" : "size-8.5";
@@ -157,6 +143,7 @@ function RowWhatsAppButton({
                 target="_blank"
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
+                onPointerDown={onAction}
                 className="flex w-full items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-[#f8fafc]"
               >
                 <div className="flex items-center gap-2 min-w-0">
@@ -189,6 +176,8 @@ interface BusinessTableProps {
   onPageChange: (page: number) => void;
   onItemsPerPageChange: (limit: number) => void;
   onClearFilters?: () => void;
+  view: BusinessView;
+  onViewChange: (view: BusinessView) => void;
 }
 
 export default function BusinessTable({
@@ -203,10 +192,13 @@ export default function BusinessTable({
   onPageChange,
   onItemsPerPageChange,
   onClearFilters,
+  view,
+  onViewChange,
 }: BusinessTableProps) {
   const router = useRouter();
   const [statusModalBusiness, setStatusModalBusiness] = useState<BusinessItem | null>(null);
   const updateStatusMutation = useUpdateBusinessStatus();
+  const { highlightBusiness, isBusinessHighlighted } = useBusinessHighlight();
 
   const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
   const sortLabel = isLatest ? "Latest First" : "Oldest First";
@@ -226,6 +218,7 @@ export default function BusinessTable({
       return;
     }
 
+    highlightBusiness(businessId, true);
     router.push(`/businesses/${businessId}`);
   };
 
@@ -293,6 +286,7 @@ export default function BusinessTable({
                 </DropdownMenuItem>
               </DropdownMenuContent>
             </DropdownMenu>
+            <BusinessViewToggle value={view} onChange={onViewChange} />
           </div>
         </div>
 
@@ -339,10 +333,15 @@ export default function BusinessTable({
               {businesses.map((item) => (
                 <div
                   key={item.id}
+                  data-business-item-id={String(item.id)}
                   onClick={(event) =>
                     handleRowClick(event, item.id, item.status === "Active")
                   }
-                  className={`flex items-start justify-between gap-3 border border-[#eaf0f6] bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all md:gap-4 md:p-4 ${
+                  className={`flex items-start justify-between gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 md:gap-4 md:p-4 ${
+                    isBusinessHighlighted(item.id)
+                      ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20"
+                      : "border-[#eaf0f6]"
+                  } ${
                     item.status === "Active"
                       ? "cursor-pointer hover:border-primary/40 hover:shadow-md"
                       : ""
@@ -413,7 +412,10 @@ export default function BusinessTable({
                         <TooltipTrigger asChild>
                           <a
                             href={`tel:${item.phone}`}
-                            onClick={(e) => e.stopPropagation()}
+                            onClick={(e) => {
+                              e.stopPropagation();
+                              highlightBusiness(item.id);
+                            }}
                             aria-label={`Call ${item.name}`}
                             className="flex size-7 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20"
                           >
@@ -423,7 +425,7 @@ export default function BusinessTable({
                         <TooltipContent>Call {item.name}</TooltipContent>
                       </Tooltip>
 
-                      <RowWhatsAppButton item={item} size="sm" />
+                      <RowWhatsAppButton item={item} size="sm" onAction={() => highlightBusiness(item.id)} />
 
                       <DropdownMenu>
                         <Tooltip>
@@ -447,9 +449,11 @@ export default function BusinessTable({
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                }}
+                                onSelect={() => {
+                                  highlightBusiness(item.id, true);
                                   router.push(`/businesses/${item.id}`);
                                 }}
-                                onSelect={() => router.push(`/businesses/${item.id}`)}
                                 className="cursor-pointer gap-2 text-xs"
                               >
                                 <Eye className="size-3.5" /> <span>View Details</span>
@@ -457,9 +461,11 @@ export default function BusinessTable({
                               <DropdownMenuItem
                                 onClick={(e) => {
                                   e.stopPropagation();
+                                }}
+                                onSelect={() => {
+                                  highlightBusiness(item.id, true);
                                   router.push(`/businesses/form/${item.id}`);
                                 }}
-                                onSelect={() => router.push(`/businesses/form/${item.id}`)}
                                 className="cursor-pointer gap-2 text-xs"
                               >
                                 <Pencil className="size-3.5" /> <span>Edit Business</span>
@@ -568,10 +574,15 @@ export default function BusinessTable({
                 businesses.map((item) => (
                   <TableRow
                     key={item.id}
+                    data-business-item-id={String(item.id)}
                     onClick={(event) =>
                       handleRowClick(event, item.id, item.status === "Active")
                     }
-                    className={`border-b border-[#f1f5f9] transition-colors ${
+                    className={`border-b border-[#f1f5f9] transition-colors duration-500 ${
+                      isBusinessHighlighted(item.id)
+                        ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25"
+                        : ""
+                    } ${
                       item.status === "Active"
                         ? "cursor-pointer hover:bg-[#f8fafc]/80"
                         : ""
@@ -660,7 +671,10 @@ export default function BusinessTable({
                           <TooltipTrigger asChild>
                             <a
                               href={`tel:${item.phone}`}
-                              onClick={(e) => e.stopPropagation()}
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                highlightBusiness(item.id);
+                              }}
                               aria-label={`Call ${item.name}`}
                               className="flex size-8 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20"
                             >
@@ -671,7 +685,7 @@ export default function BusinessTable({
                         </Tooltip>
 
                         {/* WhatsApp / Message */}
-                        <RowWhatsAppButton item={item} size="md" />
+                        <RowWhatsAppButton item={item} size="md" onAction={() => highlightBusiness(item.id)} />
 
                         {/* 3 Dots Menu */}
                         <DropdownMenu>
@@ -695,9 +709,11 @@ export default function BusinessTable({
                                 <DropdownMenuItem
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                  }}
+                                  onSelect={() => {
+                                    highlightBusiness(item.id, true);
                                     router.push(`/businesses/${item.id}`);
                                   }}
-                                  onSelect={() => router.push(`/businesses/${item.id}`)}
                                   className="cursor-pointer gap-2 text-xs"
                                 >
                                   <Eye className="size-3.5" /> <span>View Details</span>
@@ -705,9 +721,11 @@ export default function BusinessTable({
                                 <DropdownMenuItem
                                   onClick={(e) => {
                                     e.stopPropagation();
+                                  }}
+                                  onSelect={() => {
+                                    highlightBusiness(item.id, true);
                                     router.push(`/businesses/form/${item.id}`);
                                   }}
-                                  onSelect={() => router.push(`/businesses/form/${item.id}`)}
                                   className="cursor-pointer gap-2 text-xs"
                                 >
                                   <Pencil className="size-3.5" /> <span>Edit Business</span>
