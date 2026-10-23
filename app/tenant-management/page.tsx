@@ -48,6 +48,7 @@ import {
   hasCurrentSubscriptionAccess,
 } from "@/lib/subscriptions/access";
 import { useAuthStore } from "@/store/auth-store";
+import { isSuperAdmin, isTenantAdmin } from "@/types/auth";
 import type { Subscription, SubscriptionPlan } from "@/types/subscription";
 import type { Tenant, UpdateTenantPayload } from "@/types/tenant";
 
@@ -206,8 +207,8 @@ function TenantEditor({
 
 export default function TenantManagementPage() {
   const user = useAuthStore((state) => state.user);
-  const hasvikAdmin = user?.isSuperAdmin ?? false;
-  const tenantAdmin = !hasvikAdmin && user?.role.toUpperCase() === "ADMIN";
+  const hasvikAdmin = isSuperAdmin(user);
+  const tenantAdmin = isTenantAdmin(user);
   const tenantsQuery = useTenantsQuery(true, user?.userId);
   const subscriptionsQuery = useSubscriptionsQuery(user?.userId);
   const plansQuery = useSubscriptionPlansQuery();

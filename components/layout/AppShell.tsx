@@ -24,6 +24,7 @@ import { useAuthSession, useLogout, useTokenRefresh } from "@/hooks/use-auth";
 import { useTenantQuery } from "@/hooks/use-tenants";
 import { useSubscriptionsQuery } from "@/hooks/use-subscriptions";
 import { useAuthStore } from "@/store/auth-store";
+import { isSuperAdmin, isTenantAdmin } from "@/types/auth";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import {
   getSubscriptionTenantId,
@@ -50,14 +51,6 @@ const navigation = [
 
 function isPublicPath(pathname: string) {
   return pathname === "/" || pathname === "/explore-crm" || pathname === "/tenant";
-}
-
-function isTenantAdmin(user?: { role?: string; isSuperAdmin?: boolean } | null) {
-  return !user?.isSuperAdmin && user?.role?.toUpperCase() === "ADMIN";
-}
-
-function isHasvikAdmin(user?: { isSuperAdmin?: boolean } | null) {
-  return user?.isSuperAdmin ?? false;
 }
 
 function isNavigationItemVisible(
@@ -155,7 +148,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const clearAuth = useAuthStore((state) => state.clearAuth);
   const pageDetailsForPath = getPageDetails(pathname);
   const tenantAdmin = isTenantAdmin(user);
-  const hasvikAdmin = isHasvikAdmin(user);
+  const hasvikAdmin = isSuperAdmin(user);
   const tenantQuery = useTenantQuery(
     user?.tenantId,
     !publicPath && !hasvikAdmin,
@@ -216,7 +209,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       authStatus === "authenticated" &&
       user &&
       !isTenantAdmin(user) &&
-      !isHasvikAdmin(user)
+      !isSuperAdmin(user)
     ) {
       router.replace("/businesses");
     }
@@ -224,7 +217,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       pathname === "/tenant-management" &&
       authStatus === "authenticated" &&
       user &&
-      !isHasvikAdmin(user) &&
+      !isSuperAdmin(user) &&
       !isTenantAdmin(user)
     ) {
       router.replace("/businesses");
@@ -234,7 +227,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       authStatus === "authenticated" &&
       user &&
       !isTenantAdmin(user) &&
-      !isHasvikAdmin(user)
+      !isSuperAdmin(user)
     ) {
       router.replace("/businesses");
     }

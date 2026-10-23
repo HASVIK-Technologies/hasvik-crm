@@ -2,13 +2,20 @@ export type AuthUser = {
   userId: string;
   email: string;
   role: string;
-  isSuperAdmin: boolean;
   firstName: string;
   lastName: string;
   fullName: string;
   phoneNumber?: string;
   tenantId?: string;
 };
+
+export function isSuperAdmin(user?: Pick<AuthUser, "role"> | null) {
+  return user?.role?.trim().toUpperCase() === "SUPERADMIN";
+}
+
+export function isTenantAdmin(user?: Pick<AuthUser, "role"> | null) {
+  return !isSuperAdmin(user) && user?.role?.trim().toUpperCase() === "ADMIN";
+}
 
 export type TokenResponse = {
   accessToken: string;

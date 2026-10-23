@@ -21,6 +21,7 @@ import {
 } from "lucide-react";
 import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
 import { useAuthStore } from "@/store/auth-store";
+import { isSuperAdmin, isTenantAdmin } from "@/types/auth";
 import {
   useCreateSubscription,
   useRenewSubscription,
@@ -400,9 +401,8 @@ function SubscriptionRow({
 
 export default function SubscriptionsPage() {
   const user = useAuthStore((state) => state.user);
-  const hasvikAdmin = user?.isSuperAdmin ?? false;
-  const tenantAdmin =
-    !hasvikAdmin && user?.role.toUpperCase() === "ADMIN";
+  const hasvikAdmin = isSuperAdmin(user);
+  const tenantAdmin = isTenantAdmin(user);
   const plansQuery = useSubscriptionPlansQuery();
   const subscriptionsQuery = useSubscriptionsQuery(user?.userId);
   const ownTenantQuery = useTenantQuery(user?.tenantId, !hasvikAdmin);
