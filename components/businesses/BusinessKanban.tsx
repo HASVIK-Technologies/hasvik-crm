@@ -57,6 +57,7 @@ export default function BusinessKanban({
   );
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
+  const [mobileStage, setMobileStage] = useState(STATUS_OPTIONS[0].value);
   const grouped = useMemo(
     () =>
       Object.fromEntries(
@@ -119,14 +120,14 @@ export default function BusinessKanban({
           <h2 className="text-lg font-bold tracking-tight text-slate-900">
             Sales pipeline <span className="font-medium text-slate-500">({totalCount})</span>
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500">Drag an active business to update its lead stage.</p>
+          <p className="mt-0.5 text-xs text-slate-500"><span className="hidden md:inline">Drag an active business to update its lead stage.</span><span className="md:hidden">Review businesses by stage and update their progress.</span></p>
         </div>
         <div className="flex items-center gap-2">
           <BusinessViewToggle value={view} onChange={onViewChange} />
         </div>
       </div>
 
-      <div className="sticky top-[81px] z-10 overflow-hidden border-b border-slate-200 bg-slate-50/95 shadow-[0_3px_8px_rgba(15,23,42,0.08)] backdrop-blur">
+      <div className="sticky top-[81px] z-10 hidden overflow-hidden border-b border-slate-200 bg-slate-50/95 shadow-[0_3px_8px_rgba(15,23,42,0.08)] backdrop-blur md:block">
         <div className="flex h-9 items-center justify-between border-b border-slate-200 bg-white px-2">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -188,6 +189,105 @@ export default function BusinessKanban({
         </div>
       </div>
 
+      <div className="md:hidden">
+        <div className="sticky top-16 z-10 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+          <div className="flex snap-x gap-2 overflow-x-auto px-3 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
+            {STATUS_OPTIONS.map((stage) => {
+              const active = mobileStage === stage.value;
+              const count = grouped[stage.value]?.length ?? 0;
+              return (
+                <button
+                  key={stage.value}
+                  type="button"
+                  onClick={(event) => {
+                    setMobileStage(stage.value);
+                    event.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" });
+                  }}
+                  className={cn(
+                    "flex h-9 shrink-0 snap-center items-center gap-2 border px-3 text-[11px] font-bold uppercase tracking-wide transition-colors",
+                    active
+                      ? "border-brand-blue bg-blue-50 text-brand-blue"
+                      : "border-slate-200 bg-white text-slate-500",
+                  )}
+                >
+                  <span className={cn("h-4 w-1", getLeadStatusVisual(stage.value).accent)} />
+                  {stage.label}
+                  <span className={cn("flex min-w-5 items-center justify-center px-1 py-0.5 text-[10px]", active ? "bg-brand-blue text-white" : "bg-slate-100 text-slate-500")}>{count}</span>
+                </button>
+              );
+            })}
+          </div>
+        </div>
+
+        <div className="space-y-3 bg-slate-50/70 p-3">
+          {isLoading ? (
+            Array.from({ length: 3 }, (_, index) => <div key={index} className="h-40 animate-pulse bg-white" />)
+          ) : (grouped[mobileStage] ?? []).length === 0 ? (
+            <div className="border border-dashed border-slate-300 bg-white px-4 py-12 text-center">
+              <p className="text-sm font-semibold text-slate-700">No businesses in this stage</p>
+              <p className="mt-1 text-xs text-slate-500">Choose another stage to continue reviewing the pipeline.</p>
+            </div>
+          ) : (
+            (grouped[mobileStage] ?? []).map((business) => (
+              <article
+                key={business.id}
+                data-business-item-id={String(business.id)}
+                onClick={() => {
+                  if (business.status !== "Active") return;
+                  highlightBusiness(business.id, true);
+                  router.push(`/businesses/${business.id}`);
+                }}
+                className={cn(
+                  "border bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.06)] transition-all duration-500",
+                  isBusinessHighlighted(business.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-slate-200",
+                  business.status === "Active" ? "cursor-pointer" : "opacity-60",
+                )}
+              >
+                <div className="flex items-start gap-3">
+                  <Avatar className={cn("size-10", business.avatarBg)}>
+                    <AvatarFallback className={cn("text-xs font-bold", business.avatarBg, business.avatarTextColor)}>{business.initials}</AvatarFallback>
+                  </Avatar>
+                  <div className="min-w-0 flex-1">
+                    <h3 className="truncate text-sm font-bold text-slate-900">{business.name}</h3>
+                    <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
+                  </div>
+                  <DropdownMenu>
+                    <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}><PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-8 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
+                    <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(event) => event.stopPropagation()}>
+                      <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
+                    </DropdownMenuContent>
+                  </DropdownMenu>
+                </div>
+                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+                  <div className="flex min-w-0 items-center gap-2"><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
+                  <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.nextFollowUp === "-" ? "No follow-up" : business.nextFollowUp}</span></div>
+                </div>
+                <div className="mt-3 flex items-center justify-between gap-3" onClick={(event) => event.stopPropagation()}>
+                  {business.status === "Inactive" ? <StatusBadge status="INACTIVE" /> : <span className="text-[11px] font-medium text-slate-500">Move to stage</span>}
+                  {business.status === "Active" && (
+                    <select
+                      value={business.leadStatus?.toUpperCase() || "NEW"}
+                      disabled={mutation.isPending}
+                      onChange={(event) => {
+                        const status = event.target.value;
+                        setMobileStage(status);
+                        highlightBusiness(business.id);
+                        mutation.mutate({ id: business.id, status });
+                      }}
+                      aria-label={`Move ${business.name} to stage`}
+                      className="h-9 min-w-0 flex-1 border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 outline-none focus:border-brand-blue"
+                    >
+                      {STATUS_OPTIONS.map((stage) => <option key={stage.value} value={stage.value}>{stage.label}</option>)}
+                    </select>
+                  )}
+                </div>
+              </article>
+            ))
+          )}
+        </div>
+      </div>
+
       <div
         ref={boardScrollerRef}
         onScroll={(event) => {
@@ -195,7 +295,7 @@ export default function BusinessKanban({
           setHorizontalOffset(event.currentTarget.scrollLeft);
           updateScrollControls();
         }}
-        className="overflow-x-auto bg-slate-50/70"
+        className="hidden overflow-x-auto bg-slate-50/70 md:block"
       >
         <div className="min-w-[1680px] p-3 md:p-4">
         <div className="grid grid-cols-6 gap-3">
