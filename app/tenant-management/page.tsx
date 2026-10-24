@@ -20,6 +20,7 @@ import KpiCards from "@/components/common/KpiCards";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import ListPagination from "@/components/common/ListPagination";
 import ListTableToolbar from "@/components/common/ListTableToolbar";
+import { DataTableMobileCard, DataTableMobileList, DataTableShell } from "@/components/common/DataTableLayout";
 import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
 import ManagementRowActions from "@/components/common/ManagementRowActions";
 import ListPageLayout from "@/components/layout/ListPageLayout";
@@ -83,7 +84,7 @@ function formatDate(value?: string) {
 function StatusBadge({ active }: { active: boolean }) {
   return (
     <span
-      className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${
+      className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-semibold ${
         active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
       }`}
     >
@@ -391,7 +392,7 @@ export default function TenantManagementPage() {
           />
         }
         content={
-          <section className="overflow-hidden rounded-2xl border border-[#e4ecf2] bg-white shadow-[0_4px_16px_rgba(20,40,60,0.03)]">
+          <DataTableShell>
             <ListTableToolbar
               title={hasvikAdmin ? "Tenant workspaces" : "My workspace"}
               total={filteredTenants.length}
@@ -458,9 +459,9 @@ export default function TenantManagementPage() {
               </div>
             ) : (
               <>
-                <div data-layout-mobile className="flex flex-col gap-3 p-3 md:gap-4 md:p-4">
+                <DataTableMobileList>
                   {pagedTenants.map((tenant) => (
-                    <article key={tenant.id} className={`rounded-2xl border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 sm:p-4 ${isItemHighlighted(tenant.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}>
+                    <DataTableMobileCard key={tenant.id} className={isItemHighlighted(tenant.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : ""}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex min-w-0 items-start gap-3">
                           <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary">
@@ -487,26 +488,26 @@ export default function TenantManagementPage() {
                           plans={plans}
                         />
                       </div>
-                    </article>
+                    </DataTableMobileCard>
                   ))}
-                </div>
+                </DataTableMobileList>
                 <div data-layout-desktop>
                   <Table className="w-full min-w-[850px] text-left">
-                    <TableHeader className="text-[11px] font-semibold text-[#64748b]">
+                    <TableHeader>
                       <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
                         <TableHead className="py-4 pl-6 pr-4">Workspace</TableHead>
                         <TableHead className="px-4 py-4">Contact</TableHead>
                         <TableHead className="px-4 py-4">Subscription</TableHead>
                         <TableHead className="px-4 py-4">Status</TableHead>
-                        <TableHead className="py-4 pl-4 pr-6 text-right">Actions</TableHead>
+                        <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
                     <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
                       {pagedTenants.map((tenant) => (
-                        <TableRow key={tenant.id} className={`border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(tenant.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
+                        <TableRow key={tenant.id} className={`group border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(tenant.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
                           <TableCell className="py-4 pl-6 pr-4">
                             <div className="flex items-center gap-3">
-                              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-primary">
+                              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
                                 <Building2 className="size-4" />
                               </span>
                               <div className="min-w-0">
@@ -526,7 +527,7 @@ export default function TenantManagementPage() {
                             />
                           </TableCell>
                           <TableCell className="px-4 py-4"><StatusBadge active={tenant.isActive} /></TableCell>
-                          <TableCell className="py-4 pl-4 pr-6">
+                          <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
                             <TenantActions
                               tenant={tenant}
                               canManageTenants={hasvikAdmin || tenantAdmin}
@@ -552,7 +553,7 @@ export default function TenantManagementPage() {
                 />
               </>
             )}
-          </section>
+          </DataTableShell>
         }
       />
 

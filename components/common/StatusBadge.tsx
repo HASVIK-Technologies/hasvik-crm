@@ -48,7 +48,7 @@ export function StatusBadge({
       )}
       {...props}
     >
-      {label ?? formatStatus(status)}
+      <span className="truncate">{label ?? formatStatus(status)}</span>
     </Badge>
   );
 }

@@ -23,6 +23,7 @@ import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog
 import ManagementRowActions from "@/components/common/ManagementRowActions";
 import ListPagination from "@/components/common/ListPagination";
 import ListTableToolbar from "@/components/common/ListTableToolbar";
+import { DataTableMobileCard, DataTableMobileList, DataTableShell } from "@/components/common/DataTableLayout";
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import SortableColumnHeader from "@/components/common/SortableColumnHeader";
 import {
@@ -176,7 +177,7 @@ export default function BusinessCategoriesPage() {
       }
       content={
         <>
-        <section className="overflow-hidden rounded-2xl border border-[#e4ecf2] bg-white shadow-[0_4px_16px_rgba(20,40,60,0.03)]">
+        <DataTableShell>
           <ListTableToolbar
             title="Categories"
             total={total}
@@ -205,12 +206,12 @@ export default function BusinessCategoriesPage() {
           </div>
         ) : (
           <>
-            <div data-layout-mobile className="flex flex-col gap-3 p-3 md:gap-4 md:p-4">
+            <DataTableMobileList>
               {categories.map((category, index) => {
                 const id = categoryId(category) || `${category.name}-${index}`;
                 const active = category.isActive !== false;
                 return (
-                  <article key={id} className={`flex items-start justify-between gap-3 rounded-2xl border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 sm:p-4 ${isItemHighlighted(id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}>
+                  <DataTableMobileCard key={id} className={`flex items-start justify-between gap-3 ${isItemHighlighted(id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : ""}`}>
                     <div className="flex min-w-0 items-start gap-3">
                       <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-primary"><Tags className="size-4" /></span>
                       <div className="min-w-0">
@@ -227,13 +228,13 @@ export default function BusinessCategoriesPage() {
                       onEdit={() => openEdit(category)}
                       onAction={() => setChangingStatusCategory(category)}
                     />
-                  </article>
+                  </DataTableMobileCard>
                 );
               })}
-            </div>
+            </DataTableMobileList>
             <div data-layout-desktop>
               <Table className="w-full min-w-[820px] text-left">
-                <TableHeader className="text-[11px] font-semibold text-[#64748b]">
+              <TableHeader>
                   <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
                     <TableHead className="py-4 pl-6 pr-4">
                       <SortableColumnHeader label="Category" field="name" sortBy={sortBy} sortOrder={sortOrder} onSort={toggleSort} />
@@ -242,7 +243,7 @@ export default function BusinessCategoriesPage() {
                     <TableHead className="px-4 py-4">
                       <SortableColumnHeader label="Status" field="isActive" sortBy={sortBy} sortOrder={sortOrder} onSort={toggleSort} />
                     </TableHead>
-                    <TableHead className="py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
+                    <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
                 <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
@@ -250,10 +251,10 @@ export default function BusinessCategoriesPage() {
                     const id = categoryId(category) || `${category.name}-${index}`;
                     const active = category.isActive !== false;
                     return (
-                      <TableRow key={id} className={`border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
+                      <TableRow key={id} className={`group border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
                         <TableCell className="py-4 pl-6 pr-4">
                           <div className="flex items-center gap-3">
-                            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-primary"><Tags className="size-4" /></span>
+                            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Tags className="size-4" /></span>
                             <span className="text-sm font-bold text-[#0f172a]">{category.name}</span>
                           </div>
                         </TableCell>
@@ -261,7 +262,7 @@ export default function BusinessCategoriesPage() {
                         <TableCell className="px-4 py-4">
                           <span className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold ${active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{active ? "Active" : "Inactive"}</span>
                         </TableCell>
-                        <TableCell className="py-4 pl-4 pr-6">
+                        <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
                           <ManagementRowActions
                             editLabel={`Edit ${category.name}`}
                             actionLabel={active ? "Deactivate category" : "Activate category"}
@@ -291,7 +292,7 @@ export default function BusinessCategoriesPage() {
             }}
           />
         )}
-      </section>
+      </DataTableShell>
 
       <DialogPrimitive.Root open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogPrimitive.Portal>

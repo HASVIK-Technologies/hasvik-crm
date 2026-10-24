@@ -1,6 +1,7 @@
 "use client";
 
 import Link from "next/link";
+import RecordLink from "@/components/common/RecordLink";
 import {
   Bell,
   CalendarClock,
@@ -79,13 +80,13 @@ export default function FollowUpDetails({
           </Link>
           <div className="min-w-0">
             <div className="flex flex-wrap items-center gap-3">
-              <h1 className="truncate text-xl font-bold tracking-tight text-[#334155] sm:text-2xl">
-                <Link
+              <h1 className="max-w-72 truncate text-xl font-bold tracking-tight text-[#334155] sm:max-w-xl sm:text-2xl" title={followUp.businessName}>
+                <RecordLink
                   href={`/businesses/${followUp.businessId}`}
-                  className="transition-colors hover:text-primary hover:underline"
+                  className="block truncate"
                 >
                   {followUp.businessName}
-                </Link>
+                </RecordLink>
               </h1>
               <StatusBadge
                 status={followUp.status}

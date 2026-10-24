@@ -8,6 +8,7 @@ import {
   DropdownMenuItem,
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
+import { DataTableHeader } from "@/components/common/DataTableLayout";
 
 export type ListSortOption = { value: string; label: string };
 
@@ -27,11 +28,7 @@ export default function ListTableToolbar({
   const selectedSort = sortOptions.find((option) => option.value === sortValue);
 
   return (
-    <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
-      <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
-        {title} <span className="font-medium text-[#64748b]">({total})</span>
-      </h2>
-      <DropdownMenu>
+    <DataTableHeader title={title} total={total} actions={<DropdownMenu>
         <DropdownMenuTrigger asChild>
           <OutlinedButton>
             <ArrowDownUp />
@@ -50,7 +47,6 @@ export default function ListTableToolbar({
             </DropdownMenuItem>
           ))}
         </DropdownMenuContent>
-      </DropdownMenu>
-    </div>
+      </DropdownMenu>} />
   );
 }

@@ -2,11 +2,11 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import Link from "next/link";
-import { CalendarClock, ChevronLeft, ChevronRight, Eye, GripVertical, MoreVertical, Pencil, UserRound, UserRoundCog } from "lucide-react";
-import BusinessViewToggle, { type BusinessView } from "./BusinessViewToggle";
+import RecordLink from "@/components/common/RecordLink";
+import { ArrowDownUp, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Eye, GripVertical, MoreVertical, Pencil, UserRound, UserRoundCog } from "lucide-react";
 import ListPagination from "@/components/common/ListPagination";
 import PlainButton from "@/components/common/PlainButton";
+import OutlinedButton from "@/components/common/OutlinedButton";
 import { ActivityStateText } from "@/components/common/ActivityStateText";
 import { PhoneActionMenu, WhatsAppActionMenu } from "@/components/common/ContactActionMenu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
@@ -29,20 +29,22 @@ export default function BusinessKanban({
   businesses,
   totalCount,
   isLoading,
-  view,
-  onViewChange,
   currentPage,
   itemsPerPage,
+  sortOrder,
+  onSortOrderChange,
+  hasActiveFilters,
   onPageChange,
   onItemsPerPageChange,
 }: {
   businesses: BusinessItem[];
   totalCount: number;
   isLoading?: boolean;
-  view: BusinessView;
-  onViewChange: (view: BusinessView) => void;
   currentPage: number;
   itemsPerPage: number;
+  sortOrder: string;
+  onSortOrderChange: (sort: string) => void;
+  hasActiveFilters: boolean;
   onPageChange: (page: number) => void;
   onItemsPerPageChange: (limit: number) => void;
 }) {
@@ -62,6 +64,9 @@ export default function BusinessKanban({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [mobileStage, setMobileStage] = useState(STATUS_OPTIONS[0].value);
   const [assignmentBusiness, setAssignmentBusiness] = useState<BusinessItem | null>(null);
+  const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
+  const firstResult = totalCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
+  const lastResult = Math.min(currentPage * itemsPerPage, totalCount);
   const grouped = useMemo(
     () =>
       Object.fromEntries(
@@ -120,15 +125,27 @@ export default function BusinessKanban({
   return (
     <div className="border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
       <div className="flex flex-col gap-3 border-b border-slate-100 p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
-        <div>
+        <div className="min-w-0">
           <h2 className="text-lg font-bold tracking-tight text-slate-900">
             Sales pipeline <span className="font-medium text-slate-500">({totalCount})</span>
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500"><span className="hidden md:inline">Drag an active business to update its lead stage.</span><span className="md:hidden">Review businesses by stage and update their progress.</span></p>
+          <p className="mt-0.5 text-xs text-slate-500">
+            Showing {firstResult}–{lastResult} of {totalCount}. <span className="hidden md:inline">Drag an active business to update its lead stage.</span>
+          </p>
         </div>
-        <div className="flex items-center gap-2">
-          <BusinessViewToggle value={view} onChange={onViewChange} />
-        </div>
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <OutlinedButton size="sm" className="shrink-0">
+              <ArrowDownUp className="size-4" />
+              <span className="hidden sm:inline">{isLatest ? "Latest First" : "Oldest First"}</span>
+              <ChevronDown className="size-3.5" />
+            </OutlinedButton>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="end" className="w-40 bg-white">
+            <DropdownMenuItem onSelect={() => onSortOrderChange("-createdAt")} className={cn("text-xs", isLatest && "font-semibold text-primary")}>Latest First</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onSortOrderChange("+createdAt")} className={cn("text-xs", !isLatest && "font-semibold text-primary")}>Oldest First</DropdownMenuItem>
+          </DropdownMenuContent>
+        </DropdownMenu>
       </div>
 
       <div className="sticky top-[81px] z-10 hidden overflow-hidden border-b border-slate-200 bg-slate-50/95 shadow-[0_3px_8px_rgba(15,23,42,0.08)] backdrop-blur md:block">
@@ -228,8 +245,8 @@ export default function BusinessKanban({
             Array.from({ length: 3 }, (_, index) => <div key={index} className="h-40 animate-pulse bg-white" />)
           ) : (grouped[mobileStage] ?? []).length === 0 ? (
             <div className="border border-dashed border-slate-300 bg-white px-4 py-12 text-center">
-              <p className="text-sm font-semibold text-slate-700">No businesses in this stage</p>
-              <p className="mt-1 text-xs text-slate-500">Choose another stage to continue reviewing the pipeline.</p>
+              <p className="text-sm font-semibold text-slate-700">{hasActiveFilters ? "No matching businesses" : "No businesses from this page"}</p>
+              <p className="mt-1 text-xs text-slate-500">{hasActiveFilters ? "Adjust the active filters or choose another stage." : "Choose another stage or page to continue reviewing the pipeline."}</p>
             </div>
           ) : (
             (grouped[mobileStage] ?? []).map((business) => (
@@ -245,14 +262,16 @@ export default function BusinessKanban({
                   "border bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.06)] transition-all duration-500",
                   isBusinessHighlighted(business.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-slate-200",
                   business.status === "Active" ? "cursor-pointer" : "opacity-60",
+                  mutation.isPending && String(mutation.variables?.id) === String(business.id) && "pointer-events-none opacity-70",
                 )}
+                aria-busy={mutation.isPending && String(mutation.variables?.id) === String(business.id)}
               >
                 <div className="flex items-start gap-3">
                   <Avatar className={cn("size-10", business.avatarBg)}>
                     <AvatarFallback className={cn("text-xs font-bold", business.avatarBg, business.avatarTextColor)}>{business.initials}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
-                    <h3 className="truncate text-sm font-bold text-slate-900">{business.name}</h3>
+                    <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-sm" title={business.name}>{business.name}</RecordLink>
                     <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
                   </div>
                   {business.status === "Active" && <DropdownMenu>
@@ -265,9 +284,10 @@ export default function BusinessKanban({
                   </DropdownMenu>}
                 </div>
                 <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
-                  <div className="flex min-w-0 items-center gap-2"><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
-                  {business.lastFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <Link href={`/follow-ups/${business.lastFollowUpId}`} className="truncate font-semibold text-primary hover:underline">{business.lastFollowUp}</Link> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
-                  {business.nextFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <Link href={`/follow-ups/${business.nextFollowUpId}`} className="truncate font-semibold text-primary hover:underline">{business.nextFollowUp}</Link> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
+                  {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
+                  <div className={cn("flex min-w-0 items-center gap-2", business.owner ? "" : "font-semibold text-amber-700")}><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
+                  {business.lastFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
+                  {business.nextFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="truncate">{business.nextFollowUp}</RecordLink> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3" onClick={(event) => event.stopPropagation()}>
                   {business.status === "Inactive" ? <ActivityStateText active={false} /> : <div className="flex items-center gap-1"><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
@@ -326,7 +346,7 @@ export default function BusinessKanban({
                   {isLoading ? (
                     Array.from({ length: 2 }, (_, index) => <div key={index} className="h-32 animate-pulse bg-white" />)
                   ) : items.length === 0 ? (
-                    <div className="border border-dashed border-slate-300 bg-white/60 px-3 py-8 text-center text-xs text-slate-500">No businesses in this stage</div>
+                    <div className="border border-dashed border-slate-300 bg-white/60 px-3 py-8 text-center text-xs text-slate-500">{hasActiveFilters ? "No businesses match the active filters" : "No businesses from this page"}</div>
                   ) : (
                     items.map((business) => (
                       <article
@@ -350,7 +370,9 @@ export default function BusinessKanban({
                             : "border-slate-200",
                           business.status === "Active" ? "hover:border-slate-300 hover:shadow-md" : "cursor-default opacity-60",
                           String(draggedId) === String(business.id) && "opacity-40",
+                          mutation.isPending && String(mutation.variables?.id) === String(business.id) && "pointer-events-none opacity-70",
                         )}
+                        aria-busy={mutation.isPending && String(mutation.variables?.id) === String(business.id)}
                       >
                         <div className="flex items-start gap-2.5">
                           <GripVertical className="mt-1 size-4 shrink-0 text-slate-300 group-hover:text-slate-500" />
@@ -358,7 +380,7 @@ export default function BusinessKanban({
                             <AvatarFallback className={cn("text-xs font-bold", business.avatarBg, business.avatarTextColor)}>{business.initials}</AvatarFallback>
                           </Avatar>
                           <div className="min-w-0 flex-1">
-                            <h4 className="truncate text-sm font-bold text-slate-900">{business.name}</h4>
+                            <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-sm" title={business.name}>{business.name}</RecordLink>
                             <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
                           </div>
                           {business.status === "Active" && <DropdownMenu>
@@ -379,9 +401,10 @@ export default function BusinessKanban({
                         </div>
 
                         <div className="mt-3 space-y-2 border-t border-slate-100 pt-2.5 text-xs text-slate-600">
-                          <div className="flex items-center gap-2"><UserRound className="size-3.5 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
-                          {business.lastFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <Link href={`/follow-ups/${business.lastFollowUpId}`} className="truncate font-semibold text-primary hover:underline">{business.lastFollowUp}</Link> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
-                          {business.nextFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <Link href={`/follow-ups/${business.nextFollowUpId}`} className="truncate font-semibold text-primary hover:underline">{business.nextFollowUp}</Link> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
+                          {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
+                          <div className={cn("flex items-center gap-2", business.owner ? "" : "font-semibold text-amber-700")}><UserRound className="size-3.5 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
+                          {business.lastFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
+                          {business.nextFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="truncate">{business.nextFollowUp}</RecordLink> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
                         </div>
                         {business.status === "Inactive" ? <ActivityStateText active={false} className="mt-3" /> : <div className="mt-3 flex items-center gap-1 border-t border-slate-100 pt-2" onClick={(event) => event.stopPropagation()}><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
                       </article>

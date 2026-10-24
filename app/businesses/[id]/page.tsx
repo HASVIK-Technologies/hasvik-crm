@@ -39,6 +39,7 @@ import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
+import RecordLink from "@/components/common/RecordLink";
 import { formatLeadStatus } from "@/lib/business/form-options";
 import {
   DropdownMenu,
@@ -212,7 +213,7 @@ export default function BusinessDetails() {
                 </Avatar>
                 <div className="mt-0.5 flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <CardTitle className="text-lg font-bold tracking-tight text-[#0f172a] sm:text-2xl break-words min-w-0">
+                    <CardTitle className="min-w-0 max-w-full truncate text-lg font-bold tracking-tight text-[#0f172a] sm:text-2xl" title={business.name}>
                       {business.name}
                     </CardTitle>
                     <div className="flex flex-wrap items-center gap-1.5 shrink-0">
@@ -384,11 +385,11 @@ export default function BusinessDetails() {
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       {nextFollowUp && !isInactive ? (
-                        <Link href={`/follow-ups/${nextFollowUp.id}`} className="text-sm font-semibold text-primary hover:underline">
+                        <RecordLink href={`/follow-ups/${nextFollowUp.id}`} className="text-sm">
                           {dateFmt.format(new Date(nextFollowUp.scheduledAt))}
-                        </Link>
+                        </RecordLink>
                       ) : business?.nextFollowUp && business.nextFollowUp !== "-" ? (
-                        business.nextFollowUpId && !isInactive ? <Link href={`/follow-ups/${business.nextFollowUpId}`} className="text-sm font-semibold text-primary hover:underline">{business.nextFollowUp}</Link> : <p className="text-sm font-semibold text-slate-800">{business.nextFollowUp}</p>
+                        business.nextFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="text-sm">{business.nextFollowUp}</RecordLink> : <p className="text-sm font-semibold text-slate-800">{business.nextFollowUp}</p>
                       ) : (
                         <p className="text-sm font-semibold text-slate-800">
                           -
@@ -402,7 +403,7 @@ export default function BusinessDetails() {
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-slate-500">Last follow-up</p>
                     <div className="mt-1 truncate text-sm font-semibold text-slate-800">
-                      {lastFollowUpItem ? (!isInactive ? <Link href={`/follow-ups/${lastFollowUpItem.id}`} className="text-primary hover:underline">{dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))}</Link> : dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))) : business?.lastFollowUp && business.lastFollowUp !== "-" ? (business.lastFollowUpId && !isInactive ? <Link href={`/follow-ups/${business.lastFollowUpId}`} className="text-primary hover:underline">{business.lastFollowUp}</Link> : business.lastFollowUp) : "-"}
+                      {lastFollowUpItem ? (!isInactive ? <RecordLink href={`/follow-ups/${lastFollowUpItem.id}`}>{dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))}</RecordLink> : dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))) : business?.lastFollowUp && business.lastFollowUp !== "-" ? (business.lastFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`}>{business.lastFollowUp}</RecordLink> : business.lastFollowUp) : "-"}
                     </div>
                   </div>
                 </div>

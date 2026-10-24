@@ -34,6 +34,7 @@ import type {
   FollowUpItem,
   FollowUpQueryFilters,
 } from "@/types/follow-up";
+import FollowUpViewToggle from "@/components/follow-ups/FollowUpViewToggle";
 
 function dayBoundary(offset: number, end = false) {
   const date = new Date();
@@ -42,11 +43,15 @@ function dayBoundary(offset: number, end = false) {
   return date.toISOString();
 }
 
-function monthBoundary(month: string, end = false) {
+function calendarGridBoundary(month: string, end = false) {
   const [year, monthIndex] = month.split("-").map(Number);
-  const date = end
-    ? new Date(year, monthIndex, 0, 23, 59, 59, 999)
-    : new Date(year, monthIndex - 1, 1, 0, 0, 0, 0);
+  const first = new Date(year, monthIndex - 1, 1, 0, 0, 0, 0);
+  first.setDate(first.getDate() - ((first.getDay() + 6) % 7));
+  const date = new Date(first);
+  if (end) {
+    date.setDate(date.getDate() + 41);
+    date.setHours(23, 59, 59, 999);
+  }
   return date.toISOString();
 }
 
@@ -73,8 +78,10 @@ export default function FollowupsPage() {
       return {
         ...commonFilters,
         isCalendarView: true,
-        fromDate: monthBoundary(filters.calendarMonth),
-        toDate: monthBoundary(filters.calendarMonth, true),
+        // Include the complete six-week calendar grid. This also keeps the
+        // mobile week view complete when a week crosses a month boundary.
+        fromDate: calendarGridBoundary(filters.calendarMonth),
+        toDate: calendarGridBoundary(filters.calendarMonth, true),
         tab: "all",
       };
     }
@@ -211,6 +218,7 @@ export default function FollowupsPage() {
         onToggleFilters={filters.toggleFilters}
         onResetFilters={filters.reset}
         resultCount={listQuery.data?.total ?? 0}
+        viewSwitcher={<FollowUpViewToggle value={filters.view} onChange={filters.setView} />}
         actions={
           <Actions
             primary={{
@@ -248,6 +256,7 @@ export default function FollowupsPage() {
             filters={filters}
             setFilter={setFilter}
             reset={filters.reset}
+            view={filters.view}
           />
         }
         content={
@@ -272,9 +281,7 @@ export default function FollowupsPage() {
                 total={listQuery.data?.total ?? 0}
                 loading={listQuery.isFetching}
                 month={filters.calendarMonth}
-                view={filters.view}
                 onMonthChange={filters.setCalendarMonth}
-                onViewChange={filters.setView}
                 onAddFollowUp={(scheduledAt) => {
                   setInitialScheduledAt(scheduledAt);
                   setDialogOpen(true);
@@ -297,8 +304,6 @@ export default function FollowupsPage() {
                 onCancel={requestCancel}
                 onComplete={requestComplete}
                 onNextFollowUp={requestNextFollowUp}
-                view={filters.view}
-                onViewChange={filters.setView}
               />
             )}
           </div>

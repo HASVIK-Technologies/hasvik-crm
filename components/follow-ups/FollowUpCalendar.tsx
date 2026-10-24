@@ -7,7 +7,6 @@ import { useRouter } from "next/navigation";
 import PlainButton from "@/components/common/PlainButton";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import { StatusBadge } from "@/components/common/StatusBadge";
-import FollowUpViewToggle, { type FollowUpView } from "./FollowUpViewToggle";
 import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigger } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFollowUpHighlight } from "@/hooks/use-follow-up-highlight";
@@ -47,9 +46,7 @@ interface FollowUpCalendarProps {
   total: number;
   loading?: boolean;
   month: string;
-  view: FollowUpView;
   onMonthChange: (month: string) => void;
-  onViewChange: (view: FollowUpView) => void;
   onAddFollowUp: (scheduledAt: string) => void;
   onEdit: (item: FollowUpItem) => void;
   onCancel: (item: FollowUpItem) => void;
@@ -62,9 +59,7 @@ export default function FollowUpCalendar({
   total,
   loading,
   month,
-  view,
   onMonthChange,
-  onViewChange,
   onAddFollowUp,
   onEdit,
   onCancel,
@@ -112,11 +107,25 @@ export default function FollowUpCalendar({
     setMobileWeekStart(startOfWeek(next));
     onMonthChange(`${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`);
   };
+  const selectMonth = (nextMonth: string) => {
+    if (!nextMonth) return;
+    const next = monthDate(nextMonth);
+    setMobileWeekStart(startOfWeek(next));
+    onMonthChange(nextMonth);
+  };
   const changeWeek = (offset: number) => {
     const next = new Date(mobileWeekStart);
     next.setDate(next.getDate() + offset * 7);
     setMobileWeekStart(next);
     const nextMonth = `${next.getFullYear()}-${String(next.getMonth() + 1).padStart(2, "0")}`;
+    if (nextMonth !== month) onMonthChange(nextMonth);
+  };
+  const selectWeek = (value: string) => {
+    if (!value) return;
+    const selected = new Date(`${value}T12:00:00`);
+    const next = startOfWeek(selected);
+    setMobileWeekStart(next);
+    const nextMonth = `${selected.getFullYear()}-${String(selected.getMonth() + 1).padStart(2, "0")}`;
     if (nextMonth !== month) onMonthChange(nextMonth);
   };
   const goToToday = () => {
@@ -148,27 +157,28 @@ export default function FollowUpCalendar({
     <TooltipProvider>
       <>
       <div className="border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
-        <div className="flex flex-col gap-3 border-b border-slate-200 p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
+        <div className="flex items-center justify-between gap-3 border-b border-slate-200 p-3 md:p-4">
           <div>
             <h2 className="text-lg font-bold tracking-tight text-slate-900">
               Follow-up calendar <span className="font-medium text-slate-500">({total})</span>
             </h2>
-            <p className="mt-0.5 text-xs text-slate-500">Review scheduled activity and daily workload.</p>
-          </div>
-          <div className="flex flex-wrap items-center justify-end gap-2">
-            <OutlinedButton size="sm" onClick={goToToday}>Today</OutlinedButton>
-            <div className="hidden items-center border border-slate-200 bg-white md:flex">
-              <Tooltip><TooltipTrigger asChild><button type="button" aria-label="Previous month" onClick={() => changeMonth(-1)} className="flex size-9 items-center justify-center border-r border-slate-200 text-slate-600 hover:bg-slate-50"><ChevronLeft className="size-4" /></button></TooltipTrigger><TooltipContent>Previous month</TooltipContent></Tooltip>
-              <span className="min-w-32 px-3 text-center text-xs font-bold text-slate-700">
-                {new Intl.DateTimeFormat("en-IN", { month: "long", year: "numeric" }).format(visibleMonth)}
-              </span>
-              <Tooltip><TooltipTrigger asChild><button type="button" aria-label="Next month" onClick={() => changeMonth(1)} className="flex size-9 items-center justify-center border-l border-slate-200 text-slate-600 hover:bg-slate-50"><ChevronRight className="size-4" /></button></TooltipTrigger><TooltipContent>Next month</TooltipContent></Tooltip>
-            </div>
-            <FollowUpViewToggle value={view} onChange={onViewChange} />
+            <p className="mt-0.5 hidden text-xs text-slate-500 sm:block">Month overview on larger screens and a focused weekly agenda on mobile.</p>
           </div>
         </div>
 
-        <div className="hidden overflow-x-auto md:block">
+        <div className="hidden items-center justify-between border-b border-slate-200 bg-slate-50/70 px-4 py-2.5 xl:flex">
+          <p className="text-xs font-medium text-slate-500">Select a month to review scheduled workload.</p>
+          <div className="flex items-center gap-2">
+            <OutlinedButton size="sm" onClick={goToToday}>Today</OutlinedButton>
+            <div className="flex items-center border border-slate-300 bg-white">
+              <Tooltip><TooltipTrigger asChild><button type="button" aria-label="Previous month" onClick={() => changeMonth(-1)} className="flex size-9 items-center justify-center border-r border-slate-200 text-slate-600 hover:bg-slate-50"><ChevronLeft className="size-4" /></button></TooltipTrigger><TooltipContent>Previous month</TooltipContent></Tooltip>
+              <input type="month" value={month} onChange={(event) => selectMonth(event.target.value)} aria-label="Select calendar month" className="h-9 min-w-40 border-0 bg-white px-3 text-xs font-bold text-slate-700 outline-none" />
+              <Tooltip><TooltipTrigger asChild><button type="button" aria-label="Next month" onClick={() => changeMonth(1)} className="flex size-9 items-center justify-center border-l border-slate-200 text-slate-600 hover:bg-slate-50"><ChevronRight className="size-4" /></button></TooltipTrigger><TooltipContent>Next month</TooltipContent></Tooltip>
+            </div>
+          </div>
+        </div>
+
+        <div className="hidden overflow-x-auto xl:block">
           <div className="min-w-[900px]">
             <div className="grid grid-cols-7 border-b border-slate-200 bg-slate-50">
               {WEEKDAYS.map((weekday) => <div key={weekday} className="border-r border-slate-200 px-3 py-2 text-xs font-bold uppercase tracking-wide text-slate-500 last:border-r-0">{weekday}</div>)}
@@ -216,7 +226,7 @@ export default function FollowUpCalendar({
                         >
                           <div className="flex items-start gap-1">
                             <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
-                              <span className="block truncate text-[11px] font-bold text-slate-800">{timeLabel(item.scheduledAt)} · {item.businessName}</span>
+                              <span className="block truncate text-[11px] font-bold text-slate-800" title={item.businessName}>{timeLabel(item.scheduledAt)} · {item.businessName}</span>
                               <span className="mt-0.5 block truncate text-[10px] text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                             </button>
                             <DropdownMenu>
@@ -250,18 +260,27 @@ export default function FollowUpCalendar({
             </div>
           </div>
         </div>
-        <div className="md:hidden">
-          <div className="flex items-center justify-between border-b border-slate-200 bg-slate-50 px-2 py-2">
+        <div className="xl:hidden">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5">
             <button type="button" onClick={() => changeWeek(-1)} aria-label="Previous week" className="flex size-9 items-center justify-center border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"><ChevronLeft className="size-4" /></button>
-            <div className="text-center">
+            <label className="flex min-w-0 flex-col items-center justify-center border border-slate-300 bg-white px-2 py-1 text-center">
+              <span className="text-[9px] font-bold uppercase tracking-wide text-slate-400">Select week</span>
+              <input
+                type="date"
+                value={dateKey(mobileWeekStart)}
+                onChange={(event) => selectWeek(event.target.value)}
+                aria-label="Select week"
+                className="h-6 max-w-full border-0 bg-transparent text-xs font-bold text-slate-700 outline-none"
+              />
               <p className="text-xs font-bold text-slate-700">
                 {new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(mobileDays[0])}
                 {" – "}
                 {new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" }).format(mobileDays[6])}
               </p>
-              <p className="mt-0.5 text-[10px] font-semibold uppercase tracking-wide text-slate-400">Week view</p>
-            </div>
+              <span className="sr-only">Week view</span>
+            </label>
             <button type="button" onClick={() => changeWeek(1)} aria-label="Next week" className="flex size-9 items-center justify-center border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"><ChevronRight className="size-4" /></button>
+            <button type="button" onClick={goToToday} className="col-span-3 justify-self-center text-[11px] font-bold text-brand-blue hover:underline">Go to this week</button>
           </div>
           <div className="divide-y divide-slate-200">
             {mobileDays.map((day) => {
@@ -292,7 +311,7 @@ export default function FollowUpCalendar({
                       <article key={item.id} data-follow-up-item-id={item.id} className={cn("flex items-start gap-3 border border-slate-200 bg-white p-3", isFollowUpHighlighted(item.id) && "border-brand-blue bg-blue-50 ring-2 ring-brand-blue/20")}>
                         <div className="w-14 shrink-0 pt-0.5 text-xs font-bold text-brand-blue">{timeLabel(item.scheduledAt)}</div>
                         <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
-                          <span className="block truncate text-sm font-bold text-slate-900">{item.businessName}</span>
+                          <span className="block truncate text-sm font-bold text-slate-900" title={item.businessName}>{item.businessName}</span>
                           <span className="mt-0.5 block truncate text-[11px] text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                           <StatusBadge status={item.status} className="mt-2" />
                         </button>
@@ -352,7 +371,7 @@ export default function FollowUpCalendar({
                 <article key={item.id} data-follow-up-item-id={item.id} className={cn("flex gap-3 px-2 py-4 transition-colors", isFollowUpHighlighted(item.id) && "bg-blue-50 ring-2 ring-inset ring-brand-blue/25")}>
                   <div className="w-16 shrink-0 pt-0.5 text-xs font-bold text-slate-700">{timeLabel(item.scheduledAt)}</div>
                   <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
-                    <span className="block truncate text-sm font-bold text-slate-900 hover:text-brand-blue">{item.businessName}</span>
+                    <span className="block truncate text-sm font-bold text-slate-900 hover:text-brand-blue" title={item.businessName}>{item.businessName}</span>
                     <span className="mt-1 block text-xs text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                     <StatusBadge status={item.status} className="mt-2" />
                   </button>

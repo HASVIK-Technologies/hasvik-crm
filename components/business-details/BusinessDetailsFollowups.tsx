@@ -17,6 +17,14 @@ import { StatusBadge } from "@/components/common/StatusBadge";
 import CancelFollowUpDialog from "@/components/follow-ups/CancelFollowUpDialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
+  Table,
+  TableBody,
+  TableCell,
+  TableHead,
+  TableHeader,
+  TableRow,
+} from "@/components/ui/table";
+import {
   DropdownMenu,
   DropdownMenuContent,
   DropdownMenuItem,
@@ -135,7 +143,7 @@ export default function BusinessDetailsFollowups({
 
   return (
     <>
-      <div className="overflow-hidden rounded-2xl border border-slate-200 bg-white shadow-sm">
+      <div className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
         <div className="flex flex-col gap-1 border-b border-slate-100 px-5 py-4 sm:px-6">
           <h3 className="text-base font-bold text-slate-900">Follow-up history</h3>
           <p className="text-xs text-slate-500">
@@ -143,45 +151,45 @@ export default function BusinessDetailsFollowups({
           </p>
         </div>
         <div className="overflow-x-auto">
-          <table className="w-full min-w-[760px] text-left text-sm">
-            <thead className="bg-slate-50/80 text-[11px] font-semibold uppercase tracking-wide text-slate-500">
-              <tr className="border-b border-slate-100">
-                <th className="px-5 py-3 sm:px-6">Date &amp; time</th>
-                <th className="px-4 py-3">Type</th>
-                <th className="px-4 py-3">Status</th>
-                <th className="px-4 py-3">Assigned to</th>
-                <th className="px-5 py-3 text-right sm:px-6">Actions</th>
-              </tr>
-            </thead>
-            <tbody className="divide-y divide-slate-100">
+          <Table className="w-full min-w-[760px] text-left">
+            <TableHeader>
+              <TableRow className="hover:bg-transparent">
+                <TableHead className="pl-6">Date &amp; time</TableHead>
+                <TableHead>Type</TableHead>
+                <TableHead>Status</TableHead>
+                <TableHead>Assigned to</TableHead>
+                <TableHead className="sticky right-0 bg-slate-50 pr-6 text-right">Actions</TableHead>
+              </TableRow>
+            </TableHeader>
+            <TableBody className="divide-y divide-slate-100 text-sm text-slate-700">
               {followUps.map((item) => {
                 return (
-                  <tr
+                  <TableRow
                     key={item.id}
                     tabIndex={0}
                     aria-label={`Open follow-up details for ${formatScheduledAt(item.scheduledAt)}`}
                     onClick={(event) => handleRowClick(event, item.id)}
                     onKeyDown={(event) => handleRowKeyDown(event, item.id)}
-                    className="cursor-pointer transition-colors hover:bg-slate-50/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
+                    className="group cursor-pointer transition-colors hover:bg-slate-50/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
                   >
-                    <td className="whitespace-nowrap px-5 py-4 font-medium text-slate-900 sm:px-6">
+                    <TableCell className="whitespace-nowrap pl-6 font-medium text-slate-900">
                       {formatScheduledAt(item.scheduledAt)}
-                    </td>
-                    <td className="px-4 py-4">
-                      <span className="inline-flex rounded-md bg-slate-100 px-2 py-1 text-xs font-medium text-slate-700">
+                    </TableCell>
+                    <TableCell>
+                      <span className="inline-flex border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700">
                         {formatFollowUpType(item.type)}
                       </span>
-                    </td>
-                    <td className="px-4 py-4">
+                    </TableCell>
+                    <TableCell>
                       <StatusBadge
                         status={item.status}
-                        className="rounded-md px-2.5 py-1 text-[10px] uppercase tracking-wider"
+                        className="rounded-md px-2.5 py-0.5 text-[10px]"
                       />
-                    </td>
-                    <td className="px-4 py-4 text-sm text-slate-600">
+                    </TableCell>
+                    <TableCell className="text-sm text-slate-600">
                       {item.assignedToName || "Unassigned"}
-                    </td>
-                    <td className="px-5 py-4 sm:px-6" onClick={(e) => e.stopPropagation()}>
+                    </TableCell>
+                    <TableCell className="sticky right-0 bg-white pr-6 group-hover:bg-slate-50" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -274,22 +282,22 @@ export default function BusinessDetailsFollowups({
                           </DropdownMenuContent>
                         </DropdownMenu>}
                       </div>
-                    </td>
-                  </tr>
+                    </TableCell>
+                  </TableRow>
                 );
               })}
               {followUps.length === 0 && (
-                <tr>
-                  <td
+                <TableRow>
+                  <TableCell
                     colSpan={5}
                     className="px-5 py-12 text-center text-sm text-slate-500"
                   >
                     No follow-ups yet. Add a follow-up to start tracking the next touchpoint.
-                  </td>
-                </tr>
+                  </TableCell>
+                </TableRow>
               )}
-            </tbody>
-          </table>
+            </TableBody>
+          </Table>
         </div>
       </div>
 

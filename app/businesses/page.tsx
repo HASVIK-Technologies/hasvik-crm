@@ -25,6 +25,7 @@ import {
 } from "@/lib/business/query-builder";
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
+import BusinessViewToggle from "@/components/businesses/BusinessViewToggle";
 
 const EMPTY_BUSINESSES: BusinessItem[] = [];
 
@@ -196,6 +197,7 @@ function BusinessesContent() {
       onToggleFilters={toggleFilters}
       onResetFilters={resetAllFilters}
       resultCount={totalCount}
+      viewSwitcher={<BusinessViewToggle value={view} onChange={setView} />}
       actions={
         <Actions
           primary={{
@@ -238,10 +240,11 @@ function BusinessesContent() {
               businesses={businesses}
               totalCount={totalCount}
               isLoading={isListLoading}
-              view={view}
-              onViewChange={setView}
               currentPage={page}
               itemsPerPage={limit}
+              sortOrder={sortBy}
+              onSortOrderChange={setSortBy}
+              hasActiveFilters={Boolean(hasActiveFilters || search.trim())}
               onPageChange={setPage}
               onItemsPerPageChange={setLimit}
             />
@@ -258,8 +261,6 @@ function BusinessesContent() {
               onPageChange={setPage}
               onItemsPerPageChange={setLimit}
               onClearFilters={resetAllFilters}
-              view={view}
-              onViewChange={setView}
             />
           )
         )

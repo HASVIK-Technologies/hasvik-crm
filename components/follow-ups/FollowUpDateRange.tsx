@@ -24,6 +24,13 @@ function display(value: string) {
     : "";
 }
 
+function inputDate(date: Date) {
+  const year = date.getFullYear();
+  const month = String(date.getMonth() + 1).padStart(2, "0");
+  const day = String(date.getDate()).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+}
+
 export default function FollowUpDateRange({
   from = "",
   to = "",
@@ -57,14 +64,59 @@ export default function FollowUpDateRange({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-72 space-y-3 rounded-2xl bg-white p-4"
+        className="w-72 space-y-4 border border-slate-200 bg-white p-4 shadow-xl"
       >
+        <div>
+          <p className="text-xs font-bold text-slate-900">Date range</p>
+          <p className="mt-0.5 text-[10px] text-slate-500">Use a shortcut or choose exact dates.</p>
+        </div>
+        <div className="grid grid-cols-3 gap-1.5">
+          {[
+            {
+              label: "Today",
+              range: () => {
+                const today = inputDate(new Date());
+                return [today, today] as const;
+              },
+            },
+            {
+              label: "This week",
+              range: () => {
+                const start = new Date();
+                start.setDate(start.getDate() - ((start.getDay() + 6) % 7));
+                const end = new Date(start);
+                end.setDate(end.getDate() + 6);
+                return [inputDate(start), inputDate(end)] as const;
+              },
+            },
+            {
+              label: "This month",
+              range: () => {
+                const now = new Date();
+                return [
+                  inputDate(new Date(now.getFullYear(), now.getMonth(), 1)),
+                  inputDate(new Date(now.getFullYear(), now.getMonth() + 1, 0)),
+                ] as const;
+              },
+            },
+          ].map((preset) => (
+            <button
+              key={preset.label}
+              type="button"
+              onClick={() => onChange(...preset.range())}
+              className="h-8 border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:border-brand-blue hover:bg-blue-50 hover:text-brand-blue"
+            >
+              {preset.label}
+            </button>
+          ))}
+        </div>
         <div className="grid grid-cols-2 gap-3">
           <label className="space-y-1 text-[11px] font-semibold text-[#475569]">
             From
             <Input
               type="date"
               value={from}
+              max={to || undefined}
               onChange={(event) => onChange(event.target.value, to)}
               className="mt-1 h-9 text-xs"
             />

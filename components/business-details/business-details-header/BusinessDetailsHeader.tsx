@@ -42,7 +42,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
         </Avatar>
         <div className="mt-0.5 flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <CardTitle className="text-lg font-bold tracking-tight text-[#334155] sm:text-2xl break-words min-w-0">{business.name}</CardTitle>
+            <CardTitle className="min-w-0 max-w-full truncate text-lg font-bold tracking-tight text-[#334155] sm:text-2xl" title={business.name}>{business.name}</CardTitle>
             <div className="flex flex-wrap items-center gap-1.5 shrink-0">
               <ActivityStateText active={business.status === "Active"} />
               {leadStatusDisplay && leadStatusDisplay !== "-" && (

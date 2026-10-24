@@ -21,6 +21,7 @@ interface LayoutProps {
   onResetFilters?: () => void;
   resultCount?: number;
   actions?: React.ReactNode;
+  viewSwitcher?: React.ReactNode;
   content?: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
@@ -40,6 +41,7 @@ export default function ListPageLayout({
   onResetFilters,
   resultCount,
   actions,
+  viewSwitcher,
   content,
   footer,
   className,
@@ -76,22 +78,25 @@ export default function ListPageLayout({
 
   return (
     <PageContainer className={`flex flex-col gap-4 sm:gap-6 lg:gap-7 ${className ?? ""}`}>
-      <section className="flex flex-row items-center justify-between gap-2 sm:gap-4">
+      <section className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         {breadcrumb}
-        <div className="flex shrink-0 items-center gap-2">
-          {filters && (
-            <OutlinedButton
-              className="gap-2 lg:hidden"
-              size="sm"
-              onClick={handleFilterToggle}
-              aria-expanded={filterDrawerOpen}
-              aria-label="Open filters"
-            >
-              <Filter className="size-4" />
-              <span>Filters</span>
-            </OutlinedButton>
-          )}
-          {actions}
+        <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+          {viewSwitcher && <div className="shrink-0">{viewSwitcher}</div>}
+          <div className="flex shrink-0 items-center gap-2">
+            {filters && (
+              <OutlinedButton
+                className="gap-2 lg:hidden"
+                size="sm"
+                onClick={handleFilterToggle}
+                aria-expanded={filterDrawerOpen}
+                aria-label="Open filters"
+              >
+                <Filter className="size-4" />
+                <span className="hidden min-[380px]:inline">Filters</span>
+              </OutlinedButton>
+            )}
+            {actions}
+          </div>
         </div>
       </section>
       <div className="w-full lg:hidden">{search}</div>

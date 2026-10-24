@@ -10,6 +10,7 @@ export interface BusinessListStoreState extends BusinessListStateFilters {
   showStats: boolean;
   showFilters: boolean;
   view: BusinessListView;
+  visibleTableColumns: BusinessTableColumn[];
   kanbanScrollLeft: number;
   highlightedBusinessId: string | null;
   highlightRevision: number;
@@ -27,6 +28,7 @@ export interface BusinessListStoreState extends BusinessListStateFilters {
   toggleStats: () => void;
   toggleFilters: () => void;
   setView: (view: BusinessListView) => void;
+  toggleTableColumn: (column: BusinessTableColumn) => void;
   setKanbanScrollLeft: (scrollLeft: number) => void;
   highlightBusiness: (id: string | number, scrollToItem?: boolean) => void;
   clearBusinessHighlight: (revision: number) => void;
@@ -35,6 +37,17 @@ export interface BusinessListStoreState extends BusinessListStateFilters {
 }
 
 export type BusinessListView = "table" | "kanban";
+export type BusinessTableColumn = "category" | "city" | "responsible" | "leadStatus" | "activity" | "lastFollowUp" | "nextFollowUp";
+
+const DEFAULT_TABLE_COLUMNS: BusinessTableColumn[] = [
+  "category",
+  "city",
+  "responsible",
+  "leadStatus",
+  "activity",
+  "lastFollowUp",
+  "nextFollowUp",
+];
 
 export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
   page: DEFAULT_BUSINESS_QUERY.page,
@@ -49,6 +62,7 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
   showStats: true,
   showFilters: true,
   view: "table",
+  visibleTableColumns: DEFAULT_TABLE_COLUMNS,
   kanbanScrollLeft: 0,
   highlightedBusinessId: null,
   highlightRevision: 0,
@@ -85,6 +99,13 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
   toggleFilters: () => set((state) => ({ showFilters: !state.showFilters })),
 
   setView: (view) => set({ view }),
+
+  toggleTableColumn: (column) =>
+    set((state) => ({
+      visibleTableColumns: state.visibleTableColumns.includes(column)
+        ? state.visibleTableColumns.filter((item) => item !== column)
+        : [...state.visibleTableColumns, column],
+    })),
 
   setKanbanScrollLeft: (kanbanScrollLeft) => set({ kanbanScrollLeft }),
 

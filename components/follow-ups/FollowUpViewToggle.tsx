@@ -27,14 +27,15 @@ export default function FollowUpViewToggle({
             aria-pressed={active}
             onClick={() => onChange(option.value)}
             className={cn(
-              "flex h-9 items-center gap-2 border px-3 text-xs font-semibold transition-colors",
+              "flex h-9 items-center gap-1.5 border px-2 text-xs font-semibold transition-colors sm:gap-2 sm:px-3",
               active
                 ? "border-slate-200 bg-white text-brand-blue shadow-sm"
                 : "border-transparent text-slate-500 hover:bg-white/70 hover:text-slate-800",
             )}
           >
             <Icon className="size-4" />
-            {option.label}
+            <span className="hidden min-[420px]:inline sm:hidden">{option.value === "table" ? "List" : option.label}</span>
+            <span className="hidden sm:inline">{option.label}</span>
           </button>
         );
       })}

@@ -42,6 +42,7 @@ export default function BusinessViewToggle({
                 )}
               >
                 <Icon className="size-4" />
+                <span className="hidden min-[420px]:inline sm:hidden">{option.value === "table" ? "List" : "Pipeline"}</span>
                 <span className="hidden sm:inline">{option.value === "table" ? "Table" : "Kanban"}</span>
               </button>
             </TooltipTrigger>

@@ -38,7 +38,7 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
         <div className="flex items-start gap-3 text-sm">
           <Building2 className="w-5 h-5 text-slate-400 shrink-0" />
           <div className="w-32 shrink-0 text-slate-500">Business Name</div>
-          <div className="text-slate-700 font-medium">{business.name || businessData.businessInfo.name}</div>
+          <div className="min-w-0 flex-1 truncate text-slate-700 font-medium" title={business.name || businessData.businessInfo.name}>{business.name || businessData.businessInfo.name}</div>
         </div>
         <div className="flex items-start gap-3 text-sm">
           <Tags className="w-5 h-5 text-slate-400 shrink-0" />

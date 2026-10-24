@@ -48,7 +48,7 @@ export default function ListPagination({
             disabled={page <= 1}
             onClick={() => onPageChange(Math.max(1, page - 1))}
             aria-label="Previous page"
-            className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] disabled:opacity-50"
+            className="size-8.5 border border-[#e2e8f0] text-[#64748b] disabled:opacity-50"
           >
             <ChevronLeft className="size-4" />
           </OutlinedButton>
@@ -59,7 +59,7 @@ export default function ListPagination({
                 size="icon-sm"
                 type="button"
                 aria-current="page"
-                className="size-8.5 rounded-lg p-0 text-sm font-semibold shadow-sm"
+                className="size-8.5 p-0 text-sm font-semibold shadow-sm"
               >
                 {pageNumber}
               </PrimaryButton>
@@ -69,7 +69,7 @@ export default function ListPagination({
                 size="icon-sm"
                 type="button"
                 onClick={() => onPageChange(pageNumber)}
-                className="hidden size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc] sm:inline-flex"
+                className="hidden size-8.5 border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc] sm:inline-flex"
               >
                 {pageNumber}
               </OutlinedButton>
@@ -81,7 +81,7 @@ export default function ListPagination({
             disabled={page >= totalPages}
             onClick={() => onPageChange(Math.min(totalPages, page + 1))}
             aria-label="Next page"
-            className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] disabled:opacity-50"
+            className="size-8.5 border border-[#e2e8f0] text-[#64748b] disabled:opacity-50"
           >
             <ChevronRight className="size-4" />
           </OutlinedButton>
@@ -90,7 +90,7 @@ export default function ListPagination({
           value={`${limit} per page`}
           onValueChange={(value) => onLimitChange(Number.parseInt(value, 10))}
         >
-          <SelectTrigger className="h-8.5 w-auto rounded-lg border border-[#e2e8f0] bg-white pl-3.5 pr-2.5 text-xs font-medium text-[#334155]">
+          <SelectTrigger className="h-8.5 w-auto border border-[#e2e8f0] bg-white pl-3.5 pr-2.5 text-xs font-medium text-[#334155]">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-white">

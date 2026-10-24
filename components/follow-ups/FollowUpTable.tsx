@@ -39,9 +39,9 @@ import PlainButton from "@/components/common/PlainButton";
 import FollowUpCommunicationActions from "@/components/follow-ups/FollowUpCommunicationActions";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PrimaryButton from "@/components/common/PrimaryButton";
+import RecordLink from "@/components/common/RecordLink";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
-import FollowUpViewToggle, { type FollowUpView } from "@/components/follow-ups/FollowUpViewToggle";
 import { formatFollowUpType } from "@/lib/business/form-options";
 import { useState } from "react";
 import { useFollowUpHighlight } from "@/hooks/use-follow-up-highlight";
@@ -97,8 +97,6 @@ interface FollowUpTableProps {
   onCancel: (item: FollowUpItem) => void;
   onComplete: (item: FollowUpItem) => void;
   onNextFollowUp?: (item: FollowUpItem) => void;
-  view: FollowUpView;
-  onViewChange: (view: FollowUpView) => void;
 }
 
 export default function FollowUpTable({
@@ -113,8 +111,6 @@ export default function FollowUpTable({
   onCancel,
   onComplete,
   onNextFollowUp,
-  view,
-  onViewChange,
 }: FollowUpTableProps) {
   const router = useRouter();
   const [notesFollowUp, setNotesFollowUp] = useState<FollowUpItem | null>(null);
@@ -168,7 +164,6 @@ export default function FollowUpTable({
             Follow-ups{" "}
             <span className="font-medium text-[#64748b]">({total})</span>
           </h2>
-          <FollowUpViewToggle value={view} onChange={onViewChange} />
         </div>
         <div data-layout-mobile>
           {loading ? (
@@ -201,9 +196,9 @@ export default function FollowUpTable({
                       </Avatar>
                     </Link>
                     <div className="min-w-0">
-                      <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="block truncate text-sm font-bold text-[#0f172a] hover:text-primary hover:underline">
+                      <RecordLink href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="block max-w-52 truncate text-sm" title={item.businessName}>
                         {item.businessName}
-                      </Link>
+                      </RecordLink>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.businessCity || "-"}{item.businessPhone ? ` • ${item.businessPhone}` : ""}</p>
                       <p className="mt-2 text-xs font-medium text-[#475569]">{formatDate(item.scheduledAt)} at {formatTime(item.scheduledAt)}</p>
                       <p className="mt-1 text-xs text-[#64748b]">
@@ -292,7 +287,7 @@ export default function FollowUpTable({
         </div>
         <div data-layout-desktop className="overflow-x-auto">
           <Table className="w-full min-w-[920px] text-left">
-            <TableHeader className="text-[11px] font-semibold text-[#64748b]">
+            <TableHeader>
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
                 <TableHead className="py-4 pl-6 pr-4 font-semibold">
                   Business / Contact
@@ -308,7 +303,7 @@ export default function FollowUpTable({
                 <TableHead className="px-4 py-4 font-semibold">
                   Assigned To
                 </TableHead>
-                <TableHead className="py-4 pl-4 pr-6 text-right font-semibold">
+                <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">
                   Actions
                 </TableHead>
               </TableRow>
@@ -354,7 +349,7 @@ export default function FollowUpTable({
                     aria-label={`Open follow-up details for ${item.businessName}`}
                     onClick={(event) => handleRowClick(event, item.id)}
                     onKeyDown={(event) => handleRowKeyDown(event, item.id)}
-                    className={`cursor-pointer border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40 ${isFollowUpHighlighted(item.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}
+                    className={`group cursor-pointer border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40 ${isFollowUpHighlighted(item.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}
                   >
                     <TableCell className="py-4 pl-6 pr-4">
                       <div className="flex items-center gap-3">
@@ -366,13 +361,14 @@ export default function FollowUpTable({
                           </Avatar>
                         </Link>
                         <div className="min-w-0">
-                          <Link
+                          <RecordLink
                             href={`/follow-ups/${item.id}`}
                             onClick={() => highlightFollowUp(item.id, true)}
-                            className="block truncate text-sm font-bold text-[#0f172a] hover:text-primary hover:underline"
+                            className="block max-w-48 truncate text-sm"
+                            title={item.businessName}
                           >
                             {item.businessName}
-                          </Link>
+                          </RecordLink>
                           <p className="mt-0.5 text-xs text-[#64748b]">
                             {item.businessCity || "-"}
                             {item.businessPhone
@@ -400,7 +396,7 @@ export default function FollowUpTable({
                     <TableCell className="px-4 py-4 text-xs text-[#475569]">
                       {item.assignedToName}
                     </TableCell>
-                    <TableCell className="py-4 pl-4 pr-6" onClick={(e) => e.stopPropagation()}>
+                    <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
                         <Tooltip>
