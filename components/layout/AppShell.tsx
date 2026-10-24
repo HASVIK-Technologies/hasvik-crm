@@ -9,6 +9,7 @@ import {
   ChevronDown,
   CreditCard,
   FolderKanban,
+  Landmark,
   LogOut,
   Menu,
   PanelLeftClose,
@@ -45,7 +46,7 @@ const navigation = [
   { label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2 },
   { label: "User management", href: "/users", icon: Users },
   { label: "Business categories", href: "/business-categories", icon: FolderKanban },
-  { label: "Tenant management", href: "/tenant-management", icon: Users },
+  { label: "Tenant management", href: "/tenant-management", icon: Landmark },
   { label: "Subscriptions", href: "/subscriptions", icon: CreditCard },
 ];
 
@@ -315,31 +316,41 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   return (
     <div className="min-h-screen bg-background text-foreground">
       {/* Sidebar for Desktop */}
-      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-white/10 bg-[#0868b8] text-white transition-[width] lg:flex ${sidebarCollapsed ? "w-20" : "w-64"}`}>
-        {/* Brand area stays visually connected to the navigation rail. */}
-        <div className={`flex h-20 items-center border-b border-white/12 ${sidebarCollapsed ? "justify-center px-2" : "px-4"}`}>
+      <aside className={`fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-[#1d4465] bg-[#102b46] text-white shadow-[10px_0_30px_rgba(15,38,61,0.08)] transition-[width] duration-200 lg:flex ${sidebarCollapsed ? "w-[5.5rem]" : "w-72"}`}>
+        {/* The brand lockup gives the full mark and compact favicon distinct, intentional homes. */}
+        <div className={`flex h-24 items-center ${sidebarCollapsed ? "justify-center px-3" : "px-5"}`}>
           <Link
             href="/dashboard"
             aria-label="Hasvik home"
-            className={`flex h-12 items-center border-l-2 border-brand-green bg-white shadow-[0_4px_14px_rgba(0,35,72,0.16)] ${sidebarCollapsed ? "w-12 justify-center px-1.5" : "w-full px-4"}`}
+            className={`group flex items-center transition-colors ${sidebarCollapsed ? "size-14 justify-center rounded-2xl hover:bg-white/10" : "h-16 w-full justify-center rounded-xl hover:bg-white/[0.06]"}`}
           >
-            <Image
-              src="/logo.png"
-              alt="Hasvik"
-              width={140}
-              height={42}
-              priority
-              style={{ height: "auto" }}
-              className={sidebarCollapsed ? "w-10" : "w-32"}
-            />
+            {sidebarCollapsed ? (
+              <Image
+                src="/icon.png"
+                alt="Hasvik icon"
+                width={48}
+                height={48}
+                priority
+                className="size-12 object-contain drop-shadow-[0_3px_5px_rgba(0,0,0,0.2)]"
+              />
+            ) : (
+              <Image
+                src="/logo.png"
+                alt="Hasvik"
+                width={160}
+                height={48}
+                priority
+                style={{ height: "auto" }}
+                className="w-40 drop-shadow-[0_3px_5px_rgba(0,0,0,0.2)]"
+              />
+            )}
           </Link>
         </div>
 
         {/* Sidebar Navigation */}
-        <div className={`flex flex-1 flex-col justify-between py-7 ${sidebarCollapsed ? "px-2" : "px-4"}`}>
+        <div className={`flex flex-1 flex-col justify-between border-t border-white/10 py-7 ${sidebarCollapsed ? "px-3" : "px-4"}`}>
           <div>
-            <p className={`mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-white/50 ${sidebarCollapsed ? "sr-only" : ""}`}>Workspace</p>
-            <nav className="space-y-1" aria-label="Main navigation">
+            <nav className="space-y-1.5" aria-label="Main navigation">
               {navigation
                 .filter((item) =>
                   isNavigationItemVisible(item, tenantAdmin, hasvikAdmin),
@@ -351,17 +362,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   <Link
                     key={item.label}
                     href={item.href}
-                    className={`flex border-l-3 text-xs font-semibold transition-all duration-150 ${sidebarCollapsed ? "flex-col gap-1 px-1 py-2 text-center" : "items-center gap-3 px-3 py-2.5"} ${
+                    title={sidebarCollapsed ? item.label : undefined}
+                    className={`group relative flex rounded-xl text-xs font-semibold transition-all duration-150 ${sidebarCollapsed ? "flex-col items-center gap-1 px-1.5 py-2.5 text-center" : "items-center gap-3 px-3.5 py-3"} ${
                       active
-                        ? "border-brand-growth bg-white/14 text-brand-growth shadow-[inset_0_1px_0_rgba(255,255,255,0.12)]"
-                        : "border-transparent text-white/75 hover:bg-white/8 hover:text-white"
+                        ? "bg-[#1b6d77] text-white shadow-[0_8px_16px_rgba(0,0,0,0.13)]"
+                        : "text-[#c4d5e3] hover:bg-white/[0.09] hover:text-white"
                     }`}
                   >
                     <Icon
-                      className="size-4"
+                      className={`size-[18px] shrink-0 ${active ? "text-[#77e4cc]" : "text-[#9fb9cd] group-hover:text-white"}`}
                       strokeWidth={active ? 2.5 : 2}
                     />
-                    <span className={sidebarCollapsed ? "text-[10px] leading-tight" : ""}>{item.label}</span>
+                    <span className={sidebarCollapsed ? "text-[9px] leading-3" : ""}>{item.label}</span>
+                    {active && !sidebarCollapsed && <span className="ml-auto size-1.5 rounded-full bg-[#77e4cc]" />}
                   </Link>
                 );
                 })}
@@ -370,25 +383,25 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
 
           {/* Sidebar collapse control */}
-          <div className="border-t border-white/15 pt-4">
+          <div className="border-t border-white/10 pt-5">
             <button
               type="button"
               aria-label={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
               title={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
               onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
-              className={`flex w-full items-center border-l-3 border-transparent p-2.5 text-white/75 transition-colors hover:bg-white/8 hover:text-white ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
+              className={`flex w-full items-center rounded-xl p-3 text-[#c4d5e3] transition-colors hover:bg-white/[0.09] hover:text-white ${sidebarCollapsed ? "justify-center" : "gap-3"}`}
             >
               {sidebarCollapsed ? <PanelLeftOpen className="size-4" /> : <PanelLeftClose className="size-4" />}
-              {!sidebarCollapsed && <span className="text-xs font-semibold">Collapse navigation</span>}
+              {!sidebarCollapsed && <span className="text-xs font-semibold">Collapse sidebar</span>}
             </button>
             </div>
         </div>
       </aside>
 
       {/* Main Content Area */}
-      <div className={sidebarCollapsed ? "lg:pl-20" : "lg:pl-64"}>
+      <div className={sidebarCollapsed ? "lg:pl-[5.5rem]" : "lg:pl-72"}>
         {/* Sticky Header matching screenshot */}
-        <header className="sticky top-0 z-20 border-b border-[#e4ecf2] bg-white/95 backdrop-blur">
+        <header className="sticky top-0 z-20 border-b border-[#e3ebf1] bg-white/90 backdrop-blur-xl">
           <div className="flex h-16 items-center justify-between px-3 sm:h-20 sm:px-8">
             {/* Left Header Title / Eyebrow */}
             <div className="flex items-center gap-3">
@@ -405,7 +418,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 )}
               </button>
               <div>
-                <h1 className="max-w-[52vw] truncate text-lg font-bold tracking-tight text-[#0f172a] sm:max-w-none sm:text-2xl">
+                <p className="hidden text-[10px] font-bold uppercase tracking-[0.18em] text-[#6f879b] sm:block">Hasvik CRM</p>
+                <h1 className="max-w-[52vw] truncate text-lg font-bold tracking-tight text-[#102b46] sm:mt-0.5 sm:max-w-none sm:text-2xl">
                   {currentPageTitle}
                 </h1>
               </div>
@@ -517,16 +531,16 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           <>
             <button type="button" aria-label="Close navigation" onClick={() => setMobileMenuOpen(false)} className="fixed inset-0 z-30 bg-slate-950/40 backdrop-blur-[1px] lg:hidden" />
             <nav
-              className="fixed inset-y-0 left-0 z-40 flex w-[min(20rem,88vw)] flex-col overflow-y-auto bg-[#0868b8] px-4 py-5 text-white shadow-2xl lg:hidden"
+              className="fixed inset-y-0 left-0 z-40 flex w-[min(20rem,88vw)] flex-col overflow-y-auto bg-[#102b46] px-4 py-5 text-white shadow-2xl lg:hidden"
               aria-label="Mobile navigation"
             >
-              <div className="mb-6 flex h-14 shrink-0 items-center justify-between border-b border-white/15 pb-4">
-                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex h-10 w-40 items-center border-l-2 border-brand-green bg-white px-3">
+              <div className="mb-6 flex h-16 shrink-0 items-center justify-between border-b border-white/10 pb-4">
+                <Link href="/dashboard" onClick={() => setMobileMenuOpen(false)} className="flex h-12 w-44 items-center rounded-xl bg-white px-4 shadow-lg">
                   <Image src="/logo.png" alt="Hasvik" width={120} height={36} className="h-auto w-28" />
                 </Link>
                 <button type="button" onClick={() => setMobileMenuOpen(false)} aria-label="Close menu" className="flex size-10 items-center justify-center text-white/80 hover:bg-white/10 hover:text-white"><X className="size-5" /></button>
               </div>
-              <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.16em] text-white/50">Workspace</p>
+              <p className="mb-3 px-3 text-[10px] font-bold uppercase tracking-[0.2em] text-[#8eabc2]">Workspace</p>
               <div className="min-h-0 flex-1 overflow-y-auto">
                 {navigation
                   .filter((item) =>
@@ -540,13 +554,13 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                       key={item.label}
                       href={item.href}
                       onClick={() => setMobileMenuOpen(false)}
-                      className={`mb-1 flex items-center gap-3 border-l-3 px-3.5 py-3 text-sm font-semibold ${
+                      className={`mb-1.5 flex items-center gap-3 rounded-xl px-3.5 py-3 text-sm font-semibold ${
                         active
-                          ? "border-brand-green bg-white/14 text-brand-growth"
-                          : "border-transparent text-white/75 hover:bg-white/8 hover:text-white"
+                          ? "bg-[#1b6d77] text-white"
+                          : "text-[#c4d5e3] hover:bg-white/[0.09] hover:text-white"
                       }`}
                     >
-                      <Icon className="size-4" />
+                      <Icon className={`size-[18px] ${active ? "text-[#77e4cc]" : "text-[#9fb9cd]"}`} />
                       {item.label}
                     </Link>
                   );
