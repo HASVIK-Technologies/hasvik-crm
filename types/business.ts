@@ -12,7 +12,9 @@ export interface BusinessItem {
   status: "Active" | "Inactive";
   isActive?: boolean;
   lastFollowUp: string;
+  lastFollowUpId?: string;
   nextFollowUp: string;
+  nextFollowUpId?: string;
   nextFollowUpType: "today" | "tomorrow" | "date" | "none" | "overdue";
   nextFollowupDate?: string;
   reminder?: string | number;
@@ -24,6 +26,8 @@ export interface BusinessItem {
   website?: string;
   leadSource?: string;
   businessType?: string;
+  assignedToId?: string;
+  assignedToName?: string;
   assignedTo?: string;
   alternatePhone?: string;
   location?: { url?: string } | null | string;

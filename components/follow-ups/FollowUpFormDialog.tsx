@@ -153,8 +153,8 @@ export default function FollowUpFormDialog({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">
-          <div className="mb-5 flex items-start justify-between">
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-slate-200 bg-white shadow-2xl outline-none">
+          <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
             <div>
               <DialogPrimitive.Title className="text-lg font-bold text-[#0f172a]">
                 {isEdit ? "Edit follow-up" : "Add Follow-up"}
@@ -169,13 +169,13 @@ export default function FollowUpFormDialog({
               <button
                 type="button"
                 aria-label="Close dialog"
-                className="rounded-lg p-1.5 text-[#64748b] hover:bg-[#f1f5f9]"
+                className="border border-transparent p-1.5 text-[#64748b] hover:border-slate-200 hover:bg-[#f1f5f9]"
               >
                 <X className="size-4" />
               </button>
             </DialogPrimitive.Close>
-          </div>
-          <form onSubmit={handleSubmit(submit)} noValidate className="space-y-5">
+          </header>
+          <form onSubmit={handleSubmit(submit)} noValidate className="space-y-5 px-5 sm:px-6">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
                 Business {!isEdit && !initialBusiness && <span className="text-red-500">*</span>}
@@ -292,7 +292,7 @@ export default function FollowUpFormDialog({
                 />
               </div>
             </div>
-            <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">
+            <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6">
               <DialogPrimitive.Close asChild>
                 <Button type="button" variant="outline">Cancel</Button>
               </DialogPrimitive.Close>
@@ -301,7 +301,7 @@ export default function FollowUpFormDialog({
                   <><Loader2 className="mr-2 size-4 animate-spin" />{isEdit ? "Saving..." : "Adding..."}</>
                 ) : isEdit ? "Save changes" : "Add Follow-up"}
               </SaveButton>
-            </div>
+            </footer>
           </form>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

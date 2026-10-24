@@ -7,12 +7,11 @@ import {
   FileText,
   Mail,
   MapPin,
-  Phone,
   UserRound,
 } from "lucide-react";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
+import { PhoneActionMenu, WhatsAppActionMenu } from "@/components/common/ContactActionMenu";
 import { FollowUpNotes } from "@/components/follow-ups/FollowUpNotes";
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import { formatFollowUpType } from "@/lib/business/form-options";
@@ -43,8 +42,6 @@ interface FollowUpDetailsProps {
   followUp: FollowUpItem;
 }
 
-const cleanNumber = (num: string) => num.replace(/\D/g, "");
-
 export default function FollowUpDetails({
   followUp,
 }: FollowUpDetailsProps) {
@@ -63,8 +60,6 @@ export default function FollowUpDetails({
     followUp.businessEmail ||
     businessData?.email;
 
-  const cleanCalling = callingNumber ? cleanNumber(callingNumber) : "";
-  const cleanWhatsapp = whatsappNumber ? cleanNumber(whatsappNumber) : "";
 
   return (
     <div className="space-y-6">
@@ -166,13 +161,7 @@ export default function FollowUpDetails({
                 Calling number
               </p>
               {callingNumber ? (
-                <a
-                  href={`tel:${cleanCalling || callingNumber}`}
-                  className="mt-1.5 inline-flex items-center gap-2 text-sm font-semibold text-primary transition-colors hover:text-primary/80 hover:underline"
-                >
-                  <Phone className="size-4 shrink-0 text-primary" />
-                  <span>{callingNumber}</span>
-                </a>
+                <div className="mt-1 flex items-center gap-2"><PhoneActionMenu numbers={followUp.businessPhoneNumbers ?? businessData?.phoneNumbers} fallback={callingNumber} /><span className="text-sm font-semibold text-slate-700">{callingNumber}</span></div>
               ) : (
                 <p className="mt-1 text-sm text-[#94a3b8]">-</p>
               )}
@@ -184,19 +173,7 @@ export default function FollowUpDetails({
                 WhatsApp number
               </p>
               {whatsappNumber ? (
-                <a
-                  href={
-                    cleanWhatsapp.length === 10
-                      ? `https://wa.me/91${cleanWhatsapp}`
-                      : `https://wa.me/${cleanWhatsapp}`
-                  }
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="mt-1.5 inline-flex items-center gap-2 text-sm font-semibold text-brand-green-strong transition-colors hover:text-brand-green hover:underline"
-                >
-                  <WhatsAppIcon className="size-4 shrink-0 text-brand-green-strong" />
-                  <span>{whatsappNumber}</span>
-                </a>
+                <div className="mt-1 flex items-center gap-2"><WhatsAppActionMenu numbers={followUp.businessWhatsappNumbers ?? businessData?.whatsappNumbers} fallback={whatsappNumber} /><span className="text-sm font-semibold text-slate-700">{whatsappNumber}</span></div>
               ) : (
                 <p className="mt-1 text-sm text-[#94a3b8]">-</p>
               )}

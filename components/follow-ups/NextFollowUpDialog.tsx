@@ -7,6 +7,7 @@ import { toast } from "sonner";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import DateTimePicker from "@/components/common/DateTimePicker";
 import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
+import FollowUpTypeSelect from "@/components/common/FollowUpTypeSelect";
 import SaveButton from "@/components/common/SaveButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -21,6 +22,7 @@ import {
   FOLLOW_UP_REMINDER_OPTIONS,
   type FollowUpItem,
   type FollowUpOption,
+  type FollowUpType,
 } from "@/types/follow-up";
 
 interface NextFollowUpDialogProps {
@@ -32,6 +34,7 @@ interface NextFollowUpDialogProps {
 interface NextFollowUpFormValues {
   assignee: FollowUpOption | null;
   scheduledAt: string;
+  type: FollowUpType | "";
   reminder: string;
 }
 
@@ -39,6 +42,22 @@ const reminderOptions = FOLLOW_UP_REMINDER_OPTIONS.map((option) => ({
   value: option,
   label: option,
 }));
+
+const followUpTypes: FollowUpType[] = [
+  "CALL",
+  "MEETING",
+  "EMAIL",
+  "WHATSAPP",
+  "OTHER",
+];
+
+function normalizeFollowUpType(type: string): FollowUpType {
+  const normalizedType = type.trim().toUpperCase().replace(/[\s-]+/g, "_");
+
+  return followUpTypes.includes(normalizedType as FollowUpType)
+    ? (normalizedType as FollowUpType)
+    : "CALL";
+}
 
 function NextFollowUpForm({
   followUp,
@@ -58,6 +77,7 @@ function NextFollowUpForm({
         ? { id: followUp.assignedToId, label: followUp.assignedToName }
         : null,
       scheduledAt: "",
+      type: normalizeFollowUpType(followUp.type),
       reminder: "",
     },
     mode: "onChange",
@@ -65,13 +85,13 @@ function NextFollowUpForm({
 
   const submit = async (values: NextFollowUpFormValues) => {
     const scheduledAt = fromDateTimeLocalValue(values.scheduledAt);
-    if (!scheduledAt || !values.assignee?.id) return;
+    if (!scheduledAt || !values.assignee?.id || !values.type) return;
 
     try {
       await mutation.mutateAsync({
         businessId: followUp.businessId,
         assignedTo: values.assignee.id,
-        type: followUp.type || "CALL",
+        type: values.type,
         scheduledAt,
         reminderInMinutes: parseReminderToMinutes(values.reminder),
       });
@@ -86,7 +106,7 @@ function NextFollowUpForm({
 
   return (
     <>
-      <div className="mb-5 flex items-start justify-between">
+      <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
         <div>
           <DialogPrimitive.Title className="text-lg font-bold text-[#0f172a]">
             Schedule Next Follow-Up
@@ -99,17 +119,17 @@ function NextFollowUpForm({
           <button
             type="button"
             aria-label="Close dialog"
-            className="rounded-lg p-1.5 text-[#64748b] hover:bg-[#f1f5f9]"
+            className="border border-transparent p-1.5 text-[#64748b] hover:border-slate-200 hover:bg-[#f1f5f9]"
           >
             <X className="size-4" />
           </button>
         </DialogPrimitive.Close>
-      </div>
+      </header>
 
       <form
         onSubmit={handleSubmit(submit)}
         noValidate
-        className="space-y-5"
+        className="space-y-5 px-5 sm:px-6"
       >
         <div>
           <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
@@ -185,27 +205,54 @@ function NextFollowUpForm({
           </div>
         </div>
 
-        <div>
-          <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-            Reminder
-          </label>
-          <Controller
-            control={control}
-            name="reminder"
-            render={({ field }) => (
-              <FollowUpReminderSelect
-                value={field.value}
-                onChange={field.onChange}
-                options={reminderOptions}
-                placeholder="No reminder"
-                emptyOption={{ value: "none", label: "No reminder" }}
-                showIcon
-              />
+        <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
+              Type <span className="text-red-500">*</span>
+            </label>
+            <Controller
+              control={control}
+              name="type"
+              rules={{ required: "Follow-up type is required." }}
+              render={({ field }) => (
+                <FollowUpTypeSelect
+                  value={field.value}
+                  onChange={field.onChange}
+                  placeholder="Select type"
+                  invalid={Boolean(errors.type)}
+                />
+              )}
+            />
+            {errors.type && (
+              <p role="alert" className="mt-1 text-xs text-red-600">
+                {errors.type.message}
+              </p>
             )}
-          />
+          </div>
+          <div>
+            <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
+              Reminder
+            </label>
+            <Controller
+              control={control}
+              name="reminder"
+              render={({ field }) => (
+                <FollowUpReminderSelect
+                  value={field.value || "none"}
+                  onChange={(value) =>
+                    field.onChange(value === "none" ? "" : value)
+                  }
+                  options={reminderOptions}
+                  placeholder="No reminder"
+                  emptyOption={{ value: "none", label: "No reminder" }}
+                  showIcon
+                />
+              )}
+            />
+          </div>
         </div>
 
-        <div className="flex flex-col-reverse justify-end gap-2 border-t border-slate-100 pt-5 sm:flex-row">
+        <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6">
           <DialogPrimitive.Close asChild>
             <Button type="button" variant="outline">
               Cancel
@@ -224,7 +271,7 @@ function NextFollowUpForm({
               "Schedule Next Follow-Up"
             )}
           </SaveButton>
-        </div>
+        </footer>
       </form>
     </>
   );
@@ -239,7 +286,7 @@ export default function NextFollowUpDialog({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-slate-200 bg-white shadow-2xl outline-none">
           <NextFollowUpForm
             key={`next-${followUp.id}`}
             followUp={followUp}

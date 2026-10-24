@@ -229,8 +229,8 @@ export function FollowUpNotesDialog({
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl bg-white p-4 shadow-2xl outline-none sm:p-6">
-          <div className="mb-4 flex items-start justify-between gap-4">
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-slate-200 bg-white shadow-2xl outline-none">
+          <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
             <div className="min-w-0">
               <DialogPrimitive.Title className="text-lg font-bold text-slate-900">
                 Follow-up notes
@@ -244,15 +244,14 @@ export function FollowUpNotesDialog({
                 type="button"
                 aria-label="Close follow-up notes"
                 title="Close"
-                className="flex size-9 shrink-0 items-center justify-center rounded-lg text-slate-500 transition-colors hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="flex size-9 shrink-0 items-center justify-center border border-transparent text-slate-500 transition-colors hover:border-slate-200 hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
               >
                 <X className="size-4" />
               </button>
             </DialogPrimitive.Close>
-          </div>
-          {followUpId && open && (
-            <FollowUpNotesPanel key={followUpId} followUpId={followUpId} />
-          )}
+          </header>
+          <div className="px-4 py-4 sm:px-6">{followUpId && open && <FollowUpNotesPanel key={followUpId} followUpId={followUpId} />}</div>
+          <footer className="sticky bottom-0 z-10 flex justify-end border-t border-slate-200 bg-white px-4 py-3 sm:px-6"><DialogPrimitive.Close asChild><Button type="button" variant="outline" className="rounded-none">Close</Button></DialogPrimitive.Close></footer>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

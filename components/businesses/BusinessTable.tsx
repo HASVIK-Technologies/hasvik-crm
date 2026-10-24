@@ -2,10 +2,10 @@
 
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
+import Link from "next/link";
 import {
   ArrowDownUp,
   ChevronDown,
-  Phone,
   MoreVertical,
   ChevronLeft,
   ChevronRight,
@@ -13,12 +13,16 @@ import {
   Eye,
   Pencil,
   Power,
+  UserRound,
+  UserRoundCog,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PlainButton from "@/components/common/PlainButton";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { ActivityStateText } from "@/components/common/ActivityStateText";
+import { PhoneActionMenu } from "@/components/common/ContactActionMenu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
@@ -55,6 +59,7 @@ import { getWhatsAppNumbers, formatWhatsAppUrl } from "@/lib/business/mappers";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 import BusinessViewToggle, { type BusinessView } from "./BusinessViewToggle";
 import { useBusinessHighlight } from "@/hooks/use-business-highlight";
+import AssignBusinessDialog from "./AssignBusinessDialog";
 
 function formatDisplayString(val: unknown, fallback: string = "-"): string {
   if (!val) return fallback;
@@ -197,6 +202,7 @@ export default function BusinessTable({
 }: BusinessTableProps) {
   const router = useRouter();
   const [statusModalBusiness, setStatusModalBusiness] = useState<BusinessItem | null>(null);
+  const [assignmentBusiness, setAssignmentBusiness] = useState<BusinessItem | null>(null);
   const updateStatusMutation = useUpdateBusinessStatus();
   const { highlightBusiness, isBusinessHighlighted } = useBusinessHighlight();
 
@@ -373,13 +379,17 @@ export default function BusinessTable({
                           <StatusBadge
                             status={item.leadStatus || getLeadStatusLabel(item.leadStatus)}
                             label={getLeadStatusLabel(item.leadStatus)}
-                            className="rounded-md px-2 py-0.5 text-[10px]"
+                            className="px-2 py-0.5 text-[10px]"
                           />
                         ) : (
                           <span className="text-[#94a3b8]">-</span>
                         )}
                       </div>
                       <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
+                      <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
+                        <UserRound className="size-3.5 shrink-0" />
+                        <span className="truncate">{item.assignedToName || "Unassigned"}</span>
+                      </p>
                     </div>
                   </div>
 
@@ -387,45 +397,23 @@ export default function BusinessTable({
                   <div className="flex flex-col items-end justify-between self-stretch shrink-0 gap-2.5">
                     {/* Status Badge */}
                     <div>
-                      <StatusBadge
-                        status={item.status}
-                        className="rounded-md px-2.5 py-0.5 text-[11px]"
-                      />
+                      <ActivityStateText active={item.status === "Active"} />
                     </div>
 
                     {/* Follow-up text */}
                     <div className="text-[11px] font-medium text-[#64748b]">
-                      {item.nextFollowUpType === "today" ? (
-                        <span className="font-medium text-brand-green-strong">Today</span>
-                      ) : item.nextFollowUpType === "tomorrow" ? (
-                        <span className="font-medium text-primary">Tomorrow</span>
-                      ) : item.nextFollowUpType === "date" ? (
-                        <span className="font-medium text-primary">{item.nextFollowUp}</span>
-                      ) : (
-                        <span>-</span>
-                      )}
+                      {item.nextFollowUpType !== "none" ? (
+                        item.status === "Active" && item.nextFollowUpId ? <Link href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()} className="font-semibold text-primary hover:underline">{item.nextFollowUp}</Link> : <span className="font-medium text-slate-600">{item.nextFollowUp}</span>
+                      ) : <span>-</span>}
                     </div>
 
                     {/* Action Icons (Phone + WhatsApp + More) */}
                     <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <a
-                            href={`tel:${item.phone}`}
-                            onClick={(e) => {
-                              e.stopPropagation();
-                              highlightBusiness(item.id);
-                            }}
-                            aria-label={`Call ${item.name}`}
-                            className="flex size-7 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20"
-                          >
-                            <Phone className="size-4" />
-                          </a>
-                        </TooltipTrigger>
-                        <TooltipContent>Call {item.name}</TooltipContent>
-                      </Tooltip>
+                      {item.status === "Active" && <>
+                      <PhoneActionMenu numbers={item.phoneNumbers} fallback={item.phone} className="size-7" onAction={() => highlightBusiness(item.id)} />
 
                       <RowWhatsAppButton item={item} size="sm" onAction={() => highlightBusiness(item.id)} />
+                      </>}
 
                       <DropdownMenu>
                         <Tooltip>
@@ -470,6 +458,13 @@ export default function BusinessTable({
                               >
                                 <Pencil className="size-3.5" /> <span>Edit Business</span>
                               </DropdownMenuItem>
+                              <DropdownMenuItem
+                                onSelect={() => setAssignmentBusiness(item)}
+                                className="cursor-pointer gap-2 text-xs"
+                              >
+                                <UserRoundCog className="size-3.5" />
+                                <span>{item.assignedToId ? "Reassign Owner" : "Assign Owner"}</span>
+                              </DropdownMenuItem>
                             </>
                           )}
                           <DropdownMenuItem
@@ -500,6 +495,7 @@ export default function BusinessTable({
                 <TableHead className="py-4 pl-6 pr-4 font-semibold">Business Name</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Category</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">City</TableHead>
+                <TableHead className="px-4 py-4 font-semibold">Responsible Person</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Status</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>
@@ -528,6 +524,9 @@ export default function BusinessTable({
                       <div className="h-3.5 w-20 rounded bg-[#f1f5f9] animate-pulse" />
                     </TableCell>
                     <TableCell className="px-4 py-4.5">
+                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
+                    <TableCell className="px-4 py-4.5">
                       <div className="h-6 w-16 rounded-full bg-[#f1f5f9] animate-pulse" />
                     </TableCell>
                     <TableCell className="px-4 py-4.5">
@@ -549,7 +548,7 @@ export default function BusinessTable({
                 ))
               ) : businesses.length === 0 ? (
                 <TableRow>
-                  <TableCell colSpan={8} className="py-0">
+                  <TableCell colSpan={9} className="py-0">
                     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
                       <div className="flex size-14 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
                         <Building2 className="size-7 text-[#94a3b8]" />
@@ -619,13 +618,23 @@ export default function BusinessTable({
                       {formatDisplayString(item.city, "-")}
                     </TableCell>
 
+                    {/* Responsible person */}
+                    <TableCell className="px-4 py-4.5 text-sm">
+                      <div className="flex min-w-0 items-center gap-2">
+                        <UserRound className="size-4 shrink-0 text-slate-400" />
+                        <span className={cn("truncate", item.assignedToName ? "font-medium text-slate-700" : "text-slate-400")}>
+                          {item.assignedToName || "Unassigned"}
+                        </span>
+                      </div>
+                    </TableCell>
+
                     {/* Lead Status */}
                     <TableCell className="px-4 py-4.5">
                       {getLeadStatusLabel(item.leadStatus) !== "-" ? (
                         <StatusBadge
                           status={item.leadStatus || getLeadStatusLabel(item.leadStatus)}
                           label={getLeadStatusLabel(item.leadStatus)}
-                          className="rounded-md px-3 py-1 text-xs"
+                          className="px-3 py-1 text-xs"
                         />
                       ) : (
                         <span className="text-[#94a3b8]">-</span>
@@ -633,28 +642,17 @@ export default function BusinessTable({
                     </TableCell>
 
                     {/* Status */}
-                    <TableCell className="px-4 py-4.5">
-                      <StatusBadge
-                        status={item.status}
-                        className="rounded-md px-3 py-1 text-xs"
-                      />
-                    </TableCell>
+                    <TableCell className="px-4 py-4.5"><ActivityStateText active={item.status === "Active"} /></TableCell>
 
                     {/* Last Follow-up */}
-                    <TableCell className="px-4 py-4.5 text-sm">{item.lastFollowUp}</TableCell>
+                    <TableCell className="px-4 py-4.5 text-sm">
+                      {item.status === "Active" && item.lastFollowUpId ? <Link href={`/follow-ups/${item.lastFollowUpId}`} onClick={(event) => event.stopPropagation()} className="font-semibold text-primary hover:underline">{item.lastFollowUp}</Link> : item.lastFollowUp}
+                    </TableCell>
 
                     {/* Next Follow-up */}
                     <TableCell className="px-4 py-4.5">
                       {item.nextFollowUpType !== "none" ? (
-                        <StatusBadge
-                          status={item.nextFollowUpType}
-                          label={
-                            item.nextFollowUpType === "date"
-                              ? item.nextFollowUp
-                              : undefined
-                          }
-                          className="rounded-md px-3 py-1 text-xs"
-                        />
+                        item.status === "Active" && item.nextFollowUpId ? <Link href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()} className="font-semibold text-primary hover:underline">{item.nextFollowUp}</Link> : <span className="font-medium text-slate-700">{item.nextFollowUp}</span>
                       ) : (
                         <span className="text-[#94a3b8]">-</span>
                       )}
@@ -666,26 +664,13 @@ export default function BusinessTable({
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-end gap-2.5">
+                        {item.status === "Active" && <>
                         {/* Phone Call */}
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <a
-                              href={`tel:${item.phone}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                highlightBusiness(item.id);
-                              }}
-                              aria-label={`Call ${item.name}`}
-                              className="flex size-8 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20"
-                            >
-                              <Phone className="size-4.5" />
-                            </a>
-                          </TooltipTrigger>
-                          <TooltipContent>Call {item.name}</TooltipContent>
-                        </Tooltip>
+                        <PhoneActionMenu numbers={item.phoneNumbers} fallback={item.phone} onAction={() => highlightBusiness(item.id)} />
 
                         {/* WhatsApp / Message */}
                         <RowWhatsAppButton item={item} size="md" onAction={() => highlightBusiness(item.id)} />
+                        </>}
 
                         {/* 3 Dots Menu */}
                         <DropdownMenu>
@@ -729,6 +714,13 @@ export default function BusinessTable({
                                   className="cursor-pointer gap-2 text-xs"
                                 >
                                   <Pencil className="size-3.5" /> <span>Edit Business</span>
+                                </DropdownMenuItem>
+                                <DropdownMenuItem
+                                  onSelect={() => setAssignmentBusiness(item)}
+                                  className="cursor-pointer gap-2 text-xs"
+                                >
+                                  <UserRoundCog className="size-3.5" />
+                                  <span>{item.assignedToId ? "Reassign Owner" : "Assign Owner"}</span>
                                 </DropdownMenuItem>
                               </>
                             )}
@@ -848,6 +840,13 @@ export default function BusinessTable({
           }
         }}
         onConfirm={handleConfirmStatusChange}
+      />
+      <AssignBusinessDialog
+        business={assignmentBusiness}
+        open={assignmentBusiness !== null}
+        onOpenChange={(open) => {
+          if (!open) setAssignmentBusiness(null);
+        }}
       />
     </TooltipProvider>
   );

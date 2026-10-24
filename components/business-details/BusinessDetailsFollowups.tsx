@@ -4,7 +4,6 @@ import { useParams } from "next/navigation";
 import { useRouter } from "next/navigation";
 import Link from "next/link";
 import {
-  AlertCircle,
   CheckCircle2,
   Eye,
   MessageSquareText,
@@ -12,12 +11,10 @@ import {
   Pencil,
   Plus,
   Trash2,
-  X,
 } from "lucide-react";
 import { toast } from "sonner";
-import { Dialog as DialogPrimitive } from "radix-ui";
 import { StatusBadge } from "@/components/common/StatusBadge";
-import { Button } from "@/components/ui/button";
+import CancelFollowUpDialog from "@/components/follow-ups/CancelFollowUpDialog";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
   DropdownMenu,
@@ -45,6 +42,7 @@ import { useState } from "react";
 
 interface BusinessDetailsFollowupsProps {
   businessId?: string;
+  readOnly?: boolean;
 }
 
 function formatScheduledAt(value: string) {
@@ -60,6 +58,7 @@ function formatScheduledAt(value: string) {
 
 export default function BusinessDetailsFollowups({
   businessId: propBusinessId,
+  readOnly = false,
 }: BusinessDetailsFollowupsProps = {}) {
   const params = useParams<{ id?: string | string[] }>();
   const router = useRouter();
@@ -200,7 +199,7 @@ export default function BusinessDetailsFollowups({
                           </TooltipTrigger>
                           <TooltipContent>View or add notes</TooltipContent>
                         </Tooltip>
-                        <DropdownMenu>
+                        {!readOnly && <DropdownMenu>
                           <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <button
                               type="button"
@@ -273,7 +272,7 @@ export default function BusinessDetailsFollowups({
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>
-                        </DropdownMenu>
+                        </DropdownMenu>}
                       </div>
                     </td>
                   </tr>
@@ -294,59 +293,13 @@ export default function BusinessDetailsFollowups({
         </div>
       </div>
 
-      <DialogPrimitive.Root
+      <CancelFollowUpDialog
         open={Boolean(cancellingFollowUp)}
-        onOpenChange={(open) => {
-          if (!open) setCancellingFollowUp(null);
-        }}
-      >
-        <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35" />
-          <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-sm -translate-x-1/2 -translate-y-1/2 rounded-2xl bg-white p-6 shadow-2xl outline-none">
-            <div className="flex gap-4">
-              <div className="flex size-10 shrink-0 items-center justify-center rounded-full bg-red-50">
-                <AlertCircle className="size-5 text-red-600" />
-              </div>
-              <div className="flex-1">
-                <DialogPrimitive.Title className="text-lg font-bold text-slate-900">
-                  Cancel follow-up?
-                </DialogPrimitive.Title>
-                <DialogPrimitive.Description className="mt-1 text-sm text-slate-500">
-                  Cancel the follow-up for{" "}
-                  <strong>
-                    {cancellingFollowUp?.businessName || "this business"}
-                  </strong>
-                  ?
-                </DialogPrimitive.Description>
-              </div>
-              <DialogPrimitive.Close asChild>
-                <button
-                  type="button"
-                  aria-label="Close cancel confirmation"
-                  className="flex h-6 w-6 shrink-0 items-start text-slate-400 hover:text-slate-600"
-                >
-                  <X className="size-4" />
-                </button>
-              </DialogPrimitive.Close>
-            </div>
-            <div className="mt-6 flex justify-end gap-3">
-              <Button
-                variant="outline"
-                onClick={() => setCancellingFollowUp(null)}
-              >
-                Keep follow-up
-              </Button>
-              <Button
-                variant="destructive"
-                onClick={() => void cancelFollowUp()}
-                disabled={cancelMutation.isPending}
-              >
-                {cancelMutation.isPending ? "Cancelling..." : "Cancel"}
-              </Button>
-            </div>
-          </DialogPrimitive.Content>
-        </DialogPrimitive.Portal>
-      </DialogPrimitive.Root>
+        businessName={cancellingFollowUp?.businessName || "this business"}
+        loading={cancelMutation.isPending}
+        onOpenChange={(open) => { if (!open) setCancellingFollowUp(null); }}
+        onConfirm={() => void cancelFollowUp()}
+      />
       <FollowUpNotesDialog
         followUpId={notesFollowUp?.id}
         followUpName={

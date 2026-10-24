@@ -7,6 +7,7 @@ import {
   canCreateNextFollowUp,
 } from "../lib/follow-ups/actions.ts";
 import { formatFollowUpType } from "../lib/business/form-options.ts";
+import { formatFollowUpStatus } from "../lib/follow-ups/status.ts";
 import type { FollowUpItem } from "../types/follow-up.ts";
 
 function makeFollowUp(status: string): FollowUpItem {
@@ -25,6 +26,13 @@ function makeFollowUp(status: string): FollowUpItem {
 }
 
 describe("Follow-up Action Rules", () => {
+  test("formats backend follow-up statuses for display", () => {
+    assert.strictEqual(formatFollowUpStatus("SCHEDULED"), "Scheduled");
+    assert.strictEqual(formatFollowUpStatus("COMPLETED"), "Completed");
+    assert.strictEqual(formatFollowUpStatus("CANCELLED"), "Cancelled");
+    assert.strictEqual(formatFollowUpStatus("OVERDUE"), "Overdue");
+    assert.strictEqual(formatFollowUpStatus("WAITING_FOR_REPLY"), "Waiting For Reply");
+  });
   test("canCompleteFollowUp allows SCHEDULED and OVERDUE", () => {
     assert.strictEqual(canCompleteFollowUp(makeFollowUp("SCHEDULED")), true);
     assert.strictEqual(canCompleteFollowUp(makeFollowUp("scheduled")), true);

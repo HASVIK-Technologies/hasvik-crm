@@ -8,6 +8,7 @@ import OutlinedButton from "@/components/common/OutlinedButton";
 import Actions from "@/components/common/Actions";
 import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { ActivityStateText } from "@/components/common/ActivityStateText";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import businessData from "@/data/businessData.json";
@@ -32,6 +33,7 @@ import {
   Users,
   Calendar,
   AlertCircle,
+  UserRoundCog,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinessQuery } from "@/hooks/use-businesses";
@@ -47,11 +49,13 @@ import {
 import BusinessDetailsFollowups from "@/components/business-details/BusinessDetailsFollowups";
 import { DeactivateBusinessModal } from "@/components/business-details/DeactivateBusinessModal";
 import { useBusinessListStore } from "@/store/business-list-store";
+import AssignBusinessDialog from "@/components/businesses/AssignBusinessDialog";
 
 export default function BusinessDetails() {
   const cleanNumber = (num: string) => num.replace(/\D/g, "");
 
   const params = useParams();
+  const [isAssignmentOpen, setIsAssignmentOpen] = React.useState(false);
 
   const rawId = Array.isArray(params?.id) ? params.id[0] : params?.id;
   const stringId = typeof rawId === "string" ? rawId : "";
@@ -170,21 +174,26 @@ export default function BusinessDetails() {
       }
       actions={
         <Actions
-          primary={{
+          primary={isInactive ? {
+            label: "Activate Business",
+            onSelect: () => openDeactivateModal(String(business?.id)),
+          } : {
             label: "Edit Business",
             icon: <Edit2 className="size-4" />,
             href: `/businesses/form/${business.id}`,
-            disabled: isInactive,
           }}
-          secondary={[
+          secondary={isInactive ? [] : [
             {
-              label: "Add Follow Up",
-              disabled: isInactive, // Lock it if inactive!
-              onSelect: () => openFollowUpModal(String(business?.id)), // Open the modal!
+              label: business.assignedToId ? "Reassign Owner" : "Assign Owner",
+              icon: <UserRoundCog className="size-4" />,
+              onSelect: () => setIsAssignmentOpen(true),
             },
             {
-              label: isInactive ? "Activate" : "Deactivate",
-              // Open the Deactivate/Activate modal!
+              label: "Add Follow Up",
+              onSelect: () => openFollowUpModal(String(business?.id)),
+            },
+            {
+              label: "Deactivate",
               onSelect: () => openDeactivateModal(String(business?.id)),
             },
           ]}
@@ -207,7 +216,7 @@ export default function BusinessDetails() {
                       {business.name}
                     </CardTitle>
                     <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-                      <StatusBadge status={isInactive ? "Inactive" : "Active"} />
+                      <ActivityStateText active={!isInactive} />
                       {leadStatusDisplay && leadStatusDisplay !== "-" && (
                         <StatusBadge
                           status={rawLeadStatus || leadStatusDisplay}
@@ -231,7 +240,7 @@ export default function BusinessDetails() {
                 </div>
               </div>
 
-              <div className="flex items-center gap-2 self-end sm:self-auto">
+              {!isInactive && <div className="flex items-center gap-2 self-end sm:self-auto">
                 {/* Phone Dropdown / Single Button */}
                 {headerPhones.length > 1 ? (
                   <DropdownMenu>
@@ -351,7 +360,7 @@ export default function BusinessDetails() {
                     <MapPin className="h-4 w-4" />
                   </OutlinedButton>
                 )}
-              </div>
+              </div>}
             </CardHeader>
 
             <CardContent className="p-4 sm:p-6">
@@ -363,9 +372,7 @@ export default function BusinessDetails() {
                       Assigned to
                     </p>
                     <p className="mt-1 truncate text-sm font-semibold text-slate-800">
-                      {nextFollowUp
-                        ? nextFollowUp.assignedToName
-                        : business.assignedTo || "Unassigned"}
+                      {business.assignedToName || business.assignedTo || "Unassigned"}
                     </p>
                   </div>
                 </div>
@@ -376,30 +383,12 @@ export default function BusinessDetails() {
                       Next follow-up
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
-                      {nextFollowUp ? (
-                        <>
-                          <p className="text-sm font-semibold text-slate-800">
-                            {dateFmt.format(new Date(nextFollowUp.scheduledAt))}
-                          </p>
-                          <Link
-                            href={`/follow-ups/${nextFollowUp.id}`}
-                            className="inline-flex h-5 items-center rounded-full bg-blue-50 px-2 text-[10px] font-semibold text-blue-700 hover:bg-blue-100 transition-colors"
-                          >
-                            View
-                          </Link>
-                        </>
+                      {nextFollowUp && !isInactive ? (
+                        <Link href={`/follow-ups/${nextFollowUp.id}`} className="text-sm font-semibold text-primary hover:underline">
+                          {dateFmt.format(new Date(nextFollowUp.scheduledAt))}
+                        </Link>
                       ) : business?.nextFollowUp && business.nextFollowUp !== "-" ? (
-                        <>
-                          <p className="text-sm font-semibold text-slate-800">
-                            {business.nextFollowUp}
-                          </p>
-                          {business.nextFollowUpType && business.nextFollowUpType !== "none" && (
-                            <StatusBadge
-                              status={business.nextFollowUpType}
-                              className="h-5 py-0 text-[10px]"
-                            />
-                          )}
-                        </>
+                        business.nextFollowUpId && !isInactive ? <Link href={`/follow-ups/${business.nextFollowUpId}`} className="text-sm font-semibold text-primary hover:underline">{business.nextFollowUp}</Link> : <p className="text-sm font-semibold text-slate-800">{business.nextFollowUp}</p>
                       ) : (
                         <p className="text-sm font-semibold text-slate-800">
                           -
@@ -412,18 +401,9 @@ export default function BusinessDetails() {
                   <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-slate-500">Last follow-up</p>
-                    <p className="mt-1 truncate text-sm font-semibold text-slate-800">
-                      {lastFollowUpItem
-                        ? dateFmt.format(
-                            new Date(
-                              (lastFollowUpItem as { completedAt?: string }).completedAt ??
-                                lastFollowUpItem.scheduledAt
-                            )
-                          )
-                        : business?.lastFollowUp && business.lastFollowUp !== "-"
-                        ? business.lastFollowUp
-                        : "-"}
-                    </p>
+                    <div className="mt-1 truncate text-sm font-semibold text-slate-800">
+                      {lastFollowUpItem ? (!isInactive ? <Link href={`/follow-ups/${lastFollowUpItem.id}`} className="text-primary hover:underline">{dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))}</Link> : dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))) : business?.lastFollowUp && business.lastFollowUp !== "-" ? (business.lastFollowUpId && !isInactive ? <Link href={`/follow-ups/${business.lastFollowUpId}`} className="text-primary hover:underline">{business.lastFollowUp}</Link> : business.lastFollowUp) : "-"}
+                    </div>
                   </div>
                 </div>
                 <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
@@ -474,7 +454,7 @@ export default function BusinessDetails() {
             </TabsContent>
             {/* FOLLOW-UPS TAB */}
             <TabsContent value="follow-ups" className="mt-6">
-              <BusinessDetailsFollowups />
+              <BusinessDetailsFollowups readOnly={isInactive} />
             </TabsContent>
           </Tabs>
           {/* New Follow-up Modal */}
@@ -484,6 +464,11 @@ export default function BusinessDetails() {
             businessName={business?.name || ""}
             businessStatus={business?.status || ""}
             businessIsActive={business.isActive}
+          />
+          <AssignBusinessDialog
+            business={business}
+            open={isAssignmentOpen}
+            onOpenChange={setIsAssignmentOpen}
           />
         </>
       }

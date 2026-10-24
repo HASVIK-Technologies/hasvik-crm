@@ -24,6 +24,7 @@ export type BusinessFormValues = {
   email: string;
   website: string;
   description: string;
+  scheduleFollowUp: boolean;
   followUpType: FollowUpType | "";
   assignTo: string;
   /** Display name for the selected assignee; never sent to the API. */
@@ -40,13 +41,14 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   state: "",
   pincode: "",
   address: "",
-  status: "",
+  status: "NEW",
   locationUrl: "",
   phoneNumbers: [{ value: "" }],
   whatsappNumbers: [{ value: "" }],
   email: "",
   website: "",
   description: "",
+  scheduleFollowUp: false,
   followUpType: "",
   assignTo: "",
   assignToName: "",

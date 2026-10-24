@@ -9,6 +9,12 @@ import type {
 
 type CollectionPayload<T> = T[] | { data: T[] };
 
+function unwrap<T>(payload: T | { data: T }): T {
+  return payload && typeof payload === "object" && "data" in payload
+    ? (payload as { data: T }).data
+    : (payload as T);
+}
+
 function readCollection<T>(payload: CollectionPayload<T>): T[] {
   if (Array.isArray(payload)) return payload;
   if (payload && Array.isArray(payload.data)) return payload.data;
@@ -41,31 +47,35 @@ export async function getSubscriptions(
 export async function createSubscription(
   payload: CreateSubscriptionPayload,
 ): Promise<Subscription> {
-  const response = await apiClient.post<Subscription>(
+  const response = await apiClient.post<Subscription | { data: Subscription }>(
     "/subscriptions",
     payload,
   );
-  return response.data;
+  return unwrap(response.data);
 }
 
 export async function updateSubscriptionStatus(
   id: string,
   status: SubscriptionStatus,
 ): Promise<Subscription> {
-  const response = await apiClient.patch<Subscription>(
-    `/subscriptions/${id}/status`,
+  const subscriptionId = id.trim();
+  if (!subscriptionId) throw new Error("Subscription ID is required to update its status.");
+  const response = await apiClient.patch<Subscription | { data: Subscription }>(
+    `/subscriptions/${encodeURIComponent(subscriptionId)}/status`,
     { status },
   );
-  return response.data;
+  return unwrap(response.data);
 }
 
 export async function renewSubscription(
   id: string,
   payload: RenewSubscriptionPayload = {},
 ): Promise<Subscription> {
-  const response = await apiClient.patch<Subscription>(
-    `/subscriptions/${id}/renew`,
+  const subscriptionId = id.trim();
+  if (!subscriptionId) throw new Error("Subscription ID is required to renew a subscription.");
+  const response = await apiClient.patch<Subscription | { data: Subscription }>(
+    `/subscriptions/${encodeURIComponent(subscriptionId)}/renew`,
     payload,
   );
-  return response.data;
+  return unwrap(response.data);
 }

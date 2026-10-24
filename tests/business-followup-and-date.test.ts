@@ -152,6 +152,22 @@ describe("Business Follow-up & Date Validation", () => {
       assert.ok(result.includes("Aug") || result.includes("08"));
     });
 
+    test("extracts authoritative lastFollowup with only id and scheduledAt", () => {
+      const business = {
+        _id: "biz-last-response-shape",
+        name: "Response Shape Business",
+        lastFollowup: {
+          _id: "follow-up-123",
+          scheduledAt: "2026-10-03T14:27:00.000Z",
+        },
+      } as ApiBusiness;
+
+      const item = toBusinessItem(business);
+      assert.notStrictEqual(item.lastFollowUp, "-");
+      assert.ok(item.lastFollowUp.includes("Oct") || item.lastFollowUp.includes("10"));
+      assert.strictEqual(item.lastFollowUpId, "follow-up-123");
+    });
+
     test("shows completed follow-up date instead of business creation date", () => {
       const business: ApiBusiness = {
         _id: "biz-8",

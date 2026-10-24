@@ -29,7 +29,6 @@ export function formatFollowUpDate(dateVal?: string | Date | null): string {
 
   return new Intl.DateTimeFormat("en-IN", {
     dateStyle: "medium",
-    timeStyle: "short",
   }).format(date);
 }
 
@@ -323,7 +322,7 @@ export function extractLatestCompletedFollowUpDate(
         obj.completedAt ??
         obj.followUpDate ??
         obj.date ??
-        (isCompleted ? obj.scheduledAt : undefined);
+        (isCompleted || !status ? obj.scheduledAt : undefined);
 
       if (rawDate) {
         if (typeof rawDate === "string") {
@@ -409,6 +408,66 @@ export function parseFollowUp(dateStr?: string): {
   return { nextFollowUp: formattedDate, nextFollowUpType: "date" };
 }
 
+function getFollowUpId(value: unknown): string | undefined {
+  if (!value || typeof value !== "object") return undefined;
+  const record = value as Record<string, unknown>;
+  const id = record._id ?? record.id;
+  return typeof id === "string" && id.trim() ? id : undefined;
+}
+
+function selectFollowUpId(
+  values: unknown[],
+  mode: "next" | "last",
+): string | undefined {
+  const entries = values.flatMap((value) => Array.isArray(value) ? value : [value]);
+  const eligible = entries.filter((value) => {
+    if (!value || typeof value !== "object" || !getFollowUpId(value)) return false;
+    const record = value as Record<string, unknown>;
+    const status = String(record.status ?? "").toUpperCase();
+    return mode === "next"
+      ? status !== "COMPLETED" && status !== "CANCELLED"
+      : status === "COMPLETED" || record.isCompleted === true || Boolean(record.completedAt);
+  });
+
+  eligible.sort((left, right) => {
+    const leftDate = extractDateFromFollowUpEntry(left);
+    const rightDate = extractDateFromFollowUpEntry(right);
+    const leftTime = leftDate ? new Date(leftDate.replace(/\s+at\s+/i, " ")).getTime() : NaN;
+    const rightTime = rightDate ? new Date(rightDate.replace(/\s+at\s+/i, " ")).getTime() : NaN;
+    const safeLeft = Number.isNaN(leftTime) ? (mode === "next" ? Infinity : -Infinity) : leftTime;
+    const safeRight = Number.isNaN(rightTime) ? (mode === "next" ? Infinity : -Infinity) : rightTime;
+    return mode === "next" ? safeLeft - safeRight : safeRight - safeLeft;
+  });
+
+  return getFollowUpId(eligible[0]);
+}
+
+function extractFollowUpIds(business: ApiBusiness) {
+  const record = business as Record<string, unknown>;
+  const explicitLastFollowUpId = [
+    record.lastFollowup,
+    record.lastFollowUp,
+    record.lastFollowups,
+  ]
+    .flatMap((value) => Array.isArray(value) ? value : [value])
+    .find((value) => {
+      if (!value || typeof value !== "object" || !getFollowUpId(value)) return false;
+      const status = String((value as Record<string, unknown>).status ?? "").toUpperCase();
+      return !status || status === "COMPLETED";
+    });
+
+  return {
+    nextFollowUpId: selectFollowUpId(
+      [record.nextFollowups, record.nextFollowup, record.nextFollowUp, record.followUps],
+      "next",
+    ),
+    lastFollowUpId: getFollowUpId(explicitLastFollowUpId) ?? selectFollowUpId(
+      [record.completedFollowUps, record.completedFollowups, record.lastFollowup, record.lastFollowUp, record.lastFollowups, record.followUps],
+      "last",
+    ),
+  };
+}
+
 export function toBusinessItem(business: ApiBusiness): BusinessItem {
   const initials = business.name
     .split(" ")
@@ -419,6 +478,7 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     .toUpperCase();
   const nextDateRaw = extractNextFollowUpDate(business);
   const followUpInfo = parseFollowUp(nextDateRaw);
+  const followUpIds = extractFollowUpIds(business);
   const rawCategory = business.category;
   const categoryName =
     rawCategory && typeof rawCategory === "object"
@@ -428,6 +488,17 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     typeof categoryName === "string" && categoryName
       ? categoryName
       : business.categoryId || "Uncategorized";
+  const rawAssignee = business.assignee ?? business.assignedTo;
+  const assignedToId =
+    rawAssignee && typeof rawAssignee === "object"
+      ? String(rawAssignee._id ?? rawAssignee.id ?? "")
+      : typeof rawAssignee === "string"
+        ? rawAssignee
+        : "";
+  const assignedToName =
+    rawAssignee && typeof rawAssignee === "object"
+      ? String(rawAssignee.fullName ?? rawAssignee.name ?? "")
+      : "";
 
   return {
     id: business._id,
@@ -443,19 +514,23 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
     status: business.isActive === false ? "Inactive" : "Active",
     isActive: business.isActive,
     lastFollowUp: extractLatestCompletedFollowUpDate(business),
+    lastFollowUpId: followUpIds.lastFollowUpId,
     nextFollowUp: followUpInfo.nextFollowUp,
+    nextFollowUpId: followUpIds.nextFollowUpId,
     nextFollowUpType: followUpInfo.nextFollowUpType,
     nextFollowupDate: nextDateRaw ?? business.nextFollowupDate,
     reminder: business.reminder,
     description: business.description,
     notes: business.notes,
-    owner: business.assignedTo,
+    owner: assignedToName || undefined,
     address: business.address,
     email: business.email,
     website: business.website,
     leadSource: business.leadSource,
     businessType: business.businessType,
-    assignedTo: business.assignedTo,
+    assignedToId: assignedToId || undefined,
+    assignedToName: assignedToName || undefined,
+    assignedTo: assignedToName || undefined,
     alternatePhone: getPrimaryNumber(business.whatsappNumbers),
     phoneNumbers: business.phoneNumbers,
     whatsappNumbers: business.whatsappNumbers,
@@ -595,7 +670,9 @@ export function toCreateBusinessPayload(
     payload.location = { url: values.locationUrl.trim() };
   }
   if (values.assignTo) payload.assignedTo = values.assignTo;
-  payload.followUp = toFollowUpPayload(values);
+  if (values.scheduleFollowUp) {
+    payload.followUp = toFollowUpPayload(values);
+  }
 
   return payload;
 }

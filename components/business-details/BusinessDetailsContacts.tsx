@@ -10,6 +10,7 @@ interface ContactsProps {
 }
 
 export default function BusinessDetailsContacts({ business }: ContactsProps) {
+  const isInactive = business?.isActive === false;
   const cleanNumber = (num: string) => (num ? String(num).replace(/\D/g, "") : "");
 
   // 1. Get real phone numbers with fallback to primary phone
@@ -60,12 +61,12 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
                           Primary
                         </Badge>
                       )}
-                      <a
+                      {!isInactive && <a
                         href={`tel:${cleanNumber(num)}`}
                         aria-label={`Call ${num}`}
                       >
                         <Phone className="size-4 text-brand-green-strong hover:text-brand-green" />
-                      </a>
+                      </a>}
                     </div>
                   </div>
                 );
@@ -96,14 +97,14 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
                           Primary
                         </Badge>
                       )}
-                      <a
+                      {!isInactive && <a
                         href={`https://wa.me/91${cleanNumber(num)}`}
                         target="_blank"
                         rel="noopener noreferrer"
                         aria-label={`Chat on WhatsApp with ${num}`}
                       >
                         <WhatsAppIcon className="size-4 text-brand-green-strong hover:text-brand-green" />
-                      </a>
+                      </a>}
                     </div>
                   </div>
                 );
@@ -118,12 +119,12 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
               <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
                 <div className="flex items-center gap-2 overflow-hidden">
                   <Mail className="size-4 shrink-0 text-slate-400" />
-                  <a
+                  {!isInactive ? <a
                     href={`mailto:${email}`}
                     className="truncate text-sm font-medium text-slate-700 hover:text-primary hover:underline"
                   >
                     {email}
-                  </a>
+                  </a> : <span className="truncate text-sm font-medium text-slate-700">{email}</span>}
                 </div>
                 <Badge
                   variant="secondary"

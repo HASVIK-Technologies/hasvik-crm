@@ -8,7 +8,6 @@ import {
   MessageSquareText,
   MoreVertical,
   Pencil,
-  Phone,
   Plus,
   Trash2,
 } from "lucide-react";
@@ -37,9 +36,9 @@ import {
   TooltipTrigger,
 } from "@/components/ui/tooltip";
 import PlainButton from "@/components/common/PlainButton";
+import FollowUpCommunicationActions from "@/components/follow-ups/FollowUpCommunicationActions";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PrimaryButton from "@/components/common/PrimaryButton";
-import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
 import FollowUpViewToggle, { type FollowUpView } from "@/components/follow-ups/FollowUpViewToggle";
@@ -222,8 +221,7 @@ export default function FollowUpTable({
                       className="rounded-md px-2.5 py-0.5 text-[10px]"
                     />
                     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      <Tooltip><TooltipTrigger asChild><a href={item.businessPhone ? `tel:${item.businessPhone}` : undefined} onClick={(e) => { e.stopPropagation(); highlightFollowUp(item.id); }} aria-label={`Call ${item.businessName}`} className="flex size-8 items-center justify-center border border-transparent text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 aria-disabled:pointer-events-none aria-disabled:opacity-40"><Phone className="size-4" /></a></TooltipTrigger><TooltipContent>Call {item.businessName}</TooltipContent></Tooltip>
-                      <Tooltip><TooltipTrigger asChild><a href={item.businessPhone ? `https://wa.me/91${item.businessPhone}` : undefined} target="_blank" rel="noopener noreferrer" onClick={(e) => { e.stopPropagation(); highlightFollowUp(item.id); }} aria-label={`WhatsApp ${item.businessName}`} className="flex size-8 items-center justify-center border border-transparent text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800 aria-disabled:pointer-events-none aria-disabled:opacity-40"><WhatsAppIcon className="size-4" /></a></TooltipTrigger><TooltipContent>WhatsApp {item.businessName}</TooltipContent></Tooltip>
+                      <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <button
@@ -404,46 +402,7 @@ export default function FollowUpTable({
                     </TableCell>
                     <TableCell className="py-4 pl-4 pr-6" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <a
-                              href={
-                                item.businessPhone
-                                  ? `tel:${item.businessPhone}`
-                                  : undefined
-                              }
-                              onClick={(e) => e.stopPropagation()}
-                              aria-label={`Call ${item.businessName}`}
-                              className="flex size-8 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 aria-disabled:pointer-events-none aria-disabled:opacity-40"
-                            >
-                              <Phone className="size-4" />
-                            </a>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            Call {item.businessName}
-                          </TooltipContent>
-                        </Tooltip>
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <a
-                              href={
-                                item.businessPhone
-                                  ? `https://wa.me/91${item.businessPhone}`
-                                  : undefined
-                              }
-                              target="_blank"
-                              rel="noopener noreferrer"
-                              onClick={(e) => e.stopPropagation()}
-                              aria-label={`WhatsApp ${item.businessName}`}
-                              className="flex size-8 items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 aria-disabled:pointer-events-none aria-disabled:opacity-40"
-                            >
-                              <WhatsAppIcon className="size-4" />
-                            </a>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            WhatsApp {item.businessName}
-                          </TooltipContent>
-                        </Tooltip>
+                        <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
                         <Tooltip>
                           <TooltipTrigger asChild>
                             <button

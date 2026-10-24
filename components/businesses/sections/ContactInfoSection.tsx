@@ -50,10 +50,8 @@ export default function ContactInfoSection({
       return `${kind} number must contain exactly 10 digits.`;
     }
 
-    return (
-      values.some((entry) => /^\d{10}$/.test(entry.value.trim())) ||
-      `Enter at least one valid 10-digit ${kind} number.`
-    );
+    if (kind === "WhatsApp") return true;
+    return values.some((entry) => /^\d{10}$/.test(entry.value.trim())) || `Enter at least one valid 10-digit ${kind} number.`;
   };
 
   // Clicking the WhatsApp icon on a phone row copies that specific number
@@ -173,7 +171,6 @@ export default function ContactInfoSection({
           label="WhatsApp Numbers"
           addLabel="Add WhatsApp Number"
           addIcon={WhatsAppIcon}
-          required
           rowKeys={whatsappArray.fields.map((f) => f.id)}
           onAdd={() => whatsappArray.append({ value: "" })}
           onRemove={(index) => {

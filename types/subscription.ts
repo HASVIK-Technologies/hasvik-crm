@@ -1,4 +1,4 @@
-export type BillingCycle = "MONTHLY" | "YEARLY" | "LIFETIME";
+export type BillingCycle = "MONTHLY" | "QUARTERLY" | "HALF_YEARLY" | "YEARLY" | "LIFETIME";
 
 export interface SubscriptionPlanFeature {
   code: string;
@@ -46,6 +46,7 @@ export type SubscriptionStatus =
 export interface Subscription {
   _id?: string;
   id?: string;
+  subscriptionId?: string;
   tenantId?: string | SubscriptionReference;
   tenant?: SubscriptionReference;
   businessId?: string | SubscriptionReference;
@@ -67,7 +68,7 @@ export interface CreateSubscriptionPayload {
   planId: string;
   startDate?: string;
   endDate?: string;
-  autoRenew: boolean;
+  autoRenew?: boolean;
 }
 
 export interface RenewSubscriptionPayload {

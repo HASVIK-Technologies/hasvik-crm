@@ -25,7 +25,10 @@ export interface FollowUpItem {
   businessPhone?: string;
   businessCallingNumber?: string;
   businessWhatsappNumber?: string;
+  businessPhoneNumbers?: Array<{ number?: string; name?: string; type?: string; isPrimary?: boolean }>;
+  businessWhatsappNumbers?: Array<{ number?: string; name?: string; type?: string; isPrimary?: boolean }>;
   businessEmail?: string;
+  meetingLink?: string;
   assignedToId?: string;
   assignedToName: string;
   type: FollowUpType | string;
@@ -73,6 +76,7 @@ export interface FollowUpFilters {
 export type FollowUpQueryFilters = Omit<FollowUpFilters, "page" | "limit"> & {
   page?: number;
   limit?: number;
+  isCalendarView?: boolean;
 };
 
 export interface FollowUpKpis {

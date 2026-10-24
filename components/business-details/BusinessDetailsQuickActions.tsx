@@ -1,9 +1,9 @@
 import React from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import Link from "next/link";
-import { ChevronRight, Edit2, Phone, Power, Slash } from "lucide-react";
+import { ChevronRight, Edit2, Power, Slash } from "lucide-react";
 import { useModalStore } from "@/store/business-modal-store";
-import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
+import { PhoneActionMenu, WhatsAppActionMenu } from "@/components/common/ContactActionMenu";
 
 interface QuickActionsProps {
   business: any;
@@ -18,27 +18,7 @@ export default function BusinessDetailsQuickActions({
 
   const isInactive = business?.isActive === false;
 
-  const disabledStyles = isInactive
-    ? "opacity-50 pointer-events-none cursor-not-allowed"
-    : "";
-
-  const COUNTRY_CODE = "91";
   const phone = business?.phone ? cleanNumber(business.phone) : "";
-  const primaryWhatsapp =
-    (Array.isArray(business?.whatsappNumbers) &&
-      (business.whatsappNumbers.find((w: any) => w?.isPrimary)?.number ||
-        business.whatsappNumbers[0]?.number)) ||
-    business?.alternatePhone ||
-    "";
-  const whatsappDigits = primaryWhatsapp ? cleanNumber(primaryWhatsapp) : "";
-  const fullWhatsappNumber = whatsappDigits
-    ? whatsappDigits.length === 10
-      ? `${COUNTRY_CODE}${whatsappDigits}`
-      : whatsappDigits
-    : "";
-  const whatsappUrl = fullWhatsappNumber
-    ? `https://wa.me/${fullWhatsappNumber}`
-    : undefined;
 
   return (
     <div className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
@@ -47,10 +27,11 @@ export default function BusinessDetailsQuickActions({
       </h3>
 
       <div className="flex flex-col gap-2.5">
+        {!isInactive && <>
         {/* Edit Business */}
         <Link
           href={`/businesses/form/${business?.id}`}
-          className={`group flex items-center justify-between rounded-xl border border-slate-200/90 bg-white p-3 transition-all hover:border-primary/30 hover:bg-primary/5 ${disabledStyles}`}
+          className="group flex items-center justify-between rounded-xl border border-slate-200/90 bg-white p-3 transition-all hover:border-primary/30 hover:bg-primary/5"
         >
           <div className="flex items-center gap-3">
             <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
@@ -70,47 +51,13 @@ export default function BusinessDetailsQuickActions({
 
         {/* Call & WhatsApp (2 Columns) */}
         <div className="grid grid-cols-2 gap-2.5">
-          <a
-            href={phone ? `tel:${phone}` : undefined}
-            className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-brand-green/30 hover:bg-brand-green/5 ${
-              !phone || isInactive ? "opacity-50 pointer-events-none" : ""
-            }`}
-          >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green-strong transition-colors group-hover:bg-brand-green/15">
-              <Phone className="size-3.5" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand-green-strong">
-                Call
-              </p>
-              <p className="truncate text-[10px] text-slate-400">
-                Direct phone
-              </p>
-            </div>
-          </a>
-
-          <a
-            href={whatsappUrl}
-            target="_blank"
-            rel="noopener noreferrer"
-            className={`group flex items-center gap-2.5 rounded-xl border border-slate-200/90 bg-white p-2.5 transition-all hover:border-brand-green/30 hover:bg-brand-green/5 ${
-              !whatsappUrl || isInactive ? "opacity-50 pointer-events-none" : ""
-            }`}
-          >
-            <div className="flex size-8 shrink-0 items-center justify-center rounded-lg bg-brand-green/10 text-brand-green-strong transition-colors group-hover:bg-brand-green/15">
-              <WhatsAppIcon className="size-3.5" />
-            </div>
-            <div className="min-w-0">
-              <p className="truncate text-xs font-semibold text-slate-800 group-hover:text-brand-green-strong">
-                WhatsApp
-              </p>
-              <p className="truncate text-[10px] text-slate-400">Open chat</p>
-            </div>
-          </a>
+          <div className="flex items-center gap-2 border border-slate-200 bg-white p-2.5"><PhoneActionMenu numbers={business?.phoneNumbers} fallback={phone} /><span className="text-xs font-semibold text-slate-700">Call</span></div>
+          <div className="flex items-center gap-2 border border-slate-200 bg-white p-2.5"><WhatsAppActionMenu numbers={business?.whatsappNumbers} fallback={business?.alternatePhone} /><span className="text-xs font-semibold text-slate-700">WhatsApp</span></div>
         </div>
 
         {/* Divider */}
         <div className="my-0.5 border-t border-slate-100" />
+        </>}
 
         {/* Activate / Deactivate Toggle */}
         <button

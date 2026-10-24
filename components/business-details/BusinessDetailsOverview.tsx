@@ -2,6 +2,7 @@ import React from "react";
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Building2, Tags, MapPin, Building, Zap, Globe, Mail, FileText, Target } from "lucide-react";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { ActivityStateText } from "@/components/common/ActivityStateText";
 import { normalizeHttpUrl } from "@/lib/business/url-validation";
 import { useBusinessStatuses } from "@/hooks/use-filter-options";
 import { formatLeadStatus } from "@/lib/business/form-options";
@@ -57,10 +58,7 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
         <div className="flex items-center gap-3 text-sm">
           <Zap className="w-5 h-5 text-slate-400 shrink-0" />
           <div className="w-32 shrink-0 text-slate-500">Status</div>
-          <StatusBadge
-            status={isInactive ? "Inactive" : "Active"}
-            className="font-medium"
-          />
+          <ActivityStateText active={!isInactive} />
         </div>
         <div className="flex items-center gap-3 text-sm">
           <Target className="w-5 h-5 text-slate-400 shrink-0" />

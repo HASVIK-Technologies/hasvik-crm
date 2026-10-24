@@ -15,6 +15,7 @@ import { canCancelFollowUp, canCompleteFollowUp, canCreateNextFollowUp, canEditF
 import { formatFollowUpType } from "@/lib/business/form-options";
 import { cn } from "@/lib/utils";
 import type { FollowUpItem } from "@/types/follow-up";
+import FollowUpCommunicationActions from "@/components/follow-ups/FollowUpCommunicationActions";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -229,7 +230,7 @@ export default function FollowUpCalendar({
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
-                          <StatusBadge status={item.status} className="mt-1.5 px-1.5 py-0 text-[9px]" />
+                          <div className="mt-1.5 flex items-center justify-between gap-1"><StatusBadge status={item.status} className="px-1.5 py-0 text-[9px]" /><FollowUpCommunicationActions item={item} className="size-6" onAction={() => highlightFollowUp(item.id)} /></div>
                         </div>
                       ))}
                       {dayItems.length > 3 && (
@@ -295,7 +296,7 @@ export default function FollowUpCalendar({
                           <span className="mt-0.5 block truncate text-[11px] text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                           <StatusBadge status={item.status} className="mt-2" />
                         </button>
-                        <DropdownMenu>
+                        <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>
                           <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                           <DropdownMenuContent align="end" className="w-48 bg-white">
                             <DropdownMenuItem onSelect={() => openDetails(item)} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
@@ -304,7 +305,7 @@ export default function FollowUpCalendar({
                             {canCompleteFollowUp(item) && <DropdownMenuItem onSelect={() => { highlightFollowUp(item.id); onComplete(item); }} className="gap-2 text-brand-green-strong"><CheckCircle2 className="size-4" />Mark as completed</DropdownMenuItem>}
                             {canCancelFollowUp(item) && <DropdownMenuItem onSelect={() => { highlightFollowUp(item.id); onCancel(item); }} className="gap-2 text-red-700"><Trash2 className="size-4" />Cancel follow-up</DropdownMenuItem>}
                           </DropdownMenuContent>
-                        </DropdownMenu>
+                        </DropdownMenu></div>
                       </article>
                     ))}
                   </div>
@@ -355,7 +356,7 @@ export default function FollowUpCalendar({
                     <span className="mt-1 block text-xs text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                     <StatusBadge status={item.status} className="mt-2" />
                   </button>
-                  <DropdownMenu>
+                  <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>
                     <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                     <DropdownMenuContent align="end" className="w-48 bg-white">
                       <DropdownMenuItem onSelect={() => openDetails(item)} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
@@ -364,10 +365,14 @@ export default function FollowUpCalendar({
                       {canCompleteFollowUp(item) && <DropdownMenuItem onSelect={() => { setSelectedDay(null); highlightFollowUp(item.id); onComplete(item); }} className="gap-2 text-brand-green-strong"><CheckCircle2 className="size-4" />Mark as completed</DropdownMenuItem>}
                       {canCancelFollowUp(item) && <DropdownMenuItem onSelect={() => { setSelectedDay(null); highlightFollowUp(item.id); onCancel(item); }} className="gap-2 text-red-700"><Trash2 className="size-4" />Cancel follow-up</DropdownMenuItem>}
                     </DropdownMenuContent>
-                  </DropdownMenu>
+                  </DropdownMenu></div>
                 </article>
               ))}
             </div>
+            <footer className="sticky bottom-0 z-10 flex justify-end gap-2 border-t border-slate-200 bg-white p-3 sm:px-5">
+              <DialogPrimitive.Close asChild><button type="button" className="h-9 border border-slate-300 px-4 text-xs font-semibold text-slate-700 hover:bg-slate-50">Close</button></DialogPrimitive.Close>
+              {canScheduleSelectedDay && selectedDayDate && <button type="button" onClick={() => { setSelectedDay(null); scheduleForDay(selectedDayDate); }} className="h-9 border border-brand-green bg-brand-green px-4 text-xs font-bold text-white hover:bg-brand-green-strong">Add follow-up</button>}
+            </footer>
           </DialogPrimitive.Content>
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>

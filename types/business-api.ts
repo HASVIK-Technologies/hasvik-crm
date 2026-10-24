@@ -6,6 +6,13 @@ export type PhoneNumber = {
   isPrimary?: boolean;
 };
 
+export type ApiBusinessAssignee = {
+  _id?: string;
+  id?: string;
+  fullName?: string;
+  name?: string;
+};
+
 export type ApiBusiness = {
   _id: string;
   name: string;
@@ -24,7 +31,8 @@ export type ApiBusiness = {
   state?: string;
   pincode?: string;
   category?: string | { _id?: string; name?: string } | null;
-  assignedTo?: string;
+  assignedTo?: string | ApiBusinessAssignee | null;
+  assignee?: ApiBusinessAssignee | null;
   leadSource?: string;
   followUp?:
     | FollowUpPayload
@@ -70,6 +78,8 @@ export type ApiBusiness = {
   lastFollowup?:
     | string
     | {
+        _id?: string;
+        id?: string;
         scheduledAt?: string;
         completedAt?: string;
         status?: string;
@@ -82,6 +92,8 @@ export type ApiBusiness = {
   lastFollowUp?:
     | string
     | {
+        _id?: string;
+        id?: string;
         scheduledAt?: string;
         completedAt?: string;
         status?: string;
@@ -95,6 +107,8 @@ export type ApiBusiness = {
     | string
     | Array<unknown>
     | {
+        _id?: string;
+        id?: string;
         scheduledAt?: string;
         completedAt?: string;
         status?: string;

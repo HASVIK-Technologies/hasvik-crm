@@ -72,6 +72,7 @@ export default function FollowupsPage() {
     if (filters.view === "calendar") {
       return {
         ...commonFilters,
+        isCalendarView: true,
         fromDate: monthBoundary(filters.calendarMonth),
         toDate: monthBoundary(filters.calendarMonth, true),
         tab: "all",

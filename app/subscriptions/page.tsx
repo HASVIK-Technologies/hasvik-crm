@@ -4,13 +4,13 @@ import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
 import { useMemo, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { QRCodeSVG } from "qrcode.react";
 import {
   ArrowRight,
   Building2,
   CalendarDays,
   Check,
   CircleHelp,
+  Copy,
   CreditCard,
   FileText,
   Filter,
@@ -34,6 +34,7 @@ import {
 import { useTenantQuery, useTenantsQuery } from "@/hooks/use-tenants";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import {
+  getSubscriptionId,
   getSubscriptionTenantId,
   hasCurrentSubscriptionAccess,
 } from "@/lib/subscriptions/access";
@@ -45,6 +46,7 @@ import type {
 } from "@/types/subscription";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
+import { toast } from "sonner";
 import {
   Select,
   SelectContent,
@@ -58,11 +60,11 @@ import ListPageLayout from "@/components/layout/ListPageLayout";
 
 const cycleLabels: Record<BillingCycle, string> = {
   MONTHLY: "Monthly",
+  QUARTERLY: "Quarterly",
+  HALF_YEARLY: "Half-yearly",
   YEARLY: "Yearly",
   LIFETIME: "Lifetime",
 };
-
-const paymentUpiId = "9519113962@ybl";
 
 type SubscriptionFilter =
   | "ALL"
@@ -77,10 +79,6 @@ function getPlanId(plan: SubscriptionPlan) {
   return plan._id ?? plan.id ?? "";
 }
 
-function getRecordId(record: { _id?: string; id?: string }) {
-  return record.id ?? record._id ?? "";
-}
-
 function getReferenceId(value: string | SubscriptionReference | undefined) {
   if (typeof value === "string") return value;
   return value?.id ?? value?._id ?? "";
@@ -92,20 +90,6 @@ function formatPrice(price: number, currency = "INR") {
     currency,
     maximumFractionDigits: 2,
   }).format(price);
-}
-
-function getUpiPaymentLink(
-  plan: SubscriptionPlan,
-  tenantName?: string,
-) {
-  const parameters = new URLSearchParams({
-    pa: paymentUpiId,
-    pn: "HASVIK Technologies",
-    am: plan.price.toFixed(2),
-    cu: "INR",
-    tn: `${tenantName ? `${tenantName} - ` : ""}${plan.name} subscription`,
-  });
-  return `upi://pay?${parameters.toString()}`;
 }
 
 function formatDate(value?: string) {
@@ -272,7 +256,7 @@ function SubscriptionRow({
   hasvikAdmin,
   tenantAdmin,
   busy,
-  onActivate,
+  onApprove,
   onRenew,
   onCancel,
   onReject,
@@ -283,12 +267,12 @@ function SubscriptionRow({
   hasvikAdmin: boolean;
   tenantAdmin: boolean;
   busy: boolean;
-  onActivate: (id: string) => void;
+  onApprove: (subscription: Subscription) => void;
   onRenew: (subscription: Subscription) => void;
   onCancel: (subscription: Subscription) => void;
   onReject: (subscription: Subscription) => void;
 }) {
-  const id = getRecordId(subscription);
+  const id = getSubscriptionId(subscription);
   const status = normalizeStatus(subscription.status);
   const embeddedPlan =
     typeof subscription.plan === "object" ? subscription.plan : undefined;
@@ -321,6 +305,22 @@ function SubscriptionRow({
             ? `Requested ${formatDate(subscription.createdAt)}`
             : `Starts ${formatDate(subscription.startDate)} · Ends ${formatDate(subscription.endDate)}`}
         </p>
+        {id && (
+          <button
+            type="button"
+            onClick={() => {
+              void navigator.clipboard.writeText(id).then(
+                () => toast.success("Subscription ID copied."),
+                () => toast.error("Unable to copy the subscription ID."),
+              );
+            }}
+            className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 hover:text-brand-blue"
+            title={id}
+          >
+            <Copy className="size-3" />
+            <span className="max-w-48 truncate">ID: {id}</span>
+          </button>
+        )}
         {status === "PENDING" && (
           <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-950">
             {hasvikAdmin
@@ -364,7 +364,7 @@ function SubscriptionRow({
               type="button"
               size="sm"
               disabled={busy}
-              onClick={() => onActivate(id)}
+              onClick={() => onApprove(subscription)}
               className="h-9 rounded-lg"
             >
               {busy && <LoaderCircle className="size-3.5 animate-spin" />}
@@ -431,8 +431,6 @@ export default function SubscriptionsPage() {
     ownTenant?.name ??
     (typeof embeddedTenant === "object" ? embeddedTenant.name : undefined);
   const [chosenPlan, setChosenPlan] = useState<SubscriptionPlan | null>(null);
-  const [autoRenew, setAutoRenew] = useState(false);
-  const [paymentConfirmed, setPaymentConfirmed] = useState(false);
   const [search, setSearch] = useState("");
   const [cycleFilter, setCycleFilter] = useState<BillingCycle | "ALL">("ALL");
   const [statusFilter, setStatusFilter] = useState<SubscriptionFilter>(
@@ -447,6 +445,10 @@ export default function SubscriptionsPage() {
     useState<Subscription | null>(null);
   const [subscriptionToReject, setSubscriptionToReject] =
     useState<Subscription | null>(null);
+  const [subscriptionToApprove, setSubscriptionToApprove] =
+    useState<Subscription | null>(null);
+  const [manualVerificationConfirmed, setManualVerificationConfirmed] =
+    useState(false);
 
   const visibleSubscriptions = subscriptions.filter((subscription) => {
     if (!hasvikAdmin && ownTenantId && getSubscriptionTenantId(subscription) !== ownTenantId) {
@@ -454,11 +456,7 @@ export default function SubscriptionsPage() {
     }
     if (!hasvikAdmin && !ownTenantId) return false;
     const status = normalizeStatus(subscription.status);
-    if (
-      hasvikAdmin
-        ? status !== "PENDING"
-        : statusFilter !== "ALL" && status !== statusFilter
-    ) {
+    if (statusFilter !== "ALL" && status !== statusFilter) {
       return false;
     }
     const planId = getReferenceId(subscription.planId);
@@ -480,15 +478,16 @@ export default function SubscriptionsPage() {
     (subscription) => normalizeStatus(subscription.status) === "PENDING",
   ).length;
   const createTenantId = ownTenantId ?? "";
-  const activeForCreateTenant = subscriptions.some(
+  const requestExistsForCreateTenant = subscriptions.some(
     (subscription) =>
       getSubscriptionTenantId(subscription) === createTenantId &&
-      hasCurrentSubscriptionAccess(subscription),
+      (hasCurrentSubscriptionAccess(subscription) ||
+        normalizeStatus(subscription.status) === "PENDING"),
   );
   const canChoosePlan =
     Boolean(createTenantId) &&
     !hasvikAdmin &&
-    !activeForCreateTenant &&
+    !requestExistsForCreateTenant &&
     !subscriptionsQuery.isPending &&
     !subscriptionsQuery.isError &&
     !ownTenantQuery.isError;
@@ -504,8 +503,6 @@ export default function SubscriptionsPage() {
 
   function openCheckout(plan: SubscriptionPlan) {
     setChosenPlan(plan);
-    setAutoRenew(false);
-    setPaymentConfirmed(false);
     setNotice("");
     setOperationError("");
   }
@@ -515,65 +512,19 @@ export default function SubscriptionsPage() {
     const planId = chosenPlan ? getPlanId(chosenPlan) : "";
     if (!chosenPlan || !planId || !createTenantId) return;
     if (!Number.isFinite(chosenPlan.price) || chosenPlan.price < 0) return;
-    const isFreePlan = chosenPlan.code.trim().toUpperCase() === "FREE";
-    const isSupportedCurrency =
-      !chosenPlan.currency || chosenPlan.currency.toUpperCase() === "INR";
-    if (
-      !isFreePlan &&
-      (chosenPlan.price <= 0 || !isSupportedCurrency || !paymentConfirmed)
-    ) {
-      return;
-    }
-
     setOperationError("");
-    let createdSubscription: Subscription | undefined;
     try {
-      createdSubscription = await createMutation.mutateAsync({
+      const createdSubscription = await createMutation.mutateAsync({
         tenantId: createTenantId,
         planId,
-        autoRenew,
+        autoRenew: false,
       });
       const createdStatus = createdSubscription.status?.toUpperCase();
-      if (isFreePlan) {
-        const createdId = getRecordId(createdSubscription);
-        if (!createdId) {
-          setChosenPlan(null);
-          setPaymentConfirmed(false);
-          setOperationError(
-            "The free subscription was created, but the response did not include its ID, so it could not be activated. Contact support.",
-          );
-          return;
-        }
-        try {
-          const activated = await statusMutation.mutateAsync({
-            id: createdId,
-            status: "ACTIVE",
-          });
-          if (activated.status?.toUpperCase() !== "ACTIVE") {
-            throw new Error(
-              `The status service returned ${activated.status ?? "no status"} instead of ACTIVE.`,
-            );
-          }
-        } catch (error) {
-          setChosenPlan(null);
-          setPaymentConfirmed(false);
-          setOperationError(
-            `The free subscription was created, but activation failed. ${getApiErrorMessage(error)}`,
-          );
-          return;
-        }
-        setChosenPlan(null);
-        setPaymentConfirmed(false);
-        setNotice(`Your ${chosenPlan.name} free plan is active.`);
-        return;
-      }
-
       setChosenPlan(null);
-      setPaymentConfirmed(false);
       setNotice(
         createdStatus === "PENDING"
-          ? `Your payment confirmation for ${chosenPlan.name} was submitted. The subscription is pending HASVIK admin approval.`
-          : `Your payment confirmation was submitted, but the subscription status is ${createdStatus ?? "unknown"}.`,
+          ? `Your request for ${chosenPlan.name} was submitted and is pending HASVIK admin approval.`
+          : `Your subscription request was submitted with status ${createdStatus ?? "unknown"}.`,
       );
     } catch (error) {
       setOperationError(getApiErrorMessage(error));
@@ -581,10 +532,16 @@ export default function SubscriptionsPage() {
   }
 
   async function activate(id: string) {
+    if (!id || normalizeStatus(subscriptionToApprove?.status) !== "PENDING") {
+      setOperationError("Only a pending subscription request can be approved.");
+      return;
+    }
     setOperationError("");
     try {
       await statusMutation.mutateAsync({ id, status: "ACTIVE" });
       highlightItem(id);
+      setSubscriptionToApprove(null);
+      setManualVerificationConfirmed(false);
       setNotice("Subscription request approved.");
     } catch (error) {
       setOperationError(getApiErrorMessage(error));
@@ -605,8 +562,11 @@ export default function SubscriptionsPage() {
   }
 
   async function rejectSubscription() {
-    const id = subscriptionToReject ? getRecordId(subscriptionToReject) : "";
-    if (!id) return;
+    const id = subscriptionToReject ? getSubscriptionId(subscriptionToReject) : "";
+    if (!id || normalizeStatus(subscriptionToReject?.status) !== "PENDING") {
+      setOperationError("Only a pending subscription request can be rejected.");
+      return;
+    }
     setOperationError("");
     try {
       await statusMutation.mutateAsync({ id, status: "REJECTED" });
@@ -619,7 +579,7 @@ export default function SubscriptionsPage() {
   }
 
   async function cancelSubscription() {
-    const id = subscriptionToCancel ? getRecordId(subscriptionToCancel) : "";
+    const id = subscriptionToCancel ? getSubscriptionId(subscriptionToCancel) : "";
     if (!id) return;
     setOperationError("");
     try {
@@ -644,19 +604,6 @@ export default function SubscriptionsPage() {
     chosenPlan !== null &&
     Number.isFinite(chosenPlan.price) &&
     chosenPlan.price >= 0;
-  const chosenPlanIsPaid = Boolean(
-    chosenPlan && chosenPlan.code.trim().toUpperCase() !== "FREE",
-  );
-  const paymentCurrencySupported =
-    !chosenPlan?.currency || chosenPlan.currency.toUpperCase() === "INR";
-  const paymentLink =
-    chosenPlanIsPaid &&
-    paymentCurrencySupported &&
-    chosenPlanHasValidPrice &&
-    chosenPlan.price > 0 &&
-    chosenPlan
-      ? getUpiPaymentLink(chosenPlan, ownTenantName ?? user?.fullName)
-      : "";
 
   return (
     <ListPageLayout
@@ -665,11 +612,12 @@ export default function SubscriptionsPage() {
       onSearchChange={setSearch}
       searchPlaceholder={
         hasvikAdmin
-          ? "Search pending requests by workspace or plan"
+          ? "Search subscriptions by workspace or plan"
           : "Search plans and subscriptions"
       }
-      filters={tenantAdmin ? (
+      filters={tenantAdmin || hasvikAdmin ? (
         <div className="flex flex-wrap items-center gap-4">
+          {tenantAdmin && (
           <label htmlFor="subscription-cycle-filter" className="flex items-center gap-2 text-xs font-medium text-slate-600">
             Billing cycle
             <Select
@@ -687,6 +635,7 @@ export default function SubscriptionsPage() {
               </SelectContent>
             </Select>
           </label>
+          )}
           <label htmlFor="subscription-status-filter" className="flex items-center gap-2 text-xs font-medium text-slate-600">
             Status
             <Select
@@ -730,7 +679,7 @@ export default function SubscriptionsPage() {
                 ?.scrollIntoView({ behavior: "smooth" }),
             icon: <ArrowRight className="size-4" />,
           }}
-          menuItems={tenantAdmin ? [
+          menuItems={tenantAdmin || hasvikAdmin ? [
             {
               label: showFilters ? "Hide filters" : "Show filters",
               onSelect: () => setShowFilters((visible) => !visible),
@@ -791,11 +740,11 @@ export default function SubscriptionsPage() {
             </div>
           )}
 
-          {activeForCreateTenant && (
+          {requestExistsForCreateTenant && (
             <div role="status" className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
               <CircleHelp className="mt-0.5 size-4 shrink-0 text-primary" />
               <p className="text-xs leading-5 text-blue-950">
-                Your workspace already has an active subscription. Renew it from the subscription list; another plan cannot be requested until the current subscription ends.
+                Your workspace already has an active subscription or a pending request. Another plan cannot be requested until the current request is resolved or the subscription ends.
               </p>
             </div>
           )}
@@ -804,18 +753,20 @@ export default function SubscriptionsPage() {
             <div className="flex items-center justify-between gap-3 border-b border-[#edf2f7] px-4 py-4 sm:px-5">
               <div>
                 <h2 className="text-sm font-bold text-[#0f172a]">
-                  {hasvikAdmin ? "Pending requests" : "Your subscriptions"}
+                  {hasvikAdmin ? "Subscription requests and history" : "Your subscriptions"}
                 </h2>
                 <p className="mt-1 text-xs text-[#64748b]">
                   {hasvikAdmin
-                    ? "All pending subscription requests are listed here, regardless of plan type."
+                    ? "Review pending requests or filter the complete subscription history."
                     : "View your active plan, dates, and any requests awaiting approval."}
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
                 <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">
                   {hasvikAdmin
-                    ? `${pendingSubscriptionsCount} pending`
+                    ? statusFilter === "PENDING"
+                      ? `${pendingSubscriptionsCount} pending`
+                      : `${visibleSubscriptions.length} shown`
                     : `${activeSubscriptions.length} active`}
                 </span>
                 {hasvikAdmin && (
@@ -858,15 +809,19 @@ export default function SubscriptionsPage() {
                 <p className="mt-3 text-sm font-semibold text-slate-800">
                   {hasvikAdmin
                     ? search.trim()
-                      ? "No pending requests match your search"
-                      : "No pending subscription requests"
+                      ? "No subscriptions match your search"
+                      : statusFilter === "PENDING"
+                        ? "No pending subscription requests"
+                        : "No subscriptions match this status"
                     : "No subscriptions found"}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   {hasvikAdmin
                     ? search.trim()
                       ? "Try another workspace or plan name."
-                      : "New subscription requests from tenant admins will appear here."
+                      : statusFilter === "PENDING"
+                        ? "New subscription requests from tenant admins will appear here."
+                        : "Choose another status to review subscription history."
                     : "Choose an available plan below to create a subscription."}
                 </p>
               </div>
@@ -880,8 +835,8 @@ export default function SubscriptionsPage() {
                     tenants.find((tenant) => tenant.id === tenantId)?.name ??
                     (hasvikAdmin ? "Tenant" : ownTenantName ?? "Your workspace");
                   const busyThisSubscription =
-                    busy && getRecordId(subscription) === busySubscriptionId;
-                  const subscriptionId = getRecordId(subscription) || `${tenantId}-${planId}`;
+                    busy && getSubscriptionId(subscription) === busySubscriptionId;
+                  const subscriptionId = getSubscriptionId(subscription) || `${tenantId}-${planId}`;
                   return (
                     <div key={subscriptionId} className={`transition-all duration-500 ${isItemHighlighted(subscriptionId) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
                     <SubscriptionRow
@@ -891,7 +846,11 @@ export default function SubscriptionsPage() {
                       hasvikAdmin={hasvikAdmin}
                       tenantAdmin={tenantAdmin}
                       busy={busyThisSubscription}
-                      onActivate={(id) => void activate(id)}
+                      onApprove={(approvalSubscription) => {
+                        setOperationError("");
+                        setManualVerificationConfirmed(false);
+                        setSubscriptionToApprove(approvalSubscription);
+                      }}
                       onRenew={(renewalSubscription) => {
                         setOperationError("");
                         setSubscriptionToRenew(renewalSubscription);
@@ -914,7 +873,7 @@ export default function SubscriptionsPage() {
                   Available subscription plans
                 </h2>
                 <p className="mt-1 text-xs text-slate-500">
-                  Free plans activate immediately. Paid plans require payment and HASVIK admin approval.
+                  Choose a plan and submit it for HASVIK admin review. Payments are handled manually.
                 </p>
               </div>
               {!plansQuery.isPending && !plansQuery.isError && (
@@ -952,7 +911,7 @@ export default function SubscriptionsPage() {
                     featured={plans.length > 1 && plans[1] === plan}
                     disabled={
                       !canChoosePlan ||
-                      activeForCreateTenant ||
+                      requestExistsForCreateTenant ||
                       !Number.isFinite(plan.price) ||
                       plan.price < 0
                     }
@@ -973,7 +932,6 @@ export default function SubscriptionsPage() {
                 !statusMutation.isPending
               ) {
                 setChosenPlan(null);
-                setPaymentConfirmed(false);
                 setOperationError("");
               }
             }}
@@ -985,19 +943,13 @@ export default function SubscriptionsPage() {
                   <div>
                     <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eff6ff] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
                       <CreditCard className="size-3" />
-                      {chosenPlan?.code.trim().toUpperCase() === "FREE"
-                        ? "Free plan"
-                        : "UPI checkout"}
+                      Plan request
                     </span>
                     <DialogPrimitive.Title className="mt-3 text-xl font-bold tracking-tight text-[#0f172a]">
-                      {chosenPlan?.code.trim().toUpperCase() === "FREE"
-                        ? "Activate a free plan"
-                        : "Subscribe to a plan"}
+                      Request subscription plan
                     </DialogPrimitive.Title>
                     <DialogPrimitive.Description className="mt-1 text-xs leading-5 text-[#64748b]">
-                      {chosenPlan?.code.trim().toUpperCase() === "FREE"
-                        ? "No payment is needed. Your free subscription should become active as soon as you submit."
-                        : "Pay by UPI, then confirm the payment to submit your request for HASVIK admin approval."}
+                      Submit this plan to HASVIK admin for manual review and approval.
                     </DialogPrimitive.Description>
                   </div>
                   <DialogPrimitive.Close
@@ -1020,95 +972,9 @@ export default function SubscriptionsPage() {
                         <p className="mt-2 text-xs leading-5 text-slate-600">{chosenPlan.description}</p>
                       )}
                     </div>
-                    {chosenPlanIsPaid && (
-                      <section
-                        aria-label="UPI payment"
-                        className="rounded-2xl border border-[#dbeafe] bg-[#f8fbff] p-4"
-                      >
-                        <div className="flex flex-col items-center gap-4 sm:flex-row sm:items-start">
-                          <div className="flex size-52 shrink-0 items-center justify-center rounded-xl border border-slate-200 bg-white p-3">
-                            {paymentLink ? (
-                              <QRCodeSVG
-                                value={paymentLink}
-                                size={184}
-                                level="M"
-                                includeMargin
-                                title={`UPI payment QR for ${chosenPlan.name}`}
-                              />
-                            ) : (
-                              <CreditCard className="size-8 text-slate-300" />
-                            )}
-                          </div>
-                          <div className="min-w-0">
-                            <p className="text-sm font-bold text-slate-900">
-                              Scan to pay {formatPrice(chosenPlan.price, chosenPlan.currency)}
-                            </p>
-                            <p className="mt-1 text-xs leading-5 text-slate-600">
-                              Use any UPI app to scan this code. The amount and plan are included in the payment request.
-                            </p>
-                            <p className="mt-3 text-[10px] font-semibold uppercase tracking-wide text-slate-500">
-                              UPI ID
-                            </p>
-                            <code className="mt-1 block break-all rounded-lg bg-white px-3 py-2 text-xs font-semibold text-slate-800">
-                              {paymentUpiId}
-                            </code>
-                            {paymentLink && (
-                              <a
-                                href={paymentLink}
-                                className="mt-3 inline-flex text-xs font-semibold text-primary underline-offset-4 hover:underline"
-                              >
-                                Open in a UPI app
-                              </a>
-                            )}
-                          </div>
-                        </div>
-                        {!paymentCurrencySupported ? (
-                          <p role="alert" className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs leading-5 text-rose-800">
-                            UPI payments are only available for INR plans. This plan uses {chosenPlan.currency}.
-                          </p>
-                        ) : chosenPlan.price <= 0 ? (
-                          <p role="alert" className="mt-4 rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs leading-5 text-rose-800">
-                            Paid subscription plans must have a price greater than zero.
-                          </p>
-                        ) : (
-                          <label className="mt-4 flex cursor-pointer items-start gap-3 rounded-xl border border-blue-100 bg-white p-3.5">
-                            <Checkbox
-                              checked={paymentConfirmed}
-                              onCheckedChange={(checked) =>
-                                setPaymentConfirmed(checked === true)
-                              }
-                              className="mt-0.5"
-                            />
-                            <span className="text-xs leading-5 text-slate-700">
-                              <span className="block font-semibold text-slate-900">
-                                I have completed this UPI payment
-                              </span>
-                              <span className="mt-0.5 block text-[10px] leading-4 text-slate-500">
-                                This confirmation submits a pending request; HASVIK admin approval activates the subscription.
-                              </span>
-                            </span>
-                          </label>
-                        )}
-                      </section>
-                    )}
-                    <label className="flex cursor-pointer items-start gap-3 rounded-xl border border-[#e4ecf2] p-3.5">
-                      <Checkbox
-                        checked={autoRenew}
-                        onCheckedChange={(checked) => setAutoRenew(checked === true)}
-                        className="mt-0.5"
-                      />
-                      <span>
-                        <span className="block text-xs font-semibold text-[#334155]">Automatic subscription renewal</span>
-                        <span className="mt-0.5 block text-[10px] leading-4 text-[#64748b]">
-                          Enable automatic renewal for this subscription.
-                        </span>
-                      </span>
-                    </label>
                     <div className="flex items-start gap-2 rounded-xl border border-blue-100 bg-blue-50 p-3 text-[10px] leading-4 text-blue-950">
-                      <CircleHelp className="mt-0.5 size-3.5 shrink-0 text-primary" />
-                      {chosenPlanIsPaid
-                        ? "Payment is confirmed by you, not automatically verified. The subscription API does not accept a receipt or transaction reference; your request is sent to HASVIK admin for review."
-                        : "No payment is required. The free subscription is activated through the subscription status API."}
+                      <FileText className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                      Payment is handled manually outside the CRM. Submitting creates a pending request; workspace access begins only after HASVIK admin approval.
                     </div>
                     {operationError && (
                       <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">
@@ -1119,10 +985,9 @@ export default function SubscriptionsPage() {
                       <Button
                         type="button"
                         variant="outline"
-                        disabled={createMutation.isPending || statusMutation.isPending}
+                        disabled={createMutation.isPending}
                         onClick={() => {
                           setChosenPlan(null);
-                          setPaymentConfirmed(false);
                         }}
                         className="rounded-xl"
                       >
@@ -1132,22 +997,13 @@ export default function SubscriptionsPage() {
                         type="submit"
                         disabled={
                           createMutation.isPending ||
-                          statusMutation.isPending ||
                           !createTenantId ||
-                          !chosenPlanHasValidPrice ||
-                          (chosenPlanIsPaid &&
-                            (!paymentConfirmed ||
-                              !paymentCurrencySupported ||
-                              chosenPlan.price <= 0))
+                          !chosenPlanHasValidPrice
                         }
                         className="rounded-xl bg-primary text-white"
                       >
-                        {(createMutation.isPending || statusMutation.isPending) && <LoaderCircle className="size-4 animate-spin" />}
-                        {createMutation.isPending || statusMutation.isPending
-                          ? statusMutation.isPending ? "Activating…" : "Submitting…"
-                          : chosenPlanIsPaid
-                            ? "Confirm payment & request approval"
-                            : "Activate free plan"}
+                        {createMutation.isPending && <LoaderCircle className="size-4 animate-spin" />}
+                        {createMutation.isPending ? "Submitting…" : "Request plan"}
                         <ArrowRight className="size-4" />
                       </Button>
                     </div>
@@ -1218,6 +1074,62 @@ export default function SubscriptionsPage() {
           </DialogPrimitive.Root>
 
           <ManagementConfirmDialog
+            open={Boolean(subscriptionToApprove)}
+            title="Approve subscription request?"
+            description={
+              subscriptionToApprove
+                ? `Approve the pending request for ${
+                    typeof subscriptionToApprove.plan === "object"
+                      ? subscriptionToApprove.plan.name
+                      : plans.find(
+                          (plan) =>
+                            getPlanId(plan) ===
+                            getReferenceId(subscriptionToApprove.planId),
+                        )?.name ?? "this subscription"
+                  }. Approval activates workspace access.`
+                : ""
+            }
+            confirmLabel="Approve request"
+            destructive={false}
+            pending={statusMutation.isPending}
+            confirmDisabled={!manualVerificationConfirmed}
+            onCancel={() => {
+              setSubscriptionToApprove(null);
+              setManualVerificationConfirmed(false);
+              setOperationError("");
+            }}
+            onConfirm={() => {
+              const id = subscriptionToApprove
+                ? getSubscriptionId(subscriptionToApprove)
+                : "";
+              if (manualVerificationConfirmed) void activate(id);
+            }}
+          >
+            <label className="mt-5 flex cursor-pointer items-start gap-3 border border-brand-green/20 bg-emerald-50/60 p-3.5">
+              <Checkbox
+                checked={manualVerificationConfirmed}
+                onCheckedChange={(checked) =>
+                  setManualVerificationConfirmed(checked === true)
+                }
+                className="mt-0.5"
+              />
+              <span className="text-xs leading-5 text-slate-700">
+                <span className="block font-semibold text-slate-900">
+                  Manual verification completed
+                </span>
+                <span className="block text-[10px] text-slate-500">
+                  I have verified payment or commercial approval outside the CRM.
+                </span>
+              </span>
+            </label>
+            {operationError && (
+              <p role="alert" className="mt-3 border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+                {operationError}
+              </p>
+            )}
+          </ManagementConfirmDialog>
+
+          <ManagementConfirmDialog
             open={Boolean(subscriptionToRenew)}
             title="Renew subscription?"
             description={
@@ -1239,7 +1151,7 @@ export default function SubscriptionsPage() {
             onCancel={() => setSubscriptionToRenew(null)}
             onConfirm={() => {
               const id = subscriptionToRenew
-                ? getRecordId(subscriptionToRenew)
+                ? getSubscriptionId(subscriptionToRenew)
                 : "";
               if (id) {
                 void renew(id).then((success) => {

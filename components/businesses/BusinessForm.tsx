@@ -4,6 +4,8 @@ import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
   FormProvider,
+  Controller,
+  useFormContext,
   useFieldArray,
   useForm,
   useWatch,
@@ -19,7 +21,8 @@ import {
   Phone,
   RotateCcw,
   Save,
-  UsersRound,
+  UserRoundCheck,
+  CalendarPlus,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
@@ -34,6 +37,8 @@ import ContactInfoSection from "@/components/businesses/sections/ContactInfoSect
 import AdditionalInfoSection from "@/components/businesses/sections/AdditionalInfoSection";
 import FollowUpSection from "@/components/businesses/sections/FollowUpSection";
 import BusinessDetailsFollowups from "@/components/business-details/BusinessDetailsFollowups";
+import BusinessOwnershipSection from "@/components/businesses/sections/BusinessOwnershipSection";
+import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/lib/use-is-desktop";
 import {
@@ -56,7 +61,7 @@ import { useBusinessListStore } from "@/store/business-list-store";
 // when it's ready to go live; the mobile stepper below picks up the extra
 // step automatically, no other changes needed.
 const SHOW_ADDITIONAL_INFORMATION = true;
-const MAX_FORM_STEP_INDEX = SHOW_ADDITIONAL_INFORMATION ? 3 : 2;
+const MAX_FORM_STEP_INDEX = 2;
 
 // Friendly labels used to build the "Please fill in..." summary banner from
 // whatever react-hook-form's `errors` object contains.
@@ -98,13 +103,35 @@ const isBusinessInfoComplete = (values: BusinessFormValues) =>
 
 const isContactInfoComplete = (values: BusinessFormValues) =>
   isNumberListComplete(values.phoneNumbers) &&
-  isNumberListComplete(values.whatsappNumbers);
+  values.whatsappNumbers.every(
+    (number) => !number.value.trim() || /^\d{10}$/.test(number.value.trim()),
+  );
 
 const isNumberListComplete = (numbers: BusinessFormValues["phoneNumbers"]) =>
   numbers.some((number) => /^\d{10}$/.test(number.value.trim())) &&
   numbers.every(
     (number) => !number.value.trim() || /^\d{10}$/.test(number.value.trim()),
   );
+
+function OptionalFollowUp({ idPrefix }: { idPrefix: string }) {
+  const { control } = useFormContext<BusinessFormValues>();
+  const enabled = useWatch({ control, name: "scheduleFollowUp" });
+  return (
+    <div className="border border-slate-200 bg-slate-50/50">
+      <Controller
+        control={control}
+        name="scheduleFollowUp"
+        render={({ field }) => (
+          <label className="flex cursor-pointer items-start gap-3 px-4 py-3.5">
+            <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} className="mt-0.5 rounded-none" />
+            <span><span className="block text-sm font-semibold text-slate-900">Schedule the first follow-up</span><span className="mt-0.5 block text-xs text-slate-500">Optional. You can add this later from the business details page.</span></span>
+          </label>
+        )}
+      />
+      {enabled && <div className="border-t border-slate-200 bg-white p-4"><FollowUpSection idPrefix={idPrefix} /></div>}
+    </div>
+  );
+}
 
 interface BusinessFormDraft {
   values: BusinessFormValues;
@@ -139,6 +166,7 @@ function isBusinessFormValues(value: unknown): value is BusinessFormValues {
     (values.assignToName === undefined ||
       typeof values.assignToName === "string") &&
     typeof values.addAnother === "boolean" &&
+    typeof values.scheduleFollowUp === "boolean" &&
     ["phoneNumbers", "whatsappNumbers"].every(
       (field) =>
         Array.isArray(values[field]) &&
@@ -195,6 +223,7 @@ function hasBusinessFormChanged(
 ) {
   const normalize = (formValues: BusinessFormValues) => ({
     addAnother: formValues.addAnother,
+    scheduleFollowUp: formValues.scheduleFollowUp,
     businessName: formValues.businessName,
     category: formValues.category,
     categoryName: formValues.categoryName ?? "",
@@ -244,7 +273,7 @@ export default function BusinessForm({
   // Captured once on mount - this is the snapshot Reset restores to,
   // independent of anything the person types afterward.
   const [initialSnapshot] = useState<BusinessFormValues>(
-    () => initialValues ?? defaultBusinessFormValues,
+    () => ({ ...defaultBusinessFormValues, ...initialValues }),
   );
   const [draftBaseline, setDraftBaseline] =
     useState<BusinessFormValues>(initialSnapshot);
@@ -278,6 +307,7 @@ export default function BusinessForm({
   // In edit mode this holds the values loaded from the API, so "Reset"
   // can restore them instead of clearing the form.
   const savedValuesRef = useRef<BusinessFormValues | null>(null);
+  const [suppressDraftPersistence, setSuppressDraftPersistence] = useState(false);
   const historyGuardRef = useRef<{
     state: Record<string, unknown>;
     url: string;
@@ -319,7 +349,7 @@ export default function BusinessForm({
       values: watchedValues,
       currentStep,
     });
-    if (!isDraftReady || isSubmitting) return;
+    if (!isDraftReady || isSubmitting || suppressDraftPersistence) return;
     if (
       currentStep === 0 &&
       !hasBusinessFormChanged(watchedValues, draftBaseline)
@@ -338,6 +368,7 @@ export default function BusinessForm({
     draftKey,
     isDraftReady,
     isSubmitting,
+    suppressDraftPersistence,
     watchedValues,
   ]);
 
@@ -382,7 +413,7 @@ export default function BusinessForm({
           categoryObj?._id ??
           (typeof rawCategory === "string" ? rawCategory : "");
 
-        const rawAssignedTo = data.followUp?.assignedTo ?? data.assignedTo;
+        const rawAssignedTo = data.assignee ?? data.assignedTo;
         let assignedToId = "";
         let assignedToName = "";
 
@@ -429,6 +460,7 @@ export default function BusinessForm({
           email: data.email || "",
           website: data.website || "",
           description: data.description || "",
+          scheduleFollowUp: false,
           followUpType: (data.followUp?.type as FollowUpType) || "",
           assignTo: assignedToId || "",
           assignToName: assignedToName || "",
@@ -629,38 +661,22 @@ export default function BusinessForm({
     },
     {
       key: "contact",
-      title: "Contact Information",
+      title: "Contact & Details",
       render: (idPrefix: string) => (
-        <ContactInfoSection
-          idPrefix={idPrefix}
-          phoneArray={phoneArray}
-          whatsappArray={whatsappArray}
-        />
+        <div className="space-y-6">
+          <ContactInfoSection idPrefix={idPrefix} phoneArray={phoneArray} whatsappArray={whatsappArray} />
+          {SHOW_ADDITIONAL_INFORMATION && <AdditionalInfoSection idPrefix={idPrefix} />}
+        </div>
       ),
     },
-    ...(SHOW_ADDITIONAL_INFORMATION
-      ? [
-          {
-            key: "additional",
-            title: "Additional Information",
-            render: (idPrefix: string) => (
-              <AdditionalInfoSection idPrefix={idPrefix} />
-            ),
-          },
-        ]
-      : []),
     {
-      key: "followup",
-      title: "Follow-up",
+      key: "ownership",
+      title: "Ownership & Follow-up",
       render: (idPrefix: string) => (
-        <>
-          {!isEditMode && <FollowUpSection idPrefix={idPrefix} />}
-          {isEditMode && targetId && (
-            <div className="mt-6">
-              <BusinessDetailsFollowups businessId={targetId} />
-            </div>
-          )}
-        </>
+        <div className="space-y-6">
+          <BusinessOwnershipSection />
+          {!isEditMode && <OptionalFollowUp idPrefix={idPrefix} />}
+        </div>
       ),
     },
   ];
@@ -689,7 +705,9 @@ export default function BusinessForm({
     setCurrentStep((step) => Math.max(step - 1, 0));
   };
 
-  const onValid = async (values: BusinessFormValues) => {
+  const onValid = async (values: BusinessFormValues, event?: React.BaseSyntheticEvent) => {
+    const submitter = (event?.nativeEvent as SubmitEvent | undefined)?.submitter as HTMLButtonElement | null;
+    const shouldCloseAfterCreate = submitter?.value === "close";
     setSubmitError(null);
     setIsSubmitting(true);
 
@@ -727,23 +745,46 @@ export default function BusinessForm({
     }
 
     if (!isEditMode) {
-      payload.assignedTo = values.assignTo;
-      payload.followUp = toFollowUpPayload(values);
+      if (values.assignTo) payload.assignedTo = values.assignTo;
+      if (values.scheduleFollowUp) payload.followUp = toFollowUpPayload(values);
+    } else {
+      payload.assignedTo = values.assignTo || null;
     }
 
     try {
       if (isEditMode && targetId) {
         await updateMutation.mutateAsync({ id: targetId, payload });
         setDraftBaseline(values);
+        setSuppressDraftPersistence(true);
         clearBusinessFormDraft(draftKey);
         router.replace(`/businesses/${targetId}`);
       } else {
-        await createMutation.mutateAsync(payload);
-        // Stay on the form so the next business can be added right away.
-        // (The success toast is shown by useCreateBusinessMutation.)
+        const created = await createMutation.mutateAsync(payload);
+        setSuppressDraftPersistence(true);
         clearBusinessFormDraft(draftKey);
-        reset(defaultBusinessFormValues);
-        setCurrentStep(0);
+        if (shouldCloseAfterCreate && created?._id) {
+          router.replace(`/businesses/${created._id}`);
+        } else if (shouldCloseAfterCreate) {
+          router.replace("/businesses");
+        } else {
+          const nextBusinessDefaults: BusinessFormValues = {
+            ...defaultBusinessFormValues,
+            category: values.category,
+            categoryName: values.categoryName,
+            city: values.city,
+            state: values.state,
+            status: values.status || "NEW",
+            assignTo: values.assignTo,
+            assignToName: values.assignToName,
+          };
+          reset(nextBusinessDefaults);
+          setDraftBaseline(nextBusinessDefaults);
+          setCurrentStep(0);
+          window.scrollTo({ top: 0, behavior: "smooth" });
+          window.requestAnimationFrame(() => {
+            setSuppressDraftPersistence(false);
+          });
+        }
       }
     } catch (err: unknown) {
       setSubmitError(
@@ -814,8 +855,8 @@ export default function BusinessForm({
           </div>
         )}
 
-        {isDesktop || isEditMode ? (
-          <Card className="overflow-hidden rounded-2xl border-slate-200 bg-white shadow-sm">
+        {isDesktop ? (
+          <Card className="overflow-hidden rounded-none border-slate-200 bg-white shadow-sm">
             <CardContent className="px-4 py-5 sm:px-7 sm:py-6 lg:px-8">
               <FormSection title="Business Information" first>
                 <BusinessInfoSection idPrefix="desktop-" />
@@ -839,14 +880,14 @@ export default function BusinessForm({
                 </FormSection>
               )}
 
-              {!isEditMode && (
-                <FormSection icon={UsersRound} title="Follow-up">
-                  <FollowUpSection idPrefix="desktop-" />
-                </FormSection>
-              )}
+              <FormSection icon={UserRoundCheck} title="Ownership" optional>
+                <BusinessOwnershipSection />
+              </FormSection>
+
+              {!isEditMode && <FormSection icon={CalendarPlus} title="First Follow-up" optional><OptionalFollowUp idPrefix="desktop-" /></FormSection>}
 
               {!isEditMode && (
-                <div className="mt-6 flex flex-col-reverse gap-4 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="sticky bottom-0 z-20 -mx-4 mt-6 flex flex-col-reverse gap-3 border-t border-slate-200 bg-white/95 px-4 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur sm:-mx-7 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:-mx-8 lg:px-8">
                   <OutlinedButton
                     type="button"
                     size="lg"
@@ -874,10 +915,12 @@ export default function BusinessForm({
                         !isFormComplete || (isEditMode && !isDirty) || isSubmitting
                       }
                       className="w-full sm:w-auto"
+                      value="stay"
                     >
                       <Save className="size-4" />
-                      {isSubmitting ? "Saving..." : "Save Business"}
+                      {isSubmitting ? "Saving..." : "Save & add another"}
                     </SaveButton>
+                    <OutlinedButton type="submit" size="lg" value="close" disabled={!isFormComplete || isSubmitting} className="w-full sm:w-auto">Save & close</OutlinedButton>
                   </div>
                 </div>
               )}
@@ -932,11 +975,11 @@ export default function BusinessForm({
               </p>
             </div>
 
-            <Card className="border-[#dce8ee]">
+            <Card className="rounded-none border-[#dce8ee]">
               <CardContent className="p-5 sm:p-6">
                 {steps[currentStep].render("mobile-")}
 
-                <div className="mt-6 flex flex-col-reverse gap-3 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
+                <div className="sticky bottom-0 z-20 -mx-5 mt-6 flex flex-col-reverse gap-3 border-t border-slate-200 bg-white/95 px-5 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <OutlinedButton
                     type="button"
                     onClick={
@@ -965,10 +1008,12 @@ export default function BusinessForm({
                           isSubmitting
                         }
                         className="w-full sm:w-auto"
+                        value="stay"
                       >
                         <Save className="size-4" />
-                        {isSubmitting ? "Saving..." : "Save Business"}
+                        {isSubmitting ? "Saving..." : isEditMode ? "Save changes" : "Save & add another"}
                       </SaveButton>
+                      {!isEditMode && <OutlinedButton type="submit" value="close" disabled={!isFormComplete || isSubmitting} className="w-full sm:w-auto">Save & close</OutlinedButton>}
                     </div>
                   ) : (
                     <div className="flex flex-col items-stretch gap-2 sm:items-end">

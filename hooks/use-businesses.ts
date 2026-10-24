@@ -105,6 +105,67 @@ export function useUpdateBusinessLeadStatus() {
   });
 }
 
+export function useAssignBusiness() {
+  const queryClient = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      id,
+      assigneeId,
+    }: {
+      id: string | number;
+      assigneeId: string;
+      assigneeName: string;
+    }) => updateBusinessData(String(id), { assignedTo: assigneeId }),
+    onSuccess: (_, variables) => {
+      useBusinessListStore.getState().highlightBusiness(variables.id);
+      queryClient.setQueriesData(
+        { queryKey: businessQueryKeys.lists() },
+        (oldData: BusinessesResult | undefined) => {
+          if (!oldData) return oldData;
+          return {
+            ...oldData,
+            businesses: oldData.businesses.map((item) =>
+              String(item.id) === String(variables.id)
+                ? {
+                    ...item,
+                    assignedToId: variables.assigneeId,
+                    assignedToName: variables.assigneeName,
+                    assignedTo: variables.assigneeName,
+                    owner: variables.assigneeName,
+                  }
+                : item,
+            ),
+          };
+        },
+      );
+      queryClient.setQueryData<BusinessItem | undefined>(
+        businessQueryKeys.detail(String(variables.id)),
+        (business) =>
+          business
+            ? {
+                ...business,
+                assignedToId: variables.assigneeId,
+                assignedToName: variables.assigneeName,
+                assignedTo: variables.assigneeName,
+                owner: variables.assigneeName,
+              }
+            : business,
+      );
+      queryClient.invalidateQueries({ queryKey: businessQueryKeys.all });
+      toast.success(`${variables.assigneeName} is now responsible for this business.`);
+    },
+    onError: (error) => {
+      const message = axios.isAxiosError<{ message?: string }>(error)
+        ? error.response?.data?.message
+        : error instanceof Error
+          ? error.message
+          : undefined;
+      toast.error(message || "Failed to assign the responsible person.");
+    },
+  });
+}
+
 export function useBusinessKpisQuery(params: BusinessKpiParams) {
   return useQuery({
     queryKey: businessQueryKeys.kpis(params),

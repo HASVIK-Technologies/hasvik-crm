@@ -1,9 +1,7 @@
 "use client";
 
-import { Controller, useFormContext, useWatch } from "react-hook-form";
-import { Input } from "@/components/ui/input";
+import { Controller, useFormContext } from "react-hook-form";
 import FieldLabel from "@/components/businesses/FieldLabel";
-import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import DateTimePicker from "@/components/common/DateTimePicker";
 import FollowUpReminderSelect from "@/components/common/FollowUpReminderSelect";
 import FollowUpTypeSelect from "@/components/common/FollowUpTypeSelect";
@@ -18,13 +16,11 @@ export default function FollowUpSection({
 }) {
   const {
     control,
-    setValue,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
-  const assignToName = useWatch({ control, name: "assignToName" });
 
   return (
-    <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
+    <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-3">
       <Controller
         control={control}
         name="followUpType"
@@ -38,35 +34,6 @@ export default function FollowUpSection({
               value={field.value}
               onChange={field.onChange}
               className="w-full"
-              invalid={Boolean(fieldState.error)}
-            />
-            {fieldState.error && (
-              <p role="alert" className="mt-1 text-xs text-red-600">
-                {fieldState.error.message}
-              </p>
-            )}
-          </div>
-        )}
-      />
-
-      <Controller
-        control={control}
-        name="assignTo"
-        rules={{ required: "Assignee is required." }}
-        render={({ field, fieldState }) => (
-          <div>
-            <FieldLabel required invalid={Boolean(fieldState.error)}>
-              Assign To
-            </FieldLabel>
-            <AssigneeAutocomplete
-              value={field.value}
-              label={assignToName || ""}
-              onChange={(option) => {
-                field.onChange(option?.id ?? "");
-                setValue("assignToName", option?.label ?? "", {
-                  shouldDirty: true,
-                });
-              }}
               invalid={Boolean(fieldState.error)}
             />
             {fieldState.error && (

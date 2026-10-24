@@ -2,11 +2,13 @@
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
-import { CalendarClock, ChevronLeft, ChevronRight, Eye, GripVertical, MoreVertical, Pencil, UserRound } from "lucide-react";
+import Link from "next/link";
+import { CalendarClock, ChevronLeft, ChevronRight, Eye, GripVertical, MoreVertical, Pencil, UserRound, UserRoundCog } from "lucide-react";
 import BusinessViewToggle, { type BusinessView } from "./BusinessViewToggle";
 import ListPagination from "@/components/common/ListPagination";
 import PlainButton from "@/components/common/PlainButton";
-import { StatusBadge } from "@/components/common/StatusBadge";
+import { ActivityStateText } from "@/components/common/ActivityStateText";
+import { PhoneActionMenu, WhatsAppActionMenu } from "@/components/common/ContactActionMenu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   DropdownMenu,
@@ -21,6 +23,7 @@ import type { BusinessItem } from "@/types/business";
 import { useUpdateBusinessLeadStatus } from "@/hooks/use-businesses";
 import { useBusinessHighlight } from "@/hooks/use-business-highlight";
 import { useBusinessListStore } from "@/store/business-list-store";
+import AssignBusinessDialog from "./AssignBusinessDialog";
 
 export default function BusinessKanban({
   businesses,
@@ -58,6 +61,7 @@ export default function BusinessKanban({
   const [canScrollLeft, setCanScrollLeft] = useState(false);
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [mobileStage, setMobileStage] = useState(STATUS_OPTIONS[0].value);
+  const [assignmentBusiness, setAssignmentBusiness] = useState<BusinessItem | null>(null);
   const grouped = useMemo(
     () =>
       Object.fromEntries(
@@ -251,20 +255,22 @@ export default function BusinessKanban({
                     <h3 className="truncate text-sm font-bold text-slate-900">{business.name}</h3>
                     <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
                   </div>
-                  <DropdownMenu>
+                  {business.status === "Active" && <DropdownMenu>
                     <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}><PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-8 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                     <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(event) => event.stopPropagation()}>
                       <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem>
                     </DropdownMenuContent>
-                  </DropdownMenu>
+                  </DropdownMenu>}
                 </div>
-                <div className="mt-3 grid grid-cols-2 gap-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+                <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
                   <div className="flex min-w-0 items-center gap-2"><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
-                  <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.nextFollowUp === "-" ? "No follow-up" : business.nextFollowUp}</span></div>
+                  {business.lastFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <Link href={`/follow-ups/${business.lastFollowUpId}`} className="truncate font-semibold text-primary hover:underline">{business.lastFollowUp}</Link> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
+                  {business.nextFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <Link href={`/follow-ups/${business.nextFollowUpId}`} className="truncate font-semibold text-primary hover:underline">{business.nextFollowUp}</Link> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3" onClick={(event) => event.stopPropagation()}>
-                  {business.status === "Inactive" ? <StatusBadge status="INACTIVE" /> : <span className="text-[11px] font-medium text-slate-500">Move to stage</span>}
+                  {business.status === "Inactive" ? <ActivityStateText active={false} /> : <div className="flex items-center gap-1"><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
                   {business.status === "Active" && (
                     <select
                       value={business.leadStatus?.toUpperCase() || "NEW"}
@@ -355,7 +361,7 @@ export default function BusinessKanban({
                             <h4 className="truncate text-sm font-bold text-slate-900">{business.name}</h4>
                             <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
                           </div>
-                          <DropdownMenu>
+                          {business.status === "Active" && <DropdownMenu>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}>
@@ -367,15 +373,17 @@ export default function BusinessKanban({
                             <DropdownMenuContent align="end" className="w-40 bg-white" onClick={(event) => event.stopPropagation()}>
                               <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem>
                             </DropdownMenuContent>
-                          </DropdownMenu>
+                          </DropdownMenu>}
                         </div>
 
                         <div className="mt-3 space-y-2 border-t border-slate-100 pt-2.5 text-xs text-slate-600">
                           <div className="flex items-center gap-2"><UserRound className="size-3.5 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
-                          <div className="flex items-center gap-2"><CalendarClock className="size-3.5 text-slate-400" /><span className="truncate">Next: {business.nextFollowUp}</span></div>
+                          {business.lastFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <Link href={`/follow-ups/${business.lastFollowUpId}`} className="truncate font-semibold text-primary hover:underline">{business.lastFollowUp}</Link> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
+                          {business.nextFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <Link href={`/follow-ups/${business.nextFollowUpId}`} className="truncate font-semibold text-primary hover:underline">{business.nextFollowUp}</Link> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
                         </div>
-                        {business.status === "Inactive" && <StatusBadge status="INACTIVE" className="mt-3" />}
+                        {business.status === "Inactive" ? <ActivityStateText active={false} className="mt-3" /> : <div className="mt-3 flex items-center gap-1 border-t border-slate-100 pt-2" onClick={(event) => event.stopPropagation()}><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
                       </article>
                     ))
                   )}
@@ -388,6 +396,13 @@ export default function BusinessKanban({
       </div>
 
       <ListPagination total={totalCount} page={currentPage} limit={itemsPerPage} onPageChange={onPageChange} onLimitChange={onItemsPerPageChange} />
+      <AssignBusinessDialog
+        business={assignmentBusiness}
+        open={assignmentBusiness !== null}
+        onOpenChange={(open) => {
+          if (!open) setAssignmentBusiness(null);
+        }}
+      />
     </div>
   );
 }

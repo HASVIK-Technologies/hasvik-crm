@@ -10,6 +10,7 @@ import type {
   UpdateFollowUpPayload,
   UpdateFollowUpStatusPayload,
 } from "@/types/follow-up";
+import { formatFollowUpStatus } from "@/lib/follow-ups/status";
 
 export type FollowUpStatusOption = Record<string, string>;
 
@@ -167,6 +168,34 @@ function extractPhoneNumber(raw: unknown): string | undefined {
   return undefined;
 }
 
+function extractNumberEntries(raw: unknown) {
+  if (!raw) return [];
+  const values = Array.isArray(raw) ? raw : [raw];
+  return values.flatMap((value) => {
+    if (typeof value === "string" && value.trim()) return [{ number: value.trim() }];
+    if (!value || typeof value !== "object") return [];
+    const entry = value as Record<string, unknown>;
+    const number = String(entry.number ?? entry.value ?? "").trim();
+    if (!number) return [];
+    return [{
+      number,
+      name: entry.name ? String(entry.name) : undefined,
+      type: entry.type ? String(entry.type) : undefined,
+      isPrimary: entry.isPrimary === true,
+    }];
+  });
+}
+
+function extractMeetingLink(value: Record<string, unknown>) {
+  const meeting = value.meeting && typeof value.meeting === "object"
+    ? value.meeting as Record<string, unknown>
+    : {};
+  const candidate = value.meetingLink ?? value.meetingUrl ?? value.meetingURL ?? value.joinUrl ?? value.joinLink ?? meeting.url ?? meeting.link ?? meeting.joinUrl;
+  if (typeof candidate !== "string") return undefined;
+  const trimmed = candidate.trim();
+  return /^https?:\/\//i.test(trimmed) ? trimmed : undefined;
+}
+
 export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
   const business = (value.business ?? {}) as Record<string, unknown>;
   const assignee = (value.assignee ?? value.assignedTo ?? {}) as Record<
@@ -205,6 +234,9 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
     (value.whatsapp ? String(value.whatsapp) : undefined) ||
     (value.whatsappNumber ? String(value.whatsappNumber) : undefined);
 
+  const phoneNumbers = extractNumberEntries(business.phoneNumbers ?? value.phoneNumbers);
+  const whatsappNumbers = extractNumberEntries(business.whatsappNumbers ?? value.whatsappNumbers);
+
   const email =
     (business.email ? String(business.email) : undefined) ||
     (business.contactEmail ? String(business.contactEmail) : undefined) ||
@@ -223,7 +255,10 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
     businessPhone: callingNumber || whatsappNumber || "",
     businessCallingNumber: callingNumber,
     businessWhatsappNumber: whatsappNumber,
+    businessPhoneNumbers: phoneNumbers.length ? phoneNumbers : callingNumber ? [{ number: callingNumber }] : [],
+    businessWhatsappNumbers: whatsappNumbers.length ? whatsappNumbers : whatsappNumber ? [{ number: whatsappNumber }] : [],
     businessEmail: email,
+    meetingLink: extractMeetingLink(value),
     assignedToId:
       assignee._id || assignee.id
         ? String(assignee._id ?? assignee.id)
@@ -248,13 +283,13 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
 
 /**
  * GET /api/follow-ups
- * Query parameters: page, limit, businessId, assignedTo, status, type, fromDate, toDate, search
+ * Query parameters: page, limit, businessId, assignedTo, status, type, fromDate, toDate, search, isCalendarView
  */
 export async function getFollowUps(
   filters: FollowUpQueryFilters,
   signal?: AbortSignal,
 ) {
-  const params: Record<string, string | number> = {};
+  const params: Record<string, string | number | boolean> = {};
   if (filters.page !== undefined) params.page = filters.page;
   if (filters.limit !== undefined) params.limit = filters.limit;
   if (filters.search && filters.search.trim()) {
@@ -266,6 +301,9 @@ export async function getFollowUps(
   if (filters.type) params.type = filters.type;
   if (filters.fromDate) params.fromDate = filters.fromDate;
   if (filters.toDate) params.toDate = filters.toDate;
+  if (filters.isCalendarView !== undefined) {
+    params.isCalendarView = filters.isCalendarView;
+  }
 
   const response = await apiClient.get("/follow-ups", { params, signal });
   const root = response.data as {
@@ -505,10 +543,12 @@ export async function getFollowUpStatuses(signal?: AbortSignal) {
   const payload = unwrap<FollowUpStatusOption | string[]>(response.data);
   if (Array.isArray(payload)) {
     return Object.fromEntries(
-      payload.map((status) => [status, status]),
+      payload.map((status) => [status, formatFollowUpStatus(status)]),
     ) as FollowUpStatusOption;
   }
-  return payload ?? {};
+  return Object.fromEntries(
+    Object.entries(payload ?? {}).map(([key, label]) => [key, formatFollowUpStatus(label || key)]),
+  );
 }
 
 export async function getFollowUp(id: string, signal?: AbortSignal) {

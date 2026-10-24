@@ -5,6 +5,7 @@ import { Building2, MapPin } from "lucide-react";
 import { CardHeader, CardTitle } from "@/components/ui/card";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { StatusBadge } from "@/components/common/StatusBadge";
+import { ActivityStateText } from "@/components/common/ActivityStateText";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import { formatLeadStatus } from "@/lib/business/form-options";
 import { getLocationData, openGoogleMapsOnce } from "@/lib/business/location";
@@ -43,7 +44,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
             <CardTitle className="text-lg font-bold tracking-tight text-[#334155] sm:text-2xl break-words min-w-0">{business.name}</CardTitle>
             <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-              <StatusBadge status={business.status} />
+              <ActivityStateText active={business.status === "Active"} />
               {leadStatusDisplay && leadStatusDisplay !== "-" && (
                 <StatusBadge
                   status={rawLeadStatus || leadStatusDisplay}
