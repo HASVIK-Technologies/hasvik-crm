@@ -7,6 +7,7 @@ import {
   PopoverTrigger,
 } from "@/components/ui/popover";
 import Calendar from "@/components/common/Calendar";
+import { parseCalendarDate } from "@/lib/forms/date-time";
 
 interface FollowUpDateRangeProps {
   from?: string;
@@ -15,12 +16,13 @@ interface FollowUpDateRangeProps {
 }
 
 function display(value: string) {
-  return value
+  const date = parseCalendarDate(value);
+  return date
     ? new Intl.DateTimeFormat("en-IN", {
         day: "2-digit",
         month: "2-digit",
         year: "numeric",
-      }).format(new Date(`${value}T00:00:00`))
+      }).format(date)
     : "";
 }
 
@@ -36,6 +38,8 @@ export default function FollowUpDateRange({
   to = "",
   onChange,
 }: FollowUpDateRangeProps) {
+  const fromDate = parseCalendarDate(from);
+  const toDate = parseCalendarDate(to);
   return (
     <Popover>
       <PopoverTrigger asChild>
@@ -102,7 +106,7 @@ export default function FollowUpDateRange({
             </button>
           ))}
         </div>
-        <Calendar mode="range" defaultMonth={from ? new Date(`${from}T00:00:00`) : undefined} selected={from ? { from: new Date(`${from}T00:00:00`), to: to ? new Date(`${to}T00:00:00`) : undefined } : undefined} onSelect={(range) => onChange(range?.from ? inputDate(range.from) : "", range?.to ? inputDate(range.to) : "")} />
+        <Calendar mode="range" defaultMonth={fromDate} selected={fromDate ? { from: fromDate, to: toDate } : undefined} onSelect={(range) => onChange(range?.from ? inputDate(range.from) : "", range?.to ? inputDate(range.to) : "")} />
         <button type="button" onClick={() => onChange("", "")} className="h-9 w-full rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Clear dates</button>
       </PopoverContent>
     </Popover>

@@ -1,3 +1,16 @@
+/** Calendar inputs may come from date-only filters or ISO dashboard links. */
+export function parseCalendarDate(value?: string): Date | undefined {
+  if (!value) return undefined;
+  const dateOnly = /^\d{4}-\d{2}-\d{2}$/.test(value);
+  const date = new Date(dateOnly ? `${value}T00:00:00` : value);
+  if (Number.isNaN(date.getTime())) return undefined;
+  if (dateOnly) {
+    const [year, month, day] = value.split("-").map(Number);
+    if (date.getFullYear() !== year || date.getMonth() + 1 !== month || date.getDate() !== day) return undefined;
+  }
+  return date;
+}
+
 export function toDateTimeLocalValue(value?: string | Date): string {
   if (!value) return "";
   const date = new Date(value);

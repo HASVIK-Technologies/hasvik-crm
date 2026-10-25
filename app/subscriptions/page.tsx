@@ -60,6 +60,8 @@ import {
 import Actions from "@/components/common/Actions";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import ListPageLayout from "@/components/layout/ListPageLayout";
+import StatusBadge from "@/components/common/SubscriptionStatusBadge";
+import { getSubscriptionStatusVisual, SUBSCRIPTION_STATUS_VISUALS } from "@/lib/subscriptions/status";
 
 const cycleLabels: Record<BillingCycle, string> = {
   MONTHLY: "Monthly",
@@ -109,28 +111,7 @@ function getLimit(value: number | undefined) {
 }
 
 function normalizeStatus(status?: string) {
-  return status?.toUpperCase() ?? "UNKNOWN";
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const normalized = normalizeStatus(status);
-  const style =
-    normalized === "ACTIVE"
-      ? "bg-emerald-50 text-emerald-700"
-      : normalized === "EXPIRED"
-        ? "bg-rose-50 text-rose-700"
-        : normalized === "REJECTED"
-          ? "bg-rose-50 text-rose-700"
-          : normalized === "SUSPENDED"
-            ? "bg-slate-100 text-slate-700"
-            : normalized === "PENDING" || normalized === "CANCELLED"
-          ? "bg-amber-50 text-amber-800"
-          : "bg-slate-100 text-slate-600";
-  return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${style}`}>
-      {normalized.replaceAll("_", " ")}
-    </span>
-  );
+  return status?.trim().toUpperCase() ?? "UNKNOWN";
 }
 
 function LimitLine({
@@ -328,25 +309,25 @@ function SubscriptionRow({
           </button>
         )}
         {status === "PENDING" && (
-          <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-950">
+          <p className={`mt-2 rounded-lg border px-3 py-2 text-[11px] leading-5 ${getSubscriptionStatusVisual(status).badge}`}>
             {hasvikAdmin
               ? "This subscription request is awaiting your review."
               : "Your request is awaiting HASVIK admin approval. Access starts after approval."}
           </p>
         )}
         {status === "CANCELLED" && (
-          <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-950">
+          <p className={`mt-2 rounded-lg border px-3 py-2 text-[11px] leading-5 ${getSubscriptionStatusVisual(status).badge}`}>
             Plan cancelled. Access remains active until{" "}
             <span className="font-semibold">{formatDate(subscription.endDate)}</span>.
           </p>
         )}
         {status === "REJECTED" && (
-          <p className="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] leading-5 text-rose-900">
+          <p className={`mt-2 rounded-lg border px-3 py-2 text-[11px] leading-5 ${getSubscriptionStatusVisual(status).badge}`}>
             This subscription request was rejected by a HASVIK admin.
           </p>
         )}
         {status === "SUSPENDED" && (
-          <p className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] leading-5 text-slate-700">
+          <p className={`mt-2 rounded-lg border px-3 py-2 text-[11px] leading-5 ${getSubscriptionStatusVisual(status).badge}`}>
             This subscription is suspended. Workspace access may be restricted.
           </p>
         )}
@@ -533,7 +514,7 @@ export default function SubscriptionsPage() {
         planId,
         autoRenew: false,
       });
-      const createdStatus = createdSubscription.status?.toUpperCase();
+      const createdStatus = createdSubscription.status?.trim().toUpperCase();
       setChosenPlan(null);
       setNotice(
         createdStatus === "PENDING"
@@ -660,17 +641,14 @@ export default function SubscriptionsPage() {
               value={statusFilter}
               onValueChange={(value) => setStatusFilter(value as SubscriptionFilter)}
             >
-              <SelectTrigger id="subscription-status-filter" size="sm" className="w-36 rounded-lg text-xs">
-                <SelectValue />
+              <SelectTrigger id="subscription-status-filter" size="sm" className="w-48 rounded-none text-xs">
+                <SelectValue>
+                  {statusFilter === "ALL" ? <span className="text-slate-600">All statuses</span> : <StatusBadge status={statusFilter} />}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white">
-                <SelectItem value="ALL" className="text-xs">All statuses</SelectItem>
-                <SelectItem value="ACTIVE" className="text-xs">Active</SelectItem>
-                <SelectItem value="PENDING" className="text-xs">Pending</SelectItem>
-                <SelectItem value="CANCELLED" className="text-xs">Cancelled</SelectItem>
-                <SelectItem value="REJECTED" className="text-xs">Rejected</SelectItem>
-                <SelectItem value="SUSPENDED" className="text-xs">Suspended</SelectItem>
-                <SelectItem value="EXPIRED" className="text-xs">Expired</SelectItem>
+                <SelectItem value="ALL" className="rounded-none py-2.5 text-xs">All statuses</SelectItem>
+                {Object.entries(SUBSCRIPTION_STATUS_VISUALS).map(([status, visual]) => <SelectItem key={status} value={status} textValue={visual.label} className="rounded-none py-2.5 text-xs"><span className="inline-flex items-center gap-2.5"><span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${visual.dot}`} /><span>{visual.label}</span></span></SelectItem>)}
               </SelectContent>
             </Select>
           </label>
@@ -709,16 +687,14 @@ export default function SubscriptionsPage() {
       content={
         <div className="flex flex-col gap-5">
           {hasvikAdmin ? (
-            <div className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className={`flex flex-col gap-3 rounded-2xl border p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between ${getSubscriptionStatusVisual("PENDING").badge}`}>
               <div>
-                <p className="text-sm font-bold text-amber-950">Subscription approval queue</p>
-                <p className="mt-1 text-xs leading-5 text-amber-900">
+                <p className="text-sm font-bold">Subscription approval queue</p>
+                <p className="mt-1 text-xs leading-5">
                   Review pending requests from all workspaces. Approving a request activates its subscription.
                 </p>
               </div>
-              <span className="w-fit shrink-0 rounded-full border border-amber-200 bg-white px-3 py-1.5 text-xs font-bold text-amber-950">
-                {pendingSubscriptionsCount} awaiting review
-              </span>
+              <StatusBadge status="PENDING" label={`${pendingSubscriptionsCount} awaiting review`} className="w-fit px-3 py-1.5 text-xs" />
             </div>
           ) : (
             <div className="flex justify-end">
@@ -780,7 +756,7 @@ export default function SubscriptionsPage() {
                 </p>
               </div>
               <div className="flex shrink-0 items-center gap-2">
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">
+                <span className={`rounded-none border px-2.5 py-1 text-[10px] font-bold ${hasvikAdmin ? getSubscriptionStatusVisual(statusFilter).badge : getSubscriptionStatusVisual("ACTIVE").badge}`}>
                   {hasvikAdmin
                     ? statusFilter === "PENDING"
                       ? `${pendingSubscriptionsCount} pending`
