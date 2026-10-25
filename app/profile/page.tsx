@@ -89,7 +89,7 @@ export default function ProfilePage() {
   return (
     <div className="mx-auto flex w-full max-w-5xl flex-col gap-6">
       <header className="flex items-center gap-4 border-b border-[#e4ecf2] pb-5">
-        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-blue-50 text-sm font-bold text-primary">
+        <span className="flex size-12 shrink-0 items-center justify-center rounded-full bg-primary/10 text-sm font-bold text-primary">
             {initials}
         </span>
         <div className="min-w-0">

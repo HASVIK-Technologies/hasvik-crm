@@ -10,11 +10,9 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { ActivityStateText } from "@/components/common/ActivityStateText";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 import businessData from "@/data/businessData.json";
 import BusinessDetailsMap from "../../../components/business-details/BusinessDetailsMap";
 import BusinessDetailsOverview from "../../../components/business-details/BusinessDetailsOverview";
-import BusinessDetailsQuickActions from "../../../components/business-details/BusinessDetailsQuickActions";
 import BusinessDetailsContacts from "../../../components/business-details/BusinessDetailsContacts";
 import { useBusinessFollowUpsQuery } from "@/hooks/use-business-get-follow-ups";
 import { useModalStore } from "@/store/business-modal-store";
@@ -33,6 +31,7 @@ import {
   Users,
   Calendar,
   AlertCircle,
+  Plus,
   UserRoundCog,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
@@ -48,6 +47,7 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import BusinessDetailsFollowups from "@/components/business-details/BusinessDetailsFollowups";
+import BusinessDetailsActivity from "@/components/business-details/BusinessDetailsActivity";
 import { DeactivateBusinessModal } from "@/components/business-details/DeactivateBusinessModal";
 import { useBusinessListStore } from "@/store/business-list-store";
 import AssignBusinessDialog from "@/components/businesses/AssignBusinessDialog";
@@ -64,7 +64,6 @@ export default function BusinessDetails() {
     if (stringId) useBusinessListStore.getState().highlightBusiness(stringId, true);
   }, [stringId]);
   const { data: followUps } = useBusinessFollowUpsQuery(stringId);
-  const realFollowUpsCount = Array.isArray(followUps) ? followUps.length : 0;
   const {
     data: apiBusiness,
     isError,
@@ -179,11 +178,16 @@ export default function BusinessDetails() {
             label: "Activate Business",
             onSelect: () => openDeactivateModal(String(business?.id)),
           } : {
-            label: "Edit Business",
-            icon: <Edit2 className="size-4" />,
-            href: `/businesses/form/${business.id}`,
+            label: "Add Follow-up",
+            icon: <Plus className="size-4" />,
+            onSelect: () => openFollowUpModal(String(business?.id)),
           }}
           secondary={isInactive ? [] : [
+            {
+              label: "Edit Business",
+              icon: <Edit2 className="size-4" />,
+              href: `/businesses/form/${business.id}`,
+            },
             {
               label: business.assignedToId ? "Reassign Owner" : "Assign Owner",
               icon: <UserRoundCog className="size-4" />,
@@ -203,7 +207,7 @@ export default function BusinessDetails() {
       content={
         <>
           {/* 2. SINGLE MERGED CARD (Full Width) */}
-          <Card className="w-full overflow-hidden rounded-2xl border-[#e4ecf2] shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
+          <Card className="w-full overflow-hidden border-[#e4ecf2] shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
             <CardHeader className="flex flex-col gap-4 border-b border-[#e8eef4] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
               <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">
                 <Avatar className="size-13 sm:size-16 rounded-xl sm:rounded-2xl shrink-0">
@@ -422,42 +426,24 @@ export default function BusinessDetails() {
             </CardContent>
           </Card>
 
-          {/* 3. --- TABS SECTION --- */}
-          <Tabs defaultValue="overview" className="w-full">
-            <TabsList className="max-w-full justify-start overflow-x-auto">
-              <TabsTrigger value="overview" className="flex-none">
-                Overview
-              </TabsTrigger>
-              <TabsTrigger value="contacts" className="flex-none">
-                Contacts
-              </TabsTrigger>
-              <TabsTrigger value="follow-ups" className="flex-none">
-                Follow-ups ({realFollowUpsCount})
-              </TabsTrigger>
-            </TabsList>
-            {/* OVERVIEW TAB */}
-            <TabsContent value="overview" className="mt-6">
-              <div className="grid grid-cols-1 md:grid-cols-[7fr_3fr] gap-6">
-                <BusinessDetailsOverview
-                  business={business}
-                  businessData={businessData}
-                />
-                <BusinessDetailsQuickActions
-                  business={business}
-                  cleanNumber={cleanNumber}
-                />
-              </div>
-              <BusinessDetailsMap business={business} />
-            </TabsContent>
-            {/* CONTACTS TAB */}
-            <TabsContent value="contacts" className="mt-6">
+          <section className="grid grid-cols-1 gap-6 xl:grid-cols-[minmax(0,1fr)_22rem] xl:items-start">
+            <div className="min-w-0 space-y-6">
+              <BusinessDetailsFollowups
+                businessId={String(business.id)}
+                readOnly={isInactive}
+              />
+              <BusinessDetailsActivity businessId={String(business.id)} />
+            </div>
+
+            <aside className="space-y-6 xl:sticky xl:top-28">
+              <BusinessDetailsOverview
+                business={business}
+                businessData={businessData}
+              />
               <BusinessDetailsContacts business={business} />
-            </TabsContent>
-            {/* FOLLOW-UPS TAB */}
-            <TabsContent value="follow-ups" className="mt-6">
-              <BusinessDetailsFollowups readOnly={isInactive} />
-            </TabsContent>
-          </Tabs>
+              <BusinessDetailsMap business={business} />
+            </aside>
+          </section>
           {/* New Follow-up Modal */}
           <AddFollowUpModal businessName={business?.name || "Business"} />
           {/* Deactivate Business Modal */}

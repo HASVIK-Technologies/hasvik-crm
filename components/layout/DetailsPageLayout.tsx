@@ -15,7 +15,7 @@ export default function DetailsPageLayout({
   return (
     <PageContainer className="flex flex-col gap-6">
       <ScrollToTopOnRoute />
-      <section className="flex gap-4 flex-row items-center justify-between">
+      <section className="flex flex-col gap-3 sm:flex-row sm:items-center sm:justify-between">
         {breadcrumb}
         {actions && <div className="shrink-0">{actions}</div>}
       </section>

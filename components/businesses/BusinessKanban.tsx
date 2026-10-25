@@ -129,9 +129,6 @@ export default function BusinessKanban({
           <h2 className="text-lg font-bold tracking-tight text-slate-900">
             Sales pipeline <span className="font-medium text-slate-500">({totalCount})</span>
           </h2>
-          <p className="mt-0.5 text-xs text-slate-500">
-            Showing {firstResult}–{lastResult} of {totalCount}. <span className="hidden md:inline">Drag an active business to update its lead stage.</span>
-          </p>
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
@@ -148,7 +145,7 @@ export default function BusinessKanban({
         </DropdownMenu>
       </div>
 
-      <div className="sticky top-[81px] z-10 hidden overflow-hidden border-b border-slate-200 bg-slate-50/95 shadow-[0_3px_8px_rgba(15,23,42,0.08)] backdrop-blur md:block">
+      <div className="sticky top-[81px] z-10 hidden overflow-hidden bg-slate-50/95 md:block">
         <div className="flex h-9 items-center justify-between border-b border-slate-200 bg-white px-2">
           <Tooltip>
             <TooltipTrigger asChild>
@@ -165,7 +162,7 @@ export default function BusinessKanban({
             <TooltipContent>Previous stages</TooltipContent>
           </Tooltip>
           <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
-            Navigate stages
+            Click arrows to scroll horizontally
           </span>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -267,8 +264,8 @@ export default function BusinessKanban({
                 aria-busy={mutation.isPending && String(mutation.variables?.id) === String(business.id)}
               >
                 <div className="flex items-start gap-3">
-                  <Avatar className={cn("size-10", business.avatarBg)}>
-                    <AvatarFallback className={cn("text-xs font-bold", business.avatarBg, business.avatarTextColor)}>{business.initials}</AvatarFallback>
+                  <Avatar className="size-10 bg-primary/10 text-primary">
+                    <AvatarFallback className="bg-transparent text-xs font-bold text-inherit">{business.initials}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-sm" title={business.name}>{business.name}</RecordLink>
@@ -375,12 +372,12 @@ export default function BusinessKanban({
                         aria-busy={mutation.isPending && String(mutation.variables?.id) === String(business.id)}
                       >
                         <div className="flex items-start gap-2.5">
-                          <GripVertical className="mt-1 size-4 shrink-0 text-slate-300 group-hover:text-slate-500" />
-                          <Avatar className={cn("size-9", business.avatarBg)}>
-                            <AvatarFallback className={cn("text-xs font-bold", business.avatarBg, business.avatarTextColor)}>{business.initials}</AvatarFallback>
+                          {/* <GripVertical className="mt-1 size-4 shrink-0 text-slate-300 group-hover:text-slate-500" /> */}
+                          <Avatar className="size-9 bg-primary/10 text-primary">
+                            <AvatarFallback className="bg-transparent text-xs font-bold text-inherit">{business.initials}</AvatarFallback>
                           </Avatar>
                           <div className="min-w-0 flex-1">
-                            <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-sm" title={business.name}>{business.name}</RecordLink>
+                            <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-base text-slate-700 hover:text-brand-blue" title={business.name}>{business.name}</RecordLink>
                             <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
                           </div>
                           {business.status === "Active" && <DropdownMenu>
@@ -402,7 +399,7 @@ export default function BusinessKanban({
 
                         <div className="mt-3 space-y-2 border-t border-slate-100 pt-2.5 text-xs text-slate-600">
                           {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
-                          <div className={cn("flex items-center gap-2", business.owner ? "" : "font-semibold text-amber-700")}><UserRound className="size-3.5 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
+                          <div className={cn("flex items-center gap-2", business.owner ? "" : "text-slate-400")}><UserRound className="size-3.5 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
                           {business.lastFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
                           {business.nextFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="truncate">{business.nextFollowUp}</RecordLink> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
                         </div>

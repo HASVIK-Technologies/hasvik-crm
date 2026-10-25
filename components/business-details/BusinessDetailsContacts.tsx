@@ -34,10 +34,10 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
 
   return (
     <div className="w-full">
-      <div className="rounded-xl border border-slate-200 bg-white p-6 shadow-sm">
+      <div className="border border-slate-200 bg-white p-6 shadow-sm">
         <h3 className="mb-6 text-lg font-bold text-slate-800">Contact Information</h3>
 
-        <div className="grid grid-cols-1 gap-8 lg:grid-cols-3">
+        <div className="grid grid-cols-1 gap-5">
           {/* Phone Numbers Column */}
           <div className="space-y-3">
             <h4 className="text-sm font-semibold text-slate-700">Phone Numbers</h4>
