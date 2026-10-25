@@ -1,5 +1,8 @@
 "use client";
 
+import { isRecordInactive } from "@/lib/records/activity";
+import EntityActivityButton from "@/components/common/EntityActivityButton";
+
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
 import { useMemo, useState, type FormEvent } from "react";
@@ -253,6 +256,7 @@ function SubscriptionRow({
   subscription,
   plan,
   tenantName,
+  readOnly,
   hasvikAdmin,
   tenantAdmin,
   busy,
@@ -264,6 +268,7 @@ function SubscriptionRow({
   subscription: Subscription;
   plan?: SubscriptionPlan;
   tenantName: string;
+  readOnly: boolean;
   hasvikAdmin: boolean;
   tenantAdmin: boolean;
   busy: boolean;
@@ -290,6 +295,7 @@ function SubscriptionRow({
       <div className="min-w-0">
         <div className="flex flex-wrap items-center gap-2">
           <h3 className="text-sm font-bold text-slate-900">{planName}</h3>
+          {id && <EntityActivityButton entityType="SUBSCRIPTION" entityId={id} name={planName} />}
           <StatusBadge status={status} />
         </div>
         <p className="mt-1 text-xs text-slate-600">
@@ -345,7 +351,8 @@ function SubscriptionRow({
           </p>
         )}
       </div>
-      <div className="flex flex-wrap gap-2">
+      {readOnly && <p className="text-xs text-slate-500">Read-only. Activate the tenant before changing subscriptions.</p>}
+      {!readOnly && <div className="flex flex-wrap gap-2">
         {(hasvikAdmin || tenantAdmin) && status === "ACTIVE" && id && (
           <Button
             type="button"
@@ -396,7 +403,7 @@ function SubscriptionRow({
             Renew
           </Button>
         )}
-      </div>
+      </div>}
     </article>
   );
 }
@@ -427,6 +434,12 @@ export default function SubscriptionsPage() {
   const embeddedTenant = subscriptions.find(
     (subscription) => getSubscriptionTenantId(subscription) === ownTenantId,
   )?.tenant;
+  function subscriptionReadOnly(subscription?: Subscription | null) {
+    if (!subscription) return true;
+    const tenantId = getSubscriptionTenantId(subscription);
+    const tenant = tenantId === ownTenantId ? ownTenant : tenants.find((item) => item.id === tenantId);
+    return isRecordInactive(tenant) || (typeof subscription.tenant === "object" && subscription.tenant.isActive === false) || (typeof subscription.tenantId === "object" && subscription.tenantId.isActive === false) || (typeof subscription.business === "object" && subscription.business.isActive === false);
+  }
   const ownTenantName =
     ownTenant?.name ??
     (typeof embeddedTenant === "object" ? embeddedTenant.name : undefined);
@@ -485,7 +498,7 @@ export default function SubscriptionsPage() {
         normalizeStatus(subscription.status) === "PENDING"),
   );
   const canChoosePlan =
-    Boolean(createTenantId) &&
+    Boolean(createTenantId) && ownTenant?.isActive === true &&
     !hasvikAdmin &&
     !requestExistsForCreateTenant &&
     !subscriptionsQuery.isPending &&
@@ -502,6 +515,7 @@ export default function SubscriptionsPage() {
   });
 
   function openCheckout(plan: SubscriptionPlan) {
+    if (!canChoosePlan || plan.isActive === false) return;
     setChosenPlan(plan);
     setNotice("");
     setOperationError("");
@@ -510,7 +524,7 @@ export default function SubscriptionsPage() {
   async function submitSubscription(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
     const planId = chosenPlan ? getPlanId(chosenPlan) : "";
-    if (!chosenPlan || !planId || !createTenantId) return;
+    if (!chosenPlan || !planId || !createTenantId || !canChoosePlan || chosenPlan.isActive === false) return;
     if (!Number.isFinite(chosenPlan.price) || chosenPlan.price < 0) return;
     setOperationError("");
     try {
@@ -532,6 +546,7 @@ export default function SubscriptionsPage() {
   }
 
   async function activate(id: string) {
+    if (subscriptionReadOnly(subscriptionToApprove)) return;
     if (!id || normalizeStatus(subscriptionToApprove?.status) !== "PENDING") {
       setOperationError("Only a pending subscription request can be approved.");
       return;
@@ -549,6 +564,7 @@ export default function SubscriptionsPage() {
   }
 
   async function renew(id: string): Promise<boolean> {
+    if (subscriptionReadOnly(subscriptions.find((item) => getSubscriptionId(item) === id))) return false;
     setOperationError("");
     try {
       await renewMutation.mutateAsync({ id });
@@ -562,6 +578,7 @@ export default function SubscriptionsPage() {
   }
 
   async function rejectSubscription() {
+    if (subscriptionReadOnly(subscriptionToReject)) return;
     const id = subscriptionToReject ? getSubscriptionId(subscriptionToReject) : "";
     if (!id || normalizeStatus(subscriptionToReject?.status) !== "PENDING") {
       setOperationError("Only a pending subscription request can be rejected.");
@@ -579,6 +596,7 @@ export default function SubscriptionsPage() {
   }
 
   async function cancelSubscription() {
+    if (subscriptionReadOnly(subscriptionToCancel)) return;
     const id = subscriptionToCancel ? getSubscriptionId(subscriptionToCancel) : "";
     if (!id) return;
     setOperationError("");
@@ -843,6 +861,7 @@ export default function SubscriptionsPage() {
                       subscription={subscription}
                       plan={plans.find((plan) => getPlanId(plan) === planId)}
                       tenantName={tenantName}
+                      readOnly={subscriptionReadOnly(subscription)}
                       hasvikAdmin={hasvikAdmin}
                       tenantAdmin={tenantAdmin}
                       busy={busyThisSubscription}

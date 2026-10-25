@@ -1,9 +1,12 @@
 import { apiClient } from "@/lib/api/api-client";
+import { getTenant } from "@/lib/tenants/api";
+import { getUserTenant } from "@/lib/users/tenant";
+import { userRequestParams, type UserQueryParams } from "@/lib/users/query-params";
+import { canUpdateRecord } from "@/lib/records/activity";
 import type {
   CreateUserPayload,
   UpdateUserPayload,
   UserRecord,
-  UserRole,
 } from "@/types/user";
 
 type CollectionPayload<T> =
@@ -22,24 +25,10 @@ function readUsers(payload: CollectionPayload<UserRecord>): UserListResult {
 
 export async function getUsers(
   signal?: AbortSignal,
-  params?: {
-    search?: string;
-    role?: UserRole | "ALL";
-    page?: number;
-    limit?: number;
-    sortBy?: string;
-    sortOrder?: "asc" | "desc";
-  },
+  params?: UserQueryParams,
 ) {
   const response = await apiClient.get<CollectionPayload<UserRecord>>("/users", {
-    params: {
-      page: params?.page ?? 1,
-      limit: params?.limit ?? 10,
-      sortBy: params?.sortBy ?? "fullName",
-      sortOrder: params?.sortOrder ?? "asc",
-      ...(params?.search?.trim() ? { search: params.search.trim() } : {}),
-      ...(params?.role && params.role !== "ALL" ? { role: params.role } : {}),
-    },
+    params: userRequestParams(params),
     signal,
   });
   return readUsers(response.data);
@@ -51,11 +40,21 @@ export async function createUser(payload: CreateUserPayload) {
 }
 
 export async function updateUser(id: string, payload: UpdateUserPayload) {
+  await assertUserWritable(id, payload);
   const response = await apiClient.patch<UserRecord>(`/users/${id}`, payload);
   return response.data;
 }
 
 export async function deleteUser(id: string) {
+  await assertUserWritable(id);
   const response = await apiClient.delete(`/users/${id}`);
   return response.data;
+}
+
+async function assertUserWritable(id: string, payload: UpdateUserPayload = {}) {
+  const response = await apiClient.get<UserRecord | { data: UserRecord }>(`/users/${id}`);
+  const user = "data" in response.data ? response.data.data : response.data;
+  if (!canUpdateRecord(user, { ...payload }) || getUserTenant(user, []).isActive === false) throw new Error("Inactive users are read-only except for activation. Inactive tenants must be activated first.");
+  const tenantId = typeof user.tenantId === "string" ? user.tenantId : user.tenantId?._id ?? user.tenantId?.id ?? user.tenant?._id ?? user.tenant?.id;
+  if (tenantId && (await getTenant(tenantId)).isActive === false) throw new Error("Activate this user's tenant before editing the user.");
 }

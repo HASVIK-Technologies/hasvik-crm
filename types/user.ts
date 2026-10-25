@@ -9,6 +9,9 @@ export interface UserRecord {
   phoneNumber?: string;
   role: UserRole | string;
   isActive?: boolean;
+  tenantId?: string | { _id?: string; id?: string; name?: string; isActive?: boolean } | null;
+  tenant?: { _id?: string; id?: string; name?: string; isActive?: boolean } | null;
+  tenantName?: string;
   createdAt?: string;
   updatedAt?: string;
 }
@@ -21,6 +24,7 @@ export interface CreateUserPayload {
 }
 
 export interface UpdateUserPayload {
+  isActive?: boolean;
   email?: string;
   fullName?: string;
   phoneNumber?: string;

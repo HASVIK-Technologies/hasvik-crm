@@ -1,5 +1,7 @@
 "use client";
 
+import { changedFields } from "@/lib/forms/changed-fields";
+
 import { useState, type FormEvent } from "react";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import {
@@ -38,12 +40,14 @@ export default function ProfilePage() {
   const updateMutation = useMutation({
     mutationFn: async () => {
       if (!user?.userId) throw new Error("Could not identify your user account.");
-      return updateUser(user.userId, {
+      const payload = changedFields({
         fullName: fullName.trim(),
         email: email.trim(),
         phoneNumber: phoneNumber.trim(),
         ...(password ? { password } : {}),
-      });
+      }, { fullName: (user.fullName ?? "").trim(), email: (user.email ?? "").trim(), phoneNumber: (user.phoneNumber ?? "").trim() });
+      if (!Object.keys(payload).length) return { fullName: user.fullName, email: user.email, phoneNumber: user.phoneNumber };
+      return updateUser(user.userId, payload);
     },
     onSuccess: (updated) => {
       if (!user) return;
@@ -57,6 +61,7 @@ export default function ProfilePage() {
         email: updated.email || email.trim(),
         phoneNumber: updated.phoneNumber ?? phoneNumber.trim(),
       };
+      queryClient.invalidateQueries({ queryKey: ["users"] });
       setUser(nextUser);
       queryClient.setQueryData(authQueryKeys.user, nextUser);
       queryClient.setQueryData(authQueryKeys.session, (session: unknown) => {

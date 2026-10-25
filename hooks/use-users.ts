@@ -24,8 +24,10 @@ export const userQueryKeys = {
     limit: number,
     sortBy: string,
     sortOrder: "asc" | "desc",
+    isActive?: boolean,
+    tenantId?: string,
   ) =>
-    [...userQueryKeys.lists(), { search, role, page, limit, sortBy, sortOrder }] as const,
+    [...userQueryKeys.lists(), { search, role, page, limit, sortBy, sortOrder, isActive, tenantId }] as const,
 };
 
 export function useUsersQuery(
@@ -35,11 +37,25 @@ export function useUsersQuery(
   limit = 10,
   sortBy = "fullName",
   sortOrder: "asc" | "desc" = "asc",
+  isActive?: boolean,
+  tenantId?: string,
 ) {
   return useQuery({
-    queryKey: userQueryKeys.list(search, role, page, limit, sortBy, sortOrder),
+    queryKey: userQueryKeys.list(search, role, page, limit, sortBy, sortOrder, isActive, tenantId),
     queryFn: ({ signal }) =>
-      getUsers(signal, { search, role, page, limit, sortBy, sortOrder }),
+      getUsers(signal, { search, role, page, limit, sortBy, sortOrder, isActive, tenantId }),
+  });
+}
+
+export function useUpdateUserStatus() {
+  const refresh = useRefreshUsers();
+  return useMutation({
+    mutationFn: ({ id, isActive }: { id: string; isActive: boolean }) => updateUser(id, { isActive }),
+    onSuccess: (_, variables) => {
+      void refresh();
+      toast.success(variables.isActive ? "User activated." : "User deactivated.");
+    },
+    onError: (error) => { if (error instanceof Error) toast.error(error.message); },
   });
 }
 

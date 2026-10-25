@@ -1,5 +1,13 @@
 "use client";
 
+import { useAuthStore } from "@/store/auth-store";
+import { isSuperAdmin } from "@/types/auth";
+import { useTenantsQuery } from "@/hooks/use-tenants";
+import { getUserTenant } from "@/lib/users/tenant";
+import { ActivityStateText } from "@/components/common/ActivityStateText";
+import { isRecordInactive } from "@/lib/records/activity";
+import { changedFields } from "@/lib/forms/changed-fields";
+
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
 import { useState, type FormEvent } from "react";
@@ -42,7 +50,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { useCreateUser, useDeleteUser, useUpdateUser, useUsersQuery } from "@/hooks/use-users";
+import { useCreateUser, useUpdateUserStatus, useUpdateUser, useUsersQuery } from "@/hooks/use-users";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import type { CreateUserPayload, UserRecord, UserRole } from "@/types/user";
 
@@ -67,6 +75,12 @@ function RoleBadge({ role }: { role: string }) {
 
 export default function UsersPage() {
   const { highlightItem, isItemHighlighted } = useListActionHighlight("users");
+  const currentUser = useAuthStore((state) => state.user);
+  const superAdmin = isSuperAdmin(currentUser);
+  const tenantsQuery = useTenantsQuery(superAdmin, currentUser?.userId);
+  const tenants = tenantsQuery.data ?? [];
+  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [tenantFilter, setTenantFilter] = useState("ALL");
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<UserRole | "ALL">("ALL");
   const [page, setPage] = useState(1);
@@ -76,7 +90,7 @@ export default function UsersPage() {
   const [showStats, setShowStats] = useState(true);
   const [showFilters, setShowFilters] = useState(true);
   const [editingUser, setEditingUser] = useState<UserRecord | null>(null);
-  const [deactivatingUser, setDeactivatingUser] = useState<UserRecord | null>(null);
+  const [statusUser, setStatusUser] = useState<UserRecord | null>(null);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [formError, setFormError] = useState("");
   const debouncedSearch = useDebouncedValue(search, 300);
@@ -87,12 +101,15 @@ export default function UsersPage() {
     limit,
     sortBy,
     sortOrder,
+    statusFilter === "ALL" ? undefined : statusFilter === "ACTIVE",
+    superAdmin && tenantFilter !== "ALL" ? tenantFilter : undefined,
   );
   const createMutation = useCreateUser();
   const updateMutation = useUpdateUser();
-  const deleteMutation = useDeleteUser();
+  const statusMutation = useUpdateUserStatus();
   const users = usersQuery.data?.items ?? [];
   const total = usersQuery.data?.total ?? 0;
+  if (!usersQuery.isPending && !usersQuery.isError && page > Math.max(1, Math.ceil(total / limit))) setPage(Math.max(1, Math.ceil(total / limit)));
   const mutationPending = createMutation.isPending || updateMutation.isPending;
 
   function toggleSort(field: string) {
@@ -119,6 +136,7 @@ export default function UsersPage() {
   }
 
   function openEdit(user: UserRecord) {
+    if (isRecordInactive(user) || getUserTenant(user, tenants).isActive === false) return;
     setEditingUser(user);
     setFormError("");
     setDialogOpen(true);
@@ -134,17 +152,14 @@ export default function UsersPage() {
 
     try {
       if (editingUser) {
+        const latest = users.find((item) => userId(item) === userId(editingUser)) ?? editingUser;
+        if (isRecordInactive(latest) || getUserTenant(latest, tenants).isActive === false) throw new Error("Inactive records are read-only. Activate the user or tenant before editing.");
         const id = userId(editingUser);
         if (!id) throw new Error("This user record has no ID and cannot be updated.");
-        await updateMutation.mutateAsync({
-          id,
-          payload: {
-            fullName,
-            email,
-            role,
-            ...(password ? { password } : {}),
-          },
+        const payload = changedFields({ fullName, email, role, ...(password ? { password } : {}) }, {
+          fullName: editingUser.fullName.trim(), email: editingUser.email.trim(), role: editingUser.role,
         });
+        if (Object.keys(payload).length) await updateMutation.mutateAsync({ id, payload });
         highlightItem(id);
       } else {
         const payload: CreateUserPayload = { fullName, email, role, password };
@@ -157,14 +172,14 @@ export default function UsersPage() {
     }
   }
 
-  async function confirmDeactivateUser() {
-    if (!deactivatingUser) return;
-    const id = userId(deactivatingUser);
+  async function confirmUserStatus() {
+    if (!statusUser || getUserTenant(statusUser, tenants).isActive === false) return;
+    const id = userId(statusUser);
     if (!id) return;
     try {
-      await deleteMutation.mutateAsync(id);
+      await statusMutation.mutateAsync({ id, isActive: isRecordInactive(statusUser) });
       highlightItem(id);
-      setDeactivatingUser(null);
+      setStatusUser(null);
     } catch {
       // The API interceptor displays the request error.
     }
@@ -202,6 +217,19 @@ export default function UsersPage() {
                 ))}
               </SelectContent>
             </Select>
+            {superAdmin && <>
+              <label htmlFor="users-tenant-filter" className="text-xs font-medium text-slate-600">Tenant</label>
+              <Select value={tenantFilter} onValueChange={(value) => { setTenantFilter(value); setPage(1); }}>
+                <SelectTrigger id="users-tenant-filter" size="sm" disabled={tenantsQuery.isPending} className="w-48 max-w-full rounded-lg text-xs"><SelectValue placeholder="All tenants" /></SelectTrigger>
+                <SelectContent className="max-h-72 bg-white"><SelectItem value="ALL">All tenants</SelectItem>{tenants.map((tenant) => <SelectItem key={tenant.id} value={tenant.id}>{tenant.name}{tenant.isActive ? "" : " (Inactive)"}</SelectItem>)}</SelectContent>
+              </Select>
+              {tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-primary hover:underline">Retry loading tenants</button>}
+            </>}
+            <label htmlFor="users-status-filter" className="text-xs font-medium text-slate-600">Status</label>
+            <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
+              <SelectTrigger id="users-status-filter" size="sm" className="w-36 rounded-lg text-xs"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-white"><SelectItem value="ALL">All statuses</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
+            </Select>
           </div>
         }
         showFilters={showFilters}
@@ -209,6 +237,8 @@ export default function UsersPage() {
         onResetFilters={() => {
           setSearch("");
           setRoleFilter("ALL");
+          setStatusFilter("ALL");
+          setTenantFilter("ALL");
           setPage(1);
         }}
         resultCount={total}
@@ -271,16 +301,20 @@ export default function UsersPage() {
                             <span className="block truncate text-sm font-bold text-[#0f172a]">{user.fullName}</span>
                             <span className="mt-0.5 block break-all text-xs text-[#64748b]">{user.email}</span>
                             <span className="mt-1.5 block text-[11px] text-[#64748b]">{user.phoneNumber || "No contact number"}</span>
-                            <span className="mt-2 block"><RoleBadge role={user.role} /></span>
+                            <span className="mt-2 flex flex-wrap items-center gap-2"><RoleBadge role={user.role} /><ActivityStateText active={!isRecordInactive(user)} /></span>
+                            {superAdmin && <span className="mt-2 block text-xs text-slate-500">Tenant: {getUserTenant(user, tenants).name}</span>}
+                            {getUserTenant(user, tenants).isActive === false && <span className="mt-1 block text-xs text-slate-400">Tenant inactive. Activate the tenant first.</span>}
                           </span>
                         </div>
                         <ManagementRowActions
+                          activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}
                           editLabel={`Edit ${user.fullName}`}
-                          actionLabel="Deactivate user"
-                          actionDestructive
-                          disabled={deleteMutation.isPending}
+                          readOnly={isRecordInactive(user) || getUserTenant(user, tenants).isActive === false}
+                          actionLabel={getUserTenant(user, tenants).isActive === false ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
+                          actionDestructive={!isRecordInactive(user)}
+                          disabled={statusMutation.isPending}
                           onEdit={() => openEdit(user)}
-                          onAction={() => setDeactivatingUser(user)}
+                          onAction={() => setStatusUser(user)}
                         />
                       </DataTableMobileCard>
                     );
@@ -296,7 +330,9 @@ export default function UsersPage() {
                         <TableHead className="px-4 py-4">
                           <SortableColumnHeader label="Email" field="email" sortBy={sortBy} sortOrder={sortOrder} onSort={toggleSort} />
                         </TableHead>
+                        {superAdmin && <TableHead className="px-4 py-4 font-semibold">Tenant</TableHead>}
                         <TableHead className="px-4 py-4 font-semibold">Role</TableHead>
+                        <TableHead className="px-4 py-4 font-semibold">Status</TableHead>
                         <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
@@ -316,15 +352,19 @@ export default function UsersPage() {
                               </div>
                             </TableCell>
                             <TableCell className="px-4 py-4 text-xs text-[#475569]">{user.email}</TableCell>
+                            {superAdmin && <TableCell className="px-4 py-4">{getUserTenant(user, tenants).name}</TableCell>}
                             <TableCell className="px-4 py-4"><RoleBadge role={user.role} /></TableCell>
+                            <TableCell className="px-4 py-4"><ActivityStateText active={!isRecordInactive(user)} />{getUserTenant(user, tenants).isActive === false && <p className="mt-1 text-[10px] text-slate-400">Tenant inactive. Activate the tenant first.</p>}</TableCell>
                             <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
                               <ManagementRowActions
+                                activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}
                                 editLabel={`Edit ${user.fullName}`}
-                                actionLabel="Deactivate user"
-                                actionDestructive
-                                disabled={deleteMutation.isPending}
+                                readOnly={isRecordInactive(user) || getUserTenant(user, tenants).isActive === false}
+                          actionLabel={getUserTenant(user, tenants).isActive === false ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
+                                actionDestructive={!isRecordInactive(user)}
+                                disabled={statusMutation.isPending}
                                 onEdit={() => openEdit(user)}
-                                onAction={() => setDeactivatingUser(user)}
+                                onAction={() => setStatusUser(user)}
                               />
                             </TableCell>
                           </TableRow>
@@ -374,17 +414,18 @@ export default function UsersPage() {
         </DialogPrimitive.Portal>
       </DialogPrimitive.Root>
       <ManagementConfirmDialog
-        open={Boolean(deactivatingUser)}
-        title="Deactivate user?"
+        open={Boolean(statusUser)}
+        title={isRecordInactive(statusUser) ? "Activate user?" : "Deactivate user?"}
         description={
-          deactivatingUser
-            ? `${deactivatingUser.fullName} will lose access to this workspace.`
+          statusUser
+            ? `${statusUser.fullName} will ${isRecordInactive(statusUser) ? "regain" : "lose"} access to this workspace.`
             : ""
         }
-        confirmLabel="Deactivate user"
-        pending={deleteMutation.isPending}
-        onCancel={() => setDeactivatingUser(null)}
-        onConfirm={() => void confirmDeactivateUser()}
+        confirmLabel={isRecordInactive(statusUser) ? "Activate user" : "Deactivate user"}
+        destructive={!isRecordInactive(statusUser)}
+        pending={statusMutation.isPending}
+        onCancel={() => setStatusUser(null)}
+        onConfirm={() => void confirmUserStatus()}
       />
     </>
   );

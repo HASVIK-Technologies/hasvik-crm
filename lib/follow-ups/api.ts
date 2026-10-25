@@ -1,5 +1,7 @@
-import axios from "axios";
 import { apiClient } from "@/lib/api/api-client";
+import { getBusinessRaw } from "@/lib/business/api";
+import { isRecordInactive } from "@/lib/records/activity";
+import { isFollowUpReadOnly } from "@/lib/follow-ups/actions";
 import type {
   CreateFollowUpPayload,
   FollowUpFilters,
@@ -197,7 +199,7 @@ function extractMeetingLink(value: Record<string, unknown>) {
 }
 
 export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
-  const business = (value.business ?? {}) as Record<string, unknown>;
+  const business = (value.business ?? (typeof value.businessId === "object" ? value.businessId : {}) ?? {}) as Record<string, unknown>;
   const assignee = (value.assignee ?? value.assignedTo ?? {}) as Record<
     string,
     unknown
@@ -245,7 +247,10 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
 
   return {
     id: String(value._id ?? value.id ?? ""),
-    businessId: String(value.businessId ?? business._id ?? business.id ?? ""),
+    isActive: typeof value.isActive === "boolean" ? value.isActive : undefined,
+    businessIsActive: typeof business.isActive === "boolean" ? business.isActive : typeof value.businessIsActive === "boolean" ? value.businessIsActive : undefined,
+    tenantIsActive: typeof value.tenantIsActive === "boolean" ? value.tenantIsActive : undefined,
+    businessId: String(typeof value.businessId === "string" ? value.businessId : business._id ?? business.id ?? ""),
     businessName: String(
       value.businessName ?? business.name ?? "Unknown business",
     ),
@@ -343,6 +348,7 @@ export async function getFollowUps(
  * Body: CreateFollowUpDto { businessId, assignedTo, type, scheduledAt, reminderInMinutes?, notes? }
  */
 export async function createFollowUp(payload: CreateFollowUpPayload) {
+  await assertBusinessActive(payload.businessId);
   const reminderMinutes =
     payload.reminderInMinutes !== undefined
       ? payload.reminderInMinutes
@@ -379,6 +385,8 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
   if (!id) {
     throw new Error("Follow-up ID is required for update.");
   }
+  await assertFollowUpWritable(id);
+  if (payload.businessId) await assertBusinessActive(payload.businessId);
 
   const reminderMinutes =
     payload.reminderInMinutes !== undefined
@@ -396,48 +404,18 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
   if (payload.notes !== undefined) {
     const trimmedNotes = payload.notes.trim();
     body.notes = trimmedNotes;
-    body.note = trimmedNotes;
-    body.description = trimmedNotes;
-    body.comment = trimmedNotes;
   }
 
-  // Update details via PATCH /api/follow-ups/{id} (or fallback PATCH /api/follow-ups)
   let updatedRecord: Record<string, unknown> = {};
   if (Object.keys(body).length > 0) {
-    try {
-      const response = await apiClient.patch(`/follow-ups/${id}`, body);
-      updatedRecord = unwrap<Record<string, unknown>>(response.data) || {};
-    } catch (error) {
-      if (
-        axios.isAxiosError(error) &&
-        (error.response?.status === 404 || error.response?.status === 405)
-      ) {
-        const response = await apiClient.patch("/follow-ups", {
-          ...body,
-          id,
-          followUpId: id,
-        });
-        updatedRecord = unwrap<Record<string, unknown>>(response.data) || {};
-      } else {
-        throw error;
-      }
-    }
+    const response = await apiClient.patch(`/follow-ups/${id}`, body);
+    updatedRecord = unwrap<Record<string, unknown>>(response.data) || {};
   }
 
-  // If status is specified as COMPLETED or CANCELLED, call status endpoint
   if (payload.status === "COMPLETED" || payload.status === "CANCELLED") {
-    try {
-      const statusResponse = await updateFollowUpStatus({
-        id,
-        status: payload.status,
-      });
-      if (payload.notes !== undefined) {
-        statusResponse.notes = payload.notes.trim();
-      }
-      return statusResponse;
-    } catch {
-      // If status update failed (e.g. already completed), but details were updated, return updated details
-    }
+    const statusResponse = await updateFollowUpStatus({ id, status: payload.status });
+    if (payload.notes !== undefined) statusResponse.notes = payload.notes.trim();
+    return statusResponse;
   }
 
   const item = toFollowUpItem({
@@ -481,6 +459,8 @@ export async function updateFollowUpStatus(
     typeof payloadOrId === "string"
       ? { id: payloadOrId, status: status ?? "COMPLETED" }
       : payloadOrId;
+
+  await assertFollowUpWritable(payload.id);
 
   const response = await apiClient.patch(`/follow-ups/${payload.id}/status`, {
     status: payload.status,
@@ -554,6 +534,17 @@ export async function getFollowUpStatuses(signal?: AbortSignal) {
 export async function getFollowUp(id: string, signal?: AbortSignal) {
   const response = await apiClient.get(`/follow-ups/${id}`, { signal });
   return toFollowUpItem(unwrap<Record<string, unknown>>(response.data));
+}
+
+async function assertBusinessActive(id: string) {
+  if (!id) throw new Error("A business is required to change follow-ups.");
+  if (isRecordInactive(await getBusinessRaw(id))) throw new Error("This business is inactive. Activate it before changing follow-ups.");
+}
+
+export async function assertFollowUpWritable(id: string) {
+  const followUp = await getFollowUp(id);
+  if (isFollowUpReadOnly(followUp)) throw new Error("This follow-up is read-only because it or its parent record is inactive.");
+  await assertBusinessActive(followUp.businessId);
 }
 
 /**

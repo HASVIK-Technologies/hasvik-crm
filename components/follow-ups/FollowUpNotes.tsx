@@ -1,5 +1,9 @@
 "use client";
 
+import { useBusinessQuery } from "@/hooks/use-businesses";
+import { useFollowUpQuery } from "@/hooks/use-follow-ups";
+import { isRecordInactive } from "@/lib/records/activity";
+import { isFollowUpReadOnly } from "@/lib/follow-ups/actions";
 import { useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
@@ -52,7 +56,7 @@ function NoteEntry({ note }: { note: FollowUpNote }) {
   );
 }
 
-function FollowUpNotesPanel({ followUpId }: { followUpId: string }) {
+function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: string; readOnly?: boolean }) {
   const [page, setPage] = useState(1);
   const [content, setContent] = useState("");
   const notesQuery = useFollowUpNotesQuery(followUpId, page);
@@ -67,7 +71,7 @@ function FollowUpNotesPanel({ followUpId }: { followUpId: string }) {
   const addNote = async (event: FormEvent<HTMLFormElement>) => {
     event.preventDefault();
     const trimmedContent = content.trim();
-    if (!trimmedContent || createMutation.isPending) return;
+    if (readOnly || !trimmedContent || createMutation.isPending) return;
 
     try {
       await createMutation.mutateAsync({
@@ -101,7 +105,7 @@ function FollowUpNotesPanel({ followUpId }: { followUpId: string }) {
         </div>
       </div>
 
-      <form onSubmit={(event) => void addNote(event)} className="mt-6">
+      {!readOnly && <form onSubmit={(event) => void addNote(event)} className="mt-6">
         <label htmlFor={`follow-up-note-${followUpId}`} className="sr-only">
           Add a note to this follow-up
         </label>
@@ -131,7 +135,7 @@ function FollowUpNotesPanel({ followUpId }: { followUpId: string }) {
             Add note
           </SaveButton>
         </div>
-      </form>
+      </form>}
 
       <div className="mt-6 border-t border-slate-200 pt-5">
         {notesQuery.isLoading ? (
@@ -210,8 +214,8 @@ function FollowUpNotesPanel({ followUpId }: { followUpId: string }) {
   );
 }
 
-export function FollowUpNotes({ followUpId }: { followUpId: string }) {
-  return <FollowUpNotesPanel followUpId={followUpId} />;
+export function FollowUpNotes({ followUpId, readOnly = false }: { followUpId: string; readOnly?: boolean }) {
+  return <FollowUpNotesPanel followUpId={followUpId} readOnly={readOnly} />;
 }
 
 export function FollowUpNotesDialog({
@@ -219,12 +223,17 @@ export function FollowUpNotesDialog({
   followUpName,
   open,
   onOpenChange,
+  readOnly = false,
 }: {
+  readOnly?: boolean;
   followUpId?: string;
   followUpName: string;
   open: boolean;
   onOpenChange: (open: boolean) => void;
 }) {
+  const followUpQuery = useFollowUpQuery(open ? followUpId : undefined);
+  const businessQuery = useBusinessQuery(open ? followUpQuery.data?.businessId : undefined);
+  const cannotWrite = readOnly || !businessQuery.data || isRecordInactive(businessQuery.data) || Boolean(followUpQuery.data && isFollowUpReadOnly(followUpQuery.data));
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
@@ -250,7 +259,7 @@ export function FollowUpNotesDialog({
               </button>
             </DialogPrimitive.Close>
           </header>
-          <div className="px-4 py-4 sm:px-6">{followUpId && open && <FollowUpNotesPanel key={followUpId} followUpId={followUpId} />}</div>
+          <div className="px-4 py-4 sm:px-6">{followUpId && open && <FollowUpNotesPanel key={followUpId} followUpId={followUpId} readOnly={cannotWrite} />}</div>
           <footer className="sticky bottom-0 z-10 flex justify-end border-t border-slate-200 bg-white px-4 py-3 sm:px-6"><DialogPrimitive.Close asChild><Button type="button" variant="outline" className="rounded-none">Close</Button></DialogPrimitive.Close></footer>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>

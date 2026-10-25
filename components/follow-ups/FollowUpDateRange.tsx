@@ -1,12 +1,12 @@
 "use client";
 
-import { CalendarDays, X } from "lucide-react";
+import { CalendarDays } from "lucide-react";
 import {
   Popover,
   PopoverContent,
   PopoverTrigger,
 } from "@/components/ui/popover";
-import { Input } from "@/components/ui/input";
+import Calendar from "@/components/common/Calendar";
 
 interface FollowUpDateRangeProps {
   from?: string;
@@ -51,20 +51,12 @@ export default function FollowUpDateRange({
                 : "Date range"}
             </span>
           </span>
-          {from || to ? (
-            <X
-              className="size-3.5 text-[#94a3b8]"
-              onClick={(event) => {
-                event.stopPropagation();
-                onChange("", "");
-              }}
-            />
-          ) : null}
+
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        className="w-72 space-y-4 border border-slate-200 bg-white p-4 shadow-xl"
+        collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto space-y-4 border border-slate-200 bg-white p-3 shadow-xl"
       >
         <div>
           <p className="text-xs font-bold text-slate-900">Date range</p>
@@ -110,28 +102,8 @@ export default function FollowUpDateRange({
             </button>
           ))}
         </div>
-        <div className="grid grid-cols-2 gap-3">
-          <label className="space-y-1 text-[11px] font-semibold text-[#475569]">
-            From
-            <Input
-              type="date"
-              value={from}
-              max={to || undefined}
-              onChange={(event) => onChange(event.target.value, to)}
-              className="mt-1 h-9 text-xs"
-            />
-          </label>
-          <label className="space-y-1 text-[11px] font-semibold text-[#475569]">
-            To
-            <Input
-              type="date"
-              value={to}
-              min={from || undefined}
-              onChange={(event) => onChange(from, event.target.value)}
-              className="mt-1 h-9 text-xs"
-            />
-          </label>
-        </div>
+        <Calendar mode="range" defaultMonth={from ? new Date(`${from}T00:00:00`) : undefined} selected={from ? { from: new Date(`${from}T00:00:00`), to: to ? new Date(`${to}T00:00:00`) : undefined } : undefined} onSelect={(range) => onChange(range?.from ? inputDate(range.from) : "", range?.to ? inputDate(range.to) : "")} />
+        <button type="button" onClick={() => onChange("", "")} className="h-9 w-full rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Clear dates</button>
       </PopoverContent>
     </Popover>
   );

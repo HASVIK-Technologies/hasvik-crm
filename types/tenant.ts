@@ -9,6 +9,17 @@ export interface Tenant {
   updatedAt?: string;
 }
 
+export interface TenantQueryParams {
+  page?: number;
+  limit?: number;
+  isActive?: boolean;
+}
+
+export interface TenantsPage {
+  data: Tenant[];
+  total: number;
+}
+
 export interface TenantResponse {
   _id?: string;
   id?: string;

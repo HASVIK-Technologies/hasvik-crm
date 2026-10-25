@@ -1,4 +1,5 @@
 import { apiClient } from "@/lib/api/api-client";
+import { assertFollowUpWritable } from "@/lib/follow-ups/api";
 import type { FollowUpNote, FollowUpNotesPage } from "@/types/follow-up";
 
 const NOTES_PAGE_SIZE = 10;
@@ -162,6 +163,7 @@ export async function createFollowUpNote(
   followUpId: string,
   content: string,
 ): Promise<FollowUpNote> {
+  await assertFollowUpWritable(followUpId);
   const response = await apiClient.post("/notes", {
     entityType: "FOLLOW_UP",
     entityId: followUpId,

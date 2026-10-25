@@ -1,5 +1,8 @@
 "use client";
 
+import { useBusinessQuery } from "@/hooks/use-businesses";
+import { isRecordInactive } from "@/lib/records/activity";
+import { isFollowUpReadOnly } from "@/lib/follow-ups/actions";
 import { Controller, useForm } from "react-hook-form";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { Loader2, Search, X } from "lucide-react";
@@ -67,6 +70,8 @@ function NextFollowUpForm({
   onOpenChange: (open: boolean) => void;
 }) {
   const mutation = useCreateFollowUp();
+  const businessQuery = useBusinessQuery(followUp.businessId);
+  const readOnly = !businessQuery.data || isRecordInactive(businessQuery.data) || isFollowUpReadOnly(followUp);
   const {
     control,
     handleSubmit,
@@ -84,6 +89,7 @@ function NextFollowUpForm({
   });
 
   const submit = async (values: NextFollowUpFormValues) => {
+    if (readOnly) return;
     const scheduledAt = fromDateTimeLocalValue(values.scheduledAt);
     if (!scheduledAt || !values.assignee?.id || !values.type) return;
 
@@ -126,7 +132,8 @@ function NextFollowUpForm({
         </DialogPrimitive.Close>
       </header>
 
-      <form
+      {readOnly && <p className="px-5 pb-5 text-xs text-slate-500">An active business is required to schedule another follow-up.</p>}
+      {!readOnly && <form
         onSubmit={handleSubmit(submit)}
         noValidate
         className="space-y-5 px-5 sm:px-6"
@@ -260,7 +267,7 @@ function NextFollowUpForm({
           </DialogPrimitive.Close>
           <SaveButton
             type="submit"
-            disabled={isPending}
+            disabled={isPending || readOnly}
             className="gap-2"
           >
             {isPending ? (
@@ -272,7 +279,7 @@ function NextFollowUpForm({
             )}
           </SaveButton>
         </footer>
-      </form>
+      </form>}
     </>
   );
 }

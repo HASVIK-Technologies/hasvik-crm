@@ -55,6 +55,9 @@ export async function updateBusinessCategory(
   id: string,
   payload: Partial<CategoryPayload>,
 ) {
+  const current = await apiClient.get<BusinessCategory | { data: BusinessCategory }>(`/categories/${id}`);
+  const category = "data" in current.data ? current.data.data : current.data;
+  if (category.isActive === false) throw new Error("Activate this category before editing it.");
   const response = await apiClient.patch<BusinessCategory>(
     `/categories/${id}`,
     payload,

@@ -309,6 +309,7 @@ export default function BusinessDetailsFollowups({
         onConfirm={() => void cancelFollowUp()}
       />
       <FollowUpNotesDialog
+        readOnly={readOnly}
         followUpId={notesFollowUp?.id}
         followUpName={
           notesFollowUp

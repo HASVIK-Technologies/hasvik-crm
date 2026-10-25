@@ -7,6 +7,8 @@ export const businessQueryKeys = {
   list: (params: BusinessQueryParams) =>
     [...businessQueryKeys.lists(), params] as const,
   detail: (id?: string) => [...businessQueryKeys.all, "detail", id] as const,
+  activities: () => [...businessQueryKeys.all, "activity"] as const,
+  activity: (id: string) => [...businessQueryKeys.activities(), id] as const,
   kpis: (params: BusinessKpiParams) =>
     [...businessQueryKeys.all, "kpis", params] as const,
   statuses: () => [...businessQueryKeys.all, "statuses"] as const,

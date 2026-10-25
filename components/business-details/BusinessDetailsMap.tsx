@@ -1,12 +1,10 @@
 // BusinessDetailsMap.tsx
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from "react";
-import { Button } from "@/components/ui/button";
-import { ExternalLink, MapPin } from "lucide-react";
+import { MapPin } from "lucide-react";
 import {
   getLocationData,
   getMapEmbedUrl,
-  openGoogleMapsOnce,
 } from "@/lib/business/location";
 
 // Re-export getMapEmbedUrl for backwards compatibility

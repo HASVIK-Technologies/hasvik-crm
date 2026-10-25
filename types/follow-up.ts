@@ -18,6 +18,9 @@ export interface FollowUpOption {
 }
 
 export interface FollowUpItem {
+  isActive?: boolean;
+  businessIsActive?: boolean;
+  tenantIsActive?: boolean;
   id: string;
   businessId: string;
   businessName: string;

@@ -1,5 +1,7 @@
 "use client";
 
+import { changedFields } from "@/lib/forms/changed-fields";
+
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
 import { useMemo, useState, type FormEvent } from "react";
@@ -44,6 +46,7 @@ import {
 import { useSubscriptionPlansQuery, useSubscriptionsQuery } from "@/hooks/use-subscriptions";
 import {
   useTenantsQuery,
+  useTenantsPageQuery,
   useUpdateTenant,
   useUpdateTenantStatus,
 } from "@/hooks/use-tenants";
@@ -215,14 +218,13 @@ export default function TenantManagementPage() {
   const user = useAuthStore((state) => state.user);
   const hasvikAdmin = isSuperAdmin(user);
   const tenantAdmin = isTenantAdmin(user);
-  const tenantsQuery = useTenantsQuery(true, user?.userId);
   const subscriptionsQuery = useSubscriptionsQuery(user?.userId);
   const plansQuery = useSubscriptionPlansQuery();
   const updateMutation = useUpdateTenant();
   const statusMutation = useUpdateTenantStatus();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<TenantFilter>("ALL");
-  const [sortValue, setSortValue] = useState("name:asc");
+  const [filter, setFilter] = useState<TenantFilter>("ACTIVE");
+  const [sortValue, setSortValue] = useState("default");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
   const [showStats, setShowStats] = useState(true);
@@ -233,17 +235,20 @@ export default function TenantManagementPage() {
   const [tenantToToggle, setTenantToToggle] = useState<Tenant | null>(null);
   const [notice, setNotice] = useState("");
   const [operationError, setOperationError] = useState("");
-  const tenants = useMemo(
-    () => tenantsQuery.data ?? [],
-    [tenantsQuery.data],
-  );
+  const needsCollection = Boolean(search.trim()) || sortValue !== "default" || filter === "ALL";
+  const collectionQuery = useTenantsQuery(needsCollection, user?.userId);
+  const pageQuery = useTenantsPageQuery({ page, limit, isActive: filter === "ACTIVE" }, !needsCollection, user?.userId);
+  const activeCountQuery = useTenantsPageQuery({ page: 1, limit: 1, isActive: true }, showStats, user?.userId);
+  const inactiveCountQuery = useTenantsPageQuery({ page: 1, limit: 1, isActive: false }, showStats, user?.userId);
+  const tenantsQuery = needsCollection ? collectionQuery : pageQuery;
+  const tenants = useMemo(() => needsCollection ? collectionQuery.data ?? [] : pageQuery.data?.data ?? [], [needsCollection, collectionQuery.data, pageQuery.data]);
   const tenantsPending = tenantsQuery.isPending;
   const tenantsError = tenantsQuery.isError;
   const tenantsErrorValue = tenantsQuery.error;
   const subscriptions = subscriptionsQuery.data ?? [];
   const plans = plansQuery.data ?? [];
-  const activeCount = tenants.filter((tenant) => tenant.isActive).length;
-  const inactiveCount = tenants.length - activeCount;
+  const activeCount = activeCountQuery.data?.total ?? 0;
+  const inactiveCount = inactiveCountQuery.data?.total ?? 0;
   const filteredTenants = useMemo(() => {
     const query = search.trim().toLowerCase();
     const matching = tenants.filter((tenant) => {
@@ -256,6 +261,7 @@ export default function TenantManagementPage() {
           .includes(query)
       );
     });
+    if (sortValue === "default") return matching;
     const [field, direction] = sortValue.split(":");
     return matching.sort((a, b) => {
       const comparison =
@@ -265,9 +271,14 @@ export default function TenantManagementPage() {
       return direction === "desc" ? -comparison : comparison;
     });
   }, [filter, search, sortValue, tenants]);
-  const pagedTenants = filteredTenants.slice((page - 1) * limit, page * limit);
+  const total = needsCollection ? filteredTenants.length : pageQuery.data?.total ?? 0;
+  const pagedTenants = needsCollection ? filteredTenants.slice((page - 1) * limit, page * limit) : tenants;
+  if (!tenantsQuery.isPending && !tenantsQuery.isError && page > Math.max(1, Math.ceil(total / limit))) {
+    setPage(Math.max(1, Math.ceil(total / limit)));
+  }
 
   function openEdit(tenant: Tenant) {
+    if (!tenant.isActive) return;
     setEditingTenant(tenant);
     setDraft({
       name: tenant.name,
@@ -285,17 +296,15 @@ export default function TenantManagementPage() {
 
   async function saveTenant(event: FormEvent<HTMLFormElement>) {
     event.preventDefault();
-    if (!editingTenant || !draft) return;
+    if (!editingTenant || !draft || (tenants.find((tenant) => tenant.id === editingTenant.id) ?? editingTenant).isActive === false) return;
     setFormError("");
     try {
-      await updateMutation.mutateAsync({
-        id: editingTenant.id,
-        payload: {
-          name: draft.name.trim(),
-          contactEmail: draft.contactEmail.trim(),
-          contactPhone: draft.contactPhone.trim(),
-        },
+      const payload = changedFields({
+        name: draft.name.trim(), contactEmail: draft.contactEmail.trim(), contactPhone: draft.contactPhone.trim(),
+      }, {
+        name: editingTenant.name.trim(), contactEmail: (editingTenant.contactEmail ?? "").trim(), contactPhone: (editingTenant.contactPhone ?? "").trim(),
       });
+      if (Object.keys(payload).length) await updateMutation.mutateAsync({ id: editingTenant.id, payload });
       highlightItem(editingTenant.id);
       closeEditor();
       setNotice("Tenant details saved.");
@@ -364,14 +373,14 @@ export default function TenantManagementPage() {
         onToggleFilters={() => setShowFilters((visible) => !visible)}
         onResetFilters={() => {
           setSearch("");
-          setFilter("ALL");
+          setFilter("ACTIVE");
           setPage(1);
         }}
-        resultCount={filteredTenants.length}
+        resultCount={total}
         showStats={showStats}
         stats={
           <KpiCards items={[
-              { label: "Tenants", value: tenants.length, icon: UsersRound, tone: "text-primary bg-blue-50" },
+              { label: "Tenants", value: activeCount + inactiveCount, icon: UsersRound, tone: "text-primary bg-blue-50" },
               { label: "Active tenants", value: activeCount, icon: Check, tone: "text-emerald-700 bg-emerald-50" },
               { label: "Inactive tenants", value: inactiveCount, icon: X, tone: "text-slate-600 bg-slate-100" },
             ].map((item, index) => ({ ...item, tone: (["blue", "green", "slate"] as const)[index] }))} />
@@ -382,6 +391,10 @@ export default function TenantManagementPage() {
               label: "Refresh tenants",
               onSelect: () => {
                 void tenantsQuery.refetch();
+                if (showStats) {
+                  void activeCountQuery.refetch();
+                  void inactiveCountQuery.refetch();
+                }
               },
               icon: <RefreshCw className="size-4" />,
             }}
@@ -395,9 +408,10 @@ export default function TenantManagementPage() {
           <DataTableShell>
             <ListTableToolbar
               title={hasvikAdmin ? "Tenant workspaces" : "My workspace"}
-              total={filteredTenants.length}
+              total={total}
               sortValue={sortValue}
               sortOptions={[
+                { value: "default", label: "Default order" },
                 { value: "name:asc", label: "Name A–Z" },
                 { value: "name:desc", label: "Name Z–A" },
                 { value: "createdAt:desc", label: "Newest first" },
@@ -542,7 +556,7 @@ export default function TenantManagementPage() {
                   </Table>
                 </div>
                 <ListPagination
-                  total={filteredTenants.length}
+                  total={total}
                   page={page}
                   limit={limit}
                   onPageChange={setPage}
@@ -621,6 +635,8 @@ function TenantActions({
 }) {
   return (
     <ManagementRowActions
+      readOnly={tenant.isActive === false}
+      activity={{ entityType: "TENANT", entityId: tenant.id, name: tenant.name }}
       editLabel={`Edit ${tenant.name}`}
       {...(canManageTenants
         ? {

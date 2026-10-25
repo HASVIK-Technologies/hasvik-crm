@@ -1,5 +1,7 @@
 "use client";
 
+import DatePicker from "@/components/common/DatePicker";
+
 import { useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Eye, MoreVertical, Pencil, Plus, Trash2, X } from "lucide-react";
@@ -172,7 +174,7 @@ export default function FollowUpCalendar({
             <OutlinedButton size="sm" onClick={goToToday}>Today</OutlinedButton>
             <div className="flex items-center border border-slate-300 bg-white">
               <Tooltip><TooltipTrigger asChild><button type="button" aria-label="Previous month" onClick={() => changeMonth(-1)} className="flex size-9 items-center justify-center border-r border-slate-200 text-slate-600 hover:bg-slate-50"><ChevronLeft className="size-4" /></button></TooltipTrigger><TooltipContent>Previous month</TooltipContent></Tooltip>
-              <input type="month" value={month} onChange={(event) => selectMonth(event.target.value)} aria-label="Select calendar month" className="h-9 min-w-40 border-0 bg-white px-3 text-xs font-bold text-slate-700 outline-none" />
+              <input type="month" value={month} onChange={(event) => selectMonth(event.target.value)} aria-label="Select calendar month" className="h-9 min-w-0 max-w-full border-0 bg-white px-3 text-xs font-bold text-slate-700 outline-none" />
               <Tooltip><TooltipTrigger asChild><button type="button" aria-label="Next month" onClick={() => changeMonth(1)} className="flex size-9 items-center justify-center border-l border-slate-200 text-slate-600 hover:bg-slate-50"><ChevronRight className="size-4" /></button></TooltipTrigger><TooltipContent>Next month</TooltipContent></Tooltip>
             </div>
           </div>
@@ -263,22 +265,16 @@ export default function FollowUpCalendar({
         <div className="xl:hidden">
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-slate-200 bg-slate-50 px-3 py-2.5">
             <button type="button" onClick={() => changeWeek(-1)} aria-label="Previous week" className="flex size-9 items-center justify-center border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"><ChevronLeft className="size-4" /></button>
-            <label className="flex min-w-0 flex-col items-center justify-center border border-slate-300 bg-white px-2 py-1 text-center">
+            <div className="flex min-w-0 flex-col items-center justify-center border border-slate-300 bg-white px-2 py-1 text-center">
               <span className="text-[9px] font-bold uppercase tracking-wide text-slate-400">Select week</span>
-              <input
-                type="date"
-                value={dateKey(mobileWeekStart)}
-                onChange={(event) => selectWeek(event.target.value)}
-                aria-label="Select week"
-                className="h-6 max-w-full border-0 bg-transparent text-xs font-bold text-slate-700 outline-none"
-              />
+              <DatePicker value={dateKey(mobileWeekStart)} onChange={selectWeek} label="Select week" />
               <p className="text-xs font-bold text-slate-700">
                 {new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(mobileDays[0])}
                 {" – "}
                 {new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short", year: "numeric" }).format(mobileDays[6])}
               </p>
               <span className="sr-only">Week view</span>
-            </label>
+            </div>
             <button type="button" onClick={() => changeWeek(1)} aria-label="Next week" className="flex size-9 items-center justify-center border border-slate-200 bg-white text-slate-600 hover:bg-slate-50"><ChevronRight className="size-4" /></button>
             <button type="button" onClick={goToToday} className="col-span-3 justify-self-center text-[11px] font-bold text-brand-blue hover:underline">Go to this week</button>
           </div>

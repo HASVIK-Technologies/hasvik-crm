@@ -1,4 +1,8 @@
 import { apiClient } from "@/lib/api/api-client";
+import { getTenant } from "@/lib/tenants/api";
+import { getBusinessRaw } from "@/lib/business/api";
+import { getSubscriptionTenantId } from "@/lib/subscriptions/access";
+import { isRecordInactive } from "@/lib/records/activity";
 import type {
   CreateSubscriptionPayload,
   RenewSubscriptionPayload,
@@ -47,6 +51,7 @@ export async function getSubscriptions(
 export async function createSubscription(
   payload: CreateSubscriptionPayload,
 ): Promise<Subscription> {
+  if (!(await getTenant(payload.tenantId)).isActive) throw new Error("Activate this tenant before changing its subscriptions.");
   const response = await apiClient.post<Subscription | { data: Subscription }>(
     "/subscriptions",
     payload,
@@ -60,6 +65,7 @@ export async function updateSubscriptionStatus(
 ): Promise<Subscription> {
   const subscriptionId = id.trim();
   if (!subscriptionId) throw new Error("Subscription ID is required to update its status.");
+  await assertSubscriptionWritable(subscriptionId);
   const response = await apiClient.patch<Subscription | { data: Subscription }>(
     `/subscriptions/${encodeURIComponent(subscriptionId)}/status`,
     { status },
@@ -73,9 +79,19 @@ export async function renewSubscription(
 ): Promise<Subscription> {
   const subscriptionId = id.trim();
   if (!subscriptionId) throw new Error("Subscription ID is required to renew a subscription.");
+  await assertSubscriptionWritable(subscriptionId);
   const response = await apiClient.patch<Subscription | { data: Subscription }>(
     `/subscriptions/${encodeURIComponent(subscriptionId)}/renew`,
     payload,
   );
   return unwrap(response.data);
+}
+
+async function assertSubscriptionWritable(id: string) {
+  const response = await apiClient.get<Subscription | { data: Subscription }>(`/subscriptions/${id}`);
+  const subscription = unwrap(response.data);
+  const tenantId = getSubscriptionTenantId(subscription);
+  if (tenantId && !(await getTenant(tenantId)).isActive) throw new Error("Activate this tenant before changing its subscriptions.");
+  const businessId = typeof subscription.businessId === "string" ? subscription.businessId : subscription.businessId?._id ?? subscription.businessId?.id ?? subscription.business?._id ?? subscription.business?.id;
+  if (businessId && isRecordInactive(await getBusinessRaw(businessId))) throw new Error("Activate this business before changing its subscriptions.");
 }

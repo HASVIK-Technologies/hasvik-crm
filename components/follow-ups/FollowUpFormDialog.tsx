@@ -1,7 +1,12 @@
 "use client";
 
+import { useBusinessQuery } from "@/hooks/use-businesses";
+import { isFollowUpReadOnly } from "@/lib/follow-ups/actions";
+import { isRecordInactive } from "@/lib/records/activity";
+import { toFollowUpUpdatePayload } from "@/lib/follow-ups/update-payload";
+
 import { useEffect } from "react";
-import { Controller, useForm } from "react-hook-form";
+import { Controller, useForm, useWatch } from "react-hook-form";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { Loader2, Search, X } from "lucide-react";
 import { toast } from "sonner";
@@ -19,8 +24,9 @@ import {
   fromDateTimeLocalValue,
   toDateTimeLocalValue,
   validateFutureDateTime,
+  validateEditedDateTime,
 } from "@/lib/forms/date-time";
-import { parseReminderToMinutes } from "@/lib/follow-ups/api";
+import { minutesToReminder, parseReminderToMinutes } from "@/lib/follow-ups/api";
 import {
   FOLLOW_UP_REMINDER_OPTIONS,
   type FollowUpItem,
@@ -60,17 +66,14 @@ function getDefaultValues(
   initialScheduledAt?: string,
 ): FormValues {
   if (mode === "edit" && followUp) {
-    const isPast =
-      followUp.scheduledAt &&
-      new Date(followUp.scheduledAt).getTime() < Date.now() - 60_000;
     return {
       business: { id: followUp.businessId, label: followUp.businessName },
       assignee: followUp.assignedToId
         ? { id: followUp.assignedToId, label: followUp.assignedToName }
         : null,
-      scheduledAt: isPast ? "" : toDateTimeLocalValue(followUp.scheduledAt),
+      scheduledAt: toDateTimeLocalValue(followUp.scheduledAt),
       type: (followUp.type as FollowUpType) || "CALL",
-      reminder: followUp.reminder ?? "",
+      reminder: followUp.reminder ?? minutesToReminder(followUp.reminderInMinutes) ?? "",
     };
   }
   return {
@@ -102,11 +105,17 @@ export default function FollowUpFormDialog({
     mode: "onChange",
   });
 
+  const selectedBusiness = useWatch({ control, name: "business" });
+  const businessQuery = useBusinessQuery(open ? followUp?.businessId ?? initialBusiness?.id ?? selectedBusiness?.id : undefined);
+  const inactiveSelection = isRecordInactive(businessQuery.data) || Boolean(followUp && isFollowUpReadOnly(followUp));
+  const readOnly = !businessQuery.data || inactiveSelection;
+
   useEffect(() => {
     if (open) reset(getDefaultValues(mode, initialBusiness, followUp, initialScheduledAt));
   }, [mode, open, initialBusiness, initialScheduledAt, followUp, reset]);
 
   const submit = async (values: FormValues) => {
+    if (readOnly) { toast.error("Select an active business before saving a follow-up."); return; }
     const scheduledAt = fromDateTimeLocalValue(values.scheduledAt);
     const business = mode === "edit"
       ? followUp && { id: followUp.businessId, label: followUp.businessName }
@@ -119,14 +128,18 @@ export default function FollowUpFormDialog({
     try {
       if (mode === "edit") {
         if (!followUp) return;
-        await updateMutation.mutateAsync({
-          id: followUp.id,
-          businessId: followUp.businessId,
+        const updates = toFollowUpUpdatePayload({
           assignedTo: values.assignee.id,
           type: values.type,
-          scheduledAt,
-          reminderInMinutes: parseReminderToMinutes(values.reminder),
+          reminderInMinutes: parseReminderToMinutes(values.reminder) ?? 0,
+          scheduledAt: values.scheduledAt,
+        }, {
+          assignedTo: followUp.assignedToId ?? "",
+          type: followUp.type,
+          scheduledAt: followUp.scheduledAt,
+          reminderInMinutes: followUp.reminderInMinutes ?? parseReminderToMinutes(followUp.reminder) ?? 0,
         });
+        if (Object.keys(updates).length) await updateMutation.mutateAsync({ id: followUp.id, ...updates });
         toast.success("Follow-up updated successfully.");
       } else {
         await createMutation.mutateAsync({
@@ -175,7 +188,8 @@ export default function FollowUpFormDialog({
               </button>
             </DialogPrimitive.Close>
           </header>
-          <form onSubmit={handleSubmit(submit)} noValidate className="space-y-5 px-5 sm:px-6">
+          {inactiveSelection && <p role="status" className="mx-5 mb-4 border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">This business is inactive. Activate it from business details before making changes.</p>}
+          {!inactiveSelection && <form onSubmit={handleSubmit(submit)} noValidate className="space-y-5 px-5 sm:px-6">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
                 Business {!isEdit && !initialBusiness && <span className="text-red-500">*</span>}
@@ -221,7 +235,7 @@ export default function FollowUpFormDialog({
                   name="scheduledAt"
                   rules={{
                     required: "Follow-up date and time is required.",
-                    validate: validateFutureDateTime,
+                    validate: (value) => mode === "edit" ? validateEditedDateTime(value, followUp?.scheduledAt) : validateFutureDateTime(value),
                   }}
                   render={({ field }) => (
                     <DateTimePicker
@@ -296,13 +310,13 @@ export default function FollowUpFormDialog({
               <DialogPrimitive.Close asChild>
                 <Button type="button" variant="outline">Cancel</Button>
               </DialogPrimitive.Close>
-              <SaveButton type="submit" disabled={isPending}>
+              <SaveButton type="submit" disabled={isPending || readOnly}>
                 {isPending ? (
                   <><Loader2 className="mr-2 size-4 animate-spin" />{isEdit ? "Saving..." : "Adding..."}</>
                 ) : isEdit ? "Save changes" : "Add Follow-up"}
               </SaveButton>
             </footer>
-          </form>
+          </form>}
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

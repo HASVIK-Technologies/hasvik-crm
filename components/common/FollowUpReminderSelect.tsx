@@ -35,7 +35,10 @@ export default function FollowUpReminderSelect({
   showIcon = false,
   emptyOption,
 }: FollowUpReminderSelectProps) {
-  const allOptions = emptyOption ? [emptyOption, ...options] : options;
+  const baseOptions = emptyOption ? [emptyOption, ...options] : options;
+  const allOptions = value && !baseOptions.some((option) => option.value === value)
+    ? [...baseOptions, { value, label: value }]
+    : baseOptions;
 
   return (
     <Select value={value || undefined} onValueChange={onChange}>

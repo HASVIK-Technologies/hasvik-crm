@@ -1,5 +1,7 @@
 "use client";
 
+import { useBusinessQuery } from "@/hooks/use-businesses";
+import { isRecordInactive } from "@/lib/records/activity";
 import { useParams } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast } from "sonner";
@@ -37,11 +39,13 @@ export default function FollowUpDetailsPage() {
     if (id) useFollowUpListStore.getState().highlightFollowUp(id, true);
   }, [id]);
   const query = useFollowUpQuery(id);
+  const businessQuery = useBusinessQuery(query.data?.businessId);
+  const readOnly = !businessQuery.data || isRecordInactive(businessQuery.data);
   const cancelMutation = useCancelFollowUp();
   const completeMutation = useCompleteFollowUp();
 
   const handleCancel = async () => {
-    if (!id || !query.data || !canCancelFollowUp(query.data)) return;
+    if (readOnly || !id || !query.data || !canCancelFollowUp(query.data)) return;
     try {
       await cancelMutation.mutateAsync(id);
       useFollowUpListStore.getState().highlightFollowUp(id, true);
@@ -53,7 +57,7 @@ export default function FollowUpDetailsPage() {
   };
 
   const handleComplete = async () => {
-    if (!id || !query.data || !canCompleteFollowUp(query.data)) return;
+    if (readOnly || !id || !query.data || !canCompleteFollowUp(query.data)) return;
     try {
       await completeMutation.mutateAsync(id);
       useFollowUpListStore.getState().highlightFollowUp(id, true);
@@ -96,8 +100,10 @@ export default function FollowUpDetailsPage() {
           />
         }
         content={
-          <div className="py-16 text-center text-sm text-red-600">
-            Unable to load this follow-up.
+          <div role="alert" className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center">
+            <p className="text-sm font-semibold text-slate-800">Unable to load this follow-up.</p>
+            <p className="mt-2 text-xs text-slate-500">Try again to load the latest details.</p>
+            <button type="button" onClick={() => void query.refetch()} disabled={query.isFetching} className="mt-4 text-sm font-semibold text-primary hover:underline disabled:opacity-50">{query.isFetching ? "Retrying?" : "Try again"}</button>
           </div>
         }
       />
@@ -117,11 +123,12 @@ export default function FollowUpDetailsPage() {
                 label: followUp.businessName,
                 href: `/businesses/${followUp.businessId}`,
               },
+              { label: "Follow-up details" },
             ]}
           />
         }
-        actions={
-          canCreateNextFollowUp(followUp) ? (
+
+        actions={readOnly ? undefined : canCreateNextFollowUp(followUp) ? (
             <Actions
               primary={{
                 label: "Next Follow-Up",
@@ -171,11 +178,8 @@ export default function FollowUpDetailsPage() {
                   : []),
               ]}
             />
-          ) : null
-        }
-        content={
-          <FollowUpDetails followUp={followUp} />
-        }
+          ) : null}
+        content={<FollowUpDetails followUp={followUp} />}
       />
       <FollowUpEditDialog
         followUp={followUp}

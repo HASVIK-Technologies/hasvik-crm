@@ -1,44 +1,13 @@
+import { collectTenantPages, normalizeTenant, readTenantsPage, type TenantCollectionResponse } from "@/lib/tenants/pagination";
 import { apiClient } from "@/lib/api/api-client";
 import type {
   CreateTenantPayload,
   Tenant,
   TenantResponse,
+  TenantQueryParams,
+  TenantsPage,
   UpdateTenantPayload,
 } from "@/types/tenant";
-
-type TenantCollectionResponse =
-  | TenantResponse[]
-  | { data: TenantResponse[] };
-
-function normalizeTenant(tenant: TenantResponse): Tenant {
-  const id = tenant.id ?? tenant._id;
-  if (
-    typeof id !== "string" ||
-    typeof tenant.name !== "string" ||
-    typeof tenant.isActive !== "boolean"
-  ) {
-    throw new Error("The tenants service returned an invalid tenant.");
-  }
-
-  return {
-    id,
-    name: tenant.name,
-    fullName: tenant.fullName,
-    contactEmail: tenant.contactEmail,
-    contactPhone: tenant.contactPhone,
-    isActive: tenant.isActive,
-    createdAt: tenant.createdAt,
-    updatedAt: tenant.updatedAt,
-  };
-}
-
-function readTenants(payload: TenantCollectionResponse): Tenant[] {
-  const items = Array.isArray(payload) ? payload : payload?.data;
-  if (!Array.isArray(items)) {
-    throw new Error("The tenants service returned an invalid list.");
-  }
-  return items.map(normalizeTenant);
-}
 
 export async function getTenant(
   id: string,
@@ -55,11 +24,18 @@ export async function getTenant(
   return normalizeTenant(tenant);
 }
 
-export async function getTenants(signal?: AbortSignal): Promise<Tenant[]> {
+export async function getTenantsPage(params: TenantQueryParams, signal?: AbortSignal): Promise<TenantsPage> {
   const response = await apiClient.get<TenantCollectionResponse>("/tenants", {
+    params: { page: 1, limit: 10, ...params },
     signal,
   });
-  return readTenants(response.data);
+  return readTenantsPage(response.data);
+}
+
+// Global search/sorting and subscription name lookups need the complete set.
+// Query both statuses explicitly: Swagger documents an active-only default.
+export async function getTenants(signal?: AbortSignal): Promise<Tenant[]> {
+  return collectTenantPages((params) => getTenantsPage(params, signal));
 }
 
 export async function createTenant(payload: CreateTenantPayload): Promise<void> {
@@ -70,6 +46,7 @@ export async function updateTenant(
   id: string,
   payload: UpdateTenantPayload,
 ): Promise<void> {
+  if (!(await getTenant(id)).isActive) throw new Error("Activate this tenant before editing it.");
   await apiClient.patch(`/tenants/${id}`, payload);
 }
 

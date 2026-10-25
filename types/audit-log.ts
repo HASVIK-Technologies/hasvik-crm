@@ -1,3 +1,5 @@
+export type AuditEntityType = "TENANT" | "BUSINESS" | "FOLLOWUP" | "CATEGORY" | "SUBSCRIPTION" | "USER";
+
 export type AuditAction =
   | "CREATE"
   | "UPDATE"

@@ -4,16 +4,19 @@ import {
   createTenant,
   getTenant,
   getTenants,
+  getTenantsPage,
   updateTenant,
   updateTenantStatus,
 } from "@/lib/tenants/api";
-import type { CreateTenantPayload, UpdateTenantPayload } from "@/types/tenant";
+import type { CreateTenantPayload, UpdateTenantPayload, TenantQueryParams } from "@/types/tenant";
 
 export const tenantQueryKeys = {
   all: ["tenants"] as const,
   detail: (id: string) => [...tenantQueryKeys.all, "detail", id] as const,
   list: (scopeKey?: string) =>
     [...tenantQueryKeys.all, "list", scopeKey ?? "all"] as const,
+  page: (params: TenantQueryParams, scopeKey?: string) =>
+    [...tenantQueryKeys.list(scopeKey), "page", params] as const,
 };
 
 export function useTenantQuery(id?: string, enabled = true) {
@@ -24,6 +27,14 @@ export function useTenantQuery(id?: string, enabled = true) {
       if (!id) throw new Error("A tenant ID is required to load workspace details.");
       return getTenant(id, signal);
     },
+  });
+}
+
+export function useTenantsPageQuery(params: TenantQueryParams, enabled = true, scopeKey?: string) {
+  return useQuery({
+    queryKey: tenantQueryKeys.page(params, scopeKey),
+    enabled,
+    queryFn: ({ signal }) => getTenantsPage(params, signal),
   });
 }
 

@@ -1,6 +1,6 @@
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { createFollowUpNote, getFollowUpNotes } from "@/lib/notes/api";
-import { followUpQueryKeys } from "@/lib/query/query-keys";
+import { businessQueryKeys, followUpQueryKeys } from "@/lib/query/query-keys";
 
 export function useFollowUpNotesQuery(
   followUpId: string,
@@ -30,6 +30,9 @@ export function useCreateFollowUpNote() {
       queryClient.invalidateQueries({
         queryKey: followUpQueryKeys.notesForFollowUp(variables.followUpId),
       });
+      // Notes only carry a follow-up ID; refresh any visible business timeline.
+      queryClient.invalidateQueries({ queryKey: businessQueryKeys.activities() });
+      queryClient.invalidateQueries({ queryKey: [...followUpQueryKeys.all, "activity", variables.followUpId] });
     },
   });
 }

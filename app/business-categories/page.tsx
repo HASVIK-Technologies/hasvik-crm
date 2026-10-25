@@ -1,5 +1,7 @@
 "use client";
 
+import { changedFields } from "@/lib/forms/changed-fields";
+
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
 import { useMemo, useState, type FormEvent } from "react";
@@ -107,6 +109,7 @@ export default function BusinessCategoriesPage() {
   }
 
   function openEdit(category: BusinessCategory) {
+    if (category.isActive === false) return;
     setEditingCategory(category);
     setFormError("");
     setDialogOpen(true);
@@ -122,9 +125,11 @@ export default function BusinessCategoriesPage() {
 
     try {
       if (editingCategory) {
+        if ((categories.find((item) => categoryId(item) === categoryId(editingCategory)) ?? editingCategory).isActive === false) throw new Error("Activate the category before editing it.");
         const id = categoryId(editingCategory);
         if (!id) throw new Error("This category has no ID and cannot be updated.");
-        await updateMutation.mutateAsync({ id, payload });
+        const updates = changedFields(payload, { name: editingCategory.name.trim(), description: (editingCategory.description ?? "").trim() });
+        if (Object.keys(updates).length) await updateMutation.mutateAsync({ id, payload: updates });
         highlightItem(id);
       } else {
         await createMutation.mutateAsync(payload);
@@ -221,6 +226,8 @@ export default function BusinessCategoriesPage() {
                       </div>
                     </div>
                     <ManagementRowActions
+      readOnly={category.isActive === false}
+                      activity={{ entityType: "CATEGORY", entityId: categoryId(category), name: category.name }}
                       editLabel={`Edit ${category.name}`}
                       actionLabel={active ? "Deactivate category" : "Activate category"}
                       actionDestructive={active}
@@ -264,6 +271,8 @@ export default function BusinessCategoriesPage() {
                         </TableCell>
                         <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
                           <ManagementRowActions
+      readOnly={category.isActive === false}
+                            activity={{ entityType: "CATEGORY", entityId: categoryId(category), name: category.name }}
                             editLabel={`Edit ${category.name}`}
                             actionLabel={active ? "Deactivate category" : "Activate category"}
                             actionDestructive={active}

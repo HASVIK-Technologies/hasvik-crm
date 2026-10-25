@@ -1,5 +1,5 @@
 import { apiClient } from "@/lib/api/api-client";
-import type { AuditLogItem, AuditLogsResult } from "@/types/audit-log";
+import type { AuditEntityType, AuditLogItem, AuditLogsResult } from "@/types/audit-log";
 
 type UnknownRecord = Record<string, unknown>;
 
@@ -30,14 +30,15 @@ function toAuditLog(value: unknown, index: number): AuditLogItem {
   };
 }
 
-export async function getBusinessAuditLogs(
-  businessId: string,
+export async function getEntityAuditLogs(
+  entityType: AuditEntityType,
+  entityId: string,
   signal?: AbortSignal,
 ): Promise<AuditLogsResult> {
   const response = await apiClient.get<unknown>("/audit-logs", {
     params: {
-      entityType: "BUSINESS",
-      entityId: businessId,
+      entityType,
+      entityId,
       page: 1,
       limit: 30,
       sortOrder: "desc",
@@ -61,4 +62,10 @@ export async function getBusinessAuditLogs(
     logs: rawLogs.map(toAuditLog),
     total: typeof payload.total === "number" ? payload.total : rawLogs.length,
   };
+}
+
+export async function getAuditLog(id: string, signal?: AbortSignal): Promise<AuditLogItem> {
+  const response = await apiClient.get<unknown>(`/audit-logs/${encodeURIComponent(id)}`, { signal });
+  const payload = asRecord(response.data);
+  return toAuditLog(payload.data ?? payload, 0);
 }

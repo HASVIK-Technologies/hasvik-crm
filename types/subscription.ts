@@ -28,6 +28,7 @@ export interface SubscriptionPlan {
 }
 
 export interface SubscriptionReference {
+  isActive?: boolean;
   _id?: string;
   id?: string;
   name?: string;

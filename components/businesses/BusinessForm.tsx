@@ -52,6 +52,7 @@ import {
   type BusinessFormValues,
 } from "@/lib/business/form-types";
 import { normalizeHttpUrl } from "@/lib/business/url-validation";
+import { toBusinessUpdatePayload } from "@/lib/business/update-payload";
 import type { FollowUpType } from "@/types/follow-up";
 import { toDateTimeLocalValue } from "@/lib/forms/date-time";
 import { useBusinessListStore } from "@/store/business-list-store";
@@ -391,6 +392,11 @@ export default function BusinessForm({
           return;
         }
 
+        if (data.isActive === false || data.status?.toUpperCase() === "INACTIVE") {
+          router.replace(`/businesses/${targetId}`);
+          return;
+        }
+
         const phoneNumbers =
           data.phoneNumbers && data.phoneNumbers.length > 0
             ? data.phoneNumbers.map((p) => ({ value: p.number || "" }))
@@ -403,13 +409,12 @@ export default function BusinessForm({
 
         // The API may return `category` as an object ({ _id, name }) or
         // as a plain id string, so handle both.
-        const rawCategory = data.category as unknown;
+        const rawCategory = (data.categoryId ?? data.category) as unknown;
         const categoryObj =
           typeof rawCategory === "object" && rawCategory !== null
             ? (rawCategory as { _id?: string; name?: string })
             : null;
         const categoryId =
-          data.categoryId ??
           categoryObj?._id ??
           (typeof rawCategory === "string" ? rawCategory : "");
 
@@ -453,7 +458,7 @@ export default function BusinessForm({
           pincode: data.pincode || "",
           address: data.address || "",
           status:
-            data.status || (data.isActive === false ? "Inactive" : "Active"),
+            data.status || "Active",
           locationUrl: data.location?.url || "",
           phoneNumbers,
           whatsappNumbers,
@@ -507,7 +512,7 @@ export default function BusinessForm({
     return () => {
       isMounted = false;
     };
-  }, [draftKey, targetId, reset]);
+  }, [draftKey, targetId, reset, router]);
 
   const requestNavigation = (href: string) => {
     if (hasUnsavedChangesRef.current) {
@@ -753,7 +758,10 @@ export default function BusinessForm({
 
     try {
       if (isEditMode && targetId) {
-        await updateMutation.mutateAsync({ id: targetId, payload });
+        const updatedValues = toBusinessUpdatePayload(values, draftBaseline);
+        if (Object.keys(updatedValues).length > 0) {
+          await updateMutation.mutateAsync({ id: targetId, payload: updatedValues });
+        }
         setDraftBaseline(values);
         setSuppressDraftPersistence(true);
         clearBusinessFormDraft(draftKey);

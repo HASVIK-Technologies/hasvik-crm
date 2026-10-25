@@ -41,8 +41,14 @@ export default function AssignBusinessDialog({
 
   const handleSubmit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
+    if (business?.isActive === false || business?.status === "Inactive") return;
     if (!business || !assignee?.id) {
       setError("Select a responsible person.");
+      return;
+    }
+
+    if (assignee.id === business.assignedToId) {
+      handleOpenChange(false);
       return;
     }
 
@@ -59,7 +65,7 @@ export default function AssignBusinessDialog({
   };
 
   return (
-    <DialogPrimitive.Root open={open} onOpenChange={handleOpenChange}>
+    <DialogPrimitive.Root open={open && business?.isActive !== false && business?.status !== "Inactive"} onOpenChange={handleOpenChange}>
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-950/35 backdrop-blur-[2px]" />
         <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-slate-200 bg-white shadow-2xl outline-none">
@@ -119,7 +125,7 @@ export default function AssignBusinessDialog({
                   Cancel
                 </Button>
               </DialogPrimitive.Close>
-              <SaveButton type="submit" disabled={mutation.isPending}>
+              <SaveButton type="submit" disabled={mutation.isPending || !assignee?.id || assignee.id === business?.assignedToId}>
                 {mutation.isPending ? (
                   <span className="flex items-center gap-2">
                     <Loader2 className="size-4 animate-spin" /> Assigning...

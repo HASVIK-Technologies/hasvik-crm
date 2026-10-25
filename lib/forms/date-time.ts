@@ -1,9 +1,14 @@
-export function toDateTimeLocalValue(value?: string): string {
+export function toDateTimeLocalValue(value?: string | Date): string {
   if (!value) return "";
   const date = new Date(value);
   if (Number.isNaN(date.getTime())) return "";
-  date.setMinutes(date.getMinutes() - date.getTimezoneOffset());
-  return date.toISOString().slice(0, 16);
+  const pad = (part: number) => String(part).padStart(2, "0");
+  return `${date.getFullYear()}-${pad(date.getMonth() + 1)}-${pad(date.getDate())}T${pad(date.getHours())}:${pad(date.getMinutes())}`;
+}
+
+export function validateEditedDateTime(value: string, original?: string): true | string {
+  if (value && value === toDateTimeLocalValue(original) && fromDateTimeLocalValue(value)) return true;
+  return validateFutureDateTime(value);
 }
 
 export function fromDateTimeLocalValue(value: string): string | undefined {
@@ -16,8 +21,13 @@ export function fromDateTimeLocalValue(value: string): string | undefined {
   if (!normalized.includes("T") || !normalized.split("T")[1]?.trim()) {
     return undefined;
   }
-  const date = new Date(normalized);
-  return Number.isNaN(date.getTime()) ? undefined : date.toISOString();
+  const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})$/.exec(normalized);
+  if (!match) return undefined;
+  const [, year, month, day, hour, minute] = match.map(Number);
+  const date = new Date(year, month - 1, day, hour, minute);
+  // Reject impossible dates and DST gaps instead of silently rolling them over.
+  if (date.getFullYear() !== year || date.getMonth() !== month - 1 || date.getDate() !== day || date.getHours() !== hour || date.getMinutes() !== minute) return undefined;
+  return date.toISOString();
 }
 
 export function getCurrentDateLocalValue(): string {

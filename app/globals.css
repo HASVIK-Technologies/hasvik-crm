@@ -228,3 +228,16 @@
     display: none;
   }
 }
+
+/* Shared library calendar: viewport-sized cells and keyboard-visible focus. */
+.crm-calendar {
+  --rdp-accent-color: var(--primary);
+  --rdp-accent-background-color: #eff6ff;
+  --rdp-day-height: clamp(2rem, 10vw, 2.5rem);
+  --rdp-day-width: clamp(2rem, 10vw, 2.5rem);
+  --rdp-day_button-height: clamp(2rem, 10vw, 2.5rem);
+  --rdp-day_button-width: clamp(2rem, 10vw, 2.5rem);
+  font-size: 0.875rem;
+  margin-inline: auto;
+}
+.crm-calendar button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }

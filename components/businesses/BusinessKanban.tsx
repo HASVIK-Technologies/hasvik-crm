@@ -3,7 +3,8 @@
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import RecordLink from "@/components/common/RecordLink";
-import { ArrowDownUp, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Eye, GripVertical, MoreVertical, Pencil, UserRound, UserRoundCog } from "lucide-react";
+import { ArrowDownUp, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Eye, MoreVertical, Power, Pencil, UserRound, UserRoundCog } from "lucide-react";
+import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
 import ListPagination from "@/components/common/ListPagination";
 import PlainButton from "@/components/common/PlainButton";
 import OutlinedButton from "@/components/common/OutlinedButton";
@@ -20,7 +21,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { getLeadStatusVisual, STATUS_OPTIONS } from "@/lib/business/form-options";
 import { cn } from "@/lib/utils";
 import type { BusinessItem } from "@/types/business";
-import { useUpdateBusinessLeadStatus } from "@/hooks/use-businesses";
+import { useUpdateBusinessLeadStatus, useUpdateBusinessStatus } from "@/hooks/use-businesses";
 import { useBusinessHighlight } from "@/hooks/use-business-highlight";
 import { useBusinessListStore } from "@/store/business-list-store";
 import AssignBusinessDialog from "./AssignBusinessDialog";
@@ -50,6 +51,8 @@ export default function BusinessKanban({
 }) {
   const router = useRouter();
   const mutation = useUpdateBusinessLeadStatus();
+  const activationMutation = useUpdateBusinessStatus();
+  const [activatingBusiness, setActivatingBusiness] = useState<BusinessItem | null>(null);
   const { highlightBusiness, isBusinessHighlighted } = useBusinessHighlight();
   const setKanbanScrollLeft = useBusinessListStore(
     (state) => state.setKanbanScrollLeft,
@@ -65,8 +68,6 @@ export default function BusinessKanban({
   const [mobileStage, setMobileStage] = useState(STATUS_OPTIONS[0].value);
   const [assignmentBusiness, setAssignmentBusiness] = useState<BusinessItem | null>(null);
   const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
-  const firstResult = totalCount === 0 ? 0 : (currentPage - 1) * itemsPerPage + 1;
-  const lastResult = Math.min(currentPage * itemsPerPage, totalCount);
   const grouped = useMemo(
     () =>
       Object.fromEntries(
@@ -271,14 +272,15 @@ export default function BusinessKanban({
                     <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-sm" title={business.name}>{business.name}</RecordLink>
                     <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
                   </div>
-                  {business.status === "Active" && <DropdownMenu>
+                  <DropdownMenu>
                     <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}><PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-8 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                     <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(event) => event.stopPropagation()}>
                       <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
-                      <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem>
+                      {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
+                      <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
+                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-emerald-700"><Power className="size-4" />Activate business</DropdownMenuItem>}
                     </DropdownMenuContent>
-                  </DropdownMenu>}
+                  </DropdownMenu>
                 </div>
                 <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
                   {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
@@ -380,7 +382,7 @@ export default function BusinessKanban({
                             <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-base text-slate-700 hover:text-brand-blue" title={business.name}>{business.name}</RecordLink>
                             <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
                           </div>
-                          {business.status === "Active" && <DropdownMenu>
+                          <DropdownMenu>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}>
@@ -391,10 +393,11 @@ export default function BusinessKanban({
                             </Tooltip>
                             <DropdownMenuContent align="end" className="w-40 bg-white" onClick={(event) => event.stopPropagation()}>
                               <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
-                              <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem>
+                              {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
+                              <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
+                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-emerald-700"><Power className="size-4" />Activate business</DropdownMenuItem>}
                             </DropdownMenuContent>
-                          </DropdownMenu>}
+                          </DropdownMenu>
                         </div>
 
                         <div className="mt-3 space-y-2 border-t border-slate-100 pt-2.5 text-xs text-slate-600">
@@ -416,6 +419,7 @@ export default function BusinessKanban({
       </div>
 
       <ListPagination total={totalCount} page={currentPage} limit={itemsPerPage} onPageChange={onPageChange} onLimitChange={onItemsPerPageChange} />
+      <ManagementConfirmDialog open={Boolean(activatingBusiness)} title="Activate business?" description={`Activate ${activatingBusiness?.name ?? "this business"} to allow changes.`} confirmLabel="Activate business" destructive={false} pending={activationMutation.isPending} onCancel={() => setActivatingBusiness(null)} onConfirm={() => { if (activatingBusiness) activationMutation.mutate({ id: activatingBusiness.id, status: "Active" }, { onSuccess: () => setActivatingBusiness(null) }); }} />
       <AssignBusinessDialog
         business={assignmentBusiness}
         open={assignmentBusiness !== null}

@@ -1,5 +1,5 @@
-import axios from "axios";
 import { apiClient } from "@/lib/api/api-client";
+import { canUpdateRecord } from "@/lib/records/activity";
 import type {
   ApiBusiness,
   BusinessKpiParams,
@@ -61,25 +61,11 @@ async function updateBusinessRequest(
   id: string | number,
   payload: Record<string, unknown>,
 ): Promise<ApiBusiness> {
-  try {
-    const response = await apiClient.patch<ApiBusiness>(
-      `/businesses/${id}`,
-      payload,
-    );
-    return response.data;
-  } catch (error: unknown) {
-    if (
-      axios.isAxiosError(error) &&
-      (error.response?.status === 404 || error.response?.status === 405)
-    ) {
-      const response = await apiClient.put<ApiBusiness>(
-        `/businesses/${id}`,
-        payload,
-      );
-      return response.data;
-    }
-    throw error;
+  if (!canUpdateRecord(await getBusinessRaw(String(id)), payload)) {
+    throw new Error("This business is inactive. Activate it before editing.");
   }
+  const response = await apiClient.patch<ApiBusiness>(`/businesses/${id}`, payload);
+  return response.data;
 }
 
 export async function updateBusinessStatus(

@@ -19,7 +19,6 @@ import type {
   CreateFollowUpPayload,
   FollowUpFilters,
   FollowUpQueryFilters,
-  FollowUpItem,
   UpdateFollowUpPayload,
   UpdateFollowUpStatusPayload,
 } from "@/types/follow-up";
@@ -110,43 +109,10 @@ export function useUpdateFollowUp() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: UpdateFollowUpPayload) => updateFollowUp(payload),
-    onSuccess: (data, variables) => {
-      const id = variables.id || variables.followUpId;
-      if (id) {
-        queryClient.setQueryData(
-          followUpQueryKeys.detail(id),
-          (old: FollowUpItem | undefined) => {
-            const nextNotes =
-              variables.notes !== undefined
-                ? variables.notes.trim()
-                : (data?.notes ?? old?.notes);
-            if (!old) {
-              return {
-                ...data,
-                notes: nextNotes,
-              };
-            }
-            return {
-              ...old,
-              ...data,
-              notes: nextNotes,
-              reminder:
-                variables.reminder !== undefined
-                  ? variables.reminder
-                  : (data?.reminder ?? old.reminder),
-              type: variables.type || data?.type || old.type,
-              scheduledAt:
-                variables.scheduledAt || data?.scheduledAt || old.scheduledAt,
-            };
-          },
-        );
-      }
-      // Invalidate follow-up list and kpis queries without wiping out detail cache
-      queryClient.invalidateQueries({
-        predicate: (query) =>
-          query.queryKey[0] === followUpQueryKeys.all[0] &&
-          query.queryKey[1] !== "detail",
-      });
+    onSuccess: () => {
+      // PATCH responses can be partial. Refetch rather than overwriting cached
+      // business, owner, and contact fields with mapper defaults.
+      queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
       invalidateBusinessQueries(queryClient);
     },
   });

@@ -1,7 +1,9 @@
 "use client";
 
-import { MoreVertical, Pencil, Power, Trash2 } from "lucide-react";
+import { useState } from "react";
+import { History, MoreVertical, Pencil, Power, Trash2 } from "lucide-react";
 import TableActionButton from "@/components/common/TableActionButton";
+import { EntityActivityDialog, type EntityActivityTarget } from "@/components/common/EntityActivityButton";
 import { Button } from "@/components/ui/button";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import {
@@ -19,6 +21,8 @@ export default function ManagementRowActions({
   showEdit = true,
   onEdit,
   onAction,
+  activity,
+  readOnly = false,
 }: {
   editLabel: string;
   actionLabel?: string;
@@ -27,10 +31,16 @@ export default function ManagementRowActions({
   showEdit?: boolean;
   onEdit: () => void;
   onAction?: () => void;
+  activity?: EntityActivityTarget;
+  readOnly?: boolean;
 }) {
+  const [activityOpen, setActivityOpen] = useState(false);
+  const hasActivity = Boolean(activity?.entityId);
+  const hasAction = Boolean(actionLabel && onAction && (!readOnly || !actionDestructive));
   return (
     <div className="flex items-center justify-end gap-1.5">
-      {showEdit && (
+      {activity && <EntityActivityDialog {...activity} open={activityOpen} onOpenChange={setActivityOpen} />}
+      {showEdit && !readOnly && (
         <TableActionButton
           tooltip={editLabel}
           tone="brand"
@@ -40,7 +50,7 @@ export default function ManagementRowActions({
           <Pencil className="size-4" />
         </TableActionButton>
       )}
-      {actionLabel && onAction && (
+      {(hasActivity || hasAction) && (
         <DropdownMenu>
           <Tooltip>
             <TooltipTrigger asChild>
@@ -58,15 +68,16 @@ export default function ManagementRowActions({
             </TooltipTrigger>
             <TooltipContent side="top">More actions</TooltipContent>
           </Tooltip>
-          <DropdownMenuContent align="end" className="w-40 bg-white">
-            <DropdownMenuItem
+          <DropdownMenuContent align="end" className="w-40 bg-white" onCloseAutoFocus={(event) => { if (activityOpen) event.preventDefault(); }}>
+            {hasActivity && <DropdownMenuItem onSelect={() => setActivityOpen(true)} className="cursor-pointer gap-2 text-xs"><History className="size-3.5" /><span>View activity</span></DropdownMenuItem>}
+            {hasAction && <DropdownMenuItem
               onSelect={onAction}
               disabled={disabled}
               className={`cursor-pointer gap-2 text-xs ${actionDestructive ? "text-rose-700 focus:text-rose-700" : "text-emerald-700 focus:text-emerald-700"}`}
             >
               {actionDestructive ? <Trash2 className="size-3.5" /> : <Power className="size-3.5" />}
               <span>{actionLabel}</span>
-            </DropdownMenuItem>
+            </DropdownMenuItem>}
           </DropdownMenuContent>
         </DropdownMenu>
       )}
