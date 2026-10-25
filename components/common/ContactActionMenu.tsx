@@ -7,28 +7,15 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { cn } from "@/lib/utils";
 
-export interface ContactNumber {
-  number?: string;
-  name?: string;
-  type?: string;
-  isPrimary?: boolean;
-}
+import {
+  type ContactNumber,
+  normalizeNumbers,
+  labelFor,
+  getWhatsAppUrl,
+} from "@/lib/business/contact-numbers";
 
-function normalizeNumbers(values?: Array<ContactNumber | string>, fallback?: string) {
-  const seen = new Set<string>();
-  return [...(values ?? []), ...(fallback ? [fallback] : [])].flatMap((value) => {
-    const entry = typeof value === "string" ? { number: value } : value;
-    const number = String(entry.number ?? "").trim();
-    const digits = number.replace(/\D/g, "");
-    if (!digits || seen.has(digits)) return [];
-    seen.add(digits);
-    return [{ ...entry, number, digits }];
-  });
-}
-
-function labelFor(entry: ContactNumber, index: number) {
-  return entry.name || entry.type || (entry.isPrimary ? "Primary" : `Number ${index + 1}`);
-}
+export type { ContactNumber };
+export { normalizeNumbers, labelFor, getWhatsAppUrl };
 
 function ActionShell({ label, children }: { label: string; icon?: React.ReactNode; children: React.ReactNode; className?: string }) {
   return <Tooltip><TooltipTrigger asChild>{children}</TooltipTrigger><TooltipContent>{label}</TooltipContent></Tooltip>;
@@ -45,7 +32,7 @@ export function PhoneActionMenu({ numbers, fallback, className, onAction }: { nu
 export function WhatsAppActionMenu({ numbers, fallback, className, onAction }: { numbers?: Array<ContactNumber | string>; fallback?: string; className?: string; onAction?: () => void }) {
   const entries = normalizeNumbers(numbers, fallback);
   if (!entries.length) return null;
-  const url = (digits: string) => `https://wa.me/${digits.length === 10 ? `91${digits}` : digits}`;
+  const url = getWhatsAppUrl;
   const buttonClass = cn("flex size-8 items-center justify-center border border-transparent text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800", className);
   if (entries.length === 1) return <ActionShell label={`WhatsApp ${entries[0].number}`} icon={null}><a href={url(entries[0].digits)} target="_blank" rel="noopener noreferrer" onClick={onAction} aria-label={`WhatsApp ${entries[0].number}`} className={buttonClass}><WhatsAppIcon className="size-4" /></a></ActionShell>;
   return <DropdownMenu><ActionShell label="Choose a WhatsApp number" icon={null}><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label="Choose a WhatsApp number" className={buttonClass}><WhatsAppIcon className="size-4" /></PlainButton></DropdownMenuTrigger></ActionShell><DropdownMenuContent align="end" className="w-64 bg-white"><div className="border-b border-slate-100 px-3 py-2 text-[11px] font-bold uppercase tracking-wide text-slate-500">Message on WhatsApp</div>{entries.map((entry, index) => <DropdownMenuItem key={entry.digits} asChild className="gap-3"><a href={url(entry.digits)} target="_blank" rel="noopener noreferrer" onClick={onAction}><WhatsAppIcon className="size-4 text-emerald-700" /><span className="min-w-0 flex-1"><span className="block truncate text-sm font-semibold">{entry.number}</span><span className="block text-[11px] text-slate-500">{labelFor(entry, index)}</span></span></a></DropdownMenuItem>)}</DropdownMenuContent></DropdownMenu>;

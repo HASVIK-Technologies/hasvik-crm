@@ -67,7 +67,7 @@ export const STATE_OPTIONS = [
 // /businesses - sending anything else is rejected with a 400. Labels are
 // just the friendly text shown in the dropdown.
 export const STATUS_OPTIONS = [
-  { value: "NEW", label: "New Lead" },
+  { value: "NEW", label: "New" },
   { value: "CONTACTED", label: "Contacted" },
   { value: "PROPOSAL_AND_NEGOTIATION", label: "Proposal & Negotiation" },
   { value: "INTERESTED", label: "Interested" },
@@ -123,6 +123,7 @@ export function getLeadStatusVisual(status?: string | null) {
 
 export const LEAD_STATUS_DISPLAY_NAMES: Record<string, string> = {
   NEW: "New",
+  "NEW LEAD": "New",
   CONTACTED: "Contacted",
   INTERESTED: "Interested",
   PROPOSAL_AND_NEGOTIATION: "Proposal & Negotiation",
@@ -138,15 +139,15 @@ export function getLeadStatusLabel(status?: string | null): string {
 
   const upper = trimmed.toUpperCase();
 
+  if (LEAD_STATUS_DISPLAY_NAMES[upper]) {
+    return LEAD_STATUS_DISPLAY_NAMES[upper];
+  }
+
   const option = STATUS_OPTIONS.find(
     (opt) =>
       opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
   );
   if (option) return option.label;
-
-  if (LEAD_STATUS_DISPLAY_NAMES[upper]) {
-    return LEAD_STATUS_DISPLAY_NAMES[upper];
-  }
 
   return trimmed
     .split(/[_\s]+/)
@@ -166,12 +167,6 @@ export function formatLeadStatus(
 
   const upper = trimmed.toUpperCase();
 
-  const option = STATUS_OPTIONS.find(
-    (opt) =>
-      opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
-  );
-  if (option) return option.label;
-
   if (statusMap) {
     if (statusMap[trimmed] && statusMap[trimmed] !== trimmed) return statusMap[trimmed];
     if (statusMap[upper] && statusMap[upper] !== upper) return statusMap[upper];
@@ -182,6 +177,12 @@ export function formatLeadStatus(
   if (LEAD_STATUS_DISPLAY_NAMES[upper]) {
     return LEAD_STATUS_DISPLAY_NAMES[upper];
   }
+
+  const option = STATUS_OPTIONS.find(
+    (opt) =>
+      opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
+  );
+  if (option) return option.label;
 
   return trimmed
     .split(/[_\s]+/)
