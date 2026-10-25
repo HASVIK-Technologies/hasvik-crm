@@ -72,8 +72,10 @@ export function useUpdateBusinessLeadStatus() {
   return useMutation({
     mutationFn: ({ id, status }: { id: string | number; status: string }) =>
       updateBusinessData(String(id), { status }),
-    onSuccess: (_, variables) => {
-      useBusinessListStore.getState().highlightBusiness(variables.id);
+    onMutate: async (variables) => {
+      await queryClient.cancelQueries({ queryKey: businessQueryKeys.lists() });
+      const previousStages = queryClient.getQueriesData<BusinessesResult>({ queryKey: businessQueryKeys.lists() })
+        .map(([key, data]) => ({ key, stage: data?.businesses.find((item) => String(item.id) === String(variables.id))?.leadStatus }));
       queryClient.setQueriesData(
         { queryKey: businessQueryKeys.lists() },
         (oldData: BusinessesResult | undefined) => {
@@ -88,13 +90,21 @@ export function useUpdateBusinessLeadStatus() {
           };
         },
       );
-      queryClient.invalidateQueries({ queryKey: businessQueryKeys.all });
-      queryClient.invalidateQueries({
-        queryKey: businessQueryKeys.detail(String(variables.id)),
-      });
+      return { previousStages };
+    },
+    onSuccess: (_, variables) => {
+      useBusinessListStore.getState().highlightBusiness(variables.id);
       toast.success("Lead stage updated.");
     },
-    onError: (error) => {
+    onError: (error, variables, context) => {
+      // Restore only this field, preserving any other records or edits made meanwhile.
+      for (const { key, stage } of context?.previousStages ?? []) {
+        queryClient.setQueryData<BusinessesResult>(key, (data) => data ? {
+          ...data,
+          businesses: data.businesses.map((item) => String(item.id) === String(variables.id) && item.leadStatus === variables.status
+            ? { ...item, leadStatus: stage } : item),
+        } : data);
+      }
       const message = axios.isAxiosError<{ message?: string }>(error)
         ? error.response?.data?.message
         : error instanceof Error
@@ -102,6 +112,7 @@ export function useUpdateBusinessLeadStatus() {
           : undefined;
       toast.error(message || "Failed to update lead stage.");
     },
+    onSettled: () => queryClient.invalidateQueries({ queryKey: businessQueryKeys.all }),
   });
 }
 

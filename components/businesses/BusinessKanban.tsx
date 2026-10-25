@@ -1,6 +1,6 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import RecordLink from "@/components/common/RecordLink";
 import { ArrowDownUp, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Eye, MoreVertical, Power, Pencil, UserRound, UserRoundCog } from "lucide-react";
@@ -58,6 +58,34 @@ export default function BusinessKanban({
     (state) => state.setKanbanScrollLeft,
   );
   const boardScrollerRef = useRef<HTMLDivElement>(null);
+  const cardPositions = useRef(new Map<string, DOMRect>());
+  const captureCardPositions = useCallback(() => {
+    const positions = new Map<string, DOMRect>();
+    boardScrollerRef.current?.querySelectorAll<HTMLElement>("[data-business-item-id]").forEach((card) => {
+      positions.set(card.dataset.businessItemId!, card.getBoundingClientRect());
+    });
+    return positions;
+  }, []);
+
+  useLayoutEffect(() => {
+    const previous = cardPositions.current;
+    cardPositions.current = captureCardPositions();
+    if (window.matchMedia("(prefers-reduced-motion: reduce)").matches) return;
+    const animations: Animation[] = [];
+    boardScrollerRef.current?.querySelectorAll<HTMLElement>("[data-business-item-id]").forEach((card) => {
+      const before = previous.get(card.dataset.businessItemId!);
+      const after = cardPositions.current.get(card.dataset.businessItemId!);
+      if (!before || !after) return;
+      const x = before.left - after.left;
+      const y = before.top - after.top;
+      if (Math.abs(x) < 1 && Math.abs(y) < 1) return;
+      animations.push(card.animate([
+        { transform: `translate(${x}px, ${y}px)`, zIndex: 10 },
+        { transform: "translate(0, 0)", zIndex: 10 },
+      ], { duration: 260, easing: "cubic-bezier(0.2, 0.8, 0.2, 1)" }));
+    });
+    return () => animations.forEach((animation) => animation.cancel());
+  }, [businesses, captureCardPositions]);
   const [draggedId, setDraggedId] = useState<string | number | null>(null);
   const [overStage, setOverStage] = useState<string | null>(null);
   const [horizontalOffset, setHorizontalOffset] = useState(
@@ -108,11 +136,12 @@ export default function BusinessKanban({
   }, [businesses, updateScrollControls]);
 
   const moveToStage = (stage: string) => {
-    if (draggedId === null) return;
+    if (draggedId === null || mutation.isPending) return;
     const business = businesses.find((item) => String(item.id) === String(draggedId));
     setDraggedId(null);
     setOverStage(null);
-    if (!business || business.leadStatus?.toUpperCase() === stage) return;
+    if (!business || business.status !== "Active" || business.leadStatus?.toUpperCase() === stage) return;
+    cardPositions.current = captureCardPositions();
     mutation.mutate({ id: business.id, status: stage });
   };
 
@@ -331,11 +360,13 @@ export default function BusinessKanban({
                 key={stage.value}
                 aria-label={`${stage.label} stage`}
                 onDragOver={(event) => {
+                  if (draggedId === null || mutation.isPending) return;
                   event.preventDefault();
+                  event.dataTransfer.dropEffect = "move";
                   setOverStage(stage.value);
                 }}
                 onDragLeave={() => setOverStage(null)}
-                onDrop={() => moveToStage(stage.value)}
+                onDrop={(event) => { event.preventDefault(); moveToStage(stage.value); }}
                 className={cn(
                   "min-h-[360px] border border-slate-200 bg-slate-100/60 transition-colors",
                   overStage === stage.value && "border-brand-blue bg-blue-50/70",
@@ -352,7 +383,12 @@ export default function BusinessKanban({
                         key={business.id}
                         data-business-item-id={String(business.id)}
                         draggable={business.status === "Active" && !mutation.isPending}
-                        onDragStart={() => setDraggedId(business.id)}
+                        onDragStart={(event) => {
+                          event.dataTransfer.effectAllowed = "move";
+                          event.dataTransfer.setData("text/plain", String(business.id));
+                          event.dataTransfer.setDragImage(event.currentTarget, 24, 24);
+                          setDraggedId(business.id);
+                        }}
                         onDragEnd={() => {
                           setDraggedId(null);
                           setOverStage(null);
@@ -363,13 +399,14 @@ export default function BusinessKanban({
                           router.push(`/businesses/${business.id}`);
                         }}
                         className={cn(
-                          "group cursor-pointer border bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-all duration-500",
+                          "group relative border bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[border-color,background-color,box-shadow] duration-200",
+                          business.status === "Active" && !mutation.isPending && "cursor-grab [&_*]:cursor-grab active:cursor-grabbing active:[&_*]:cursor-grabbing",
                           isBusinessHighlighted(business.id)
                             ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20"
                             : "border-slate-200",
                           business.status === "Active" ? "hover:border-slate-300 hover:shadow-md" : "cursor-default opacity-60",
-                          String(draggedId) === String(business.id) && "opacity-40",
-                          mutation.isPending && String(mutation.variables?.id) === String(business.id) && "pointer-events-none opacity-70",
+                          String(draggedId) === String(business.id) && "ring-2 ring-brand-blue/30",
+                          mutation.isPending && String(mutation.variables?.id) === String(business.id) && "pointer-events-none ring-2 ring-brand-blue/20",
                         )}
                         aria-busy={mutation.isPending && String(mutation.variables?.id) === String(business.id)}
                       >
