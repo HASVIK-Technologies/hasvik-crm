@@ -321,8 +321,8 @@ export default function BusinessTable({
                       </p>
                       <div className="mt-1 flex items-center gap-1.5 text-xs text-[#64748b]">
                         <span>Lead status:</span>
-                        {getLeadStatusLabel(item.leadStatus) !== "-" ? (
-                          <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-[10px]" />
+                        {formatLeadStatusWithStatusOptions(item.leadStatus) !== "-" ? (
+                          <StatusBadge status={item.leadStatus || formatLeadStatusWithStatusOptions(item.leadStatus)} label={formatLeadStatusWithStatusOptions(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-[10px]" />
                         ) : (
                           <span className="text-[#94a3b8]">-</span>
                         )}
@@ -587,8 +587,8 @@ export default function BusinessTable({
 
                     {/* Lead Status */}
                     {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
-                      {getLeadStatusLabel(item.leadStatus) !== "-" ? (
-                        <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={getLeadStatusLabel(item.leadStatus)} />
+                      {formatLeadStatusWithStatusOptions(item.leadStatus) !== "-" ? (
+                        <StatusBadge status={item.leadStatus || formatLeadStatusWithStatusOptions(item.leadStatus)} label={formatLeadStatusWithStatusOptions(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={formatLeadStatusWithStatusOptions(item.leadStatus)} />
                       ) : (
                         <span className="text-[#94a3b8]">-</span>
                       )}
