@@ -2,11 +2,11 @@
 
 import { create } from "zustand";
 import type { FollowUpFilters } from "@/types/follow-up";
+import { savedFollowUpDate } from "@/lib/follow-ups/highlight";
 
 const initialFilters: FollowUpFilters = {
   page: 1,
   limit: 10,
-  search: "",
   businessId: "",
   businessName: "",
   assignedTo: "",
@@ -24,6 +24,7 @@ interface FollowUpListState extends FollowUpFilters {
   showStats: boolean;
   showFilters: boolean;
   highlightedFollowUpId: string | null;
+  highlightedFollowUpDate: string | null;
   highlightRevision: number;
   scrollToHighlightedFollowUp: boolean;
   setFilter: <K extends keyof FollowUpFilters>(
@@ -37,6 +38,7 @@ interface FollowUpListState extends FollowUpFilters {
   toggleStats: () => void;
   toggleFilters: () => void;
   highlightFollowUp: (id: string, scrollToItem?: boolean) => void;
+  highlightSavedFollowUp: (id: string, scheduledAt: string) => void;
   clearFollowUpHighlight: (revision: number) => void;
 }
 
@@ -47,6 +49,7 @@ export const useFollowUpListStore = create<FollowUpListState>((set) => ({
   showStats: true,
   showFilters: true,
   highlightedFollowUpId: null,
+  highlightedFollowUpDate: null,
   highlightRevision: 0,
   scrollToHighlightedFollowUp: false,
   setFilter: (key, value) =>
@@ -63,13 +66,24 @@ export const useFollowUpListStore = create<FollowUpListState>((set) => ({
   highlightFollowUp: (id, scrollToItem = false) =>
     set((state) => ({
       highlightedFollowUpId: id,
+      highlightedFollowUpDate: null,
       highlightRevision: state.highlightRevision + 1,
       scrollToHighlightedFollowUp: scrollToItem,
     })),
+  highlightSavedFollowUp: (id, scheduledAt) => set((state) => {
+    const date = savedFollowUpDate(scheduledAt);
+    return {
+      highlightedFollowUpId: id || null,
+      highlightedFollowUpDate: date,
+      highlightRevision: state.highlightRevision + 1,
+      scrollToHighlightedFollowUp: true,
+      ...(state.view === "calendar" && date ? { calendarMonth: date.slice(0, 7) } : {}),
+    };
+  }),
   clearFollowUpHighlight: (revision) =>
     set((state) =>
       state.highlightRevision === revision
-        ? { highlightedFollowUpId: null, scrollToHighlightedFollowUp: false }
+        ? { highlightedFollowUpId: null, highlightedFollowUpDate: null, scrollToHighlightedFollowUp: false }
         : state,
     ),
 }));

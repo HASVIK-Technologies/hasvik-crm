@@ -141,18 +141,20 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
   const publicPath = isPublicPath(pathname);
-  const sessionQuery = useAuthSession(!publicPath);
+  const sessionQuery = useAuthSession(!publicPath || pathname === "/");
   useTokenRefresh();
   const logoutMutation = useLogout();
   const authStatus = useAuthStore((state) => state.status);
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
+  const restoreBlocked = useAuthStore((state) => state.restoreBlocked);
+  const loggingOut = useAuthStore((state) => state.isLoggingOut);
   const pageDetailsForPath = getPageDetails(pathname);
   const tenantAdmin = isTenantAdmin(user);
   const hasvikAdmin = isSuperAdmin(user);
   const tenantQuery = useTenantQuery(
     user?.tenantId,
-    !publicPath && !hasvikAdmin,
+    !publicPath && authStatus === "authenticated" && !hasvikAdmin,
   );
   const subscriptionsQuery = useSubscriptionsQuery(
     user?.userId,
@@ -199,10 +201,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     }
     if (
       !publicPath &&
-      (sessionQuery.isError ||
-        (authStatus === "unauthenticated" && !sessionQuery.isPending))
+      authStatus === "unauthenticated"
     ) {
-      clearAuth();
       router.replace("/");
     }
     if (
@@ -245,6 +245,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     subscriptionAccessBlocked,
     user,
   ]);
+
+  if ((!publicPath || pathname === "/") && authStatus === "loading" && !restoreBlocked && sessionQuery.isError) {
+    return <main className="flex min-h-screen flex-col items-center justify-center gap-3 px-6 text-center">
+      <h1 className="text-base font-semibold text-slate-900">Could not restore your session</h1>
+      <p className="max-w-md text-sm text-slate-500">{getApiErrorMessage(sessionQuery.error)}</p>
+      <button type="button" onClick={() => void sessionQuery.refetch()} disabled={sessionQuery.isFetching} className="rounded-lg bg-primary px-4 py-2 text-sm font-semibold text-white disabled:opacity-50">{sessionQuery.isFetching ? "Retrying..." : "Try again"}</button>
+      <button type="button" onClick={() => clearAuth()} className="text-sm text-slate-500 hover:underline">Go to sign in</button>
+    </main>;
+  }
+  if (loggingOut) return <main className="flex min-h-screen items-center justify-center text-sm text-slate-500">Signing out...</main>;
+  if (pathname === "/" && ((authStatus === "loading" && !restoreBlocked) || (authStatus === "authenticated" && user))) {
+    return <main className="flex min-h-screen items-center justify-center text-sm text-slate-500">Restoring your session...</main>;
+  }
 
   if (publicPath) {
     return <>{children}</>;
@@ -289,6 +302,8 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   async function handleLogout() {
     try {
       await logoutMutation.mutateAsync();
+    } catch {
+      // Logout always completes locally; no error toast is shown.
     } finally {
       router.replace("/");
     }

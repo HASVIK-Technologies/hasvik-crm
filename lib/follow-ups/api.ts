@@ -288,7 +288,7 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
 
 /**
  * GET /api/follow-ups
- * Query parameters: page, limit, businessId, assignedTo, status, type, fromDate, toDate, search, isCalendarView
+ * Query parameters: page, limit, businessId, assignedTo, status, type, fromDate, toDate, isCalendarView
  */
 export async function getFollowUps(
   filters: FollowUpQueryFilters,
@@ -297,9 +297,6 @@ export async function getFollowUps(
   const params: Record<string, string | number | boolean> = {};
   if (filters.page !== undefined) params.page = filters.page;
   if (filters.limit !== undefined) params.limit = filters.limit;
-  if (filters.search && filters.search.trim()) {
-    params.search = filters.search.trim();
-  }
   if (filters.businessId) params.businessId = filters.businessId;
   if (filters.assignedTo) params.assignedTo = filters.assignedTo;
   if (filters.status) params.status = filters.status;
@@ -497,7 +494,6 @@ export async function getFollowUpKpis(
   if (params?.type) queryParams.type = params.type;
   if (params?.fromDate) queryParams.fromDate = params.fromDate;
   if (params?.toDate) queryParams.toDate = params.toDate;
-  if (params?.search && params.search.trim()) queryParams.search = params.search.trim();
 
   const response = await apiClient.get<FollowUpKpis>("/follow-ups/kpis", {
     params: Object.keys(queryParams).length > 0 ? queryParams : undefined,

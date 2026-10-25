@@ -1,6 +1,7 @@
 "use client";
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useFollowUpListStore } from "@/store/follow-up-list-store";
 import {
   createFollowUp,
   getFollowUpKpis,
@@ -98,9 +99,12 @@ export function useCreateFollowUp() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: CreateFollowUpPayload) => createFollowUp(payload),
-    onSuccess: () => {
-      queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
-      invalidateBusinessQueries(queryClient);
+    onSuccess: async (created, variables) => {
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all }),
+        invalidateBusinessQueries(queryClient),
+      ]);
+      useFollowUpListStore.getState().highlightSavedFollowUp(created.id, created.scheduledAt || variables.scheduledAt);
     },
   });
 }
@@ -109,11 +113,14 @@ export function useUpdateFollowUp() {
   const queryClient = useQueryClient();
   return useMutation({
     mutationFn: (payload: UpdateFollowUpPayload) => updateFollowUp(payload),
-    onSuccess: () => {
+    onSuccess: async (updated, variables) => {
       // PATCH responses can be partial. Refetch rather than overwriting cached
       // business, owner, and contact fields with mapper defaults.
-      queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all });
-      invalidateBusinessQueries(queryClient);
+      await Promise.all([
+        queryClient.invalidateQueries({ queryKey: followUpQueryKeys.all }),
+        invalidateBusinessQueries(queryClient),
+      ]);
+      useFollowUpListStore.getState().highlightSavedFollowUp(updated.id || variables.id || variables.followUpId || "", variables.highlightScheduledAt || updated.scheduledAt || variables.scheduledAt || "");
     },
   });
 }

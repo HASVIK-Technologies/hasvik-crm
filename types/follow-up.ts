@@ -64,7 +64,6 @@ export interface FollowUpNotesPage {
 export interface FollowUpFilters {
   page: number;
   limit: number;
-  search: string;
   businessId: string;
   businessName: string;
   assignedTo: string;
@@ -100,6 +99,8 @@ export interface CreateFollowUpPayload {
 }
 
 export interface UpdateFollowUpPayload {
+  /** UI context for save highlighting; never included in the PATCH body. */
+  highlightScheduledAt?: string;
   id: string;
   followUpId?: string;
   businessId?: string;

@@ -32,6 +32,7 @@ export default function LoginForm() {
   });
 
   const onSubmit: SubmitHandler<LoginFormValues> = async (values) => {
+    if (loginMutation.isPending) return;
     try {
       const session = await loginMutation.mutateAsync({
         email: values.email.trim(),

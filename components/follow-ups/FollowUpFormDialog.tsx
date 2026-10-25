@@ -139,7 +139,7 @@ export default function FollowUpFormDialog({
           scheduledAt: followUp.scheduledAt,
           reminderInMinutes: followUp.reminderInMinutes ?? parseReminderToMinutes(followUp.reminder) ?? 0,
         });
-        if (Object.keys(updates).length) await updateMutation.mutateAsync({ id: followUp.id, ...updates });
+        if (Object.keys(updates).length) await updateMutation.mutateAsync({ id: followUp.id, ...updates, highlightScheduledAt: scheduledAt });
         toast.success("Follow-up updated successfully.");
       } else {
         await createMutation.mutateAsync({

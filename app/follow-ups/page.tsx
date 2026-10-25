@@ -10,7 +10,6 @@ import FollowUpFilters from "@/components/follow-ups/FollowUpFilters";
 import FollowUpStats from "@/components/follow-ups/FollowUpStats";
 import FollowUpTable from "@/components/follow-ups/FollowUpTable";
 import FollowUpCalendar from "@/components/follow-ups/FollowUpCalendar";
-import SearchWithSuggestions from "@/components/businesses/SearchWithSuggestions";
 import AddFollowUpDialog from "@/components/follow-ups/AddFollowUpDialog";
 import FollowUpEditDialog from "@/components/follow-ups/FollowUpEditDialog";
 import NextFollowUpDialog from "@/components/follow-ups/NextFollowUpDialog";
@@ -66,7 +65,6 @@ export default function FollowupsPage() {
 
   const queryFilters = useMemo<FollowUpQueryFilters>(() => {
     const commonFilters = {
-      search: filters.search,
       businessId: filters.businessId,
       businessName: filters.businessName,
       assignedTo: filters.assignedTo,
@@ -108,7 +106,6 @@ export default function FollowupsPage() {
     if (filters.assignedTo) p.assignedTo = filters.assignedTo;
     if (filters.type) p.type = filters.type;
     if (filters.status) p.status = filters.status;
-    if (filters.search?.trim()) p.search = filters.search.trim();
     if (filters.fromDate) p.fromDate = filters.fromDate;
     if (filters.toDate) p.toDate = filters.toDate;
     return p;
@@ -117,7 +114,6 @@ export default function FollowupsPage() {
     filters.assignedTo,
     filters.type,
     filters.status,
-    filters.search,
     filters.fromDate,
     filters.toDate,
   ]);
@@ -139,7 +135,6 @@ export default function FollowupsPage() {
       filters.assignedTo ||
       filters.type ||
       filters.status ||
-      filters.search?.trim() ||
       filters.fromDate ||
       filters.toDate,
   );
@@ -152,15 +147,6 @@ export default function FollowupsPage() {
         ? listQuery.data.total
         : kpiData.total,
   };
-
-  const searchControl = (
-    <SearchWithSuggestions
-      searchTerm={filters.search}
-      onSearchTermChange={(value) => setFilter("search", value)}
-      placeholder="Search by business or contact..."
-      isSearching={listQuery.isFetching}
-    />
-  );
 
   const confirmComplete = async () => {
     if (!completeFollowUp || !canCompleteFollowUp(completeFollowUp)) {
@@ -212,7 +198,6 @@ export default function FollowupsPage() {
     <>
       <ListPageLayout
         breadcrumb={<Breadcrumb items={[{ label: "Follow-ups" }]} />}
-        customSearch={searchControl}
         showStats={filters.showStats}
         showFilters={filters.showFilters}
         onToggleFilters={filters.toggleFilters}
@@ -263,7 +248,8 @@ export default function FollowupsPage() {
           <div className="space-y-4">
             {filters.view === "table" && (
               <div className="flex items-center gap-1 overflow-x-auto border-b border-[#e7edf3]">
-                {(["all", "today", "upcoming", "overdue"] as const).map((tab) => (
+                {/* {(["all", "today", "upcoming", "overdue"] as const).map((tab) => ( */}
+                {(["all", "today", "upcoming"] as const).map((tab) => (
                   <button
                     type="button"
                     key={tab}

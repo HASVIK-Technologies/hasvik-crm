@@ -55,6 +55,7 @@ import { normalizeHttpUrl } from "@/lib/business/url-validation";
 import { toBusinessUpdatePayload } from "@/lib/business/update-payload";
 import type { FollowUpType } from "@/types/follow-up";
 import { toDateTimeLocalValue } from "@/lib/forms/date-time";
+import { useAuthStore } from "@/store/auth-store";
 import { useBusinessListStore } from "@/store/business-list-store";
 
 // Additional Information is built out but hidden from view for now - the
@@ -265,7 +266,8 @@ export default function BusinessForm({
 
   const targetId = businessId || searchParams.get("id") || undefined;
   const isEditMode = Boolean(targetId);
-  const draftKey = `hasvik-crm:business-form:${targetId ?? "new"}`;
+  const draftUserId = useAuthStore((state) => state.user?.userId);
+  const draftKey = `hasvik-crm:business-form:${draftUserId ?? "anonymous"}:${targetId ?? "new"}`;
 
   useEffect(() => {
     if (targetId) useBusinessListStore.getState().highlightBusiness(targetId, true);

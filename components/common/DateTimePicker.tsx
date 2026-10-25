@@ -47,7 +47,13 @@ export default function DateTimePicker({ id, value = "", onChange, placeholder =
         </PopoverTrigger>
         {value && !disabled && <button type="button" onClick={() => onChange("")} aria-label="Clear date and time" className="absolute right-1 top-1 flex size-8 items-center justify-center rounded-md text-slate-400 hover:bg-slate-100"><X className="size-4" /></button>}
       </div>
-      <PopoverContent align="start" collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto rounded-xl p-3">
+      <PopoverContent align="start" collisionPadding={12} className="flex max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] flex-col overflow-hidden rounded-xl p-0">
+        <div className="min-h-0 overflow-y-auto overscroll-contain p-3">
+        <fieldset className="mb-3 flex items-center gap-2 border-b border-slate-100 pb-3">
+          <legend className="px-1 text-xs font-semibold text-slate-600">Time (24-hour)</legend>
+          <label className="flex-1 text-xs text-slate-500">Hour<select aria-label="Hour" value={time.slice(0, 2)} onChange={(event) => changeTime(event.target.value, time.slice(3, 5))} className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-800">{Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((hour) => <option key={hour}>{hour}</option>)}</select></label>
+          <label className="flex-1 text-xs text-slate-500">Minute<select aria-label="Minute" value={time.slice(3, 5)} onChange={(event) => changeTime(time.slice(0, 2), event.target.value)} className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-800">{Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0")).map((minute) => <option key={minute}>{minute}</option>)}</select></label>
+        </fieldset>
         {open && <Calendar mode="single" selected={selectedDraft} defaultMonth={selectedDraft ?? minimum} disabled={{ before: minimumDay }} onSelect={(date) => {
           if (!date) return;
           const datePart = `${date.getFullYear()}-${String(date.getMonth() + 1).padStart(2, "0")}-${String(date.getDate()).padStart(2, "0")}`;
@@ -55,13 +61,9 @@ export default function DateTimePicker({ id, value = "", onChange, placeholder =
           const instant = fromDateTimeLocalValue(candidate);
           setDraft(instant && new Date(instant).getTime() < minimum.getTime() - 60_000 ? toDateTimeLocalValue(minimum) : candidate);
         }} />}
-        <fieldset className="mt-3 flex items-center gap-2 border-t border-slate-100 pt-3">
-          <legend className="px-1 text-xs font-semibold text-slate-600">Time (24-hour)</legend>
-          <label className="flex-1 text-xs text-slate-500">Hour<select aria-label="Hour" value={time.slice(0, 2)} onChange={(event) => changeTime(event.target.value, time.slice(3, 5))} className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-800">{Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((hour) => <option key={hour}>{hour}</option>)}</select></label>
-          <label className="flex-1 text-xs text-slate-500">Minute<select aria-label="Minute" value={time.slice(3, 5)} onChange={(event) => changeTime(time.slice(0, 2), event.target.value)} className="mt-1 h-10 w-full rounded-lg border border-slate-200 bg-white px-2 text-sm text-slate-800">{Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0")).map((minute) => <option key={minute}>{minute}</option>)}</select></label>
-        </fieldset>
         {!canApply && draft && <p role="status" className="mt-2 text-xs text-amber-700">Choose a future date and time.</p>}
-        <div className="mt-3 flex justify-end gap-2 border-t border-slate-100 pt-3">
+        </div>
+        <div className="flex shrink-0 justify-end gap-2 border-t border-slate-100 bg-white p-3">
           <button type="button" onClick={() => setOpen(false)} className="h-9 rounded-lg px-3 text-xs font-semibold text-slate-500 hover:bg-slate-100">Cancel</button>
           <button type="button" disabled={!canApply} onClick={() => { if (!unchanged) onChange(draft); setOpen(false); }} className="h-9 rounded-lg bg-primary px-4 text-xs font-semibold text-white disabled:opacity-40">Apply</button>
         </div>

@@ -6,6 +6,7 @@ import { useFollowUpListStore } from "@/store/follow-up-list-store";
 export function useFollowUpHighlight() {
   const id = useFollowUpListStore((state) => state.highlightedFollowUpId);
   const revision = useFollowUpListStore((state) => state.highlightRevision);
+  const date = useFollowUpListStore((state) => state.highlightedFollowUpDate);
   const shouldScroll = useFollowUpListStore(
     (state) => state.scrollToHighlightedFollowUp,
   );
@@ -17,15 +18,15 @@ export function useFollowUpHighlight() {
   );
 
   useEffect(() => {
-    if (!id) return;
+    if (!id && !date) return;
     let timer: number | undefined;
     let attempts = 0;
     const findItem = () => {
       const item = Array.from(
         document.querySelectorAll<HTMLElement>(
-          `[data-follow-up-item-id="${CSS.escape(id)}"]`,
+          `[data-follow-up-item-id="${CSS.escape(id ?? "")}"]`,
         ),
-      ).find((candidate) => candidate.getClientRects().length > 0);
+      ).find((candidate) => candidate.getClientRects().length > 0) ?? (date ? Array.from(document.querySelectorAll<HTMLElement>(`[data-follow-up-date="${CSS.escape(date)}"]`)).find((candidate) => candidate.getClientRects().length > 0) : undefined);
       if (item) {
         if (shouldScroll) {
           item.scrollIntoView({
@@ -39,16 +40,19 @@ export function useFollowUpHighlight() {
         timer = window.setTimeout(() => clearHighlight(revision), 3500);
       } else if (attempts++ < 40) {
         timer = window.setTimeout(findItem, 100);
+      } else {
+        clearHighlight(revision);
       }
     };
     findItem();
     return () => {
       if (timer) window.clearTimeout(timer);
     };
-  }, [clearHighlight, id, revision, shouldScroll]);
+  }, [clearHighlight, id, date, revision, shouldScroll]);
 
   return {
     highlightFollowUp,
     isFollowUpHighlighted: (itemId: string) => itemId === id,
+    isDayHighlighted: (day: string) => day === date,
   };
 }

@@ -2,6 +2,8 @@
 
 import DatePicker from "@/components/common/DatePicker";
 
+import { useFollowUpListStore } from "@/store/follow-up-list-store";
+import { visibleCalendarItems } from "@/lib/follow-ups/highlight";
 import { useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Eye, MoreVertical, Pencil, Plus, Trash2, X } from "lucide-react";
@@ -71,7 +73,12 @@ export default function FollowUpCalendar({
   const router = useRouter();
   const [selectedDay, setSelectedDay] = useState<string | null>(null);
   const [today] = useState(() => new Date());
+  const highlightedDate = useFollowUpListStore((state) => state.highlightedFollowUpDate);
+  const highlightRevision = useFollowUpListStore((state) => state.highlightRevision);
+  const highlightedId = useFollowUpListStore((state) => state.highlightedFollowUpId);
+  const [seenHighlightRevision, setSeenHighlightRevision] = useState(highlightRevision);
   const [mobileWeekStart, setMobileWeekStart] = useState(() => {
+    if (highlightedDate) return startOfWeek(new Date(`${highlightedDate}T12:00:00`));
     const selectedMonth = monthDate(month);
     const now = new Date();
     return startOfWeek(
@@ -81,7 +88,11 @@ export default function FollowUpCalendar({
         : selectedMonth,
     );
   });
-  const { highlightFollowUp, isFollowUpHighlighted } = useFollowUpHighlight();
+  const { highlightFollowUp, isFollowUpHighlighted, isDayHighlighted } = useFollowUpHighlight();
+  if (seenHighlightRevision !== highlightRevision) {
+    setSeenHighlightRevision(highlightRevision);
+    if (highlightedDate) setMobileWeekStart(startOfWeek(new Date(`${highlightedDate}T12:00:00`)));
+  }
   const visibleMonth = monthDate(month);
   const firstGridDate = new Date(visibleMonth);
   firstGridDate.setDate(firstGridDate.getDate() - ((firstGridDate.getDay() + 6) % 7));
@@ -195,6 +206,7 @@ export default function FollowUpCalendar({
                 return (
                   <div
                     key={key}
+                    data-follow-up-date={key}
                     onClick={(event) => {
                       if (!canSchedule || (event.target as HTMLElement).closest("button, [role='menuitem']")) return;
                       scheduleForDay(day);
@@ -202,6 +214,7 @@ export default function FollowUpCalendar({
                     className={cn(
                       "group/day min-h-36 border-b border-r border-slate-200 p-2 last:border-r-0",
                       !inMonth && "bg-slate-50/70",
+                      isDayHighlighted(key) && "bg-blue-50 ring-2 ring-inset ring-brand-blue/50",
                       canSchedule && "cursor-pointer transition-colors hover:bg-blue-50/30",
                     )}
                   >
@@ -220,7 +233,7 @@ export default function FollowUpCalendar({
                       </div>
                     </div>
                     <div className="space-y-1.5">
-                      {loading ? <div className="h-14 animate-pulse bg-slate-100" /> : dayItems.slice(0, 3).map((item) => (
+                      {loading ? <div className="h-14 animate-pulse bg-slate-100" /> : visibleCalendarItems(dayItems, highlightedId).map((item) => (
                         <div
                           key={item.id}
                           data-follow-up-item-id={item.id}
@@ -285,7 +298,7 @@ export default function FollowUpCalendar({
               const isToday = key === dateKey(today);
               const canSchedule = key >= dateKey(today);
               return (
-                <section key={key} aria-label={day.toLocaleDateString("en-IN")} className={cn("bg-white", isToday && "border-l-3 border-brand-blue bg-blue-50/20")}>
+                <section key={key} data-follow-up-date={key} aria-label={day.toLocaleDateString("en-IN")} className={cn("bg-white transition-colors", isDayHighlighted(key) && "bg-blue-50 ring-2 ring-inset ring-brand-blue/50", isToday && "border-l-3 border-brand-blue bg-blue-50/20")}>
                   <div className="flex items-center justify-between gap-3 bg-slate-50/80 px-3 py-2.5">
                     <div className="flex min-w-0 items-center gap-2.5">
                       <span className={cn("flex size-9 shrink-0 items-center justify-center text-sm font-bold", isToday ? "bg-brand-blue text-white" : "border border-slate-200 bg-white text-slate-700")}>{day.getDate()}</span>
