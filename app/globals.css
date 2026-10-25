@@ -169,6 +169,13 @@
  
 }
 
+.responsive-filter-field [data-slot="select-trigger"],
+.responsive-filter-field [data-slot="popover-trigger"] {
+  width: 100%;
+  max-width: 100%;
+  height: 2.5rem;
+}
+
 @media (max-width: 1023px) {
   .layout-filters [data-filter-controls] {
     display: grid;

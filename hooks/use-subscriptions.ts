@@ -4,6 +4,7 @@ import {
   createSubscription,
   getSubscriptionPlans,
   getSubscriptions,
+  getSubscriptionsPage,
   renewSubscription,
   updateSubscriptionStatus,
 } from "@/lib/subscriptions/api";
@@ -11,6 +12,7 @@ import type {
   CreateSubscriptionPayload,
   RenewSubscriptionPayload,
   SubscriptionStatus,
+  SubscriptionQueryParams,
 } from "@/types/subscription";
 
 export const subscriptionQueryKeys = {
@@ -33,6 +35,14 @@ export function useSubscriptionsQuery(scopeKey?: string, enabled = true) {
     queryKey: subscriptionQueryKeys.list(scopeKey),
     enabled,
     queryFn: ({ signal }) => getSubscriptions(signal),
+  });
+}
+
+export function useSubscriptionsPageQuery(params: SubscriptionQueryParams, scopeKey?: string, enabled = true) {
+  return useQuery({
+    queryKey: [...subscriptionQueryKeys.list(scopeKey), "page", params],
+    enabled,
+    queryFn: ({ signal }) => getSubscriptionsPage(params, signal),
   });
 }
 
@@ -70,9 +80,9 @@ export function useRenewSubscription() {
       id: string;
       payload?: RenewSubscriptionPayload;
     }) => renewSubscription(id, payload),
-    onSuccess: () => {
-      void refreshSubscriptions();
-      toast.success("Subscription renewed.");
+    onSuccess: async (subscription) => {
+      await refreshSubscriptions();
+      toast.success(subscription.status === "PENDING" ? "Renewal submitted for approval." : "Subscription renewed.");
     },
   });
 }
@@ -87,8 +97,8 @@ export function useUpdateSubscriptionStatus() {
       id: string;
       status: SubscriptionStatus;
     }) => updateSubscriptionStatus(id, status),
-    onSuccess: (_, variables) => {
-      void refreshSubscriptions();
+    onSuccess: async (_, variables) => {
+      await refreshSubscriptions();
       toast.success(
         variables.status === "ACTIVE"
           ? "Subscription activated."
@@ -96,7 +106,9 @@ export function useUpdateSubscriptionStatus() {
             ? "Subscription cancelled. Access remains available until the current term ends."
             : variables.status === "REJECTED"
               ? "Subscription request rejected."
-              : "Subscription status updated.",
+              : variables.status === "SUSPENDED"
+                ? "Subscription suspended. It no longer grants workspace access."
+                : "Subscription status updated.",
       );
     },
   });

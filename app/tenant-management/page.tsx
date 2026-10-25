@@ -25,6 +25,7 @@ import ListTableToolbar from "@/components/common/ListTableToolbar";
 import { DataTableMobileCard, DataTableMobileList, DataTableShell } from "@/components/common/DataTableLayout";
 import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
 import ManagementRowActions from "@/components/common/ManagementRowActions";
+import ResponsiveFilters from "@/components/common/ResponsiveFilters";
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
@@ -346,12 +347,7 @@ export default function TenantManagementPage() {
           setPage(1);
         }}
         searchPlaceholder="Search tenants by name or contact"
-        filters={
-          <div className="flex flex-wrap items-center gap-3">
-            <label htmlFor="tenant-status-filter" className="text-xs font-medium text-slate-600">
-              Status
-            </label>
-            <Select
+        filters={<ResponsiveFilters onReset={() => { setSearch(""); setFilter("ACTIVE"); setPage(1); }} fields={[{ key: "status", label: "Status", active: filter !== "ALL", reset: () => { setFilter("ALL"); setPage(1); }, control: <Select
               value={filter}
               onValueChange={(value) => {
                 setFilter(value as TenantFilter);
@@ -366,9 +362,7 @@ export default function TenantManagementPage() {
                 <SelectItem value="ACTIVE" className="text-xs">Active</SelectItem>
                 <SelectItem value="INACTIVE" className="text-xs">Inactive</SelectItem>
               </SelectContent>
-            </Select>
-          </div>
-        }
+            </Select> }]} />}
         showFilters={showFilters}
         onToggleFilters={() => setShowFilters((visible) => !visible)}
         onResetFilters={() => {
@@ -400,7 +394,7 @@ export default function TenantManagementPage() {
             }}
             menuItems={[
               { label: showStats ? "Hide KPIs" : "Show KPIs", icon: <ChartNoAxesCombined className="size-4" />, onSelect: () => setShowStats((visible) => !visible) },
-              { label: showFilters ? "Hide filters" : "Show filters", onSelect: () => setShowFilters((visible) => !visible), icon: <Filter className="size-4" /> },
+              { label: showFilters ? "Hide filters" : "Show filters", desktopOnly: true, onSelect: () => setShowFilters((visible) => !visible), icon: <Filter className="size-4" /> },
             ]}
           />
         }

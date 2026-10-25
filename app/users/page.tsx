@@ -32,6 +32,7 @@ import ManagementRowActions from "@/components/common/ManagementRowActions";
 import ListPagination from "@/components/common/ListPagination";
 import ListTableToolbar from "@/components/common/ListTableToolbar";
 import { DataTableMobileCard, DataTableMobileList, DataTableShell } from "@/components/common/DataTableLayout";
+import ResponsiveFilters from "@/components/common/ResponsiveFilters";
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import SortableColumnHeader from "@/components/common/SortableColumnHeader";
 import {
@@ -195,10 +196,8 @@ export default function UsersPage() {
           setPage(1);
         }}
         searchPlaceholder="Search users by name or email"
-        filters={
-          <div className="flex flex-wrap items-center gap-3">
-            <label htmlFor="users-role-filter" className="text-xs font-medium text-slate-600">Role</label>
-            <Select
+        filters={<ResponsiveFilters onReset={() => { setSearch(""); setRoleFilter("ALL"); setStatusFilter("ALL"); setTenantFilter("ALL"); setPage(1); }} fields={[
+            { key: "role", label: "Role", active: roleFilter !== "ALL", reset: () => { setRoleFilter("ALL"); setPage(1); }, control: <Select
               value={roleFilter}
               onValueChange={(value) => {
                 setRoleFilter(value as UserRole | "ALL");
@@ -216,22 +215,16 @@ export default function UsersPage() {
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
-            {superAdmin && <>
-              <label htmlFor="users-tenant-filter" className="text-xs font-medium text-slate-600">Tenant</label>
-              <Select value={tenantFilter} onValueChange={(value) => { setTenantFilter(value); setPage(1); }}>
+            </Select> },
+            ...(superAdmin ? [{ key: "tenant", label: "Workspace", active: tenantFilter !== "ALL", reset: () => { setTenantFilter("ALL"); setPage(1); }, control: <><Select value={tenantFilter} onValueChange={(value) => { setTenantFilter(value); setPage(1); }}>
                 <SelectTrigger id="users-tenant-filter" size="sm" disabled={tenantsQuery.isPending} className="w-48 max-w-full rounded-lg text-xs"><SelectValue placeholder="All tenants" /></SelectTrigger>
                 <SelectContent className="max-h-72 bg-white"><SelectItem value="ALL">All tenants</SelectItem>{tenants.map((tenant) => <SelectItem key={tenant.id} value={tenant.id}>{tenant.name}{tenant.isActive ? "" : " (Inactive)"}</SelectItem>)}</SelectContent>
-              </Select>
-              {tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-primary hover:underline">Retry loading tenants</button>}
-            </>}
-            <label htmlFor="users-status-filter" className="text-xs font-medium text-slate-600">Status</label>
-            <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
+              </Select>{tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-primary hover:underline">Retry loading tenants</button>}</> }] : []),
+            { key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
               <SelectTrigger id="users-status-filter" size="sm" className="w-36 rounded-lg text-xs"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-white"><SelectItem value="ALL">All statuses</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
-            </Select>
-          </div>
-        }
+            </Select> },
+          ]} />}
         showFilters={showFilters}
         onToggleFilters={() => setShowFilters((visible) => !visible)}
         onResetFilters={() => {
@@ -255,7 +248,7 @@ export default function UsersPage() {
             primary={{ label: "Add user", onSelect: openCreate, icon: <Plus className="size-4" /> }}
             menuItems={[
               { label: showStats ? "Hide KPIs" : "Show KPIs", icon: <ChartNoAxesCombined className="size-4" />, onSelect: () => setShowStats((visible) => !visible) },
-              { label: showFilters ? "Hide filters" : "Show filters", onSelect: () => setShowFilters((visible) => !visible), icon: <Filter className="size-4" /> },
+              { label: showFilters ? "Hide filters" : "Show filters", desktopOnly: true, onSelect: () => setShowFilters((visible) => !visible), icon: <Filter className="size-4" /> },
             ]}
           />
         }
