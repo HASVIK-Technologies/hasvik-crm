@@ -297,7 +297,6 @@ function SubscriptionRow({
   const canRenew = writable && (hasvikAdmin || tenantAdmin) && (status === "ACTIVE" || status === "EXPIRED") && billingCycle !== "LIFETIME";
   const actions = (
     <div className="flex items-center justify-end gap-1.5">
-      {canApprove && <TableActionButton tooltip="Approve subscription" tone="success" disabled={busy} onClick={() => onApprove(subscription)}><CheckCircle2 className="size-4" /></TableActionButton>}
       {canRenew && <TableActionButton tooltip="Renew subscription" tone="brand" disabled={busy} onClick={() => onRenew(subscription)}><RefreshCw className="size-4" /></TableActionButton>}
       {id && <DropdownMenu>
         <DropdownMenuTrigger asChild>
@@ -311,6 +310,7 @@ function SubscriptionRow({
             {status === "SUSPENDED" ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}{status === "SUSPENDED" ? "Resume subscription" : "Suspend subscription"}
           </DropdownMenuItem>}
           {writable && (hasvikAdmin || tenantAdmin) && status === "ACTIVE" && <DropdownMenuItem disabled={busy} onSelect={() => onCancel(subscription)} className="cursor-pointer gap-2 text-xs text-rose-700 focus:text-rose-700"><Ban className="size-3.5" />Cancel subscription</DropdownMenuItem>}
+          {canApprove && <DropdownMenuItem disabled={busy} onSelect={() => onApprove(subscription)} className="cursor-pointer gap-2 text-xs text-emerald-700 focus:text-emerald-700"><CheckCircle2 className="size-3.5" />Approve</DropdownMenuItem>}
           {canApprove && <DropdownMenuItem disabled={busy} onSelect={() => onReject(subscription)} className="cursor-pointer gap-2 text-xs text-rose-700 focus:text-rose-700"><XCircle className="size-3.5" />Reject request</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>}

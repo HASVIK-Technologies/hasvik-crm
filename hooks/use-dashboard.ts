@@ -3,7 +3,7 @@
 import { useQueries, useQuery } from "@tanstack/react-query";
 import { getBusinesses } from "@/lib/business/api";
 import { getFollowUpKpis, getFollowUps } from "@/lib/follow-ups/api";
-import { getUsers } from "@/lib/users/api";
+import { getUserKpis } from "@/lib/users/api";
 import { STATUS_OPTIONS } from "@/lib/business/form-options";
 import { dashboardDates, dashboardFollowUpFilters } from "@/lib/dashboard/model";
 import { businessQueryKeys, followUpQueryKeys } from "@/lib/query/query-keys";
@@ -47,7 +47,7 @@ export function useDashboardFollowUps(assignedTo: string, now: Date) {
 export function useDashboardUserCount(tenantId?: string) {
   return useQuery({
     queryKey: ["users", "dashboard", "active-count", tenantId],
-    queryFn: ({ signal }) => getUsers(signal, { page: 1, limit: 1, isActive: true, tenantId }),
+    queryFn: ({ signal }) => getUserKpis({ tenantId }, signal),
     ...freshness,
   });
 }

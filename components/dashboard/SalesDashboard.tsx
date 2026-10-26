@@ -41,7 +41,7 @@ function WorkspaceHealth({ user }: { user: AuthUser }) {
   const subscriptions = useDashboardSubscriptions(user.userId);
   const current = subscriptions.data?.filter((subscription) => getSubscriptionTenantId(subscription) === user.tenantId);
   return <DashboardPanel variant="colored" title="Workspace health" tone="green" icon={Users} description="Access and subscription information for administrators.">
-    <div className="flex items-center justify-between gap-3 rounded-none border border-white/15 bg-white/5 p-4"><span className="flex items-center gap-2 text-sm font-medium text-white"><Users className="size-4" />Active users</span><strong className="text-2xl text-white">{metricValue(users, users.data?.total)}</strong></div>
+    <div className="flex items-center justify-between gap-3 rounded-none border border-white/15 bg-white/5 p-4"><span className="flex items-center gap-2 text-sm font-medium text-white"><Users className="size-4" />Active users</span><strong className="text-2xl text-white">{metricValue(users, users.data?.active)}</strong></div>
     {users.isError && <p className="mt-2 text-xs text-amber-100">User count unavailable. <button type="button" onClick={() => void users.refetch()} className="underline">Retry</button></p>}
     <div className="mt-4"><DashboardLink href="/users">Manage users</DashboardLink></div>
     <div className="mt-5 border-t border-white/15 pt-4"><QueryContent query={subscriptions}>

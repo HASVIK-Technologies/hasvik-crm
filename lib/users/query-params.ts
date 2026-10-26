@@ -11,6 +11,17 @@ export interface UserQueryParams {
   tenantId?: string;
 }
 
+export type UserKpiParams = Pick<UserQueryParams, "search" | "role" | "isActive" | "tenantId">;
+
+export function userKpiRequestParams(params?: UserKpiParams) {
+  return {
+    ...(params?.search?.trim() ? { search: params.search.trim() } : {}),
+    ...(params?.tenantId?.trim() ? { tenantId: params.tenantId.trim() } : {}),
+    ...(params?.role && params.role !== "ALL" ? { role: params.role } : {}),
+    ...(params?.isActive !== undefined ? { isActive: params.isActive } : {}),
+  };
+}
+
 export function userRequestParams(params?: UserQueryParams) {
   return {
     page: params?.page ?? 1,

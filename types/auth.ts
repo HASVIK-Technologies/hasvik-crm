@@ -17,6 +17,11 @@ export function isTenantAdmin(user?: Pick<AuthUser, "role"> | null) {
   return !isSuperAdmin(user) && user?.role?.trim().toUpperCase() === "ADMIN";
 }
 
+export function canEditManagedUser(actor: Pick<AuthUser, "role"> | null | undefined, target: { role: string } | null | undefined) {
+  if (!actor || !target) return false;
+  return isSuperAdmin(actor) || (isTenantAdmin(actor) && !isSuperAdmin(target));
+}
+
 export type TokenResponse = {
   accessToken: string;
 };
