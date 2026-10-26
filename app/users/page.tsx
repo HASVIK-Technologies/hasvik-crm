@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/store/auth-store";
-import { isSuperAdmin } from "@/types/auth";
+import { isSuperAdmin, canEditManagedUser } from "@/types/auth";
 import { useTenantsQuery } from "@/hooks/use-tenants";
 import { getUserTenant } from "@/lib/users/tenant";
 import { ActivityStateText } from "@/components/common/ActivityStateText";
@@ -143,6 +143,7 @@ export default function UsersPage() {
   }
 
   function openEdit(user: UserRecord) {
+    if (!canEditManagedUser(useAuthStore.getState().user, user)) return;
     if (isRecordInactive(user) || getUserTenant(user, tenants).isActive === false) return;
     setEditingUser(user);
     setFormError("");
@@ -159,6 +160,7 @@ export default function UsersPage() {
 
     try {
       if (editingUser) {
+        if (!canEditManagedUser(useAuthStore.getState().user, editingUser)) throw new Error("You do not have permission to update this user.");
         const latest = users.find((item) => userId(item) === userId(editingUser)) ?? editingUser;
         if (isRecordInactive(latest) || getUserTenant(latest, tenants).isActive === false) throw new Error("Inactive records are read-only. Activate the user or tenant before editing.");
         const id = userId(editingUser);
@@ -180,6 +182,7 @@ export default function UsersPage() {
   }
 
   async function confirmUserStatus() {
+    if (statusUser && isSuperAdmin(statusUser) && !isRecordInactive(statusUser)) return;
     if (!statusUser || getUserTenant(statusUser, tenants).isActive === false) return;
     const id = userId(statusUser);
     if (!id) return;
@@ -311,8 +314,9 @@ export default function UsersPage() {
                         <ManagementRowActions
                           activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}
                           editLabel={`Edit ${user.fullName}`}
+                          showEdit={canEditManagedUser(currentUser, user)}
                           readOnly={isRecordInactive(user) || getUserTenant(user, tenants).isActive === false}
-                          actionLabel={getUserTenant(user, tenants).isActive === false ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
+                          actionLabel={getUserTenant(user, tenants).isActive === false || (isSuperAdmin(user) && !isRecordInactive(user)) ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
                           actionDestructive={!isRecordInactive(user)}
                           disabled={statusMutation.isPending}
                           onEdit={() => openEdit(user)}
@@ -361,8 +365,9 @@ export default function UsersPage() {
                               <ManagementRowActions
                                 activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}
                                 editLabel={`Edit ${user.fullName}`}
+                                showEdit={canEditManagedUser(currentUser, user)}
                                 readOnly={isRecordInactive(user) || getUserTenant(user, tenants).isActive === false}
-                          actionLabel={getUserTenant(user, tenants).isActive === false ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
+                          actionLabel={getUserTenant(user, tenants).isActive === false || (isSuperAdmin(user) && !isRecordInactive(user)) ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
                                 actionDestructive={!isRecordInactive(user)}
                                 disabled={statusMutation.isPending}
                                 onEdit={() => openEdit(user)}
@@ -393,7 +398,7 @@ export default function UsersPage() {
         }
       />
 
-      <DialogPrimitive.Root open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogPrimitive.Root open={dialogOpen && (!editingUser || canEditManagedUser(currentUser, editingUser))} onOpenChange={setDialogOpen}>
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
           <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">

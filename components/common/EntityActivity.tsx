@@ -1,10 +1,9 @@
 "use client";
 
-import { useState } from "react";
 import { getSavedFields } from "@/lib/audit-logs/saved-fields";
 import { Activity, CheckCircle2, ClipboardList, Edit3, MessageSquareText, Plus, RefreshCw, UserRoundCog } from "lucide-react";
-import { useAuditLogQuery, useEntityAuditLogsQuery } from "@/hooks/use-audit-logs";
-import type { AuditEntityType, AuditLogItem } from "@/types/audit-log";
+import { useEntityAuditLogsQuery } from "@/hooks/use-audit-logs";
+import type { AuditEntityType } from "@/types/audit-log";
 import { getActivityMessages } from "@/lib/audit-logs/activity-messages";
 
 const actionDetails: Record<string, { label: string; icon: typeof Activity; tone: string }> = {
@@ -80,12 +79,14 @@ export default function EntityActivity({ entityType, entityId }: { entityType: A
               <li key={log.id} className="group relative flex gap-3 pb-6 last:pb-0 sm:gap-4">
                 <span aria-hidden="true" className="absolute bottom-0 left-[17px] top-10 w-px bg-slate-200 group-last:hidden" />
                 <span aria-hidden="true" className={`relative flex size-9 shrink-0 items-center justify-center rounded-full ${detail.tone}`}><Icon className="size-4" /></span>
-                <div className="min-w-0 flex-1 pt-1">
-                  <div className="flex flex-wrap items-center justify-between gap-x-3 gap-y-1"><p className="min-w-0 break-words text-sm font-semibold text-slate-800 [overflow-wrap:anywhere]">{messages[0] ?? eventLabel}</p><time dateTime={log.createdAt} className="shrink-0 text-xs text-slate-400">{formatTime(log.createdAt)}</time></div>
-                  <p className="mt-1 text-xs text-slate-500">{log.userName || log.userEmail || "System"}</p>
-                  {messages.length > 1 && <ul className="mt-2 list-disc space-y-1 pl-4 text-xs leading-5 text-slate-600">{messages.slice(1).map((message, index) => <li key={index} className="break-words [overflow-wrap:anywhere]">{message}</li>)}</ul>}
-                  <AuditDetails log={log} entityType={entityType} entityId={entityId} />
-                </div>
+                <article className="min-w-0 flex-1 rounded-lg border border-slate-200/80 bg-white p-3 sm:p-4">
+                  <header className="mb-3 flex flex-wrap items-center justify-between gap-x-3 gap-y-1 border-b border-slate-100 pb-2.5">
+                    <p className="min-w-0 text-xs font-semibold text-slate-700 [overflow-wrap:anywhere]">{log.userName || log.userEmail || "System"}</p>
+                    <time dateTime={log.createdAt} className="text-xs leading-5 text-slate-500">{formatTime(log.createdAt)}</time>
+                  </header>
+                  <p className="break-words text-sm font-semibold text-slate-800 [overflow-wrap:anywhere]">{eventLabel}</p>
+                  {messages.length > 0 && <ul className="mt-2 list-disc space-y-1.5 pl-4 text-xs leading-5 text-slate-600">{messages.map((message, index) => <li key={index} className="whitespace-pre-wrap break-words [overflow-wrap:anywhere]">{message}</li>)}</ul>}
+                </article>
               </li>
             );
           })}
@@ -93,26 +94,5 @@ export default function EntityActivity({ entityType, entityId }: { entityType: A
       )}
       {logs.length > 0 && (data?.total ?? 0) > logs.length && <p className="border-t border-slate-100 px-5 py-3 text-xs text-slate-500 sm:px-6">Showing the latest {logs.length} of {data?.total} activities.</p>}
     </section>
-  );
-}
-
-function AuditDetails({ log, entityType, entityId }: { log: AuditLogItem; entityType: AuditEntityType; entityId: string }) {
-  const [open, setOpen] = useState(false);
-  const { data, isLoading, isError, refetch } = useAuditLogQuery(entityType, entityId, log.id, open);
-  const fields = getSavedFields(data ?? log);
-  return (
-    <details onToggle={(event) => setOpen(event.currentTarget.open)} className="mt-3 rounded-lg border border-slate-100 bg-slate-50/70">
-      <summary className="cursor-pointer px-3 py-2 text-xs font-medium text-slate-600 focus-visible:outline-2 focus-visible:outline-primary">View saved details{fields.length > 0 ? ` (${fields.length} fields)` : ""}</summary>
-      {isLoading && <p role="status" className="px-3 pb-3 text-xs text-slate-500">Loading audit details?</p>}
-      {isError && <div className="px-3 pb-3 text-xs text-slate-500">Full audit details could not be loaded. <button type="button" onClick={() => void refetch()} className="font-semibold text-primary hover:underline">Try again</button></div>}
-      {fields.length > 0 ? <>
-        <p className="px-3 pb-2 text-xs text-slate-500">Values recorded with this event.</p>
-        <dl className="grid gap-x-4 gap-y-3 border-t border-slate-100 p-3 sm:grid-cols-2">
-          {fields.map(({ field, label, value }) => (
-            <div key={field} className="min-w-0"><dt className="text-xs text-slate-500">{field === "status" && entityType !== "BUSINESS" ? "Status" : label}</dt><dd className="mt-1 whitespace-pre-wrap break-words text-xs font-medium text-slate-800 [overflow-wrap:anywhere]">{["scheduledAt", "completedAt", "startDate", "endDate", "expiresAt"].includes(field) && !Number.isNaN(Date.parse(value)) ? formatTime(value) : value}</dd></div>
-          ))}
-        </dl>
-      </> : !isLoading && !isError && <p className="px-3 pb-3 text-xs text-slate-500">No additional field values were recorded for this event.</p>}
-    </details>
   );
 }

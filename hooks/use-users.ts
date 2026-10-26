@@ -2,6 +2,8 @@
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { toast } from "sonner";
+import { useAuthStore } from "@/store/auth-store";
+import { isSuperAdmin, isTenantAdmin } from "@/types/auth";
 import {
   createUser,
   deleteUser,
@@ -88,8 +90,13 @@ export function useCreateUser() {
 export function useUpdateUser() {
   const refresh = useRefreshUsers();
   return useMutation({
-    mutationFn: ({ id, payload }: { id: string; payload: UpdateUserPayload }) =>
-      updateUser(id, payload),
+    mutationFn: ({ id, payload }: { id: string; payload: UpdateUserPayload }) => {
+      const actor = useAuthStore.getState().user;
+      if (!isSuperAdmin(actor) && !isTenantAdmin(actor)) {
+        throw new Error("Only admins can update user details.");
+      }
+      return updateUser(id, payload, true);
+    },
     onSuccess: () => {
       void refresh();
       toast.success("User updated.");
