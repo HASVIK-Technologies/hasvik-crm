@@ -51,7 +51,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { useCreateUser, useUpdateUserStatus, useUpdateUser, useUsersQuery } from "@/hooks/use-users";
+import { useCreateUser, useUpdateUserStatus, useUpdateUser, useUsersQuery, useUserKpisQuery } from "@/hooks/use-users";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import type { CreateUserPayload, UserRecord, UserRole } from "@/types/user";
 
@@ -106,6 +106,12 @@ export default function UsersPage() {
     superAdmin && tenantFilter !== "ALL" ? tenantFilter : undefined,
   );
   const createMutation = useCreateUser();
+  const kpisQuery = useUserKpisQuery({
+    search: debouncedSearch,
+    role: roleFilter,
+    isActive: statusFilter === "ALL" ? undefined : statusFilter === "ACTIVE",
+    tenantId: superAdmin && tenantFilter !== "ALL" ? tenantFilter : undefined,
+  });
   const updateMutation = useUpdateUser();
   const statusMutation = useUpdateUserStatus();
   const users = usersQuery.data?.items ?? [];
@@ -237,11 +243,14 @@ export default function UsersPage() {
         resultCount={total}
         showStats={showStats}
         stats={
-          <KpiCards items={[
-              { label: "Team members", value: total, icon: UsersRound, tone: "text-primary bg-blue-50" },
-              { label: "Administrators on page", value: users.filter((item) => item.role.toUpperCase() === "ADMIN").length, icon: ShieldCheck, tone: "text-emerald-700 bg-emerald-50" },
-              { label: "Workspace roles", value: roles.length, icon: UserRound, tone: "text-violet-700 bg-violet-50" },
-            ].map((item, index) => ({ ...item, tone: (["blue", "green", "violet"] as const)[index] }))} />
+          <div className="space-y-3">
+            <KpiCards loading={kpisQuery.isPending} items={[
+              { label: "Team members", value: kpisQuery.isError ? "—" : kpisQuery.data?.total ?? "—", icon: UsersRound, tone: "blue" },
+              { label: "Active users", value: kpisQuery.isError ? "—" : kpisQuery.data?.active ?? "—", icon: ShieldCheck, tone: "green" },
+              { label: "Inactive users", value: kpisQuery.isError ? "—" : kpisQuery.data?.inactive ?? "—", icon: UserRound, tone: "slate" },
+            ]} />
+            {kpisQuery.isError && <p role="alert" className="text-sm text-amber-800">User totals could not be loaded. <button type="button" onClick={() => void kpisQuery.refetch()} className="font-semibold underline">Retry totals</button></p>}
+          </div>
         }
         actions={
           <Actions

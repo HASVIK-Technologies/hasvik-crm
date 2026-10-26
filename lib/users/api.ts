@@ -1,12 +1,13 @@
 import { apiClient } from "@/lib/api/api-client";
 import { getTenant } from "@/lib/tenants/api";
 import { getUserTenant } from "@/lib/users/tenant";
-import { userRequestParams, type UserQueryParams } from "@/lib/users/query-params";
+import { userRequestParams, userKpiRequestParams, type UserQueryParams, type UserKpiParams } from "@/lib/users/query-params";
 import { canUpdateRecord } from "@/lib/records/activity";
 import type {
   CreateUserPayload,
   UpdateUserPayload,
   UserRecord,
+  UserKpis,
 } from "@/types/user";
 
 type CollectionPayload<T> =
@@ -37,6 +38,19 @@ export async function getUsers(
 export async function createUser(payload: CreateUserPayload) {
   const response = await apiClient.post<UserRecord>("/users", payload);
   return response.data;
+}
+
+export async function getUserKpis(params?: UserKpiParams, signal?: AbortSignal): Promise<UserKpis> {
+  const response = await apiClient.get<UserKpis | { data: UserKpis }>("/users/kpis", {
+    params: userKpiRequestParams(params),
+    signal,
+  });
+  const payload = response.data;
+  const value = payload && "data" in payload ? payload.data : payload;
+  if (!value || ![value.total, value.active, value.inactive].every((count) => Number.isInteger(count) && count >= 0)) {
+    throw new Error("The users service returned invalid KPI counts.");
+  }
+  return { total: value.total, active: value.active, inactive: value.inactive };
 }
 
 export async function updateUser(id: string, payload: UpdateUserPayload) {

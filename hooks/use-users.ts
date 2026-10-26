@@ -6,6 +6,7 @@ import {
   createUser,
   deleteUser,
   getUsers,
+  getUserKpis,
   updateUser,
 } from "@/lib/users/api";
 import type {
@@ -13,9 +14,11 @@ import type {
   UpdateUserPayload,
   UserRole,
 } from "@/types/user";
+import { userKpiRequestParams, type UserKpiParams } from "@/lib/users/query-params";
 
 export const userQueryKeys = {
   all: ["users"] as const,
+  kpis: (params?: UserKpiParams) => ["users", "kpis", userKpiRequestParams(params)] as const,
   lists: () => [...userQueryKeys.all, "list"] as const,
   list: (
     search: string,
@@ -29,6 +32,13 @@ export const userQueryKeys = {
   ) =>
     [...userQueryKeys.lists(), { search, role, page, limit, sortBy, sortOrder, isActive, tenantId }] as const,
 };
+
+export function useUserKpisQuery(params?: UserKpiParams) {
+  return useQuery({
+    queryKey: userQueryKeys.kpis(params),
+    queryFn: ({ signal }) => getUserKpis(params, signal),
+  });
+}
 
 export function useUsersQuery(
   search: string,

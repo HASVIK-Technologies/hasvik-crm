@@ -28,7 +28,7 @@ export default function PlatformDashboard({ user, now }: { user: AuthUser; now: 
     <KpiCards className="gap-4 sm:gap-4" variant="solid" items={[
       { label: "Active tenants", value: metricValue(active, active.data?.total), icon: Landmark, tone: "blue" },
       { label: "Inactive tenants", value: metricValue(inactive, inactive.data?.total), icon: ShieldCheck, tone: "slate" },
-      { label: "Active users", value: metricValue(users, users.data?.total), icon: Users, tone: "green" },
+      { label: "Active users", value: metricValue(users, users.data?.active), icon: Users, tone: "green" },
       { label: "Pending subscriptions", value: metricValue(subscriptions, summary.pending.length), icon: CreditCard, tone: "amber" },
     ]} />
     {(inactive.isError || users.isError) && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border border-amber-200 bg-amber-50 p-4 text-sm text-amber-900"><span>Some platform totals are unavailable.</span><button type="button" onClick={() => { if (inactive.isError) void inactive.refetch(); if (users.isError) void users.refetch(); }} className="font-semibold underline">Retry totals</button></div>}
