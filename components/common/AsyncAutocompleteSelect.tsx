@@ -85,7 +85,7 @@ export default function AsyncAutocompleteSelect({
           onOpenChange?.(nextOpen);
         }}
       >
-        <div className="flex h-10 w-full items-center border border-line bg-surface shadow-card transition-colors hover:border-muted focus-within:border-brand-strong focus-within:ring-2 focus-within:ring-brand/15">
+        <div className="flex h-11 w-full items-center rounded-xl border border-line bg-surface shadow-card transition-colors hover:border-muted focus-within:border-brand focus-within:ring-4 focus-within:ring-(--ring) sm:h-10">
           <PopoverTrigger asChild>
             <button
               id={controlId}
@@ -95,7 +95,7 @@ export default function AsyncAutocompleteSelect({
               aria-expanded={open}
               aria-invalid={invalid}
               className={cn(
-                "flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left text-xs font-medium text-ink-soft outline-none",
+                "flex h-full min-w-0 flex-1 items-center gap-2 rounded-xl px-3.5 text-left text-base text-ink outline-none sm:text-sm",
                 !selectedLabel && "text-muted",
               )}
             >

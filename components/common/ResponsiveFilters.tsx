@@ -47,7 +47,7 @@ export default function ResponsiveFilters({ fields, onReset, hasActiveFilters }:
     {visible.map((field) => renderField(field, false))}
     {more.length > 0 && <Popover key={count}>
       <PopoverTrigger asChild>
-        <button type="button" className={`inline-flex h-10 shrink-0 items-center gap-2 border px-3 text-xs font-semibold ${activeMore ? "border-brand-strong bg-brand-soft text-brand-strong" : "border-line bg-surface text-ink-soft hover:bg-surface-2"}`}>
+        <button type="button" className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-sm font-semibold ${activeMore ? "border-brand-strong bg-brand-soft text-brand-strong" : "border-line bg-surface text-ink-soft hover:bg-surface-2"}`}>
           <Filter className="size-3.5" />More Filters
           {activeMore > 0 && <span className="rounded-full bg-btn px-1.5 text-[10px] text-primary-foreground">{activeMore}</span>}
         </button>
@@ -60,6 +60,6 @@ export default function ResponsiveFilters({ fields, onReset, hasActiveFilters }:
         <div className="flex flex-col gap-4">{more.map((field) => renderField(field, true))}</div>
       </PopoverContent>
     </Popover>}
-    {onReset && (hasActiveFilters ?? fields.some((field) => field.active)) && <button type="button" data-inline-filter-reset onClick={onReset} className="inline-flex h-10 shrink-0 items-center gap-1.5 border border-line bg-surface px-3 text-xs font-semibold text-ink-soft hover:bg-bad-soft hover:text-bad"><RotateCcw className="size-3.5" />Reset Filters</button>}
+    {onReset && (hasActiveFilters ?? fields.some((field) => field.active)) && <button type="button" data-inline-filter-reset onClick={onReset} className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-sm font-semibold text-ink-soft hover:bg-bad-soft hover:text-bad"><RotateCcw className="size-3.5" />Reset Filters</button>}
   </div>;
 }
