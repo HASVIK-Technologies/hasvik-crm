@@ -165,11 +165,11 @@ export interface ActivityOwnerRow {
   total: number;
 }
 
-/** Completed activity per owner; WhatsApp and email are grouped as messages. */
+/** Completed activity per owner, by scheduled date (the field the follow-ups API filters on); WhatsApp and email are grouped as messages. */
 export function activityByOwner(activities: ActivityRecord[], range: Pick<DateRange, "from" | "to">): ActivityOwnerRow[] {
   const rows = new Map<string, ActivityOwnerRow>();
   for (const activity of activities) {
-    if (activity.status !== "COMPLETED" || !inRange(activity.completedAt ?? activity.scheduledAt, range.from, range.to)) continue;
+    if (activity.status !== "COMPLETED" || !inRange(activity.scheduledAt, range.from, range.to)) continue;
     const id = activity.ownerId || UNASSIGNED;
     const row = rows.get(id) ?? { ownerId: id, ownerName: activity.ownerName || "Unassigned", calls: 0, meetings: 0, messages: 0, other: 0, total: 0 };
     if (activity.type === "CALL") row.calls++;

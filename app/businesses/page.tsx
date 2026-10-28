@@ -1,6 +1,6 @@
 "use client";
 
-import React, { Suspense, useEffect, useMemo, useRef } from "react";
+import React, { Suspense, useEffect, useMemo, useRef, useState } from "react";
 import { useSearchParams, usePathname } from "next/navigation";
 import { ChartNoAxesCombined, Filter, Plus } from "lucide-react";
 import Actions from "@/components/common/Actions";
@@ -26,6 +26,16 @@ import {
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import BusinessViewToggle from "@/components/businesses/BusinessViewToggle";
+import ActiveFilterChips, { type FilterChip } from "@/components/common/ActiveFilterChips";
+import { useLeadsData } from "@/hooks/use-analytics";
+import { STAGE_LABELS } from "@/lib/analytics/metrics";
+import {
+  applyLeadViewFilter,
+  CLIENT_FILTER_KEYS,
+  needsClientFilter,
+  parseLeadViewFilter,
+  type LeadViewFilter,
+} from "@/lib/analytics/lead-filters";
 
 const EMPTY_BUSINESSES: BusinessItem[] = [];
 
@@ -62,6 +72,13 @@ function BusinessesContent() {
     syncFromParams,
   } = useBusinessListStore();
 
+  // Filters the API cannot apply (owner, dates, staleness, ...) live in the URL and are applied client-side.
+  const [viewFilter, setViewFilter] = useState<LeadViewFilter>(() => {
+    const parsed = parseLeadViewFilter(searchParams ?? new URLSearchParams());
+    return { owner: parsed.owner, createdFrom: parsed.createdFrom, createdTo: parsed.createdTo, updatedFrom: parsed.updatedFrom, updatedTo: parsed.updatedTo, staleDays: parsed.staleDays, open: parsed.open, source: parsed.source };
+  });
+  const clientMode = needsClientFilter(viewFilter);
+
   // 1. Initial URL param synchronization on mount / URL direct landing
   useEffect(() => {
     if (!hasInitializedFromUrl.current) {
@@ -89,6 +106,11 @@ function BusinessesContent() {
       isActive,
     });
 
+    for (const key of CLIENT_FILTER_KEYS) {
+      const value = viewFilter[key];
+      if (value !== undefined && value !== false) sp.set(key, value === true ? "1" : String(value));
+    }
+
     const newQueryString = sp.toString();
     const currentQueryString = searchParams ? searchParams.toString() : "";
 
@@ -109,6 +131,7 @@ function BusinessesContent() {
     city,
     status,
     isActive,
+    viewFilter,
   ]);
 
   // 3. Centralized API queries (100% Server-Side)
@@ -144,23 +167,60 @@ function BusinessesContent() {
     isLoading: isListLoading,
     isError: isListError,
     refetch: refetchList,
-  } = useBusinessesQuery(listQueryParams);
+  } = useBusinessesQuery(clientMode ? { ...listQueryParams, page: 1, limit: 1000 } : listQueryParams);
+  const leadsQuery = useLeadsData(true);
 
   const {
     data: kpiData,
     isLoading: isKpisLoading,
   } = useBusinessKpisQuery(kpiQueryParams);
 
-  const businesses = listData?.businesses ?? EMPTY_BUSINESSES;
-  const totalCount = listData?.total ?? 0;
-  const totalPages = listData?.totalPages ?? 1;
+  const clientRows = useMemo(() => {
+    if (!clientMode || !leadsQuery.data) return null;
+    const ids = new Set(applyLeadViewFilter(leadsQuery.data, viewFilter, new Date()).map((lead) => lead.id));
+    return (listData?.businesses ?? EMPTY_BUSINESSES).filter((item) => ids.has(String(item.id)));
+  }, [clientMode, leadsQuery.data, listData, viewFilter]);
+  const businesses = clientMode
+    ? (clientRows ?? EMPTY_BUSINESSES).slice((page - 1) * limit, page * limit)
+    : (listData?.businesses ?? EMPTY_BUSINESSES);
+  const totalCount = clientMode ? (clientRows?.length ?? 0) : (listData?.total ?? 0);
+  const totalPages = clientMode ? Math.max(1, Math.ceil(totalCount / limit)) : (listData?.totalPages ?? 1);
+  const listLoading = isListLoading || (clientMode && !clientRows);
+
+  // Owner options come from the leads themselves, so they work for every role.
+  const owners = useMemo(() => {
+    const seen = new Map<string, string>();
+    for (const lead of leadsQuery.data ?? []) if (lead.ownerId) seen.set(lead.ownerId, lead.ownerName || "Unnamed user");
+    return [...seen.entries()].map(([id, name]) => ({ id, name })).sort((a, b) => a.name.localeCompare(b.name));
+  }, [leadsQuery.data]);
+
+  const patchViewFilter = (patch: Partial<LeadViewFilter>) => {
+    setViewFilter((current) => ({ ...current, ...patch }));
+    setPage(1);
+  };
+  const resetEverything = () => {
+    setViewFilter({});
+    resetAllFilters();
+  };
+
+  const day = (iso?: string) => (iso ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso)) : "any date");
+  const chips: FilterChip[] = [];
+  if (status && status !== "All Status") chips.push({ key: "status", label: "Stage: " + (STAGE_LABELS[status] ?? status), onRemove: () => setStatus("") });
+  if (isActive === true) chips.push({ key: "active", label: "Active only", onRemove: () => setIsActive(undefined) });
+  if (viewFilter.owner) chips.push({ key: "owner", label: "Owner: " + (viewFilter.owner === "none" ? "Unassigned" : owners.find((o) => o.id === viewFilter.owner)?.name ?? "selected user"), onRemove: () => patchViewFilter({ owner: undefined }) });
+  if (viewFilter.createdFrom || viewFilter.createdTo) chips.push({ key: "created", label: "Added " + day(viewFilter.createdFrom) + " to " + day(viewFilter.createdTo), onRemove: () => patchViewFilter({ createdFrom: undefined, createdTo: undefined }) });
+  if (viewFilter.updatedFrom || viewFilter.updatedTo) chips.push({ key: "updated", label: "Updated " + day(viewFilter.updatedFrom) + " to " + day(viewFilter.updatedTo), onRemove: () => patchViewFilter({ updatedFrom: undefined, updatedTo: undefined }) });
+  if (viewFilter.staleDays) chips.push({ key: "stale", label: "No activity for " + viewFilter.staleDays + "+ days", onRemove: () => patchViewFilter({ staleDays: undefined }) });
+  if (viewFilter.open) chips.push({ key: "open", label: "Open leads only", onRemove: () => patchViewFilter({ open: undefined }) });
+  if (viewFilter.source) chips.push({ key: "source", label: "Source: " + viewFilter.source, onRemove: () => patchViewFilter({ source: undefined }) });
 
   // Active filters detection (only dropdown filters, since search bar has its own 'X' clear button)
   const hasActiveFilters = Boolean(
     categoryId ||
       (city && city !== "All Cities") ||
       (status && status !== "All Status") ||
-      isActive !== undefined,
+      isActive !== undefined ||
+      clientMode,
   );
 
   const searchControl = (
@@ -183,7 +243,10 @@ function BusinessesContent() {
       isActive={isActive}
       onIsActiveChange={setIsActive}
       hasActiveFilters={hasActiveFilters}
-      onResetFilters={resetAllFilters}
+      onResetFilters={resetEverything}
+      owners={owners}
+      selectedOwner={viewFilter.owner ?? ""}
+      onOwnerChange={(owner) => patchViewFilter({ owner: owner || undefined })}
     />
   );
 
@@ -192,10 +255,10 @@ function BusinessesContent() {
       breadcrumb={<Breadcrumb items={[{ label: "Businesses" }]} />}
       customSearch={searchControl}
       filters={filterControls}
-      showStats={showStats}
+      showStats={showStats && !clientMode}
       showFilters={showFilters}
       onToggleFilters={toggleFilters}
-      onResetFilters={resetAllFilters}
+      onResetFilters={resetEverything}
       resultCount={totalCount}
       viewSwitcher={<BusinessViewToggle value={view} onChange={setView} />}
       actions={
@@ -223,7 +286,9 @@ function BusinessesContent() {
       }
       stats={<BusinessStats stats={kpiData} isLoading={isKpisLoading} />}
       content={
-        isListError ? (
+        <div className="space-y-4">
+        <ActiveFilterChips chips={chips} onClearAll={resetEverything} />
+        {isListError ? (
           <div className="rounded-2xl border border-bad/30 bg-bad-soft p-12 text-center text-sm text-bad">
             Unable to load businesses from API.
             <button
@@ -239,7 +304,7 @@ function BusinessesContent() {
             <BusinessKanban
               businesses={businesses}
               totalCount={totalCount}
-              isLoading={isListLoading}
+              isLoading={listLoading}
               currentPage={page}
               itemsPerPage={limit}
               sortOrder={sortBy}
@@ -252,7 +317,7 @@ function BusinessesContent() {
             <BusinessTable
               businesses={businesses}
               totalCount={totalCount}
-              isLoading={isListLoading}
+              isLoading={listLoading}
               sortOrder={sortBy}
               onSortOrderChange={setSortBy}
               currentPage={page}
@@ -263,7 +328,8 @@ function BusinessesContent() {
               onClearFilters={resetAllFilters}
             />
           )
-        )
+        )}
+        </div>
       }
     />
   );
