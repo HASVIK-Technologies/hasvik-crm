@@ -229,7 +229,7 @@ export type FollowUpPayload = {
 export type CreateBusinessPayload = {
   name: string;
   categoryId: string;
-  status: string;
+  description?: string;
   phoneNumbers: { number: string; name: string; isPrimary: boolean }[];
   whatsappNumbers: { number: string; name: string; isPrimary: boolean }[];
   email?: string;
@@ -238,8 +238,6 @@ export type CreateBusinessPayload = {
   city: string;
   state: string;
   pincode: string;
-  latitude?: number;
-  longitude?: number;
   assignedTo?: string;
   leadSource?: string;
   followUp?: FollowUpPayload;

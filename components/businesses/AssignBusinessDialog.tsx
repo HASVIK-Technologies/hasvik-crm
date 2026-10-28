@@ -43,7 +43,7 @@ export default function AssignBusinessDialog({
     event.preventDefault();
     if (business?.isActive === false || business?.status === "Inactive") return;
     if (!business || !assignee?.id) {
-      setError("Select a responsible person.");
+      setError("Choose who to assign this business to.");
       return;
     }
 
@@ -76,7 +76,7 @@ export default function AssignBusinessDialog({
               </div>
               <div className="min-w-0">
                 <DialogPrimitive.Title className="text-base font-bold text-ink">
-                  Assign responsible person
+                  Assign to
                 </DialogPrimitive.Title>
                 <DialogPrimitive.Description className="mt-1 truncate text-xs text-muted">
                   Choose who will own and manage {business?.name || "this business"}.
@@ -97,7 +97,7 @@ export default function AssignBusinessDialog({
           <form onSubmit={handleSubmit} noValidate>
             <div className="px-5 py-5 sm:px-6">
               <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
-                Responsible person <span className="text-bad">*</span>
+                Assign to <span className="text-bad">*</span>
               </label>
               <AssigneeAutocomplete
                 value={assignee?.id}

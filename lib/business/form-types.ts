@@ -24,6 +24,8 @@ export type BusinessFormValues = {
   email: string;
   website: string;
   description: string;
+  /** Where the lead came from (free text, e.g. WhatsApp, Referral, Walk-in). */
+  leadSource: string;
   scheduleFollowUp: boolean;
   followUpType: FollowUpType | "";
   assignTo: string;
@@ -48,6 +50,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   email: "",
   website: "",
   description: "",
+  leadSource: "",
   scheduleFollowUp: false,
   followUpType: "",
   assignTo: "",
@@ -70,7 +73,7 @@ export const STEP_FIELD_NAMES = {
     "address",
     "status",
   ] as const,
-  additional: ["website", "description"] as const,
+  additional: ["website", "description", "leadSource"] as const,
   followup: [
     "followUpType",
     "assignTo",

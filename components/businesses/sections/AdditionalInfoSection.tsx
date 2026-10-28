@@ -39,6 +39,20 @@ export default function AdditionalInfoSection({
       </div>
 
       <div>
+        <FieldLabel htmlFor={`${idPrefix}leadSource`} optional>Lead source</FieldLabel>
+        <Input
+          id={`${idPrefix}leadSource`}
+          list={`${idPrefix}leadSource-options`}
+          placeholder="e.g. WhatsApp, Referral, Walk-in"
+          autoComplete="off"
+          {...register("leadSource")}
+        />
+        <datalist id={`${idPrefix}leadSource-options`}>
+          {["WhatsApp", "Referral", "Walk-in", "Website", "Cold call", "Social media"].map((option) => <option key={option} value={option} />)}
+        </datalist>
+      </div>
+
+      <div>
         <FieldLabel htmlFor={`${idPrefix}description`}>Description</FieldLabel>
         <Textarea
           id={`${idPrefix}description`}

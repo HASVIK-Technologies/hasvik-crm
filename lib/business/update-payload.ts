@@ -13,6 +13,7 @@ function editableValues(values: BusinessFormValues): Record<string, unknown> {
     state: values.state.trim(),
     pincode: values.pincode.trim(),
     description: values.description,
+    leadSource: values.leadSource.trim(),
     location: { url: normalizeHttpUrl(values.locationUrl) },
     assignedTo: values.assignTo || null,
     phoneNumbers: values.phoneNumbers.filter((item) => item.value.trim())

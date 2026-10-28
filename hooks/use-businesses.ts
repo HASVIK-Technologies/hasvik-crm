@@ -315,8 +315,14 @@ export function useCreateBusiness() {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (values: BusinessFormValues) =>
-      createBusinessRequest(toCreateBusinessPayload(values)),
+    mutationFn: async (values: BusinessFormValues) => {
+      const created = await createBusinessRequest(toCreateBusinessPayload(values));
+      // The create endpoint ignores `status` (new leads always start as NEW), so a different stage is applied afterwards.
+      if (values.status && values.status !== "NEW" && created._id) {
+        await updateBusinessData(String(created._id), { status: values.status });
+      }
+      return created;
+    },
     onSuccess: (created) => {
       queryClient.invalidateQueries({ queryKey: businessQueryKeys.all });
       toast.success(`${created.name} was added successfully.`);

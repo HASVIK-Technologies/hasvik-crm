@@ -655,7 +655,6 @@ export function toCreateBusinessPayload(
   const payload: CreateBusinessPayload = {
     name: businessName,
     categoryId: values.category,
-    status: values.status,
     phoneNumbers: toNumberEntries(values.phoneNumbers, businessName),
     whatsappNumbers: toNumberEntries(values.whatsappNumbers, businessName),
     address: values.address.trim(),
@@ -664,6 +663,8 @@ export function toCreateBusinessPayload(
     pincode: values.pincode.trim(),
   };
 
+  if (values.description.trim()) payload.description = values.description.trim();
+  if (values.leadSource.trim()) payload.leadSource = values.leadSource.trim();
   if (values.email.trim()) payload.email = values.email.trim();
   if (values.website.trim()) payload.website = values.website.trim();
   if (values.locationUrl?.trim()) {

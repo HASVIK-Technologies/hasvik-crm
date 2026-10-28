@@ -69,7 +69,7 @@ import {
 const TABLE_COLUMN_OPTIONS: Array<{ value: BusinessTableColumn; label: string }> = [
   { value: "category", label: "Category" },
   { value: "city", label: "City" },
-  { value: "responsible", label: "Responsible person" },
+  { value: "responsible", label: "Owner" },
   { value: "leadStatus", label: "Lead status" },
   { value: "activity", label: "Activity status" },
   { value: "lastFollowUp", label: "Last follow-up" },
@@ -523,7 +523,7 @@ export default function BusinessTable({
                 <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Business Name</TableHead>
                 {columnVisible("category") && <TableHead className="px-4 py-4 font-semibold">Category</TableHead>}
                 {columnVisible("city") && <TableHead className="px-4 py-4 font-semibold">City</TableHead>}
-                {columnVisible("responsible") && <TableHead className="min-w-44 px-4 py-4 font-semibold">Responsible Person</TableHead>}
+                {columnVisible("responsible") && <TableHead className="min-w-44 px-4 py-4 font-semibold">Owner</TableHead>}
                 {columnVisible("leadStatus") && <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>}
                 {columnVisible("activity") && <TableHead className="px-4 py-4 font-semibold">Status</TableHead>}
                 {columnVisible("lastFollowUp") && <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>}
