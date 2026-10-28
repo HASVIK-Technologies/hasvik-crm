@@ -28,6 +28,10 @@ export function useFollowUpUrlFilters(): { chips: FilterChip[]; clearAll: () => 
   const [ready, setReady] = useState(false);
 
   useEffect(() => {
+    void useFollowUpListStore.persist.rehydrate();
+  }, []);
+
+  useEffect(() => {
     if (initialised.current) return;
     initialised.current = true;
     const incoming = Object.fromEntries(KEYS.map((key) => [key, searchParams.get(key) ?? ""])) as Record<Key, string>;

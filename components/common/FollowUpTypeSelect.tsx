@@ -30,7 +30,7 @@ export default function FollowUpTypeSelect({
       value={value || undefined}
       onValueChange={(selected) => onChange(selected as FollowUpType)}
     >
-      <SelectTrigger className={className} aria-invalid={invalid}>
+      <SelectTrigger className={className} aria-label="Select option" aria-invalid={invalid}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
       <SelectContent className="bg-surface">

@@ -354,7 +354,7 @@ export default function TenantManagementPage() {
                 setPage(1);
               }}
             >
-              <SelectTrigger id="tenant-status-filter" size="sm" className="w-40 rounded-lg text-xs">
+              <SelectTrigger id="tenant-status-filter" aria-label="Tenant status" size="sm" className="w-40 rounded-lg text-xs">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-surface">

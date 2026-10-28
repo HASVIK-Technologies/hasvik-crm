@@ -2,6 +2,7 @@ import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AppShell from "@/components/layout/AppShell";
 import AppProviders from "@/components/providers/AppProviders";
+import { BRAND_THEME_COLOR } from "@/lib/shared/brand";
 import "./globals.css";
 
 const geistSans = Geist({
@@ -21,7 +22,7 @@ export const metadata: Metadata = {
   appleWebApp: { capable: true, title: "HASVIK CRM", statusBarStyle: "default" },
 };
 
-export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: "#0876d1" };
+export const viewport: Viewport = { width: "device-width", initialScale: 1, themeColor: BRAND_THEME_COLOR };
 
 // Applies the saved (or system) colour theme before first paint so there is no flash.
 const themeScript =

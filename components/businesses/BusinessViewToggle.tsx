@@ -35,7 +35,7 @@ export default function BusinessViewToggle({
                 aria-pressed={active}
                 onClick={() => onChange(option.value)}
                 className={cn(
-                  "inline-flex h-8 items-center gap-2 border px-3 text-xs font-semibold transition-colors",
+                  "inline-flex h-11 items-center gap-2 rounded-lg border px-3 text-xs sm:h-9 font-semibold transition-colors",
                   active
                     ? "border-line bg-surface text-brand-strong shadow-sm"
                     : "border-transparent text-muted hover:text-ink",

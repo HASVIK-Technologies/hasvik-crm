@@ -43,7 +43,7 @@ export default function LabeledSelect({
         {label}
       </FieldLabel>
       <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger className="w-full" aria-invalid={invalid}>
+        <SelectTrigger className="w-full" aria-label={label} aria-invalid={invalid}>
           <SelectValue placeholder={placeholder} />
         </SelectTrigger>
         <SelectContent>

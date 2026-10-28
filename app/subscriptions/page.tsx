@@ -628,7 +628,7 @@ export default function SubscriptionsPage() {
               value={statusFilter}
               onValueChange={(value) => { setStatusFilter(value as SubscriptionFilter); setPage(1); }}
             >
-              <SelectTrigger id="subscription-status-filter" size="sm" className="w-48 rounded-xl text-xs">
+              <SelectTrigger id="subscription-status-filter" aria-label="Subscription status" size="sm" className="w-48 rounded-xl text-xs">
                 <SelectValue>
                   {statusFilter === "ALL" ? <span className="text-ink-soft">All statuses</span> : <StatusBadge status={statusFilter} />}
                 </SelectValue>

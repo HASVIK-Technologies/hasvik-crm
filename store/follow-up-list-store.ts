@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import type { FollowUpFilters } from "@/types/follow-up";
 import { savedFollowUpDate } from "@/lib/follow-ups/highlight";
 
@@ -42,7 +43,8 @@ interface FollowUpListState extends FollowUpFilters {
   clearFollowUpHighlight: (revision: number) => void;
 }
 
-export const useFollowUpListStore = create<FollowUpListState>((set) => ({
+// Only the Table / Calendar choice is remembered per browser; it is rehydrated after mount.
+export const useFollowUpListStore = create<FollowUpListState>()(persist((set) => ({
   ...initialFilters,
   view: "table",
   calendarMonth: new Date().toISOString().slice(0, 7),
@@ -86,4 +88,4 @@ export const useFollowUpListStore = create<FollowUpListState>((set) => ({
         ? { highlightedFollowUpId: null, highlightedFollowUpDate: null, scrollToHighlightedFollowUp: false }
         : state,
     ),
-}));
+}), { name: "hasvik-followup-view", partialize: (state) => ({ view: state.view }), skipHydration: true }));

@@ -42,7 +42,7 @@ export default function FollowUpReminderSelect({
 
   return (
     <Select value={value || undefined} onValueChange={onChange}>
-      <SelectTrigger className={className} aria-invalid={invalid}>
+      <SelectTrigger className={className} aria-label="Select option" aria-invalid={invalid}>
         {showIcon ? (
           <span className="flex items-center gap-2">
             <Bell className="size-3.5 text-muted" />

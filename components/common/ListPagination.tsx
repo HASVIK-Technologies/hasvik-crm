@@ -90,7 +90,7 @@ export default function ListPagination({
           value={`${limit} per page`}
           onValueChange={(value) => onLimitChange(Number.parseInt(value, 10))}
         >
-          <SelectTrigger className="h-8.5 w-auto border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft">
+          <SelectTrigger aria-label="Rows per page" className="h-8.5 w-auto border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft">
             <SelectValue />
           </SelectTrigger>
           <SelectContent className="bg-surface">

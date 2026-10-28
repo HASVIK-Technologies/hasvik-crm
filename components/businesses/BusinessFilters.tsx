@@ -44,7 +44,7 @@ export default function BusinessFilters({ selectedCategoryId = "", selectedCateg
     </Select> },
     { key: "city", label: "City", active: Boolean(selectedCity), reset: () => onCityChange?.(""), control: <CityAutocomplete value={selectedCity} onChange={onCityChange} placeholder="All Cities" /> },
     { key: "activity", label: "Activity status", active: isActive !== undefined, reset: () => onIsActiveChange?.(undefined), control: <Select value={isActive === undefined ? "ALL" : isActive ? "ACTIVE" : "INACTIVE"} onValueChange={(value) => onIsActiveChange?.(value === "ALL" ? undefined : value === "ACTIVE")}>
-      <SelectTrigger className="w-full bg-surface text-xs"><SelectValue /></SelectTrigger>
+      <SelectTrigger className="w-full bg-surface text-xs" aria-label="Activity status"><SelectValue /></SelectTrigger>
       <SelectContent className="bg-surface"><SelectItem value="ALL">All Status</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
     </Select> },
   ]} />;

@@ -213,7 +213,7 @@ export default function UsersPage() {
                 setPage(1);
               }}
             >
-              <SelectTrigger id="users-role-filter" size="sm" className="w-44 rounded-lg text-xs">
+              <SelectTrigger id="users-role-filter" aria-label="Role" size="sm" className="w-44 rounded-lg text-xs">
                 <SelectValue placeholder="All roles" />
               </SelectTrigger>
               <SelectContent className="bg-surface">
@@ -226,11 +226,11 @@ export default function UsersPage() {
               </SelectContent>
             </Select> },
             ...(superAdmin ? [{ key: "tenant", label: "Workspace", active: tenantFilter !== "ALL", reset: () => { setTenantFilter("ALL"); setPage(1); }, control: <><Select value={tenantFilter} onValueChange={(value) => { setTenantFilter(value); setPage(1); }}>
-                <SelectTrigger id="users-tenant-filter" size="sm" disabled={tenantsQuery.isPending} className="w-48 max-w-full rounded-lg text-xs"><SelectValue placeholder="All tenants" /></SelectTrigger>
+                <SelectTrigger id="users-tenant-filter" aria-label="Workspace" size="sm" disabled={tenantsQuery.isPending} className="w-48 max-w-full rounded-lg text-xs"><SelectValue placeholder="All tenants" /></SelectTrigger>
                 <SelectContent className="max-h-72 bg-surface"><SelectItem value="ALL">All tenants</SelectItem>{tenants.map((tenant) => <SelectItem key={tenant.id} value={tenant.id}>{tenant.name}{tenant.isActive ? "" : " (Inactive)"}</SelectItem>)}</SelectContent>
               </Select>{tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-brand-strong hover:underline">Retry loading tenants</button>}</> }] : []),
             { key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
-              <SelectTrigger id="users-status-filter" size="sm" className="w-36 rounded-lg text-xs"><SelectValue /></SelectTrigger>
+              <SelectTrigger id="users-status-filter" aria-label="Account status" size="sm" className="w-36 rounded-lg text-xs"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-surface"><SelectItem value="ALL">All statuses</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
             </Select> },
           ]} />}

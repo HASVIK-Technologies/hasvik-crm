@@ -1,6 +1,7 @@
 "use client";
 
 import { create } from "zustand";
+import { persist } from "zustand/middleware";
 import {
   BusinessListStateFilters,
   DEFAULT_BUSINESS_QUERY,
@@ -49,7 +50,9 @@ const DEFAULT_TABLE_COLUMNS: BusinessTableColumn[] = [
   "nextFollowUp",
 ];
 
-export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
+// Only the Table / Kanban choice is remembered per browser. It is rehydrated after mount (see app/businesses/page.tsx)
+// so the server render and first client render agree.
+export const useBusinessListStore = create<BusinessListStoreState>()(persist((set) => ({
   page: DEFAULT_BUSINESS_QUERY.page,
   limit: DEFAULT_BUSINESS_QUERY.limit,
   sortBy: DEFAULT_BUSINESS_QUERY.sortBy,
@@ -139,4 +142,4 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
       ...state,
       ...params,
     })),
-}));
+}), { name: "hasvik-business-view", partialize: (state) => ({ view: state.view }), skipHydration: true }));

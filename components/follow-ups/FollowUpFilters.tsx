@@ -40,7 +40,7 @@ export default function FollowUpFilters({ filters, setFilter, reset, view }: Pro
     { key: "assignee", label: "Team member", active: Boolean(filters.assignedTo), reset: () => setOption("user"), control: <AssigneeAutocomplete value={filters.assignedTo} label={filters.assignedToName} onChange={(option) => setOption("user", option)} placeholder="All Team Members" /> },
     { key: "status", label: "Status", active: Boolean(filters.status), reset: () => setFilter("status", ""), control: <FollowUpStatusSelect value={filters.status} onChange={(value) => setFilter("status", value)} /> },
     { key: "type", label: "Type", active: Boolean(filters.type), reset: () => setFilter("type", ""), control: <Select value={filters.type || "ALL"} onValueChange={(value) => setFilter("type", value === "ALL" ? "" : value)}>
-      <SelectTrigger className="w-full bg-surface text-xs"><SelectValue /></SelectTrigger>
+      <SelectTrigger aria-label="Follow-up type" className="w-full bg-surface text-xs"><SelectValue /></SelectTrigger>
       <SelectContent className="bg-surface"><SelectItem value="ALL">All Types</SelectItem><SelectItem value="CALL">Call</SelectItem><SelectItem value="MEETING">Meeting</SelectItem><SelectItem value="EMAIL">Email</SelectItem><SelectItem value="WHATSAPP">WhatsApp</SelectItem><SelectItem value="OTHER">Other</SelectItem></SelectContent>
     </Select> },
   ];

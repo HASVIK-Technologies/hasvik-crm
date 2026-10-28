@@ -25,9 +25,10 @@ export default function FollowUpViewToggle({
             key={option.value}
             type="button"
             aria-pressed={active}
+            aria-label={option.label}
             onClick={() => onChange(option.value)}
             className={cn(
-              "flex h-9 items-center gap-1.5 border px-2 text-xs font-semibold transition-colors sm:gap-2 sm:px-3",
+              "flex h-11 items-center gap-1.5 rounded-lg border px-3 sm:h-9 text-xs font-semibold transition-colors sm:gap-2 sm:px-3",
               active
                 ? "border-line bg-surface text-brand-strong shadow-sm"
                 : "border-transparent text-muted hover:bg-surface/70 hover:text-ink",

@@ -216,11 +216,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         className={cn(
           "group relative flex min-h-11 items-center rounded-xl text-sm font-semibold transition-colors",
           compact ? "justify-center px-0" : "gap-3 px-3.5",
-          active ? "bg-brand-soft text-brand-strong" : "text-ink-soft hover:bg-surface-2 hover:text-ink",
+          active ? "bg-brand-soft text-ink" : "text-ink-soft hover:bg-surface-2 hover:text-ink",
         )}
       >
         {active && !compact && <span aria-hidden className="absolute top-2.5 bottom-2.5 left-0 w-1 rounded-r-full bg-brand" />}
-        <Icon className="size-5 shrink-0" strokeWidth={active ? 2.4 : 2} aria-hidden />
+        <Icon className={cn("size-5 shrink-0", active && "text-brand-strong")} strokeWidth={active ? 2.4 : 2} aria-hidden />
         {compact ? <span className="sr-only">{item.label}</span> : <span className="truncate">{item.label}</span>}
       </Link>
     );

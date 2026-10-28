@@ -38,7 +38,7 @@ export default function FormLeadStatusSelect({
         {label}
       </FieldLabel>
       <Select value={value} onValueChange={onChange}>
-        <SelectTrigger id={id} aria-invalid={invalid} className="w-full">
+        <SelectTrigger id={id} aria-label="Lead status" aria-invalid={invalid} className="w-full">
           <span className="flex items-center gap-2 truncate text-left">
             {value && <span className={`size-2 shrink-0 ${getLeadStatusVisual(value).dot}`} />}
             {value ? formatLeadStatus(value, statuses) : "Select status"}

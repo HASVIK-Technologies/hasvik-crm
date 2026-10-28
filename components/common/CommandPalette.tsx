@@ -34,9 +34,9 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
 
   useEffect(() => {
     if (!open) return;
-    const id = window.setTimeout(() => input.current?.focus(), 30);
+
     document.body.style.overflow = "hidden";
-    return () => { window.clearTimeout(id); document.body.style.overflow = ""; };
+    return () => { document.body.style.overflow = ""; };
   }, [open]);
 
   useEffect(() => {
@@ -79,6 +79,7 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
           <Search className="size-5 shrink-0 text-muted" aria-hidden />
           <input
             ref={input}
+            autoFocus
             value={query}
             onChange={(event) => { setQuery(event.target.value); setCursor(0); }}
             placeholder="Search pages or businesses…"

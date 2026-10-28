@@ -11,12 +11,12 @@
 */
 :root {
   --brand: #08a9e6;              /* Tech Cyan: highlights, focus, active indicators */
-  --brand-strong: #0876d1;       /* HASVIK Blue: links and brand text (4.9:1 on white) */
+  --brand-strong: #0669b9;       /* HASVIK Blue, darkened for text: 5.1:1 on the soft tint, 5.9:1 on white */
   --brand-soft: #e7f4fd;
   --btn: #0876d1;                /* primary button fill: white text 4.9:1 */
   --btn-hover: #0665b5;
   --accent: #20b83f;             /* HASVIK Green: growth, success, secondary brand */
-  --accent-strong: #158a30;      /* green text on white: 4.7:1 */
+  --accent-strong: #11772a;      /* green text: 4.6:1 on the soft tint */
   --accent-soft: #e4f7e9;
   --growth: #63d329;             /* Growth Green: swoosh highlights only */
   --ink: #0a1f33;
@@ -26,10 +26,10 @@
   --surface: #ffffff;
   --surface-2: #f4f8fc;
   --canvas: #f0f5fa;
-  --ok: #158a30;     --ok-soft: #e1f6e7;
+  --ok: #11772a;     --ok-soft: #e1f6e7;
   --warn: #a15207;   --warn-soft: #fef3c7;
   --bad: #b91c1c;    --bad-soft: #fee2e2;
-  --info: #0876d1;   --info-soft: #e7f4fd;
+  --info: #0669b9;   --info-soft: #e7f4fd;
   --shadow-sm: 0 1px 2px rgba(10, 31, 51, 0.05);
   --shadow-md: 0 6px 18px rgba(10, 31, 51, 0.07);
   --shadow-lg: 0 20px 56px rgba(10, 31, 51, 0.14);
@@ -44,8 +44,8 @@ html.dark {
   --brand: #3dbdf2;
   --brand-strong: #5bc3f4;
   --brand-soft: rgba(8, 169, 230, 0.16);
-  --btn: #0b7fd9;
-  --btn-hover: #1a92ee;
+  --btn: #0a74c9;
+  --btn-hover: #0b82e0;
   --accent: #3ccf5c;
   --accent-strong: #5fdc7b;
   --accent-soft: rgba(32, 184, 63, 0.16);

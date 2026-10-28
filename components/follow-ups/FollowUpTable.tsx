@@ -184,13 +184,14 @@ export default function FollowUpTable({
                   key={item.id}
                   data-follow-up-item-id={item.id}
                   tabIndex={0}
+                  role="link"
                   aria-label={`Open follow-up details for ${item.businessName}`}
                   onClick={(event) => handleRowClick(event, item.id)}
                   onKeyDown={(event) => handleRowKeyDown(event, item.id)}
                   className={`flex cursor-pointer items-start justify-between gap-3 border bg-surface p-3 shadow-card transition-all duration-500 hover:border-brand/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 md:p-4 ${isFollowUpHighlighted(item.id) ? "border-brand-strong bg-brand-soft/80 ring-2 ring-brand/20" : "border-surface-2"}`}
                 >
                   <div className="flex min-w-0 items-start gap-3">
-                    <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="shrink-0">
+                    <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} aria-label={`Open follow-up details for ${item.businessName}`} className="hidden shrink-0 sm:block">
                       <Avatar className="mt-0.5 hidden size-11 rounded-full bg-btn/10 text-sm font-bold text-brand-strong transition-transform hover:scale-105 sm:flex">
                         <AvatarFallback className="bg-transparent text-inherit">{initials(item.businessName)}</AvatarFallback>
                       </Avatar>
@@ -346,6 +347,7 @@ export default function FollowUpTable({
                     key={item.id}
                     data-follow-up-item-id={item.id}
                     tabIndex={0}
+                    role="link"
                     aria-label={`Open follow-up details for ${item.businessName}`}
                     onClick={(event) => handleRowClick(event, item.id)}
                     onKeyDown={(event) => handleRowKeyDown(event, item.id)}
@@ -353,7 +355,7 @@ export default function FollowUpTable({
                   >
                     <TableCell className="py-4 pl-6 pr-4">
                       <div className="flex items-center gap-3">
-                        <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="shrink-0">
+                        <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} aria-label={`Open follow-up details for ${item.businessName}`} className="hidden shrink-0 sm:block">
                           <Avatar className="size-10 rounded-full bg-btn/10 text-xs font-bold text-brand-strong transition-transform hover:scale-105">
                             <AvatarFallback className="bg-transparent text-inherit">
                               {initials(item.businessName)}
@@ -497,7 +499,7 @@ export default function FollowUpTable({
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end sm:gap-4">
             <div className="flex items-center gap-1.5">
-              <OutlinedButton size="icon-sm" type="button" disabled={page === 1} onClick={() => onPage(Math.max(1, page - 1))} className="size-8.5 rounded-lg border border-line text-muted transition-colors disabled:opacity-50">
+              <OutlinedButton size="icon-sm" type="button" aria-label="Previous page" disabled={page === 1} onClick={() => onPage(Math.max(1, page - 1))} className="size-8.5 rounded-lg border border-line text-muted transition-colors disabled:opacity-50">
                 <ChevronLeft className="size-4" />
               </OutlinedButton>
               {visiblePages.map((pageNum) => page === pageNum ? (
@@ -505,10 +507,10 @@ export default function FollowUpTable({
               ) : (
                 <OutlinedButton key={pageNum} size="icon-sm" type="button" onClick={() => onPage(pageNum)} className="hidden size-8.5 rounded-lg border border-line bg-surface text-muted hover:bg-surface-2 sm:inline-flex">{pageNum}</OutlinedButton>
               ))}
-              <OutlinedButton size="icon-sm" type="button" disabled={page >= totalPages} onClick={() => onPage(Math.min(totalPages, page + 1))} className="size-8.5 rounded-lg border border-line text-muted hover:bg-surface-2"><ChevronRight className="size-4" /></OutlinedButton>
+              <OutlinedButton size="icon-sm" type="button" aria-label="Next page" disabled={page >= totalPages} onClick={() => onPage(Math.min(totalPages, page + 1))} className="size-8.5 rounded-lg border border-line text-muted hover:bg-surface-2"><ChevronRight className="size-4" /></OutlinedButton>
             </div>
             <Select value={`${limit} per page`} onValueChange={(value) => onItemsPerPageChange(Number.parseInt(value, 10))}>
-              <SelectTrigger className="h-8.5 w-auto rounded-lg border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft hover:border-line focus-visible:ring-1 focus-visible:ring-brand"><SelectValue /></SelectTrigger>
+              <SelectTrigger aria-label="Rows per page" className="h-8.5 w-auto rounded-lg border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft hover:border-line focus-visible:ring-1 focus-visible:ring-brand"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-surface"><SelectItem value="10 per page" className="text-xs">10 per page</SelectItem><SelectItem value="20 per page" className="text-xs">20 per page</SelectItem><SelectItem value="50 per page" className="text-xs">50 per page</SelectItem><SelectItem value="100 per page" className="text-xs">100 per page</SelectItem></SelectContent>
             </Select>
           </div>

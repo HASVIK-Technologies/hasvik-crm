@@ -779,6 +779,7 @@ export default function BusinessTable({
                 size="icon-sm"
                 type="button"
                 disabled={currentPage === 1}
+                aria-label="Previous page"
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
                 className="size-8.5 rounded-lg border border-line text-muted transition-colors disabled:opacity-50"
               >
@@ -811,6 +812,7 @@ export default function BusinessTable({
                 size="icon-sm"
                 type="button"
                 disabled={totalPages === 0 || currentPage >= totalPages}
+                aria-label="Next page"
                 onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
                 className="size-8.5 rounded-lg border border-line text-muted hover:bg-surface-2"
               >
@@ -822,7 +824,7 @@ export default function BusinessTable({
               value={`${itemsPerPage} per page`}
               onValueChange={(value) => onItemsPerPageChange(Number.parseInt(value, 10))}
             >
-              <SelectTrigger className="h-8.5 w-auto rounded-lg border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft hover:border-line focus-visible:ring-1 focus-visible:ring-brand">
+              <SelectTrigger aria-label="Rows per page" className="h-8.5 w-auto rounded-lg border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft hover:border-line focus-visible:ring-1 focus-visible:ring-brand">
                 <SelectValue />
               </SelectTrigger>
               <SelectContent className="bg-surface">

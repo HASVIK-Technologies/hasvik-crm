@@ -8,7 +8,7 @@ export async function launch(sizeName, { theme = "light" } = {}) {
   const browser = await chromium.launch();
   const vp = SIZES[sizeName];
   const context = await browser.newContext({ viewport: vp, isMobile: sizeName === "phone", hasTouch: sizeName === "phone" });
-  await context.addInitScript((t) => { try { localStorage.setItem("hasvik-theme", t); } catch {} }, theme);
+  await context.addInitScript((t) => { try { if (!sessionStorage.getItem("e2e-theme-set")) { localStorage.setItem("hasvik-theme", t); sessionStorage.setItem("e2e-theme-set", "1"); } } catch {} }, theme);
   const page = await context.newPage();
   const errors = [];
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });

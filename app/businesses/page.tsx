@@ -72,6 +72,10 @@ function BusinessesContent() {
     syncFromParams,
   } = useBusinessListStore();
 
+  useEffect(() => {
+    void useBusinessListStore.persist.rehydrate();
+  }, []);
+
   // Filters the API cannot apply (owner, dates, staleness, ...) live in the URL and are applied client-side.
   const [viewFilter, setViewFilter] = useState<LeadViewFilter>(() => {
     const parsed = parseLeadViewFilter(searchParams ?? new URLSearchParams());
