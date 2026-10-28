@@ -13,6 +13,9 @@ export interface LeadViewFilter {
   createdTo?: string;
   updatedFrom?: string;
   updatedTo?: string;
+  /** Next scheduled follow-up falls inside this window (used by the forecast). */
+  nextFrom?: string;
+  nextTo?: string;
   /** Open leads with no activity for this many days. */
   staleDays?: number;
   /** Only leads that are not won or lost. */
@@ -22,7 +25,7 @@ export interface LeadViewFilter {
   source?: string;
 }
 
-export const CLIENT_FILTER_KEYS = ["owner", "createdFrom", "createdTo", "updatedFrom", "updatedTo", "staleDays", "open", "source"] as const;
+export const CLIENT_FILTER_KEYS = ["owner", "createdFrom", "createdTo", "updatedFrom", "updatedTo", "nextFrom", "nextTo", "staleDays", "open", "source"] as const;
 
 type Params = { get(name: string): string | null };
 
@@ -36,6 +39,8 @@ export function parseLeadViewFilter(params: Params): LeadViewFilter {
     createdTo: text("createdTo"),
     updatedFrom: text("updatedFrom"),
     updatedTo: text("updatedTo"),
+    nextFrom: text("nextFrom"),
+    nextTo: text("nextTo"),
     staleDays: Number.isFinite(stale) && stale > 0 ? stale : undefined,
     open: params.get("open") === "1" ? true : undefined,
     status: text("status"),
@@ -47,7 +52,7 @@ export function parseLeadViewFilter(params: Params): LeadViewFilter {
 /** True when the filter needs the client-side layer (anything beyond status / isActive / search / city / category). */
 export function needsClientFilter(filter: LeadViewFilter): boolean {
   return Boolean(
-    filter.owner || filter.createdFrom || filter.createdTo || filter.updatedFrom || filter.updatedTo || filter.staleDays || filter.open || filter.source,
+    filter.owner || filter.createdFrom || filter.createdTo || filter.updatedFrom || filter.updatedTo || filter.nextFrom || filter.nextTo || filter.staleDays || filter.open || filter.source,
   );
 }
 
@@ -63,6 +68,9 @@ export function applyLeadViewFilter(leads: LeadRecord[], filter: LeadViewFilter,
   }
   if (filter.updatedFrom || filter.updatedTo) {
     rows = rows.filter((lead) => inRange(lead.updatedAt, filter.updatedFrom ?? "1970-01-01T00:00:00Z", filter.updatedTo ?? "9999-12-31T00:00:00Z"));
+  }
+  if (filter.nextFrom || filter.nextTo) {
+    rows = rows.filter((lead) => inRange(lead.nextFollowUpAt, filter.nextFrom ?? "1970-01-01T00:00:00Z", filter.nextTo ?? "9999-12-31T00:00:00Z"));
   }
   if (filter.staleDays) {
     const stale = new Set(staleLeads(rows, filter.staleDays, now).map((lead) => lead.id));
@@ -82,6 +90,8 @@ export function leadsHref(filter: LeadViewFilter): string {
   if (filter.createdTo) params.set("createdTo", filter.createdTo);
   if (filter.updatedFrom) params.set("updatedFrom", filter.updatedFrom);
   if (filter.updatedTo) params.set("updatedTo", filter.updatedTo);
+  if (filter.nextFrom) params.set("nextFrom", filter.nextFrom);
+  if (filter.nextTo) params.set("nextTo", filter.nextTo);
   if (filter.staleDays) params.set("staleDays", String(filter.staleDays));
   if (filter.open) params.set("open", "1");
   const query = params.toString();

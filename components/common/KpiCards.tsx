@@ -7,7 +7,7 @@ export type KpiTone = "blue" | "cyan" | "green" | "amber" | "red" | "violet" | "
 export interface KpiItem {
   label: string;
   value: React.ReactNode;
-  icon: LucideIcon;
+  icon?: LucideIcon;
   tone?: KpiTone;
   hint?: string;
   /** Opens a screen already filtered to what the number counts. */

@@ -34,15 +34,13 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
 
   useEffect(() => {
     if (!open) return;
-    setQuery("");
-    setCursor(0);
     const id = window.setTimeout(() => input.current?.focus(), 30);
     document.body.style.overflow = "hidden";
     return () => { window.clearTimeout(id); document.body.style.overflow = ""; };
   }, [open]);
 
   useEffect(() => {
-    if (!open || debounced.length < 2) { setRecords([]); return; }
+    if (!open || debounced.length < 2) return;
     const controller = new AbortController();
     getBusinesses({ search: debounced, page: 1, limit: 6 }, controller.signal)
       .then((result) => setRecords(result.data.map((item) => ({ id: item._id, label: item.name, hint: [item.city, typeof item.category === "string" ? item.category : item.category?.name].filter(Boolean).join(" · ") || "Business", href: `/businesses/${item._id}`, icon: Building2 }))))
@@ -54,9 +52,7 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
   const matchedPages = q
     ? pages.filter((page) => `${page.label} ${visibleNavigation(user).find((n) => n.href === page.href)?.keywords ?? ""}`.toLowerCase().includes(q))
     : pages;
-  const entries = [...matchedPages, ...records];
-
-  useEffect(() => setCursor(0), [query]);
+  const entries = [...matchedPages, ...(debounced.length < 2 ? [] : records)];
 
   if (!open) return null;
 
@@ -84,7 +80,7 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
           <input
             ref={input}
             value={query}
-            onChange={(event) => setQuery(event.target.value)}
+            onChange={(event) => { setQuery(event.target.value); setCursor(0); }}
             placeholder="Search pages or businesses…"
             aria-label="Search"
             className="h-14 w-full bg-transparent text-base text-ink outline-none placeholder:text-muted"

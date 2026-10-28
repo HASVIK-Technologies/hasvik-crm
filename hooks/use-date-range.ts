@@ -1,10 +1,11 @@
 "use client";
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useMemo, useState, useSyncExternalStore } from "react";
 import { resolveRange } from "@/lib/analytics/ranges";
 import type { RangePreset } from "@/lib/analytics/types";
+import { createLocalStore } from "@/lib/shared/local-store";
 
-const STORAGE_KEY = "hasvik-range";
+const store = createLocalStore("hasvik-range");
 const PRESETS: RangePreset[] = ["today", "7d", "30d", "month", "quarter", "custom"];
 
 interface Stored {
@@ -13,31 +14,24 @@ interface Stored {
   to?: string;
 }
 
-function read(): Stored {
+function parse(raw: string | null, fallback: RangePreset): Stored {
   try {
-    const parsed = JSON.parse(localStorage.getItem(STORAGE_KEY) ?? "null") as Stored | null;
+    const parsed = JSON.parse(raw ?? "null") as Stored | null;
     if (parsed && PRESETS.includes(parsed.preset)) return parsed;
   } catch {
-    // Unreadable storage falls back to the default.
+    // Unreadable value falls back to the default.
   }
-  return { preset: "30d" };
+  return { preset: fallback };
 }
 
 /** Date range for dashboards and reports. The choice is remembered per browser. */
 export function useDateRange(defaultPreset: RangePreset = "30d") {
-  const [state, setState] = useState<Stored>({ preset: defaultPreset });
+  const raw = useSyncExternalStore(store.subscribe, store.get, store.server);
+  const state = useMemo(() => parse(raw, defaultPreset), [raw, defaultPreset]);
   const [now] = useState(() => new Date());
 
-  useEffect(() => setState(read()), []);
-
   const choose = useCallback((preset: RangePreset, custom?: { from: string; to: string }) => {
-    const next: Stored = { preset, ...(preset === "custom" ? custom : {}) };
-    setState(next);
-    try {
-      localStorage.setItem(STORAGE_KEY, JSON.stringify(next));
-    } catch {
-      // Not remembered, still applied.
-    }
+    store.set(JSON.stringify({ preset, ...(preset === "custom" ? custom : {}) }));
   }, []);
 
   const range = useMemo(

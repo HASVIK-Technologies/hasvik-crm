@@ -75,7 +75,7 @@ function BusinessesContent() {
   // Filters the API cannot apply (owner, dates, staleness, ...) live in the URL and are applied client-side.
   const [viewFilter, setViewFilter] = useState<LeadViewFilter>(() => {
     const parsed = parseLeadViewFilter(searchParams ?? new URLSearchParams());
-    return { owner: parsed.owner, createdFrom: parsed.createdFrom, createdTo: parsed.createdTo, updatedFrom: parsed.updatedFrom, updatedTo: parsed.updatedTo, staleDays: parsed.staleDays, open: parsed.open, source: parsed.source };
+    return { owner: parsed.owner, createdFrom: parsed.createdFrom, createdTo: parsed.createdTo, updatedFrom: parsed.updatedFrom, updatedTo: parsed.updatedTo, nextFrom: parsed.nextFrom, nextTo: parsed.nextTo, staleDays: parsed.staleDays, open: parsed.open, source: parsed.source };
   });
   const clientMode = needsClientFilter(viewFilter);
 
@@ -210,6 +210,7 @@ function BusinessesContent() {
   if (viewFilter.owner) chips.push({ key: "owner", label: "Owner: " + (viewFilter.owner === "none" ? "Unassigned" : owners.find((o) => o.id === viewFilter.owner)?.name ?? "selected user"), onRemove: () => patchViewFilter({ owner: undefined }) });
   if (viewFilter.createdFrom || viewFilter.createdTo) chips.push({ key: "created", label: "Added " + day(viewFilter.createdFrom) + " to " + day(viewFilter.createdTo), onRemove: () => patchViewFilter({ createdFrom: undefined, createdTo: undefined }) });
   if (viewFilter.updatedFrom || viewFilter.updatedTo) chips.push({ key: "updated", label: "Updated " + day(viewFilter.updatedFrom) + " to " + day(viewFilter.updatedTo), onRemove: () => patchViewFilter({ updatedFrom: undefined, updatedTo: undefined }) });
+  if (viewFilter.nextFrom || viewFilter.nextTo) chips.push({ key: "next", label: "Next follow-up " + day(viewFilter.nextFrom) + " to " + day(viewFilter.nextTo), onRemove: () => patchViewFilter({ nextFrom: undefined, nextTo: undefined }) });
   if (viewFilter.staleDays) chips.push({ key: "stale", label: "No activity for " + viewFilter.staleDays + "+ days", onRemove: () => patchViewFilter({ staleDays: undefined }) });
   if (viewFilter.open) chips.push({ key: "open", label: "Open leads only", onRemove: () => patchViewFilter({ open: undefined }) });
   if (viewFilter.source) chips.push({ key: "source", label: "Source: " + viewFilter.source, onRemove: () => patchViewFilter({ source: undefined }) });

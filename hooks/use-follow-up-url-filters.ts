@@ -40,9 +40,10 @@ export function useFollowUpUrlFilters(): { chips: FilterChip[]; clearAll: () => 
 
   useEffect(() => {
     if (!ready) return;
+    const current = useFollowUpListStore.getState();
     const next = new URLSearchParams(window.location.search);
     for (const key of KEYS) {
-      if (store[key]) next.set(key, store[key]);
+      if (current[key]) next.set(key, current[key]);
       else next.delete(key);
     }
     const query = next.toString();

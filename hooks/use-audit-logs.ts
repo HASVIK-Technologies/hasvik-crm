@@ -1,5 +1,5 @@
 import { useQuery } from "@tanstack/react-query";
-import { getAuditLog, getEntityAuditLogs } from "@/lib/audit-logs/api";
+import { getAuditLog, getAuditLogsPage, getEntityAuditLogs, type AuditLogQuery } from "@/lib/audit-logs/api";
 import { auditLogQueryKeys } from "@/lib/audit-logs/query-keys";
 import type { AuditEntityType } from "@/types/audit-log";
 
@@ -21,6 +21,15 @@ export function useAuditLogQuery(entityType: AuditEntityType, entityId: string, 
     queryKey: [...auditLogQueryKeys.entity(entityType, entityId), "record", logId],
     queryFn: ({ signal }) => getAuditLog(logId, signal),
     enabled: enabled && Boolean(logId) && !logId.startsWith("audit-log-"),
+    staleTime: 15_000,
+  });
+}
+
+export function useAuditLogsPageQuery(query: AuditLogQuery) {
+  return useQuery({
+    queryKey: ["audit-logs", "page", query],
+    queryFn: ({ signal }) => getAuditLogsPage(query, signal),
+    placeholderData: (previous) => previous,
     staleTime: 15_000,
   });
 }

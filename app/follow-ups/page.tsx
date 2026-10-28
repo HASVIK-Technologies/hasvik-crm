@@ -249,6 +249,7 @@ function FollowupsContent() {
         }
         content={
           <div className="space-y-4">
+            <ActiveFilterChips chips={urlFilters.chips} onClearAll={urlFilters.clearAll} />
             {filters.view === "table" && (
               <div className="flex items-center gap-1 overflow-x-auto border-b border-line">
                 {/* {(["all", "today", "upcoming", "overdue"] as const).map((tab) => ( */}

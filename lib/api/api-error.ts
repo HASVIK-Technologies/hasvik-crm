@@ -6,6 +6,8 @@ type ApiErrorPayload = {
   errors?: unknown;
 };
 
+const sentence = (text: string) => { const t = text.trim(); return `${t.charAt(0).toUpperCase()}${t.slice(1)}${/[.!?]$/.test(t) ? "" : "."}`; };
+
 const statusMessages: Record<number, string> = {
   400: "The request was invalid.",
   401: "Your session has expired. Please sign in again.",
@@ -18,6 +20,12 @@ const statusMessages: Record<number, string> = {
 };
 
 function getPayloadMessage(payload: ApiErrorPayload): string | undefined {
+  // NestJS validation failures arrive as an array of sentences, one per field.
+  if (Array.isArray(payload.message)) {
+    const messages = payload.message.filter((value): value is string => typeof value === "string" && Boolean(value.trim()));
+    if (messages.length > 0) return messages.map(sentence).join(" ");
+  }
+
   for (const value of [payload.message, payload.error]) {
     if (typeof value === "string" && value.trim()) return value;
   }
@@ -71,4 +79,21 @@ export function getApiErrorMessage(error: unknown): string {
       ? "The server is unavailable right now. Please try again."
       : `Request failed with status ${error.response.status}.`)
   );
+}
+/**
+ * Maps validation messages such as "email must be an email" to the field they name, so a form can show each one
+ * next to its input. Messages that do not start with a known field name are returned under "_form".
+ */
+export function getApiFieldErrors(error: unknown, fields: string[]): Record<string, string> {
+  const result: Record<string, string> = {};
+  if (!axios.isAxiosError(error)) return result;
+  const payload = error.response?.data as ApiErrorPayload | undefined;
+  const list = Array.isArray(payload?.message) ? payload.message : [];
+  for (const raw of list) {
+    if (typeof raw !== "string") continue;
+    const field = fields.find((name) => raw === name || raw.startsWith(`${name} `) || raw.startsWith(`${name}.`));
+    const key = field ?? "_form";
+    result[key] = result[key] ? `${result[key]} ${sentence(raw)}` : sentence(raw);
+  }
+  return result;
 }

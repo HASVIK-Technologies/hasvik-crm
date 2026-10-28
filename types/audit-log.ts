@@ -16,6 +16,8 @@ export interface AuditLogItem {
   action: AuditAction;
   entityType?: string;
   entityId?: string;
+  /** Plain-language summary written by the API, e.g. "Business updated". */
+  message?: string;
   createdAt?: string;
   userName?: string;
   userEmail?: string;

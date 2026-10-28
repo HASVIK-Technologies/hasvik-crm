@@ -286,3 +286,11 @@ html { color-scheme: light; }
   margin-inline: auto;
 }
 .crm-calendar button:focus-visible { outline: 2px solid var(--btn); outline-offset: 2px; }
+
+/* Print / save as PDF: only the report itself, without the app chrome. */
+@media print {
+  aside, header.glass, nav[aria-label="Primary"], .no-print { display: none !important; }
+  body { background: white !important; }
+  main { padding: 0 !important; }
+  div[class*="lg:pl-"] { padding-left: 0 !important; }
+}

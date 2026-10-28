@@ -158,8 +158,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     return () => document.removeEventListener("keydown", onKey);
   }, [publicPath]);
 
-  useEffect(() => setMoreOpen(false), [pathname]);
-
   if ((!publicPath || pathname === "/") && authStatus === "loading" && !restoreBlocked && sessionQuery.isError) {
     return (
       <main className="flex min-h-dvh flex-col items-center justify-center gap-3 bg-canvas px-6 text-center">
@@ -424,7 +422,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </div>
       )}
 
-      <CommandPalette open={paletteOpen} onClose={() => setPaletteOpen(false)} />
+      {paletteOpen && <CommandPalette open onClose={() => setPaletteOpen(false)} />}
     </div>
   );
 }

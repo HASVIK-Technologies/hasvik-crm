@@ -22,6 +22,7 @@ function toAuditLog(value: unknown, index: number): AuditLogItem {
     action: asText(item.action ?? item.eventType ?? item.type) ?? "UPDATE",
     entityType: asText(item.entityType),
     entityId: asText(item.entityId),
+    message: asText(item.message),
     createdAt: asText(item.createdAt ?? item.timestamp ?? item.date),
     userName: asText(actor.fullName ?? actor.name ?? item.userName),
     userEmail: asText(actor.email ?? item.userEmail),
@@ -68,4 +69,22 @@ export async function getAuditLog(id: string, signal?: AbortSignal): Promise<Aud
   const response = await apiClient.get<unknown>(`/audit-logs/${encodeURIComponent(id)}`, { signal });
   const payload = asRecord(response.data);
   return toAuditLog(payload.data ?? payload, 0);
+}
+
+export interface AuditLogQuery {
+  page: number;
+  limit: number;
+  action?: string;
+  entityType?: string;
+  userId?: string;
+}
+
+export async function getAuditLogsPage(query: AuditLogQuery, signal?: AbortSignal): Promise<AuditLogsResult> {
+  const response = await apiClient.get<unknown>("/audit-logs", {
+    params: { ...query, sortOrder: "desc" },
+    signal,
+  });
+  const payload = asRecord(response.data);
+  const rows = Array.isArray(payload.data) ? payload.data : Array.isArray(response.data) ? (response.data as unknown[]) : [];
+  return { logs: rows.map(toAuditLog), total: typeof payload.total === "number" ? payload.total : rows.length };
 }

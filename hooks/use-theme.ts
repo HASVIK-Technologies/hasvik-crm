@@ -1,18 +1,15 @@
 "use client";
 
-import { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useSyncExternalStore } from "react";
+import { createLocalStore } from "@/lib/shared/local-store";
 
 export type ThemePreference = "light" | "dark" | "system";
 
 export const THEME_STORAGE_KEY = "hasvik-theme";
+const store = createLocalStore(THEME_STORAGE_KEY);
 
-function readPreference(): ThemePreference {
-  try {
-    const value = localStorage.getItem(THEME_STORAGE_KEY);
-    return value === "light" || value === "dark" ? value : "system";
-  } catch {
-    return "system";
-  }
+function toPreference(value: string | null): ThemePreference {
+  return value === "light" || value === "dark" ? value : "system";
 }
 
 function applyTheme(preference: ThemePreference) {
@@ -22,26 +19,18 @@ function applyTheme(preference: ThemePreference) {
 
 /** Light / Dark / System, remembered per browser. The first paint is handled by the inline script in app/layout.tsx. */
 export function useTheme() {
-  const [preference, setPreference] = useState<ThemePreference>("system");
+  const stored = useSyncExternalStore(store.subscribe, store.get, store.server);
+  const preference = toPreference(stored);
 
   useEffect(() => {
-    setPreference(readPreference());
+    applyTheme(preference);
+    if (preference !== "system") return;
     const media = window.matchMedia("(prefers-color-scheme: dark)");
-    const onChange = () => { if (readPreference() === "system") applyTheme("system"); };
+    const onChange = () => applyTheme("system");
     media.addEventListener("change", onChange);
     return () => media.removeEventListener("change", onChange);
-  }, []);
+  }, [preference]);
 
-  const choose = useCallback((next: ThemePreference) => {
-    setPreference(next);
-    try {
-      if (next === "system") localStorage.removeItem(THEME_STORAGE_KEY);
-      else localStorage.setItem(THEME_STORAGE_KEY, next);
-    } catch {
-      // Storage unavailable: the choice still applies for this visit.
-    }
-    applyTheme(next);
-  }, []);
-
+  const choose = useCallback((next: ThemePreference) => store.set(next === "system" ? null : next), []);
   return { preference, choose };
 }
