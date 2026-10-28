@@ -58,6 +58,7 @@ checks it in the browser for every card.
 | `POST /api/businesses` | `phoneNumbers[].name` required per spec | Accepted without it; unknown fields (`status`, `latitude`) silently ignored |
 | `GET /api/businesses` items | Spec names `assignedTo` | Response carries `assignee: { _id, fullName }` |
 | `DELETE /api/businesses/{id}` | Delete | Soft delete only (`isActive: false`); records stay searchable, so `ZZ-TEST` data cannot be purged |
+| `POST /api/auth/login`, `/auth/refresh` | Several devices signed in at once (phone and computer) | A new sign-in revokes the previous refresh token ("Refresh token has been revoked or is invalid"), so the other device is signed out at its next refresh. The UI now explains this on the sign-in screen |
 | All endpoints | Response body schemas in the spec | Only status codes are documented |
 | Users / password | Change password with current password | `PATCH /users/{id}` accepts a new password without checking the old one |
 | Profile photo | Upload endpoint | None |

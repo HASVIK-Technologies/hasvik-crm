@@ -1,3 +1,4 @@
+import { markSessionEnded } from "@/lib/auth/sign-out-reason";
 import axios from "axios";
 import { authTransport } from "@/lib/auth/auth-transport";
 import { createSessionController } from "@/lib/auth/session-controller";
@@ -51,7 +52,10 @@ export const sessionController = createSessionController({
   blocked: () => useAuthStore.getState().isLoggingOut || useAuthStore.getState().restoreBlocked,
   request: requestToken,
   apply: (token) => useAuthStore.getState().setToken(token),
-  expire: () => useAuthStore.getState().clearAuth(),
+  expire: () => {
+    markSessionEnded();
+    useAuthStore.getState().clearAuth();
+  },
   isUnauthorized: (error) => axios.isAxiosError(error) && [401, 403].includes(error.response?.status ?? 0),
 });
 

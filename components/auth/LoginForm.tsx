@@ -3,7 +3,7 @@
 import { BarChart3, CalendarCheck2, Eye, EyeOff, LockKeyhole, ShieldCheck, Smartphone, UserRound } from "lucide-react";
 import Image from "next/image";
 import Link from "next/link";
-import { useState } from "react";
+import { useState, useSyncExternalStore } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useLogin } from "@/hooks/use-auth";
@@ -12,6 +12,7 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import ThemeToggle from "@/components/common/ThemeToggle";
 import type { LoginFormValues } from "@/types/auth";
+import { clearSessionEnded, sessionEndedStore } from "@/lib/auth/sign-out-reason";
 
 const POINTS = [
   { icon: CalendarCheck2, title: "Never miss a follow-up", text: "Calls, meetings and reminders land in one calm daily list." },
@@ -23,6 +24,7 @@ export default function LoginForm() {
   const router = useRouter();
   const loginMutation = useLogin();
   const [showPassword, setShowPassword] = useState(false);
+  const sessionEnded = useSyncExternalStore(sessionEndedStore.subscribe, sessionEndedStore.get, sessionEndedStore.server);
   const {
     register,
     handleSubmit,
@@ -38,6 +40,7 @@ export default function LoginForm() {
         email: values.email.trim(),
         password: values.password,
       });
+      clearSessionEnded();
       const role = session.user.role.toUpperCase();
       const returningFromSignup =
         new URLSearchParams(window.location.search).get("welcome") ===
@@ -99,7 +102,13 @@ export default function LoginForm() {
             <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
             <p className="mt-1.5 text-sm leading-relaxed text-muted">Sign in to your HASVIK CRM workspace.</p>
 
-            <form className="mt-7 space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate suppressHydrationWarning>
+            {sessionEnded && !loginError && (
+              <p role="status" className="mt-5 rounded-xl bg-info-soft px-3.5 py-2.5 text-sm leading-relaxed text-ink-soft">
+                <span className="font-semibold text-ink">You were signed out.</span> This happens when a session runs out or your account signs in on another device. Sign in again to carry on.
+              </p>
+            )}
+
+            <form className="mt-7 space-y-5" method="post" onSubmit={handleSubmit(onSubmit)} noValidate suppressHydrationWarning>
               <div className="space-y-1.5">
                 <label htmlFor="email" className="block text-sm font-medium text-ink">Email address</label>
                 <div className="relative">

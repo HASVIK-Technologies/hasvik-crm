@@ -1,3 +1,4 @@
+import { markSessionEnded } from "@/lib/auth/sign-out-reason";
 import axios from "axios";
 import { toast } from "sonner";
 import { useAuthStore } from "@/store/auth-store";
@@ -15,7 +16,10 @@ export const apiClient = axios.create({
 attachRequestAuth(apiClient, {
   snapshot: () => useAuthStore.getState(),
   refresh: () => sessionController.refresh(),
-  expire: () => useAuthStore.getState().clearAuth(),
+  expire: () => {
+    markSessionEnded();
+    useAuthStore.getState().clearAuth();
+  },
   notify: (error, refreshFailure) => {
     if (typeof window !== "undefined") toast.error(getApiErrorMessage(error), refreshFailure ? { id: "auth-refresh-unavailable" } : undefined);
   },

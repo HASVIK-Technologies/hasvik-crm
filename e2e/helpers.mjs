@@ -13,11 +13,14 @@ export async function launch(sizeName, { theme = "light" } = {}) {
   const errors = [];
   page.on("console", (message) => { if (message.type() === "error") errors.push(message.text()); });
   page.on("pageerror", (error) => errors.push(String(error)));
+  page.on("response", (response) => { if (response.status() >= 500) errors.push(`HTTP ${response.status()} ${response.request().method()} ${response.url()}`); });
   return { browser, context, page, errors };
 }
 
 export async function login(page, email = process.env.E2E_EMAIL, password = process.env.E2E_PASSWORD) {
   await page.goto(`${BASE}/`);
+  // Wait for hydration: typing into the server-rendered form before React attaches would submit it natively.
+  await page.waitForLoadState("networkidle").catch(() => {});
   await page.fill("input[type=email]", email);
   await page.fill("input[type=password]", password);
   await page.keyboard.press("Enter");

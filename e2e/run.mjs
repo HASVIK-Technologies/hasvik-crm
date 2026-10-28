@@ -259,7 +259,7 @@ for (const route of axeRoutes) {
 
 await t.step("no unexpected console errors during the run", async () => {
   const real = errors.filter((e) => !ignorable(e));
-  if (real.length) throw new Error(`${real.length} console errors, first: ${real[0].slice(0, 160)}`);
+  if (real.length) throw new Error(`${real.length} errors: ${real.filter((e) => e.startsWith("HTTP")).concat(real).slice(0, 3).map((e) => e.slice(0, 200)).join(" || ")}`);
 });
 
 t.done();
