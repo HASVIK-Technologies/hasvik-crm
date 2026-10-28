@@ -134,14 +134,14 @@ export default function WorkspaceDashboard({ user }: { user: AuthUser }) {
           <div role="group" aria-label="Whose numbers" className="inline-flex gap-1 rounded-xl bg-white/15 p-1 ring-1 ring-white/25 backdrop-blur ring-inset">
             {(["mine", "team"] as const).map((value) => (
               <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)}
-                className={cn("min-h-10 rounded-lg px-3.5 text-sm font-semibold transition-all", scope === value ? "bg-white text-brand-strong shadow-card" : "text-white hover:bg-white/10")}>
+                className={cn("min-h-10 rounded-lg px-3.5 text-sm font-semibold transition-all", scope === value ? "bg-white text-btn shadow-card" : "text-white hover:bg-white/10")}>
                 {value === "mine" ? "My numbers" : "Whole team"}
               </button>
             ))}
           </div>
         </div>
         <div className="relative mt-5 flex flex-wrap gap-2">
-          <Link href={followUps({ fromDate: data.todayFrom, toDate: data.todayTo })} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-brand-strong shadow-card transition-transform hover:-translate-y-0.5 active:scale-[0.98]">
+          <Link href={followUps({ fromDate: data.todayFrom, toDate: data.todayTo })} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-btn shadow-card transition-transform hover:-translate-y-0.5 active:scale-[0.98]">
             <CalendarCheck2 className="size-4" aria-hidden />See today&apos;s follow-ups
           </Link>
           <Link href="/businesses/form" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white/15 px-4 text-sm font-semibold text-white ring-1 ring-white/30 transition-colors ring-inset hover:bg-white/25">
