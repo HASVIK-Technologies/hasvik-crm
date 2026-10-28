@@ -287,7 +287,7 @@ export default function FollowUpTable({
           )}
         </div>
         <div data-layout-desktop className="overflow-x-auto">
-          <Table className="w-full min-w-[920px] text-left">
+          <Table className="w-full min-w-230 text-left">
             <TableHeader>
               <TableRow className="border-b border-surface-2 hover:bg-transparent">
                 <TableHead className="py-4 pl-6 pr-4 font-semibold">
@@ -302,7 +302,7 @@ export default function FollowUpTable({
                   Status
                 </TableHead>
                 <TableHead className="px-4 py-4 font-semibold">
-                  Assigned To
+                  Owner
                 </TableHead>
                 <TableHead className="sticky right-0 bg-surface-2 py-4 pl-4 pr-6 text-right font-semibold">
                   Actions

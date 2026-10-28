@@ -192,7 +192,7 @@ export default function FollowUpCalendar({
         </div>
 
         <div className="hidden overflow-x-auto xl:block">
-          <div className="min-w-[900px]">
+          <div className="min-w-225">
             <div className="grid grid-cols-7 border-b border-line bg-surface-2">
               {WEEKDAYS.map((weekday) => <div key={weekday} className="border-r border-line px-3 py-2 text-xs font-bold uppercase tracking-wide text-muted last:border-r-0">{weekday}</div>)}
             </div>

@@ -86,11 +86,14 @@ export default function ListPageLayout({
 
   return (
     <PageContainer className={`flex flex-col gap-4 sm:gap-6 lg:gap-7 ${className ?? ""}`}>
-      <section className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        {/* Phones already show the page title in the top bar, so the breadcrumb only appears from tablet up. */}
-        <div className="hidden sm:block">{breadcrumb}</div>
-        <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
-          {viewSwitcher && <div className="shrink-0">{viewSwitcher}</div>}
+      {/* One toolbar layout for every list page: view switch on the left, actions on the right. The page name lives in
+          the top bar, so a breadcrumb only appears when it adds a level (see Breadcrumb). */}
+      {breadcrumb && <div className="hidden sm:block empty:hidden">{breadcrumb}</div>}
+      <section className="flex min-h-11 items-center justify-between gap-2">
+        <div className="flex min-w-0 items-center gap-2">
+          {viewSwitcher}
+        </div>
+        <div className="flex min-w-0 items-center gap-2">
           <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             {filters && (
               <OutlinedButton

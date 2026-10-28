@@ -37,7 +37,7 @@ export default function ExploreCrmPage() {
   return (
     <main className="min-h-screen overflow-hidden bg-surface-2 text-ink">
       <header className="border-b border-line/80 bg-surface/90">
-        <div className="mx-auto flex h-[76px] max-w-7xl items-center justify-between px-5 sm:px-8">
+        <div className="mx-auto flex h-19 max-w-7xl items-center justify-between px-5 sm:px-8">
           <Link href="/explore-crm" aria-label="Hasvik CRM home">
             <Image
               src="/logo.png"
@@ -77,7 +77,7 @@ export default function ExploreCrmPage() {
       </header>
 
       <section className="relative isolate mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.04fr_0.96fr] lg:py-28">
-        <div className="pointer-events-none absolute -left-48 top-8 -z-10 size-[28rem] rounded-full bg-brand/20/40 blur-3xl" />
+        <div className="pointer-events-none absolute -left-48 top-8 -z-10 size-112 rounded-full bg-brand/10 blur-3xl" />
         <div>
           <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-surface px-3.5 py-2 text-xs font-bold uppercase tracking-[0.13em] text-brand-strong shadow-sm">
             <span className="size-2 rounded-full bg-ok" />
@@ -124,7 +124,7 @@ export default function ExploreCrmPage() {
         </div>
 
         <div className="relative mx-auto w-full max-w-xl">
-          <div className="absolute -inset-5 -z-10 rounded-[2rem] bg-gradient-to-br from-brand/20/70 to-ok-soft/80 blur-xl" />
+          <div className="absolute -inset-5 -z-10 rounded-[2rem] bg-gradient-to-br from-brand/15 to-ok-soft/80 blur-xl" />
           <div className="overflow-hidden rounded-3xl border border-line bg-surface shadow-card">
             <div className="flex items-center justify-between border-b border-surface-2 px-5 py-4 sm:px-6">
               <div>

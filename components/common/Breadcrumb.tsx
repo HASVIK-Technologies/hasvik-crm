@@ -7,7 +7,8 @@ export type BreadcrumbItem = {
 };
 
 export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
-  if (!items || items.length === 0) return null;
+  // A single level repeats the page name already shown in the top bar, so it is left out.
+  if (!items || items.length < 2) return null;
 
   return (
     <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-base md:text-lg">

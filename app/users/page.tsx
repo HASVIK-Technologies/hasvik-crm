@@ -327,7 +327,7 @@ export default function UsersPage() {
                   })}
                 </DataTableMobileList>
                 <div data-layout-desktop>
-                  <Table className="w-full min-w-[760px] text-left">
+                  <Table className="w-full min-w-190 text-left">
                     <TableHeader>
                       <TableRow className="border-b border-surface-2 hover:bg-transparent">
                         <TableHead className="py-4 pl-6 pr-4">

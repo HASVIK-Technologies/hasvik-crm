@@ -10,7 +10,7 @@ export default function ManagementConfirmDialog({ open, title, description, conf
     <AlertDialogPrimitive.Root open={open} onOpenChange={(nextOpen) => { if (!nextOpen && !pending) onCancel(); }}>
       <AlertDialogPrimitive.Portal>
         <AlertDialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/45 backdrop-blur-[2px] data-[state=open]:animate-in data-[state=closed]:animate-out data-[state=closed]:fade-out-0 data-[state=open]:fade-in-0" />
-        <AlertDialogPrimitive.Content className={`fixed left-1/2 top-1/2 z-50 flex max-h-[min(90vh,560px)] w-[calc(100%-2rem)] max-w-[460px] -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border bg-surface shadow-card outline-none ${destructive ? "border-bad/30" : "border-ok/30"}`}>
+        <AlertDialogPrimitive.Content className={`fixed left-1/2 top-1/2 z-50 flex max-h-[min(90vh,560px)] w-[calc(100%-2rem)] max-w-115 -translate-x-1/2 -translate-y-1/2 flex-col overflow-hidden border bg-surface shadow-card outline-none ${destructive ? "border-bad/30" : "border-ok/30"}`}>
           <header className="flex shrink-0 items-start gap-4 border-b border-line bg-surface-2/80 px-5 py-4 rounded-2xl">
             <span className={`flex size-10 shrink-0 items-center justify-center border ${destructive ? "border-bad/30 bg-bad-soft text-bad" : "border-ok/30 bg-ok-soft text-ok"}`}>{destructive ? <AlertCircle className="size-5" /> : <CheckCircle2 className="size-5" />}</span>
             <div className="min-w-0 flex-1 pt-0.5">

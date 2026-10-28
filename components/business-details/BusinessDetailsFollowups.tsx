@@ -151,7 +151,7 @@ export default function BusinessDetailsFollowups({
           </p>
         </div>
         <div className="overflow-x-auto">
-          <Table className="w-full min-w-[760px] text-left">
+          <Table className="w-full min-w-190 text-left">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
                 <TableHead className="pl-6">Date &amp; time</TableHead>

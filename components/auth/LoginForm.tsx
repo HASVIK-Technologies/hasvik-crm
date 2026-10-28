@@ -63,7 +63,7 @@ export default function LoginForm() {
     <div className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
       <aside className="hero-surface relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-white/10 blur-3xl" />
-        <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 size-[28rem] rounded-full bg-brand/20 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 size-112 rounded-full bg-brand/20 blur-3xl" />
 
         <div className="relative">
           <span className="inline-block rounded-2xl bg-white px-5 py-3 shadow-lg">
@@ -92,7 +92,7 @@ export default function LoginForm() {
 
       <main className="relative flex min-h-dvh flex-col items-center justify-center px-5 py-10">
         <div className="absolute top-4 right-4"><ThemeToggle /></div>
-        <div className="w-full max-w-[440px]">
+        <div className="w-full max-w-110">
           <div className="mb-8 flex justify-center lg:hidden">
             <span className="rounded-2xl bg-white px-5 py-3 shadow-pop ring-1 ring-line">
               <Image src="/hasvik-logo.png" alt="HASVIK" width={512} height={171} priority className="h-12 w-auto" />
@@ -112,7 +112,7 @@ export default function LoginForm() {
               <div className="space-y-1.5">
                 <label htmlFor="email" className="block text-sm font-medium text-ink">Email address</label>
                 <div className="relative">
-                  <UserRound className="pointer-events-none absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-muted" aria-hidden />
+                  <UserRound className="pointer-events-none absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted" aria-hidden />
                   <Input
                     id="email"
                     type="email"
@@ -136,7 +136,7 @@ export default function LoginForm() {
               <div className="space-y-1.5">
                 <label htmlFor="password" className="block text-sm font-medium text-ink">Password</label>
                 <div className="relative">
-                  <LockKeyhole className="pointer-events-none absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-muted" aria-hidden />
+                  <LockKeyhole className="pointer-events-none absolute top-1/2 left-3.5 size-4.5 -translate-y-1/2 text-muted" aria-hidden />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
@@ -155,7 +155,7 @@ export default function LoginForm() {
                     onClick={() => setShowPassword(!showPassword)}
                     className="absolute top-1/2 right-1 grid size-11 -translate-y-1/2 place-items-center rounded-xl text-muted transition-colors hover:text-brand-strong sm:size-10"
                   >
-                    {showPassword ? <EyeOff className="size-[18px]" aria-hidden /> : <Eye className="size-[18px]" aria-hidden />}
+                    {showPassword ? <EyeOff className="size-4.5" aria-hidden /> : <Eye className="size-4.5" aria-hidden />}
                   </button>
                 </div>
                 {errors.password && <p id="password-error" role="alert" className="text-xs font-medium text-bad">{errors.password.message}</p>}

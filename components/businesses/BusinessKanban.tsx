@@ -210,7 +210,7 @@ export default function BusinessKanban({
           </Tooltip>
         </div>
         <div
-          className="min-w-[1680px] p-3 pb-0 md:p-4 md:pb-0"
+          className="min-w-420 p-3 pb-0 md:p-4 md:pb-0"
           style={{ transform: `translateX(-${horizontalOffset}px)` }}
         >
           <div className="grid grid-cols-6 gap-3">
@@ -351,7 +351,7 @@ export default function BusinessKanban({
         }}
         className="hidden overflow-x-auto bg-surface-2/70 md:block"
       >
-        <div className="min-w-[1680px] p-3 md:p-4">
+        <div className="min-w-420 p-3 md:p-4">
         <div className="grid grid-cols-6 gap-3">
           {STATUS_OPTIONS.map((stage) => {
             const items = grouped[stage.value] ?? [];
@@ -368,7 +368,7 @@ export default function BusinessKanban({
                 onDragLeave={() => setOverStage(null)}
                 onDrop={(event) => { event.preventDefault(); moveToStage(stage.value); }}
                 className={cn(
-                  "min-h-[360px] border border-line bg-surface-2/60 transition-colors",
+                  "min-h-90 border border-line bg-surface-2/60 transition-colors",
                   overStage === stage.value && "border-brand-strong bg-brand-soft/70",
                 )}
               >

@@ -10,7 +10,7 @@ export default function PageContainer({
   className,
 }: PageContainerProps) {
   return (
-    <div className={cn("mx-auto w-full max-w-360", className)}>
+    <div className={cn("w-full", className)}>
       {children}
     </div>
   );

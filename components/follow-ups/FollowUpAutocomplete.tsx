@@ -87,13 +87,14 @@ export default function FollowUpAutocomplete({
           type="button"
           aria-expanded={open}
           className={cn(
-            "flex h-10 w-full items-center justify-between border border-line bg-surface px-3 text-xs font-medium text-ink-soft shadow-card hover:border-muted focus-visible:border-brand-strong focus-visible:ring-2 focus-visible:ring-brand/15",
-            value && "border-brand-strong/60 bg-brand-soft/40",
+            "flex h-11 w-full items-center justify-between rounded-xl border border-line bg-surface px-3.5 text-left text-base text-ink shadow-card transition-colors outline-none hover:border-muted focus-visible:border-brand focus-visible:ring-4 focus-visible:ring-(--ring) sm:h-10 sm:text-sm",
+            !value && "text-muted",
+            value && "border-brand/50 bg-brand-soft/40",
             invalid && "border-bad/30",
           )}
         >
           <span className="flex min-w-0 items-center gap-2">
-            <Icon className="size-3.5 shrink-0 text-muted" />
+            <Icon className="size-4 shrink-0 text-muted" aria-hidden />
             <span className="truncate">{displayLabel || placeholder}</span>
           </span>
           <span className="flex items-center gap-1">
@@ -109,7 +110,7 @@ export default function FollowUpAutocomplete({
             >
               <X className="size-3.5" />
             </span>
-            <ChevronDown className="size-3.5 text-muted" />
+            <ChevronDown className="size-4 text-muted" aria-hidden />
           </span>
         </button>
       </PopoverTrigger>

@@ -500,7 +500,7 @@ export default function TenantManagementPage() {
                   ))}
                 </DataTableMobileList>
                 <div data-layout-desktop>
-                  <Table className="w-full min-w-[850px] text-left">
+                  <Table className="w-full min-w-212.5 text-left">
                     <TableHeader>
                       <TableRow className="border-b border-surface-2 hover:bg-transparent">
                         <TableHead className="py-4 pl-6 pr-4">Workspace</TableHead>

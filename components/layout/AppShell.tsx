@@ -15,7 +15,7 @@ import {
   ShieldCheck,
   X,
 } from "lucide-react";
-import { useEffect, useState } from "react";
+import { useCallback, useEffect, useState, useSyncExternalStore } from "react";
 import { useAuthSession, useLogout, useTokenRefresh } from "@/hooks/use-auth";
 import { useTenantQuery } from "@/hooks/use-tenants";
 import { useSubscriptionsQuery } from "@/hooks/use-subscriptions";
@@ -37,6 +37,9 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { cn } from "@/lib/utils";
+import { createLocalStore } from "@/lib/shared/local-store";
+
+const sidebarStore = createLocalStore("hasvik-sidebar");
 
 function isPublicPath(pathname: string) {
   return pathname === "/" || pathname === "/explore-crm" || pathname === "/tenant";
@@ -58,7 +61,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const router = useRouter();
   const [moreOpen, setMoreOpen] = useState(false);
   const [paletteOpen, setPaletteOpen] = useState(false);
-  const [sidebarCollapsed, setSidebarCollapsed] = useState(false);
+  // Remembered per browser; read through useSyncExternalStore so the server and first client render agree.
+  const sidebarCollapsed = useSyncExternalStore(sidebarStore.subscribe, sidebarStore.get, sidebarStore.server) === "collapsed";
+  const toggleSidebar = useCallback(() => sidebarStore.set(sidebarStore.get() === "collapsed" ? null : "collapsed"), []);
   const publicPath = isPublicPath(pathname);
   const sessionQuery = useAuthSession(!publicPath || pathname === "/");
   useTokenRefresh();
@@ -145,7 +150,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
     user,
   ]);
 
-  // Ctrl/Cmd+K opens the command palette from anywhere in the signed-in app.
+  // Ctrl/Cmd+K opens the command palette and Ctrl/Cmd+B shows or hides the sidebar, anywhere in the signed-in app.
   useEffect(() => {
     if (publicPath) return;
     const onKey = (event: KeyboardEvent) => {
@@ -153,10 +158,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         event.preventDefault();
         setPaletteOpen((open) => !open);
       }
+      if ((event.ctrlKey || event.metaKey) && event.key.toLowerCase() === "b") {
+        event.preventDefault();
+        toggleSidebar();
+      }
     };
     document.addEventListener("keydown", onKey);
     return () => document.removeEventListener("keydown", onKey);
-  }, [publicPath]);
+  }, [publicPath, toggleSidebar]);
 
   if ((!publicPath || pathname === "/") && authStatus === "loading" && !restoreBlocked && sessionQuery.isError) {
     return (
@@ -228,10 +237,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
   return (
     <div className="min-h-dvh text-ink">
-      <a href="#main" className="sr-only z-[100] rounded-lg bg-btn px-4 py-2 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3">Skip to content</a>
+      <a href="#main" className="sr-only z-100 rounded-lg bg-btn px-4 py-2 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3">Skip to content</a>
 
       {/* Desktop sidebar */}
-      <aside className={cn("fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-line bg-surface transition-[width] duration-200 lg:flex", sidebarCollapsed ? "w-[4.75rem]" : "w-64")}>
+      <aside id="app-sidebar" className={cn("fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-line bg-surface transition-[width] duration-200 lg:flex", sidebarCollapsed ? "w-19" : "w-64")}>
         <div className={cn("flex h-16 shrink-0 items-center", sidebarCollapsed ? "justify-center" : "px-5")}>
           <Link href="/dashboard" aria-label="HASVIK CRM home" className="flex items-center">
             {sidebarCollapsed ? (
@@ -242,26 +251,29 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </Link>
         </div>
         <div aria-hidden className="brand-bar h-0.5 shrink-0 opacity-70" />
-        <nav aria-label="Main navigation" className={cn("flex-1 space-y-1 overflow-y-auto py-4", sidebarCollapsed ? "px-3" : "px-3")}>
+        <nav aria-label="Main navigation" className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
           {items.map((item) => navLink(item, sidebarCollapsed))}
         </nav>
-        <div className="border-t border-line p-3">
-          <button
-            type="button"
-            aria-label={sidebarCollapsed ? "Expand navigation" : "Collapse navigation"}
-            onClick={() => setSidebarCollapsed((collapsed) => !collapsed)}
-            className={cn("flex min-h-11 w-full items-center rounded-xl text-sm font-semibold text-muted transition-colors hover:bg-surface-2 hover:text-ink", sidebarCollapsed ? "justify-center" : "gap-3 px-3.5")}
-          >
-            {sidebarCollapsed ? <PanelLeftOpen className="size-5" aria-hidden /> : <PanelLeftClose className="size-5" aria-hidden />}
-            {!sidebarCollapsed && "Collapse"}
-          </button>
-        </div>
       </aside>
 
-      <div className={cn("transition-[padding] duration-200", sidebarCollapsed ? "lg:pl-[4.75rem]" : "lg:pl-64")}>
-        <header className="glass sticky top-0 z-20 border-b border-line">
-          <div className="flex h-14 items-center justify-between gap-3 px-4 sm:h-16 sm:px-6">
-            <div className="flex min-w-0 items-center gap-3">
+      <div className={cn("transition-[padding] duration-200", sidebarCollapsed ? "lg:pl-19" : "lg:pl-64")}>
+        <header className="glass sticky top-0 z-20 border-b border-line px-4 sm:px-6">
+          {/* Same max width as <main> so the page title lines up with the content below it. */}
+          <div className="mx-auto flex h-14 w-full max-w-400 items-center justify-between gap-3 sm:h-16">
+            <div className="flex min-w-0 items-center gap-2">
+              {/* The sidebar toggle stays in this spot whether the sidebar is open or not, so it is never lost. */}
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-label={sidebarCollapsed ? "Show navigation" : "Hide navigation"}
+                aria-expanded={!sidebarCollapsed}
+                aria-controls="app-sidebar"
+                aria-keyshortcuts="Control+B"
+                title={`${sidebarCollapsed ? "Show" : "Hide"} navigation (Ctrl+B)`}
+                className="-ml-2 hidden size-10 place-items-center rounded-xl text-ink-soft transition-colors hover:bg-surface-2 hover:text-ink lg:grid"
+              >
+                {sidebarCollapsed ? <PanelLeftOpen className="size-5" aria-hidden /> : <PanelLeftClose className="size-5" aria-hidden />}
+              </button>
               <Link href="/dashboard" aria-label="HASVIK CRM home" className="lg:hidden">
                 <Image src="/hasvik-icon.png" alt="HASVIK" width={40} height={40} className="size-9" />
               </Link>
@@ -319,7 +331,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         </header>
 
         <main id="main" className="min-h-[calc(100dvh-3.5rem)] px-4 pt-4 pb-28 sm:px-6 sm:pt-6 lg:pb-10">
-          <div className="mx-auto w-full max-w-[1600px]">
+          <div className="mx-auto w-full max-w-400">
             {subscriptionAccessPending ? (
               <div role="status" className="space-y-4" aria-label="Checking workspace subscription">
                 <div className="skeleton h-9 w-56" />

@@ -51,8 +51,8 @@ export default function ReportTable({ columns, rows, rowHref, onVisibleRows, cap
         <Search className="pointer-events-none absolute top-1/2 left-3.5 size-4 -translate-y-1/2 text-muted" aria-hidden />
         <Input type="search" value={query} onChange={(event) => setQuery(event.target.value)} placeholder="Search this table…" aria-label="Search this table" className="pl-10" />
       </div>
-      <div className="max-h-[32rem] overflow-auto rounded-2xl border border-line">
-        <table className="w-full min-w-[34rem] text-left text-sm tabular">
+      <div className="max-h-128 overflow-auto rounded-2xl border border-line">
+        <table className="w-full min-w-136 text-left text-sm tabular">
           <caption className="sr-only">{caption}</caption>
           <thead className="sticky top-0 z-10 bg-surface-2">
             <tr>

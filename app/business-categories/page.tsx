@@ -240,7 +240,7 @@ export default function BusinessCategoriesPage() {
               })}
             </DataTableMobileList>
             <div data-layout-desktop>
-              <Table className="w-full min-w-[820px] text-left">
+              <Table className="w-full min-w-205 text-left">
               <TableHeader>
                   <TableRow className="border-b border-surface-2 hover:bg-transparent">
                     <TableHead className="py-4 pl-6 pr-4">
@@ -265,7 +265,7 @@ export default function BusinessCategoriesPage() {
                             <span className="text-sm font-bold text-ink">{category.name}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="max-w-[360px] px-4 py-4 text-xs leading-5 text-ink-soft">{category.description || "No description provided."}</TableCell>
+                        <TableCell className="max-w-90 px-4 py-4 text-xs leading-5 text-ink-soft">{category.description || "No description provided."}</TableCell>
                         <TableCell className="px-4 py-4">
                           <span className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold ${active ? "bg-ok-soft text-ok" : "bg-surface-2 text-muted"}`}>{active ? "Active" : "Inactive"}</span>
                         </TableCell>
