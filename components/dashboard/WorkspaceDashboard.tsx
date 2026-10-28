@@ -117,23 +117,41 @@ export default function WorkspaceDashboard({ user }: { user: AuthUser }) {
 
   return (
     <div className="space-y-5">
-      <div className="fade-up flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-[1.7rem]">{greeting(now)}, {(storeUser.fullName || "there").split(" ")[0]}</h1>
-          <p className="mt-1 text-sm text-muted">{mine ? "Your leads and follow-ups" : "Everything in the workspace"} · {range.label}</p>
-        </div>
-        <div className="flex flex-wrap items-center gap-2">
-          <div role="group" aria-label="Whose numbers" className="inline-flex gap-1 rounded-xl bg-surface-2 p-1 ring-1 ring-line ring-inset">
+      <section aria-label="Today at a glance" className="hero-surface fade-up relative overflow-hidden rounded-3xl p-5 text-white shadow-float sm:p-7">
+        <div aria-hidden className="pointer-events-none absolute -top-20 -right-16 size-64 rounded-full bg-white/10 blur-3xl" />
+        <div className="relative flex flex-wrap items-start justify-between gap-4">
+          <div className="min-w-0">
+            <p className="text-sm font-medium text-white/80">{new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "long", day: "numeric", month: "long" }).format(now)}</p>
+            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-[1.9rem]">{greeting(now)}, {(storeUser.fullName || "there").split(" ")[0]}</h1>
+            <p className="mt-2 max-w-md text-sm leading-relaxed text-white/90">
+              {loading
+                ? "Getting your day ready…"
+                : data.todays.length || data.overdue.length
+                  ? `You have ${data.todays.length} follow-up${data.todays.length === 1 ? "" : "s"} today${data.overdue.length ? ` and ${data.overdue.length} waiting from earlier` : ""}.`
+                  : "Nothing is due today. A good moment to reach out to a new lead."}
+            </p>
+          </div>
+          <div role="group" aria-label="Whose numbers" className="inline-flex gap-1 rounded-xl bg-white/15 p-1 ring-1 ring-white/25 backdrop-blur ring-inset">
             {(["mine", "team"] as const).map((value) => (
               <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)}
-                className={cn("min-h-10 rounded-lg px-3.5 text-sm font-semibold transition-all", scope === value ? "bg-surface text-ink shadow-card" : "text-muted hover:text-ink")}>
+                className={cn("min-h-10 rounded-lg px-3.5 text-sm font-semibold transition-all", scope === value ? "bg-white text-brand-strong shadow-card" : "text-white hover:bg-white/10")}>
                 {value === "mine" ? "My numbers" : "Whole team"}
               </button>
             ))}
           </div>
-          <Button variant="outline" onClick={retry} loading={leadsQuery.isFetching || activitiesQuery.isFetching} aria-label="Refresh dashboard"><RefreshCw className="size-4" aria-hidden />Refresh</Button>
         </div>
-      </div>
+        <div className="relative mt-5 flex flex-wrap gap-2">
+          <Link href={followUps({ fromDate: data.todayFrom, toDate: data.todayTo })} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-brand-strong shadow-card transition-transform hover:-translate-y-0.5 active:scale-[0.98]">
+            <CalendarCheck2 className="size-4" aria-hidden />See today&apos;s follow-ups
+          </Link>
+          <Link href="/businesses/form" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white/15 px-4 text-sm font-semibold text-white ring-1 ring-white/30 transition-colors ring-inset hover:bg-white/25">
+            <PlusCircle className="size-4" aria-hidden />Add a business
+          </Link>
+          <button type="button" onClick={retry} aria-label="Refresh dashboard" className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-white/90 hover:bg-white/10">
+            <RefreshCw className={cn("size-4", (leadsQuery.isFetching || activitiesQuery.isFetching) && "animate-spin")} aria-hidden /><span className="hidden sm:inline">Refresh</span>
+          </button>
+        </div>
+      </section>
 
       <DateRangeControl preset={preset} custom={custom} onChange={choose} />
 

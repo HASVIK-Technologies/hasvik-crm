@@ -157,7 +157,7 @@ export default function ReportView({ meta }: { meta: ReportMeta }) {
           ) : (
             <>
               {result.chart && result.rows.length > 0 && (
-                <ChartFrame title="Chart" table={{ columns: ["Item", "Value"], rows: result.chart.rows.map((r) => [r.label, r.valueLabel ?? r.value]) }}>
+                <ChartFrame title={result.chart.ariaLabel} table={{ columns: ["Item", "Value"], rows: result.chart.rows.map((r) => [r.label, r.valueLabel ?? r.value]) }}>
                   {result.chart.kind === "bars"
                     ? <BarList ariaLabel={result.chart.ariaLabel} rows={result.chart.rows} />
                     : <ColumnChart ariaLabel={result.chart.ariaLabel} unit={result.chart.unit} points={result.chart.rows} />}

@@ -28,7 +28,7 @@ export default function KpiCards({ items, loading = false, className }: {
   variant?: "default" | "brand" | "tinted" | "solid";
 }) {
   return (
-    <section aria-label="Key performance indicators" className={cn("stagger grid grid-cols-2 gap-3 xl:grid-cols-[repeat(auto-fit,minmax(165px,1fr))]", className)}>
+    <section aria-label="Key performance indicators" className={cn("stagger grid grid-cols-2 gap-3 xl:grid-cols-[repeat(auto-fit,minmax(165px,1fr))] [&>*:last-child:nth-child(odd)]:col-span-2 xl:[&>*:last-child:nth-child(odd)]:col-span-1", className)}>
       {items.map(({ tone = "blue", ...item }) => (
         <StatCard key={item.label} {...item} tone={TONES[tone]} loading={loading} />
       ))}

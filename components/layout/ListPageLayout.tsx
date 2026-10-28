@@ -4,6 +4,7 @@ import { useEffect, useState } from "react";
 import { Filter, X } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import OutlinedButton from "../common/OutlinedButton";
+import { Button } from "@/components/ui/button";
 import SearchInput from "../common/SearchInput";
 import { FilterDisplayContext } from "@/components/common/ResponsiveFilters";
 import PageContainer from "./PageContainer";
@@ -86,7 +87,8 @@ export default function ListPageLayout({
   return (
     <PageContainer className={`flex flex-col gap-4 sm:gap-6 lg:gap-7 ${className ?? ""}`}>
       <section className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        {breadcrumb}
+        {/* Phones already show the page title in the top bar, so the breadcrumb only appears from tablet up. */}
+        <div className="hidden sm:block">{breadcrumb}</div>
         <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
           {viewSwitcher && <div className="shrink-0">{viewSwitcher}</div>}
           <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
@@ -127,14 +129,16 @@ export default function ListPageLayout({
           onOpenChange={setFilterDrawerOpen}
         >
           <DialogPrimitive.Portal>
-            <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 lg:hidden" />
-            <DialogPrimitive.Content className="filter-drawer fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-surface shadow-2xl outline-none lg:hidden">
+            <DialogPrimitive.Overlay className="fade-up fixed inset-0 z-50 bg-ink/55 backdrop-blur-[3px] lg:hidden" />
+            {/* A bottom sheet on phones (thumb reach), a side panel on tablets. */}
+            <DialogPrimitive.Content className="filter-drawer sheet-up fixed inset-x-0 bottom-0 z-50 flex max-h-[88dvh] flex-col rounded-t-3xl border border-line bg-surface shadow-float outline-none sm:inset-x-auto sm:inset-y-0 sm:right-0 sm:max-h-none sm:w-full sm:max-w-sm sm:rounded-none sm:rounded-l-3xl lg:hidden">
+              <div aria-hidden className="mx-auto mt-2.5 h-1.5 w-10 rounded-full bg-line sm:hidden" />
               <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-5">
-                <DialogPrimitive.Title className="text-lg font-bold text-ink">
+                <DialogPrimitive.Title className="text-lg font-bold tracking-tight text-ink">
                   Filters
                 </DialogPrimitive.Title>
                 <DialogPrimitive.Close
-                  className="rounded-md p-2 text-muted hover:bg-surface-2 hover:text-ink"
+                  className="grid size-11 place-items-center rounded-xl text-muted hover:bg-surface-2 hover:text-ink"
                   aria-label="Close filters"
                 >
                   <X className="size-5" />
@@ -144,22 +148,13 @@ export default function ListPageLayout({
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
                 <FilterDisplayContext value="drawer">{filters}</FilterDisplayContext>
               </div>
-              <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-line bg-surface p-4 shadow-card rounded-2xl">
-                <button
-                  type="button"
-                  onClick={onResetFilters}
-                  disabled={!onResetFilters}
-                  className="h-11 border border-line bg-surface px-3 text-sm font-semibold text-ink-soft hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
-                >
-                  Reset Filters
-                </button>
-                <button
-                  type="button"
-                  onClick={() => setFilterDrawerOpen(false)}
-                  className="h-11 border border-accent bg-surface-2 px-3 text-sm font-semibold text-white hover:bg-accent-strong"
-                >
-                  Show Results{typeof resultCount === "number" ? ` (${resultCount})` : ""}
-                </button>
+              <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-line p-4 pb-[calc(1rem+env(safe-area-inset-bottom))]">
+                <Button variant="outline" onClick={onResetFilters} disabled={!onResetFilters}>
+                  Clear all
+                </Button>
+                <Button onClick={() => setFilterDrawerOpen(false)}>
+                  Show {typeof resultCount === "number" ? `${resultCount} result${resultCount === 1 ? "" : "s"}` : "results"}
+                </Button>
               </div>
             </DialogPrimitive.Content>
           </DialogPrimitive.Portal>
