@@ -153,7 +153,7 @@ export default function BusinessKanban({
   };
 
   return (
-    <div className="border border-line bg-surface shadow-card">
+    <div className="border border-line bg-surface shadow-card rounded-2xl">
       <div className="flex flex-col gap-3 border-b border-surface-2 p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
         <div className="min-w-0">
           <h2 className="text-lg font-bold tracking-tight text-ink">
@@ -219,7 +219,7 @@ export default function BusinessKanban({
               return (
                 <div
                   key={stage.value}
-                  className="flex items-center justify-between border border-line bg-surface px-3 py-3"
+                  className="flex items-center justify-between border border-line bg-surface px-3 py-3 rounded-2xl"
                 >
                   <div className="flex min-w-0 items-center gap-2">
                     <span className={cn("h-5 w-1", getLeadStatusVisual(stage.value).accent)} />
@@ -271,7 +271,7 @@ export default function BusinessKanban({
           {isLoading ? (
             Array.from({ length: 3 }, (_, index) => <div key={index} className="h-40 animate-pulse bg-surface" />)
           ) : (grouped[mobileStage] ?? []).length === 0 ? (
-            <div className="border border-dashed border-line bg-surface px-4 py-12 text-center">
+            <div className="border border-dashed border-line bg-surface px-4 py-12 text-center rounded-2xl">
               <p className="text-sm font-semibold text-ink-soft">{hasActiveFilters ? "No matching businesses" : "No businesses from this page"}</p>
               <p className="mt-1 text-xs text-muted">{hasActiveFilters ? "Adjust the active filters or choose another stage." : "Choose another stage or page to continue reviewing the pipeline."}</p>
             </div>
@@ -376,7 +376,7 @@ export default function BusinessKanban({
                   {isLoading ? (
                     Array.from({ length: 2 }, (_, index) => <div key={index} className="h-32 animate-pulse bg-surface" />)
                   ) : items.length === 0 ? (
-                    <div className="border border-dashed border-line bg-surface/60 px-3 py-8 text-center text-xs text-muted">{hasActiveFilters ? "No businesses match the active filters" : "No businesses from this page"}</div>
+                    <div className="border border-dashed border-line bg-surface/60 px-3 py-8 text-center text-xs text-muted rounded-2xl">{hasActiveFilters ? "No businesses match the active filters" : "No businesses from this page"}</div>
                   ) : (
                     items.map((business) => (
                       <article

@@ -143,7 +143,7 @@ export default function BusinessDetailsFollowups({
 
   return (
     <>
-      <div className="overflow-hidden border border-line bg-surface shadow-card">
+      <div className="overflow-hidden border border-line bg-surface shadow-card rounded-2xl">
         <div className="flex flex-col gap-1 border-b border-surface-2 px-5 py-4 sm:px-6">
           <h3 className="text-base font-bold text-ink">Follow-up history</h3>
           <p className="text-xs text-muted">

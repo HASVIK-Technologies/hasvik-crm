@@ -124,7 +124,7 @@ export default function AsyncAutocompleteSelect({
         </div>
         <PopoverContent
           align="start"
-          className="w-(--radix-popover-trigger-width) overflow-hidden border border-line bg-surface p-0 shadow-xl"
+          className="w-(--radix-popover-trigger-width) overflow-hidden border border-line bg-surface p-0 shadow-xl rounded-2xl"
         >
           <div className="border-b border-surface-2 p-2.5">
             <div className="relative">

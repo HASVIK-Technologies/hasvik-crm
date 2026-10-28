@@ -52,7 +52,7 @@ export default function ResponsiveFilters({ fields, onReset, hasActiveFilters }:
           {activeMore > 0 && <span className="rounded-full bg-btn px-1.5 text-[10px] text-primary-foreground">{activeMore}</span>}
         </button>
       </PopoverTrigger>
-      <PopoverContent align="start" collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto border border-line bg-surface p-4 shadow-xl">
+      <PopoverContent align="start" collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto border border-line bg-surface p-4 shadow-xl rounded-2xl">
         <div className="mb-4 flex items-center justify-between border-b border-surface-2 pb-3">
           <h3 className="text-xs font-bold text-ink">More Filters</h3>
           {activeMore > 0 && <button type="button" onClick={() => more.forEach((field) => field.reset?.())} className="text-xs text-brand-strong hover:underline">Reset Extra</button>}

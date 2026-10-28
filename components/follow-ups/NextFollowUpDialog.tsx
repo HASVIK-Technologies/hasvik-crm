@@ -112,7 +112,7 @@ function NextFollowUpForm({
 
   return (
     <>
-      <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6">
+      <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6 rounded-2xl">
         <div>
           <DialogPrimitive.Title className="text-lg font-bold text-ink">
             Schedule Next Follow-Up
@@ -259,7 +259,7 @@ function NextFollowUpForm({
           </div>
         </div>
 
-        <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-line bg-surface px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6">
+        <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-line bg-surface px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6 rounded-2xl">
           <DialogPrimitive.Close asChild>
             <Button type="button" variant="outline">
               Cancel

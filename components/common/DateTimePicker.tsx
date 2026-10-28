@@ -63,7 +63,7 @@ export default function DateTimePicker({ id, value = "", onChange, placeholder =
         }} />}
         {!canApply && draft && <p role="status" className="mt-2 text-xs text-warn">Choose a future date and time.</p>}
         </div>
-        <div className="flex shrink-0 justify-end gap-2 border-t border-surface-2 bg-surface p-3">
+        <div className="flex shrink-0 justify-end gap-2 border-t border-surface-2 bg-surface p-3 rounded-2xl">
           <button type="button" onClick={() => setOpen(false)} className="h-9 rounded-lg px-3 text-xs font-semibold text-muted hover:bg-surface-2">Cancel</button>
           <button type="button" disabled={!canApply} onClick={() => { if (!unchanged) onChange(draft); setOpen(false); }} className="h-9 rounded-lg bg-btn px-4 text-xs font-semibold text-white disabled:opacity-40">Apply</button>
         </div>

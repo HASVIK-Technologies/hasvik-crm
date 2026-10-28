@@ -19,7 +19,7 @@ export default function BusinessDetailsMap({ business }: MapProps) {
 
   if (!locationData.isAvailable || !locationData.embedSrc) {
     return (
-      <div className="bg-surface border border-line p-6 shadow-sm">
+      <div className="bg-surface border border-line p-6 shadow-sm rounded-2xl">
         <div className="flex items-center justify-between mb-4">
           <h3 className="text-lg font-bold text-ink">Location</h3>
         </div>

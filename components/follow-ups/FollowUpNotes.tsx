@@ -239,7 +239,7 @@ export function FollowUpNotesDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px]" />
         <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-line bg-surface shadow-2xl outline-none">
-          <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-surface px-4 py-4 sm:px-6">
+          <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-surface px-4 py-4 sm:px-6 rounded-2xl">
             <div className="min-w-0">
               <DialogPrimitive.Title className="text-lg font-bold text-ink">
                 Follow-up notes
@@ -260,7 +260,7 @@ export function FollowUpNotesDialog({
             </DialogPrimitive.Close>
           </header>
           <div className="px-4 py-4 sm:px-6">{followUpId && open && <FollowUpNotesPanel key={followUpId} followUpId={followUpId} readOnly={cannotWrite} />}</div>
-          <footer className="sticky bottom-0 z-10 flex justify-end border-t border-line bg-surface px-4 py-3 sm:px-6"><DialogPrimitive.Close asChild><Button type="button" variant="outline" className="rounded-xl">Close</Button></DialogPrimitive.Close></footer>
+          <footer className="sticky bottom-0 z-10 flex justify-end border-t border-line bg-surface px-4 py-3 sm:px-6 rounded-2xl"><DialogPrimitive.Close asChild><Button type="button" variant="outline" className="rounded-xl">Close</Button></DialogPrimitive.Close></footer>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

@@ -78,6 +78,8 @@ function BusinessesContent() {
     return { owner: parsed.owner, createdFrom: parsed.createdFrom, createdTo: parsed.createdTo, updatedFrom: parsed.updatedFrom, updatedTo: parsed.updatedTo, nextFrom: parsed.nextFrom, nextTo: parsed.nextTo, staleDays: parsed.staleDays, open: parsed.open, source: parsed.source };
   });
   const clientMode = needsClientFilter(viewFilter);
+  // The pipeline board needs every record so each column shows its true count, not just the current page.
+  const loadEverything = clientMode || view === "kanban";
 
   // 1. Initial URL param synchronization on mount / URL direct landing
   useEffect(() => {
@@ -167,7 +169,7 @@ function BusinessesContent() {
     isLoading: isListLoading,
     isError: isListError,
     refetch: refetchList,
-  } = useBusinessesQuery(clientMode ? { ...listQueryParams, page: 1, limit: 1000 } : listQueryParams);
+  } = useBusinessesQuery(loadEverything ? { ...listQueryParams, page: 1, limit: 1000 } : listQueryParams);
   const leadsQuery = useLeadsData(true);
 
   const {
@@ -180,11 +182,10 @@ function BusinessesContent() {
     const ids = new Set(applyLeadViewFilter(leadsQuery.data, viewFilter, new Date()).map((lead) => lead.id));
     return (listData?.businesses ?? EMPTY_BUSINESSES).filter((item) => ids.has(String(item.id)));
   }, [clientMode, leadsQuery.data, listData, viewFilter]);
-  const businesses = clientMode
-    ? (clientRows ?? EMPTY_BUSINESSES).slice((page - 1) * limit, page * limit)
-    : (listData?.businesses ?? EMPTY_BUSINESSES);
-  const totalCount = clientMode ? (clientRows?.length ?? 0) : (listData?.total ?? 0);
-  const totalPages = clientMode ? Math.max(1, Math.ceil(totalCount / limit)) : (listData?.totalPages ?? 1);
+  const allRows = clientMode ? (clientRows ?? EMPTY_BUSINESSES) : (listData?.businesses ?? EMPTY_BUSINESSES);
+  const businesses = view === "kanban" ? allRows : clientMode ? allRows.slice((page - 1) * limit, page * limit) : allRows;
+  const totalCount = clientMode ? allRows.length : (listData?.total ?? 0);
+  const totalPages = clientMode && view !== "kanban" ? Math.max(1, Math.ceil(totalCount / limit)) : (listData?.totalPages ?? 1);
   const listLoading = isListLoading || (clientMode && !clientRows);
 
   // Owner options come from the leads themselves, so they work for every role.
@@ -306,8 +307,8 @@ function BusinessesContent() {
               businesses={businesses}
               totalCount={totalCount}
               isLoading={listLoading}
-              currentPage={page}
-              itemsPerPage={limit}
+              currentPage={1}
+              itemsPerPage={Math.max(limit, totalCount, 1)}
               sortOrder={sortBy}
               onSortOrderChange={setSortBy}
               hasActiveFilters={Boolean(hasActiveFilters || search.trim())}

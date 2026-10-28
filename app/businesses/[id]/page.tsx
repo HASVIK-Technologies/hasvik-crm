@@ -208,7 +208,7 @@ export default function BusinessDetails() {
         <>
           {/* 2. SINGLE MERGED CARD (Full Width) */}
           <Card className="w-full overflow-hidden border-line shadow-card">
-            <CardHeader className="flex flex-col gap-4 border-b border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
+            <CardHeader className="flex flex-col gap-4 border-b border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7 rounded-2xl">
               <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">
                 <Avatar className="size-13 sm:size-16 rounded-xl sm:rounded-2xl shrink-0">
                   <AvatarFallback className="bg-btn/10 text-base sm:text-xl font-semibold text-brand-strong">

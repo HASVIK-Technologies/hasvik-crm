@@ -70,5 +70,5 @@ const TITLES: [string, string][] = [
 ];
 
 export function pageTitle(pathname: string) {
-  return TITLES.find(([prefix]) => pathname === prefix.replace(/\/$/, "") || pathname.startsWith(prefix))?.[1] ?? "HASVIK CRM";
+  return TITLES.find(([prefix]) => (prefix.endsWith("/") ? pathname.startsWith(prefix) : pathname === prefix))?.[1] ?? "HASVIK CRM";
 }

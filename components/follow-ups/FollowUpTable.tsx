@@ -158,7 +158,7 @@ export default function FollowUpTable({
   return (
     <>
     <TooltipProvider>
-      <div className="overflow-hidden border border-line bg-surface shadow-card">
+      <div className="overflow-hidden border border-line bg-surface shadow-card rounded-2xl">
         <div className="flex flex-col gap-3.5 border-b border-surface-2 p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
           <h2 className="text-lg font-bold tracking-tight text-ink">
             Follow-ups{" "}
@@ -169,7 +169,7 @@ export default function FollowUpTable({
           {loading ? (
             <div className="flex flex-col gap-3 p-3 md:gap-4 md:p-4">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div key={`follow-up-mobile-skeleton-${index}`} className="space-y-3 border border-surface-2 bg-surface p-4 shadow-sm">
+                <div key={`follow-up-mobile-skeleton-${index}`} className="space-y-3 border border-surface-2 bg-surface p-4 shadow-sm rounded-2xl">
                   <div className="flex animate-pulse items-center gap-3"><div className="size-10 rounded-full bg-surface-2" /><div className="flex-1 space-y-1.5"><div className="h-4 w-32 rounded bg-surface-2" /><div className="h-3 w-20 rounded bg-surface-2" /></div></div>
                   <div className="h-3 w-48 animate-pulse rounded bg-surface-2" />
                 </div>

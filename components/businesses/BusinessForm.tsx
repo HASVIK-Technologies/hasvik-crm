@@ -130,7 +130,7 @@ function OptionalFollowUp({ idPrefix }: { idPrefix: string }) {
           </label>
         )}
       />
-      {enabled && <div className="border-t border-line bg-surface p-4"><FollowUpSection idPrefix={idPrefix} /></div>}
+      {enabled && <div className="border-t border-line bg-surface p-4 rounded-2xl"><FollowUpSection idPrefix={idPrefix} /></div>}
     </div>
   );
 }
@@ -897,7 +897,7 @@ export default function BusinessForm({
               {!isEditMode && <FormSection icon={CalendarPlus} title="First Follow-up" optional><OptionalFollowUp idPrefix="desktop-" /></FormSection>}
 
               {!isEditMode && (
-                <div className="sticky bottom-0 z-20 -mx-4 mt-6 flex flex-col-reverse gap-3 border-t border-line bg-surface/95 px-4 py-4 shadow-card backdrop-blur sm:-mx-7 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:-mx-8 lg:px-8">
+                <div className="sticky bottom-0 z-20 -mx-4 mt-6 flex flex-col-reverse gap-3 border-t border-line bg-surface/95 px-4 py-4 shadow-card backdrop-blur sm:-mx-7 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:-mx-8 lg:px-8 rounded-2xl">
                   <OutlinedButton
                     type="button"
                     size="lg"
@@ -989,7 +989,7 @@ export default function BusinessForm({
               <CardContent className="p-5 sm:p-6">
                 {steps[currentStep].render("mobile-")}
 
-                <div className="sticky bottom-0 z-20 -mx-5 mt-6 flex flex-col-reverse gap-3 border-t border-line bg-surface/95 px-5 py-4 shadow-card backdrop-blur sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div className="sticky bottom-0 z-20 -mx-5 mt-6 flex flex-col-reverse gap-3 border-t border-line bg-surface/95 px-5 py-4 shadow-card backdrop-blur sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 rounded-2xl">
                   <OutlinedButton
                     type="button"
                     onClick={

@@ -34,7 +34,7 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
 
   return (
     <div className="w-full">
-      <div className="border border-line bg-surface p-6 shadow-sm">
+      <div className="border border-line bg-surface p-6 shadow-sm rounded-2xl">
         <h3 className="mb-6 text-lg font-bold text-ink">Contact Information</h3>
 
         <div className="grid grid-cols-1 gap-5">

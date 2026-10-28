@@ -39,7 +39,7 @@ export default function EntityActivity({ entityType, entityId }: { entityType: A
     (Date.parse(b.createdAt ?? "") || 0) - (Date.parse(a.createdAt ?? "") || 0));
 
   return (
-    <section className="overflow-hidden border border-line bg-surface shadow-card">
+    <section className="overflow-hidden border border-line bg-surface shadow-card rounded-2xl">
       <div className="flex items-start justify-between gap-4 border-b border-surface-2 px-5 py-4 sm:px-6">
         <div>
           <h3 className="text-base font-bold text-ink">Activity</h3>

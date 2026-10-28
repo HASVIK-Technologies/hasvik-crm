@@ -69,7 +69,7 @@ export default function AssignBusinessDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/35 backdrop-blur-[2px]" />
         <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-line bg-surface shadow-2xl outline-none">
-          <header className="sticky top-0 z-10 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6">
+          <header className="sticky top-0 z-10 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6 rounded-2xl">
             <div className="flex min-w-0 items-start gap-3">
               <div className="flex size-9 shrink-0 items-center justify-center bg-brand-soft text-brand-strong">
                 <UserRound className="size-4.5" />
@@ -119,7 +119,7 @@ export default function AssignBusinessDialog({
               )}
             </div>
 
-            <footer className="sticky bottom-0 z-10 flex flex-col-reverse justify-end gap-2 border-t border-line bg-surface px-5 py-4 sm:flex-row sm:px-6">
+            <footer className="sticky bottom-0 z-10 flex flex-col-reverse justify-end gap-2 border-t border-line bg-surface px-5 py-4 sm:flex-row sm:px-6 rounded-2xl">
               <DialogPrimitive.Close asChild>
                 <Button type="button" variant="outline" disabled={mutation.isPending}>
                   Cancel

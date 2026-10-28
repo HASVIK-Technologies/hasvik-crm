@@ -275,7 +275,7 @@ export default function BusinessTable({
 
   return (
     <TooltipProvider>
-      <div className="overflow-hidden border border-line bg-surface shadow-card">
+      <div className="overflow-hidden border border-line bg-surface shadow-card rounded-2xl">
         {/* Top Bar */}
         <div className="flex flex-col gap-3.5 border-b border-surface-2 p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
@@ -338,7 +338,7 @@ export default function BusinessTable({
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={`skeleton-mobile-${i}`}
-                  className="animate-pulse border border-surface-2 bg-surface p-4 shadow-sm space-y-3"
+                  className="animate-pulse border border-surface-2 bg-surface p-4 shadow-sm space-y-3 rounded-2xl"
                 >
                   <div className="flex items-center gap-3">
                     <div className="size-10 rounded-full bg-surface-2" />

@@ -47,7 +47,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
 
   return (
     <div className="space-y-5">
-      <section aria-labelledby="follow-up-heading" className="overflow-hidden border border-line bg-surface shadow-card">
+      <section aria-labelledby="follow-up-heading" className="overflow-hidden border border-line bg-surface shadow-card rounded-2xl">
         <div className="flex flex-col justify-between gap-4 border-b border-line p-4 sm:flex-row sm:items-center sm:p-6 sm:px-7">
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
             <Avatar aria-hidden="true" className="size-13 shrink-0 rounded-xl sm:size-16 sm:rounded-2xl"><AvatarFallback className="bg-btn/10 text-base font-semibold text-brand-strong sm:text-xl">{initials}</AvatarFallback></Avatar>

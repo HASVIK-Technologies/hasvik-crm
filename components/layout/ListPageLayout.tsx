@@ -108,7 +108,7 @@ export default function ListPageLayout({
       </section>
       <div className="w-full lg:hidden">{search}</div>
       {showFilters && (filters || search) && (
-        <div className="hidden grow border border-line bg-surface p-3 shadow-card lg:flex overflow-visible">
+        <div className="hidden grow border border-line bg-surface p-3 shadow-card lg:flex overflow-visible rounded-2xl">
           <div className="flex w-full min-w-0 flex-wrap items-center gap-3">
             {search && <div className="w-full shrink-0 lg:w-60 xl:w-72">{search}</div>}
             {filters && <div className="min-w-0 flex-1"><FilterDisplayContext value="inline">{!filterDrawerOpen && filters}</FilterDisplayContext></div>}
@@ -144,7 +144,7 @@ export default function ListPageLayout({
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
                 <FilterDisplayContext value="drawer">{filters}</FilterDisplayContext>
               </div>
-              <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-line bg-surface p-4 shadow-card">
+              <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-line bg-surface p-4 shadow-card rounded-2xl">
                 <button
                   type="button"
                   onClick={onResetFilters}

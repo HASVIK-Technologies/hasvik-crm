@@ -31,7 +31,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
   const leadStatusDisplay = formatLeadStatus(rawLeadStatus);
 
   return (
-    <CardHeader className="flex flex-col gap-4 border-b border-line bg-surface-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
+    <CardHeader className="flex flex-col gap-4 border-b border-line bg-surface-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7 rounded-2xl">
 
       {/* LEFT SIDE: Avatar & Name */}
       <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">

@@ -32,7 +32,7 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
   const leadStatusDisplay = formatLeadStatus(rawLeadStatus, statuses);
 
   return (
-    <div className="border border-line bg-surface p-5 shadow-card sm:p-6">
+    <div className="border border-line bg-surface p-5 shadow-card sm:p-6 rounded-2xl">
       <h3 className="mb-6 text-lg font-bold tracking-tight text-ink">Business Information</h3>
       <div className="space-y-5">
         <div className="flex items-start gap-3 text-sm">

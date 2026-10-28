@@ -169,7 +169,7 @@ export default function FollowUpCalendar({
   return (
     <TooltipProvider>
       <>
-      <div className="border border-line bg-surface shadow-card">
+      <div className="border border-line bg-surface shadow-card rounded-2xl">
         <div className="flex items-center justify-between gap-3 border-b border-line p-3 md:p-4">
           <div>
             <h2 className="text-lg font-bold tracking-tight text-ink">
@@ -179,7 +179,7 @@ export default function FollowUpCalendar({
           </div>
         </div>
 
-        <div className="hidden items-center justify-between border-b border-line bg-surface-2/70 px-4 py-2.5 xl:flex">
+        <div className="hidden items-center justify-between border-b border-line bg-surface-2/70 px-4 py-2.5 xl:flex rounded-2xl">
           <p className="text-xs font-medium text-muted">Select a month to review scheduled workload.</p>
           <div className="flex items-center gap-2">
             <OutlinedButton size="sm" onClick={goToToday}>Today</OutlinedButton>
@@ -276,7 +276,7 @@ export default function FollowUpCalendar({
           </div>
         </div>
         <div className="xl:hidden">
-          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-line bg-surface-2 px-3 py-2.5">
+          <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-line bg-surface-2 px-3 py-2.5 rounded-2xl">
             <button type="button" onClick={() => changeWeek(-1)} aria-label="Previous week" className="flex size-9 items-center justify-center border border-line bg-surface text-ink-soft hover:bg-surface-2"><ChevronLeft className="size-4" /></button>
             <div className="flex min-w-0 flex-col items-center justify-center border border-line bg-surface px-2 py-1 text-center">
               <span className="text-[9px] font-bold uppercase tracking-wide text-muted">Select week</span>
@@ -347,7 +347,7 @@ export default function FollowUpCalendar({
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px]" />
           <DialogPrimitive.Content className="fixed inset-x-0 bottom-0 z-50 max-h-[88vh] overflow-y-auto border border-line bg-surface shadow-2xl outline-none sm:left-1/2 sm:top-1/2 sm:bottom-auto sm:w-[calc(100%-2rem)] sm:max-w-2xl sm:-translate-x-1/2 sm:-translate-y-1/2">
-            <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-line bg-surface p-4 sm:p-5">
+            <div className="sticky top-0 z-10 flex items-start justify-between gap-3 border-b border-line bg-surface p-4 sm:p-5 rounded-2xl">
               <div className="flex min-w-0 items-start gap-3">
                 <div className="flex size-10 shrink-0 items-center justify-center bg-brand-soft text-brand-strong"><CalendarDays className="size-5" /></div>
                 <div className="min-w-0">
@@ -370,7 +370,7 @@ export default function FollowUpCalendar({
             </div>
             <div className="divide-y divide-surface-2 p-3 sm:p-5">
               {selectedDayItems.length === 0 && (
-                <div className="border border-dashed border-line bg-surface-2 px-4 py-10 text-center">
+                <div className="border border-dashed border-line bg-surface-2 px-4 py-10 text-center rounded-2xl">
                   <CalendarDays className="mx-auto size-6 text-muted" />
                   <p className="mt-2 text-sm font-semibold text-ink-soft">No follow-ups scheduled</p>
                   <p className="mt-1 text-xs text-muted">Use Add follow-up to schedule the first activity for this day.</p>
@@ -397,7 +397,7 @@ export default function FollowUpCalendar({
                 </article>
               ))}
             </div>
-            <footer className="sticky bottom-0 z-10 flex justify-end gap-2 border-t border-line bg-surface p-3 sm:px-5">
+            <footer className="sticky bottom-0 z-10 flex justify-end gap-2 border-t border-line bg-surface p-3 sm:px-5 rounded-2xl">
               <DialogPrimitive.Close asChild><button type="button" className="h-9 border border-line px-4 text-xs font-semibold text-ink-soft hover:bg-surface-2">Close</button></DialogPrimitive.Close>
               {canScheduleSelectedDay && selectedDayDate && <button type="button" onClick={() => { setSelectedDay(null); scheduleForDay(selectedDayDate); }} className="h-9 border border-accent bg-surface-2 px-4 text-xs font-bold text-white hover:bg-accent-strong">Add follow-up</button>}
             </footer>

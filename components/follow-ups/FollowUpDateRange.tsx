@@ -60,7 +60,7 @@ export default function FollowUpDateRange({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto space-y-4 border border-line bg-surface p-3 shadow-xl"
+        collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto space-y-4 border border-line bg-surface p-3 shadow-xl rounded-2xl"
       >
         <div>
           <p className="text-xs font-bold text-ink">Date range</p>

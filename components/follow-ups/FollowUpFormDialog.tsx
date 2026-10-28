@@ -167,7 +167,7 @@ export default function FollowUpFormDialog({
       <DialogPrimitive.Portal>
         <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/35 backdrop-blur-[2px]" />
         <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-line bg-surface shadow-2xl outline-none">
-          <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6">
+          <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6 rounded-2xl">
             <div>
               <DialogPrimitive.Title className="text-lg font-bold text-ink">
                 {isEdit ? "Edit follow-up" : "Add Follow-up"}
@@ -306,7 +306,7 @@ export default function FollowUpFormDialog({
                 />
               </div>
             </div>
-            <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-line bg-surface px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6">
+            <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-line bg-surface px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6 rounded-2xl">
               <DialogPrimitive.Close asChild>
                 <Button type="button" variant="outline">Cancel</Button>
               </DialogPrimitive.Close>
