@@ -16,7 +16,7 @@ export default function BusinessViewToggle({
 }) {
   return (
     <div
-      className="inline-flex h-9 border border-slate-200 bg-slate-50 p-0.5"
+      className="inline-flex h-9 border border-line bg-surface-2 p-0.5"
       role="group"
       aria-label="Business view"
     >
@@ -37,8 +37,8 @@ export default function BusinessViewToggle({
                 className={cn(
                   "inline-flex h-8 items-center gap-2 border px-3 text-xs font-semibold transition-colors",
                   active
-                    ? "border-slate-200 bg-white text-brand-blue shadow-sm"
-                    : "border-transparent text-slate-500 hover:text-slate-900",
+                    ? "border-line bg-surface text-brand-strong shadow-sm"
+                    : "border-transparent text-muted hover:text-ink",
                 )}
               >
                 <Icon className="size-4" />

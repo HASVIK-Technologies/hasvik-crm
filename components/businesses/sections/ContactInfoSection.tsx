@@ -98,7 +98,7 @@ export default function ContactInfoSection({
 
   return (
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
-      <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4">
+      <div className="rounded-xl border border-line bg-surface-2/40 p-4">
         <NumberListField
           label="Phone Numbers"
           addLabel="Add Phone Number"
@@ -126,7 +126,7 @@ export default function ContactInfoSection({
                     invalid={!!fieldState.error}
                   />
                   {fieldState.error && (
-                    <p role="alert" className="mt-1 text-xs text-red-600">
+                    <p role="alert" className="mt-1 text-xs text-bad">
                       {fieldState.error.message}
                     </p>
                   )}
@@ -154,8 +154,8 @@ export default function ContactInfoSection({
                 className={cn(
                   "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
                   isMarked
-                    ? "bg-brand-green/10 text-brand-green-strong hover:bg-brand-green/15"
-                    : "bg-[#f3f5f6] text-[#8a9eaa] hover:bg-[#e5edf1] hover:text-[#547080]",
+                    ? "bg-surface-2/10 text-accent-strong hover:bg-surface-2/15"
+                    : "bg-surface-2 text-muted hover:bg-surface-2 hover:text-brand-strong",
                   !phoneValue.trim() && "cursor-not-allowed opacity-50",
                 )}
               >
@@ -166,7 +166,7 @@ export default function ContactInfoSection({
         />
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4">
+      <div className="rounded-xl border border-line bg-surface-2/40 p-4">
         <NumberListField
           label="WhatsApp Numbers"
           addLabel="Add WhatsApp Number"
@@ -197,7 +197,7 @@ export default function ContactInfoSection({
                     invalid={!!fieldState.error}
                   />
                   {fieldState.error && (
-                    <p role="alert" className="mt-1 text-xs text-red-600">
+                    <p role="alert" className="mt-1 text-xs text-bad">
                       {fieldState.error.message}
                     </p>
                   )}
@@ -208,7 +208,7 @@ export default function ContactInfoSection({
         />
       </div>
 
-      <div className="rounded-xl border border-slate-200 bg-slate-50/40 p-4">
+      <div className="rounded-xl border border-line bg-surface-2/40 p-4">
         <FieldLabel htmlFor={`${idPrefix}email`} optional>
           Email
         </FieldLabel>
@@ -224,11 +224,11 @@ export default function ContactInfoSection({
           })}
         />
         {errors.email && (
-          <p role="alert" className="mt-1 text-xs text-red-600">
+          <p role="alert" className="mt-1 text-xs text-bad">
             {errors.email.message}
           </p>
         )}
-        <p className="mt-1.5 text-xs text-[#8a9eaa]">Business email address</p>
+        <p className="mt-1.5 text-xs text-muted">Business email address</p>
       </div>
     </div>
   );

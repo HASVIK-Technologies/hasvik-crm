@@ -247,14 +247,14 @@ export default function FollowupsPage() {
         content={
           <div className="space-y-4">
             {filters.view === "table" && (
-              <div className="flex items-center gap-1 overflow-x-auto border-b border-[#e7edf3]">
+              <div className="flex items-center gap-1 overflow-x-auto border-b border-line">
                 {/* {(["all", "today", "upcoming", "overdue"] as const).map((tab) => ( */}
                 {(["all", "today", "upcoming"] as const).map((tab) => (
                   <button
                     type="button"
                     key={tab}
                     onClick={() => filters.setTab(tab)}
-                    className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-primary text-primary" : "border-transparent text-[#64748b] hover:text-[#334155]"}`}
+                    className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-brand text-brand-strong" : "border-transparent text-muted hover:text-ink-soft"}`}
                   >
                     {tab}
                   </button>

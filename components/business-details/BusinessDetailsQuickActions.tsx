@@ -21,8 +21,8 @@ export default function BusinessDetailsQuickActions({
   const phone = business?.phone ? cleanNumber(business.phone) : "";
 
   return (
-    <div className="flex flex-col rounded-2xl border border-slate-200/80 bg-white p-5 shadow-sm">
-      <h3 className="mb-3.5 text-xs font-bold uppercase tracking-wider text-slate-500">
+    <div className="flex flex-col rounded-2xl border border-line/80 bg-surface p-5 shadow-sm">
+      <h3 className="mb-3.5 text-xs font-bold uppercase tracking-wider text-muted">
         Quick Actions
       </h3>
 
@@ -31,32 +31,32 @@ export default function BusinessDetailsQuickActions({
         {/* Edit Business */}
         <Link
           href={`/businesses/form/${business?.id}`}
-          className="group flex items-center justify-between rounded-xl border border-slate-200/90 bg-white p-3 transition-all hover:border-primary/30 hover:bg-primary/5"
+          className="group flex items-center justify-between rounded-xl border border-line/90 bg-surface p-3 transition-all hover:border-brand/30 hover:bg-btn/5"
         >
           <div className="flex items-center gap-3">
-            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-primary/10 text-primary transition-colors group-hover:bg-primary/15">
+            <div className="flex size-9 shrink-0 items-center justify-center rounded-lg bg-btn/10 text-brand-strong transition-colors group-hover:bg-btn/15">
               <Edit2 className="size-4" />
             </div>
             <div>
-              <p className="text-xs font-semibold text-slate-800 group-hover:text-primary">
+              <p className="text-xs font-semibold text-ink group-hover:text-brand-strong">
                 Edit Business
               </p>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-muted">
                 Update business details
               </p>
             </div>
           </div>
-          <ChevronRight className="size-4 text-slate-400 transition-transform group-hover:translate-x-0.5 group-hover:text-primary" />
+          <ChevronRight className="size-4 text-muted transition-transform group-hover:translate-x-0.5 group-hover:text-brand-strong" />
         </Link>
 
         {/* Call & WhatsApp (2 Columns) */}
         <div className="grid grid-cols-2 gap-2.5">
-          <div className="flex items-center gap-2 border border-slate-200 bg-white p-2.5"><PhoneActionMenu numbers={business?.phoneNumbers} fallback={phone} /><span className="text-xs font-semibold text-slate-700">Call</span></div>
-          <div className="flex items-center gap-2 border border-slate-200 bg-white p-2.5"><WhatsAppActionMenu numbers={business?.whatsappNumbers} fallback={business?.alternatePhone} /><span className="text-xs font-semibold text-slate-700">WhatsApp</span></div>
+          <div className="flex items-center gap-2 border border-line bg-surface p-2.5"><PhoneActionMenu numbers={business?.phoneNumbers} fallback={phone} /><span className="text-xs font-semibold text-ink-soft">Call</span></div>
+          <div className="flex items-center gap-2 border border-line bg-surface p-2.5"><WhatsAppActionMenu numbers={business?.whatsappNumbers} fallback={business?.alternatePhone} /><span className="text-xs font-semibold text-ink-soft">WhatsApp</span></div>
         </div>
 
         {/* Divider */}
-        <div className="my-0.5 border-t border-slate-100" />
+        <div className="my-0.5 border-t border-surface-2" />
         </>}
 
         {/* Activate / Deactivate Toggle */}
@@ -65,16 +65,16 @@ export default function BusinessDetailsQuickActions({
           onClick={() => openDeactivateModal(business?.id)}
           className={`group flex items-center justify-between rounded-xl border p-3 text-left transition-all ${
             isInactive
-              ? "border-brand-green/30 bg-brand-green/5 hover:bg-brand-green/10 hover:border-brand-green/40"
-              : "border-slate-200/90 bg-white hover:border-red-200 hover:bg-red-50/30"
+              ? "border-accent/30 bg-surface-2/5 hover:bg-surface-2/10 hover:border-accent/40"
+              : "border-line/90 bg-surface hover:border-bad/30 hover:bg-bad-soft/30"
           }`}
         >
           <div className="flex items-center gap-3">
             <div
               className={`flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors ${
                 isInactive
-                  ? "bg-brand-green/15 text-brand-green-strong"
-                  : "bg-slate-100 text-slate-500 group-hover:bg-red-100 group-hover:text-red-600"
+                  ? "bg-surface-2/15 text-accent-strong"
+                  : "bg-surface-2 text-muted group-hover:bg-bad-soft group-hover:text-bad"
               }`}
             >
               {isInactive ? (
@@ -87,13 +87,13 @@ export default function BusinessDetailsQuickActions({
               <p
                 className={`text-xs font-semibold ${
                   isInactive
-                    ? "text-brand-green-strong"
-                    : "text-slate-800 group-hover:text-red-600"
+                    ? "text-accent-strong"
+                    : "text-ink group-hover:text-bad"
                 }`}
               >
                 {isInactive ? "Activate Business" : "Deactivate Business"}
               </p>
-              <p className="text-[11px] text-slate-400">
+              <p className="text-[11px] text-muted">
                 {isInactive
                   ? "Restore full access & status"
                   : "Pause operations for this business"}
@@ -103,8 +103,8 @@ export default function BusinessDetailsQuickActions({
           <ChevronRight
             className={`size-4 transition-transform group-hover:translate-x-0.5 ${
               isInactive
-                ? "text-brand-green/70 group-hover:text-brand-green-strong"
-                : "text-slate-300 group-hover:text-red-400"
+                ? "text-accent-strong/70 group-hover:text-accent-strong"
+                : "text-muted group-hover:text-bad"
             }`}
           />
         </button>

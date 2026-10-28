@@ -22,7 +22,7 @@ export default function SortableColumnHeader({
     <button
       type="button"
       onClick={() => onSort(field)}
-      className="inline-flex items-center gap-1.5 text-left font-bold uppercase tracking-wide text-slate-400 transition-colors hover:text-slate-700"
+      className="inline-flex items-center gap-1.5 text-left font-bold uppercase tracking-wide text-muted transition-colors hover:text-ink-soft"
       aria-label={`Sort by ${label}`}
     >
       {label}

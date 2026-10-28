@@ -67,7 +67,7 @@ function roleLabel(role: string) {
 
 function RoleBadge({ role }: { role: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md border border-slate-200 bg-slate-50 px-2.5 py-1 text-[10px] font-semibold text-slate-700">
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-2 px-2.5 py-1 text-[10px] font-semibold text-ink-soft">
       <ShieldCheck className="size-3" />
       {roleLabel(role)}
     </span>
@@ -216,7 +216,7 @@ export default function UsersPage() {
               <SelectTrigger id="users-role-filter" size="sm" className="w-44 rounded-lg text-xs">
                 <SelectValue placeholder="All roles" />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-surface">
                 <SelectItem value="ALL" className="text-xs">All roles</SelectItem>
                 {roles.map((role) => (
                   <SelectItem key={role} value={role} className="text-xs">
@@ -227,11 +227,11 @@ export default function UsersPage() {
             </Select> },
             ...(superAdmin ? [{ key: "tenant", label: "Workspace", active: tenantFilter !== "ALL", reset: () => { setTenantFilter("ALL"); setPage(1); }, control: <><Select value={tenantFilter} onValueChange={(value) => { setTenantFilter(value); setPage(1); }}>
                 <SelectTrigger id="users-tenant-filter" size="sm" disabled={tenantsQuery.isPending} className="w-48 max-w-full rounded-lg text-xs"><SelectValue placeholder="All tenants" /></SelectTrigger>
-                <SelectContent className="max-h-72 bg-white"><SelectItem value="ALL">All tenants</SelectItem>{tenants.map((tenant) => <SelectItem key={tenant.id} value={tenant.id}>{tenant.name}{tenant.isActive ? "" : " (Inactive)"}</SelectItem>)}</SelectContent>
-              </Select>{tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-primary hover:underline">Retry loading tenants</button>}</> }] : []),
+                <SelectContent className="max-h-72 bg-surface"><SelectItem value="ALL">All tenants</SelectItem>{tenants.map((tenant) => <SelectItem key={tenant.id} value={tenant.id}>{tenant.name}{tenant.isActive ? "" : " (Inactive)"}</SelectItem>)}</SelectContent>
+              </Select>{tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-brand-strong hover:underline">Retry loading tenants</button>}</> }] : []),
             { key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
               <SelectTrigger id="users-status-filter" size="sm" className="w-36 rounded-lg text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent className="bg-white"><SelectItem value="ALL">All statuses</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
+              <SelectContent className="bg-surface"><SelectItem value="ALL">All statuses</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
             </Select> },
           ]} />}
         showFilters={showFilters}
@@ -252,7 +252,7 @@ export default function UsersPage() {
               { label: "Active users", value: kpisQuery.isError ? "—" : kpisQuery.data?.active ?? "—", icon: ShieldCheck, tone: "green" },
               { label: "Inactive users", value: kpisQuery.isError ? "—" : kpisQuery.data?.inactive ?? "—", icon: UserRound, tone: "slate" },
             ]} />
-            {kpisQuery.isError && <p role="alert" className="text-sm text-amber-800">User totals could not be loaded. <button type="button" onClick={() => void kpisQuery.refetch()} className="font-semibold underline">Retry totals</button></p>}
+            {kpisQuery.isError && <p role="alert" className="text-sm text-warn">User totals could not be loaded. <button type="button" onClick={() => void kpisQuery.refetch()} className="font-semibold underline">Retry totals</button></p>}
           </div>
         }
         actions={
@@ -279,18 +279,18 @@ export default function UsersPage() {
               onSortChange={setSortPreset}
             />
             {usersQuery.isPending ? (
-              <div className="flex min-h-44 items-center justify-center"><LoaderCircle className="size-5 animate-spin text-primary" /><span className="ml-2 text-sm text-slate-500">Loading users…</span></div>
+              <div className="flex min-h-44 items-center justify-center"><LoaderCircle className="size-5 animate-spin text-brand-strong" /><span className="ml-2 text-sm text-muted">Loading users…</span></div>
             ) : usersQuery.isError ? (
               <div className="px-5 py-12 text-center">
-                <p className="text-sm font-semibold text-slate-900">Users couldn’t be loaded</p>
-                <p className="mt-1 text-xs text-slate-500">Check your access and connection, then try again.</p>
+                <p className="text-sm font-semibold text-ink">Users couldn’t be loaded</p>
+                <p className="mt-1 text-xs text-muted">Check your access and connection, then try again.</p>
                 <Button variant="outline" size="sm" onClick={() => void usersQuery.refetch()} className="mt-4 rounded-lg">Try again</Button>
               </div>
             ) : users.length === 0 ? (
               <div className="px-5 py-14 text-center">
-                <UserRound className="mx-auto size-7 text-slate-300" />
-                <p className="mt-3 text-sm font-semibold text-slate-800">No users found</p>
-                <p className="mt-1 text-xs text-slate-500">Try another search or add a teammate.</p>
+                <UserRound className="mx-auto size-7 text-muted" />
+                <p className="mt-3 text-sm font-semibold text-ink">No users found</p>
+                <p className="mt-1 text-xs text-muted">Try another search or add a teammate.</p>
               </div>
             ) : (
               <>
@@ -299,16 +299,16 @@ export default function UsersPage() {
                     const id = userId(user) || `${user.email}-${index}`;
                     const initials = user.fullName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
                     return (
-                      <DataTableMobileCard key={id} className={`flex items-start justify-between gap-3 ${isItemHighlighted(id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : ""}`}>
+                      <DataTableMobileCard key={id} className={`flex items-start justify-between gap-3 ${isItemHighlighted(id) ? "border-brand-strong bg-brand-soft/80 ring-2 ring-brand/20" : ""}`}>
                         <div className="flex min-w-0 items-start gap-3">
-                          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{initials}</span>
+                          <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-btn/10 text-xs font-bold text-brand-strong">{initials}</span>
                           <span className="min-w-0">
-                            <span className="block truncate text-sm font-bold text-[#0f172a]">{user.fullName}</span>
-                            <span className="mt-0.5 block break-all text-xs text-[#64748b]">{user.email}</span>
-                            <span className="mt-1.5 block text-[11px] text-[#64748b]">{user.phoneNumber || "No contact number"}</span>
+                            <span className="block truncate text-sm font-bold text-ink">{user.fullName}</span>
+                            <span className="mt-0.5 block break-all text-xs text-muted">{user.email}</span>
+                            <span className="mt-1.5 block text-[11px] text-muted">{user.phoneNumber || "No contact number"}</span>
                             <span className="mt-2 flex flex-wrap items-center gap-2"><RoleBadge role={user.role} /><ActivityStateText active={!isRecordInactive(user)} /></span>
-                            {superAdmin && <span className="mt-2 block text-xs text-slate-500">Tenant: {getUserTenant(user, tenants).name}</span>}
-                            {getUserTenant(user, tenants).isActive === false && <span className="mt-1 block text-xs text-slate-400">Tenant inactive. Activate the tenant first.</span>}
+                            {superAdmin && <span className="mt-2 block text-xs text-muted">Tenant: {getUserTenant(user, tenants).name}</span>}
+                            {getUserTenant(user, tenants).isActive === false && <span className="mt-1 block text-xs text-muted">Tenant inactive. Activate the tenant first.</span>}
                           </span>
                         </div>
                         <ManagementRowActions
@@ -329,7 +329,7 @@ export default function UsersPage() {
                 <div data-layout-desktop>
                   <Table className="w-full min-w-[760px] text-left">
                     <TableHeader>
-                      <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
+                      <TableRow className="border-b border-surface-2 hover:bg-transparent">
                         <TableHead className="py-4 pl-6 pr-4">
                           <SortableColumnHeader label="User" field="fullName" sortBy={sortBy} sortOrder={sortOrder} onSort={toggleSort} />
                         </TableHead>
@@ -339,29 +339,29 @@ export default function UsersPage() {
                         {superAdmin && <TableHead className="px-4 py-4 font-semibold">Tenant</TableHead>}
                         <TableHead className="px-4 py-4 font-semibold">Role</TableHead>
                         <TableHead className="px-4 py-4 font-semibold">Status</TableHead>
-                        <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
+                        <TableHead className="sticky right-0 bg-surface-2 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
+                    <TableBody className="divide-y divide-surface-2 text-sm text-ink-soft">
                       {users.map((user, index) => {
                         const id = userId(user) || `${user.email}-${index}`;
                         const initials = user.fullName.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase();
                         return (
-                          <TableRow key={id} className={`group border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
+                          <TableRow key={id} className={`group border-b border-surface-2 transition-colors duration-500 hover:bg-surface-2/80 ${isItemHighlighted(id) ? "bg-brand-soft ring-2 ring-inset ring-brand/25" : ""}`}>
                             <TableCell className="py-4 pl-6 pr-4">
                               <div className="flex items-center gap-3">
-                                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-xs font-bold text-primary">{initials}</span>
+                                <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-btn/10 text-xs font-bold text-brand-strong">{initials}</span>
                                 <div className="min-w-0">
-                                  <p className="truncate text-sm font-bold text-[#0f172a]">{user.fullName}</p>
-                                  <p className="mt-0.5 text-xs text-[#64748b]">{user.phoneNumber || "No contact number"}</p>
+                                  <p className="truncate text-sm font-bold text-ink">{user.fullName}</p>
+                                  <p className="mt-0.5 text-xs text-muted">{user.phoneNumber || "No contact number"}</p>
                                 </div>
                               </div>
                             </TableCell>
-                            <TableCell className="px-4 py-4 text-xs text-[#475569]">{user.email}</TableCell>
+                            <TableCell className="px-4 py-4 text-xs text-ink-soft">{user.email}</TableCell>
                             {superAdmin && <TableCell className="px-4 py-4">{getUserTenant(user, tenants).name}</TableCell>}
                             <TableCell className="px-4 py-4"><RoleBadge role={user.role} /></TableCell>
-                            <TableCell className="px-4 py-4"><ActivityStateText active={!isRecordInactive(user)} />{getUserTenant(user, tenants).isActive === false && <p className="mt-1 text-[10px] text-slate-400">Tenant inactive. Activate the tenant first.</p>}</TableCell>
-                            <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
+                            <TableCell className="px-4 py-4"><ActivityStateText active={!isRecordInactive(user)} />{getUserTenant(user, tenants).isActive === false && <p className="mt-1 text-[10px] text-muted">Tenant inactive. Activate the tenant first.</p>}</TableCell>
+                            <TableCell className="sticky right-0 bg-surface py-4 pl-4 pr-6 group-hover:bg-surface-2">
                               <ManagementRowActions
                                 activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}
                                 editLabel={`Edit ${user.fullName}`}
@@ -400,19 +400,19 @@ export default function UsersPage() {
 
       <DialogPrimitive.Root open={dialogOpen && (!editingUser || canEditManagedUser(currentUser, editingUser))} onOpenChange={setDialogOpen}>
         <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
-          <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px]" />
+          <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-line bg-surface p-5 shadow-2xl outline-none sm:p-6">
             <div className="mb-5 flex items-start justify-between gap-3">
-              <div><DialogPrimitive.Title className="text-lg font-bold text-slate-900">{editingUser ? "Edit user" : "Add a user"}</DialogPrimitive.Title><DialogPrimitive.Description className="mt-1 text-xs leading-5 text-slate-500">Set the user’s profile details and workspace role.</DialogPrimitive.Description></div>
-              <DialogPrimitive.Close aria-label="Close" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X className="size-4" /></DialogPrimitive.Close>
+              <div><DialogPrimitive.Title className="text-lg font-bold text-ink">{editingUser ? "Edit user" : "Add a user"}</DialogPrimitive.Title><DialogPrimitive.Description className="mt-1 text-xs leading-5 text-muted">Set the user’s profile details and workspace role.</DialogPrimitive.Description></div>
+              <DialogPrimitive.Close aria-label="Close" className="rounded-lg p-2 text-muted hover:bg-surface-2"><X className="size-4" /></DialogPrimitive.Close>
             </div>
             <form onSubmit={(event) => void submitUser(event)} className="space-y-4">
-              <div className="space-y-1.5"><label htmlFor="user-full-name" className="text-xs font-semibold text-slate-700">Full name</label><Input id="user-full-name" name="fullName" required defaultValue={editingUser?.fullName ?? ""} autoComplete="name" className="h-11 rounded-xl" /></div>
-              <div className="space-y-1.5"><label htmlFor="user-email" className="text-xs font-semibold text-slate-700">Email</label><Input id="user-email" name="email" type="email" required defaultValue={editingUser?.email ?? ""} autoComplete="email" className="h-11 rounded-xl" /></div>
-              <div className="space-y-1.5"><label htmlFor="user-role" className="text-xs font-semibold text-slate-700">Role</label><select id="user-role" name="role" defaultValue={editingUser?.role ?? "USER"} className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-primary">{roles.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}</select></div>
-              <div className="space-y-1.5"><label htmlFor="user-password" className="text-xs font-semibold text-slate-700">Password {editingUser && <span className="font-normal text-slate-400">(leave blank to keep current)</span>}</label><Input id="user-password" name="password" type="password" autoComplete={editingUser ? "new-password" : "new-password"} required={!editingUser} minLength={8} className="h-11 rounded-xl" /></div>
-              {formError && <p role="alert" className="rounded-lg bg-rose-50 p-3 text-xs text-rose-700">{formError}</p>}
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+              <div className="space-y-1.5"><label htmlFor="user-full-name" className="text-xs font-semibold text-ink-soft">Full name</label><Input id="user-full-name" name="fullName" required defaultValue={editingUser?.fullName ?? ""} autoComplete="name" className="h-11 rounded-xl" /></div>
+              <div className="space-y-1.5"><label htmlFor="user-email" className="text-xs font-semibold text-ink-soft">Email</label><Input id="user-email" name="email" type="email" required defaultValue={editingUser?.email ?? ""} autoComplete="email" className="h-11 rounded-xl" /></div>
+              <div className="space-y-1.5"><label htmlFor="user-role" className="text-xs font-semibold text-ink-soft">Role</label><select id="user-role" name="role" defaultValue={editingUser?.role ?? "USER"} className="h-11 w-full rounded-xl border border-line bg-surface px-3 text-sm text-ink-soft outline-none focus:border-brand">{roles.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}</select></div>
+              <div className="space-y-1.5"><label htmlFor="user-password" className="text-xs font-semibold text-ink-soft">Password {editingUser && <span className="font-normal text-muted">(leave blank to keep current)</span>}</label><Input id="user-password" name="password" type="password" autoComplete={editingUser ? "new-password" : "new-password"} required={!editingUser} minLength={8} className="h-11 rounded-xl" /></div>
+              {formError && <p role="alert" className="rounded-lg bg-bad-soft p-3 text-xs text-bad">{formError}</p>}
+              <div className="flex justify-end gap-2 border-t border-surface-2 pt-4">
                 <Button type="button" variant="outline" disabled={mutationPending} onClick={() => setDialogOpen(false)} className="rounded-xl">Cancel</Button>
                 <Button type="submit" disabled={mutationPending} className="rounded-xl">{mutationPending && <LoaderCircle className="size-4 animate-spin" />}{editingUser ? "Save changes" : "Create user"}</Button>
               </div>

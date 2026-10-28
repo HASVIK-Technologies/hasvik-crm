@@ -119,18 +119,18 @@ function OptionalFollowUp({ idPrefix }: { idPrefix: string }) {
   const { control } = useFormContext<BusinessFormValues>();
   const enabled = useWatch({ control, name: "scheduleFollowUp" });
   return (
-    <div className="border border-slate-200 bg-slate-50/50">
+    <div className="border border-line bg-surface-2/50">
       <Controller
         control={control}
         name="scheduleFollowUp"
         render={({ field }) => (
           <label className="flex cursor-pointer items-start gap-3 px-4 py-3.5">
-            <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} className="mt-0.5 rounded-none" />
-            <span><span className="block text-sm font-semibold text-slate-900">Schedule the first follow-up</span><span className="mt-0.5 block text-xs text-slate-500">Optional. You can add this later from the business details page.</span></span>
+            <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} className="mt-0.5 rounded-xl" />
+            <span><span className="block text-sm font-semibold text-ink">Schedule the first follow-up</span><span className="mt-0.5 block text-xs text-muted">Optional. You can add this later from the business details page.</span></span>
           </label>
         )}
       />
-      {enabled && <div className="border-t border-slate-200 bg-white p-4"><FollowUpSection idPrefix={idPrefix} /></div>}
+      {enabled && <div className="border-t border-line bg-surface p-4"><FollowUpSection idPrefix={idPrefix} /></div>}
     </div>
   );
 }
@@ -818,10 +818,10 @@ export default function BusinessForm({
 
   if (isLoadingBusiness) {
     return (
-      <Card className="border-[#dce8ee] p-12 text-center">
+      <Card className="border-line p-12 text-center">
         <div className="flex flex-col items-center justify-center gap-3">
-          <Loader2 className="size-8 animate-spin text-primary" />
-          <p className="text-sm font-medium text-[#64748b]">
+          <Loader2 className="size-8 animate-spin text-brand-strong" />
+          <p className="text-sm font-medium text-muted">
             Loading business details...
           </p>
         </div>
@@ -831,15 +831,15 @@ export default function BusinessForm({
 
   if (loadError) {
     return (
-      <Card className="border-red-200 bg-red-50/50 p-8 text-center max-w-lg mx-auto">
+      <Card className="border-bad/30 bg-bad-soft/50 p-8 text-center max-w-lg mx-auto">
         <div className="flex flex-col items-center gap-3">
-          <div className="flex size-12 items-center justify-center rounded-2xl bg-red-100 text-red-600">
+          <div className="flex size-12 items-center justify-center rounded-2xl bg-bad-soft text-bad">
             <AlertCircle className="size-6" />
           </div>
-          <h3 className="text-base font-bold text-[#0f172a]">
+          <h3 className="text-base font-bold text-ink">
             Business Not Found
           </h3>
-          <p className="text-sm text-[#64748b]">{loadError}</p>
+          <p className="text-sm text-muted">{loadError}</p>
           <OutlinedButton
             type="button"
             onClick={() => router.push("/businesses")}
@@ -860,13 +860,13 @@ export default function BusinessForm({
         className="flex flex-col gap-5"
       >
         {submitError && (
-          <div className="rounded-lg border border-red-200 bg-red-50 px-4 py-2.5 text-sm text-red-600">
+          <div className="rounded-lg border border-bad/30 bg-bad-soft px-4 py-2.5 text-sm text-bad">
             {submitError}
           </div>
         )}
 
         {isDesktop ? (
-          <Card className="overflow-hidden rounded-none border-slate-200 bg-white shadow-sm">
+          <Card className="overflow-hidden rounded-xl border-line bg-surface shadow-sm">
             <CardContent className="px-4 py-5 sm:px-7 sm:py-6 lg:px-8">
               <FormSection title="Business Information" first>
                 <BusinessInfoSection idPrefix="desktop-" />
@@ -897,7 +897,7 @@ export default function BusinessForm({
               {!isEditMode && <FormSection icon={CalendarPlus} title="First Follow-up" optional><OptionalFollowUp idPrefix="desktop-" /></FormSection>}
 
               {!isEditMode && (
-                <div className="sticky bottom-0 z-20 -mx-4 mt-6 flex flex-col-reverse gap-3 border-t border-slate-200 bg-white/95 px-4 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur sm:-mx-7 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:-mx-8 lg:px-8">
+                <div className="sticky bottom-0 z-20 -mx-4 mt-6 flex flex-col-reverse gap-3 border-t border-line bg-surface/95 px-4 py-4 shadow-card backdrop-blur sm:-mx-7 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:-mx-8 lg:px-8">
                   <OutlinedButton
                     type="button"
                     size="lg"
@@ -958,11 +958,11 @@ export default function BusinessForm({
                         className={cn(
                           "flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed",
                           isCompleted &&
-                            "border-brand-green bg-brand-green text-secondary-foreground",
-                          isActive && "border-brand-green text-brand-green-strong",
+                            "border-accent bg-surface-2 text-secondary-foreground",
+                          isActive && "border-accent text-accent-strong",
                           !isActive &&
                             !isCompleted &&
-                            "border-[#dce8ee] text-[#8a9eaa] disabled:opacity-50",
+                            "border-line text-muted disabled:opacity-50",
                         )}
                       >
                         {isCompleted ? <Check className="size-4" /> : index + 1}
@@ -971,7 +971,7 @@ export default function BusinessForm({
                         <div
                           className={cn(
                             "mx-2 h-0.5 flex-1 rounded-full transition-colors",
-                            isCompleted ? "bg-brand-green" : "bg-[#dce8ee]",
+                            isCompleted ? "bg-surface-2" : "bg-surface-2",
                           )}
                         />
                       )}
@@ -979,17 +979,17 @@ export default function BusinessForm({
                   );
                 })}
               </div>
-              <p className="mt-3 text-sm font-semibold text-[#163b58]">
+              <p className="mt-3 text-sm font-semibold text-brand-strong">
                 Step {currentStep + 1} of {steps.length} —{" "}
                 {steps[currentStep].title}
               </p>
             </div>
 
-            <Card className="rounded-none border-[#dce8ee]">
+            <Card className="rounded-xl border-line">
               <CardContent className="p-5 sm:p-6">
                 {steps[currentStep].render("mobile-")}
 
-                <div className="sticky bottom-0 z-20 -mx-5 mt-6 flex flex-col-reverse gap-3 border-t border-slate-200 bg-white/95 px-5 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
+                <div className="sticky bottom-0 z-20 -mx-5 mt-6 flex flex-col-reverse gap-3 border-t border-line bg-surface/95 px-5 py-4 shadow-card backdrop-blur sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6">
                   <OutlinedButton
                     type="button"
                     onClick={
@@ -1028,7 +1028,7 @@ export default function BusinessForm({
                   ) : (
                     <div className="flex flex-col items-stretch gap-2 sm:items-end">
                       {!isCurrentStepComplete && (
-                        <p className="text-xs text-[#8a9eaa]">
+                        <p className="text-xs text-muted">
                           Fill in all required fields to continue.
                         </p>
                       )}
@@ -1052,7 +1052,7 @@ export default function BusinessForm({
         {isEditMode && targetId && (
           <>
             <BusinessDetailsFollowups businessId={targetId} />
-            <div className="flex flex-col-reverse gap-4 border-t border-[#edf2f5] pt-5 sm:flex-row sm:items-center sm:justify-between">
+            <div className="flex flex-col-reverse gap-4 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
               <OutlinedButton
                 type="button"
                 size="lg"

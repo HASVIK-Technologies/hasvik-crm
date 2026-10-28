@@ -80,7 +80,7 @@ export default function FollowUpDetailsPage() {
           />
         }
         content={
-          <div className="py-16 text-center text-sm text-[#64748b]">
+          <div className="py-16 text-center text-sm text-muted">
             Loading follow-up details...
           </div>
         }
@@ -100,10 +100,10 @@ export default function FollowUpDetailsPage() {
           />
         }
         content={
-          <div role="alert" className="rounded-2xl border border-slate-200 bg-white px-6 py-14 text-center">
-            <p className="text-sm font-semibold text-slate-800">Unable to load this follow-up.</p>
-            <p className="mt-2 text-xs text-slate-500">Try again to load the latest details.</p>
-            <button type="button" onClick={() => void query.refetch()} disabled={query.isFetching} className="mt-4 text-sm font-semibold text-primary hover:underline disabled:opacity-50">{query.isFetching ? "Retrying?" : "Try again"}</button>
+          <div role="alert" className="rounded-2xl border border-line bg-surface px-6 py-14 text-center">
+            <p className="text-sm font-semibold text-ink">Unable to load this follow-up.</p>
+            <p className="mt-2 text-xs text-muted">Try again to load the latest details.</p>
+            <button type="button" onClick={() => void query.refetch()} disabled={query.isFetching} className="mt-4 text-sm font-semibold text-brand-strong hover:underline disabled:opacity-50">{query.isFetching ? "Retrying?" : "Try again"}</button>
           </div>
         }
       />

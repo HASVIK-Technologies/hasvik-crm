@@ -32,7 +32,7 @@ export default function AdditionalInfoSection({
           })}
         />
         {errors.website && (
-          <p role="alert" className="mt-1 text-xs text-red-600">
+          <p role="alert" className="mt-1 text-xs text-bad">
             {errors.website.message}
           </p>
         )}

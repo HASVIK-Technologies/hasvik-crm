@@ -114,7 +114,7 @@ export default function BusinessDetails() {
 
   if (isError) {
     return (
-      <div className="mx-auto max-w-6xl py-12 text-center text-sm text-red-600">
+      <div className="mx-auto max-w-6xl py-12 text-center text-sm text-bad">
         Unable to load this business. Please try again.
       </div>
     );
@@ -122,7 +122,7 @@ export default function BusinessDetails() {
 
   if (isLoading) {
     return (
-      <div className="mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]">
+      <div className="mx-auto max-w-6xl py-12 text-center text-sm text-muted">
         Loading business details...
       </div>
     );
@@ -131,13 +131,13 @@ export default function BusinessDetails() {
   if (!business) {
     return (
       <div className="mx-auto flex max-w-xl flex-col items-center py-16 text-center">
-        <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-[#fff1f2] text-[#e11d48]">
+        <div className="mb-5 flex size-14 items-center justify-center rounded-2xl bg-surface-2 text-bad">
           <AlertCircle className="size-7" />
         </div>
-        <h1 className="text-2xl font-bold tracking-tight text-[#334155]">
+        <h1 className="text-2xl font-bold tracking-tight text-ink-soft">
           Business not found
         </h1>
-        <p className="mt-2 max-w-sm text-sm leading-6 text-[#64748b]">
+        <p className="mt-2 max-w-sm text-sm leading-6 text-muted">
           The business with ID #{rawId} does not exist or has been removed.
         </p>
         <OutlinedButton asChild className="mt-6 gap-2">
@@ -207,17 +207,17 @@ export default function BusinessDetails() {
       content={
         <>
           {/* 2. SINGLE MERGED CARD (Full Width) */}
-          <Card className="w-full overflow-hidden border-[#e4ecf2] shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
-            <CardHeader className="flex flex-col gap-4 border-b border-[#e8eef4] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
+          <Card className="w-full overflow-hidden border-line shadow-card">
+            <CardHeader className="flex flex-col gap-4 border-b border-line bg-surface p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
               <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">
                 <Avatar className="size-13 sm:size-16 rounded-xl sm:rounded-2xl shrink-0">
-                  <AvatarFallback className="bg-primary/10 text-base sm:text-xl font-semibold text-primary">
+                  <AvatarFallback className="bg-btn/10 text-base sm:text-xl font-semibold text-brand-strong">
                     {business.initials}
                   </AvatarFallback>
                 </Avatar>
                 <div className="mt-0.5 flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
                   <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <CardTitle className="min-w-0 max-w-full truncate text-lg font-bold tracking-tight text-[#0f172a] sm:text-2xl" title={business.name}>
+                    <CardTitle className="min-w-0 max-w-full truncate text-lg font-bold tracking-tight text-ink sm:text-2xl" title={business.name}>
                       {business.name}
                     </CardTitle>
                     <div className="flex flex-wrap items-center gap-1.5 shrink-0">
@@ -230,12 +230,12 @@ export default function BusinessDetails() {
                       )}
                     </div>
                   </div>
-                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-[#64748b]">
-                    <Building2 className="size-3.5 sm:size-4 shrink-0 text-[#94a3b8]" />
+                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted">
+                    <Building2 className="size-3.5 sm:size-4 shrink-0 text-muted" />
                     <span>{business.category || "Uncategorized"}</span>
                     {business.city && (
                       <>
-                        <span aria-hidden="true" className="text-[#cbd5e1]">
+                        <span aria-hidden="true" className="text-line">
                           ·
                         </span>
                         <span>{business.city}</span>
@@ -253,7 +253,7 @@ export default function BusinessDetails() {
                       <OutlinedButton
                         aria-label="Call business"
                         title="Call business"
-                        className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
+                        className="h-9 w-9 p-0 flex items-center justify-center text-accent-strong border-line hover:bg-surface-2/10"
                       >
                         <Phone className="h-4 w-4" />
                       </OutlinedButton>
@@ -280,7 +280,7 @@ export default function BusinessDetails() {
                   <OutlinedButton
                     asChild
                     aria-label="Call business"
-                    className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
+                    className="h-9 w-9 p-0 flex items-center justify-center text-accent-strong border-line hover:bg-surface-2/10"
                   >
                     <a href={`tel:${cleanNumber(headerPhones[0].number)}`}>
                       <Phone className="h-4 w-4" />
@@ -295,7 +295,7 @@ export default function BusinessDetails() {
                       <OutlinedButton
                         aria-label="Message business on WhatsApp"
                         title="Message business on WhatsApp"
-                        className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
+                        className="h-9 w-9 p-0 flex items-center justify-center text-accent-strong border-line hover:bg-surface-2/10"
                       >
                         <WhatsAppIcon className="h-4 w-4" />
                       </OutlinedButton>
@@ -324,7 +324,7 @@ export default function BusinessDetails() {
                   <OutlinedButton
                     asChild
                     aria-label="Message business on WhatsApp"
-                    className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
+                    className="h-9 w-9 p-0 flex items-center justify-center text-accent-strong border-line hover:bg-surface-2/10"
                   >
                     <a
                       href={`https://wa.me/91${cleanNumber(
@@ -343,7 +343,7 @@ export default function BusinessDetails() {
                     asChild
                     aria-label="View business location on Google Maps"
                     title="View business location on Google Maps"
-                    className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10 cursor-pointer"
+                    className="h-9 w-9 p-0 flex items-center justify-center text-brand-strong border-line hover:bg-btn/10 cursor-pointer"
                   >
                     <a
                       href={locationData.mapLink || "#"}
@@ -360,7 +360,7 @@ export default function BusinessDetails() {
                     aria-disabled="true"
                     aria-label="Location not available"
                     title="Location not available"
-                    className="h-9 w-9 p-0 flex items-center justify-center text-slate-300 border-gray-200 opacity-50 cursor-not-allowed"
+                    className="h-9 w-9 p-0 flex items-center justify-center text-muted border-line opacity-50 cursor-not-allowed"
                   >
                     <MapPin className="h-4 w-4" />
                   </OutlinedButton>
@@ -370,21 +370,21 @@ export default function BusinessDetails() {
 
             <CardContent className="p-4 sm:p-6">
               <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
-                  <Users className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-surface-2/80 p-3.5">
+                  <Users className="mt-0.5 size-4 shrink-0 text-muted" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">
+                    <p className="text-xs font-medium text-muted">
                       Assigned to
                     </p>
-                    <p className="mt-1 truncate text-sm font-semibold text-slate-800">
+                    <p className="mt-1 truncate text-sm font-semibold text-ink">
                       {business.assignedToName || business.assignedTo || "Unassigned"}
                     </p>
                   </div>
                 </div>
-                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
-                  <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-surface-2/80 p-3.5">
+                  <Calendar className="mt-0.5 size-4 shrink-0 text-muted" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">
+                    <p className="text-xs font-medium text-muted">
                       Next follow-up
                     </p>
                     <div className="mt-1 flex flex-wrap items-center gap-2">
@@ -393,31 +393,31 @@ export default function BusinessDetails() {
                           {dateFmt.format(new Date(nextFollowUp.scheduledAt))}
                         </RecordLink>
                       ) : business?.nextFollowUp && business.nextFollowUp !== "-" ? (
-                        business.nextFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="text-sm">{business.nextFollowUp}</RecordLink> : <p className="text-sm font-semibold text-slate-800">{business.nextFollowUp}</p>
+                        business.nextFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="text-sm">{business.nextFollowUp}</RecordLink> : <p className="text-sm font-semibold text-ink">{business.nextFollowUp}</p>
                       ) : (
-                        <p className="text-sm font-semibold text-slate-800">
+                        <p className="text-sm font-semibold text-ink">
                           -
                         </p>
                       )}
                     </div>
                   </div>
                 </div>
-                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
-                  <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-surface-2/80 p-3.5">
+                  <Calendar className="mt-0.5 size-4 shrink-0 text-muted" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">Last follow-up</p>
-                    <div className="mt-1 truncate text-sm font-semibold text-slate-800">
+                    <p className="text-xs font-medium text-muted">Last follow-up</p>
+                    <div className="mt-1 truncate text-sm font-semibold text-ink">
                       {lastFollowUpItem ? (!isInactive ? <RecordLink href={`/follow-ups/${lastFollowUpItem.id}`}>{dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))}</RecordLink> : dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))) : business?.lastFollowUp && business.lastFollowUp !== "-" ? (business.lastFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`}>{business.lastFollowUp}</RecordLink> : business.lastFollowUp) : "-"}
                     </div>
                   </div>
                 </div>
-                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-surface-2/80 p-3.5">
+                  <MapPin className="mt-0.5 size-4 shrink-0 text-muted" />
                   <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">
+                    <p className="text-xs font-medium text-muted">
                       Address
                     </p>
-                    <p className="mt-1 text-sm font-semibold leading-5 text-slate-800">
+                    <p className="mt-1 text-sm font-semibold leading-5 text-ink">
                       {business.address || (business.city ? business.city : "Location not available")}
                     </p>
                   </div>

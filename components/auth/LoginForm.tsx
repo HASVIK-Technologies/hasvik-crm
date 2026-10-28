@@ -1,23 +1,23 @@
 "use client";
 
-import {
-  ArrowUpRight,
-  Eye,
-  EyeOff,
-  LockKeyhole,
-  ShieldCheck,
-  UserRound,
-} from "lucide-react";
+import { BarChart3, CalendarCheck2, Eye, EyeOff, LockKeyhole, ShieldCheck, Smartphone, UserRound } from "lucide-react";
 import Image from "next/image";
+import Link from "next/link";
 import { useState } from "react";
 import { useRouter } from "next/navigation";
 import { useForm, type SubmitHandler } from "react-hook-form";
 import { useLogin } from "@/hooks/use-auth";
 import { getApiErrorMessage } from "@/lib/api/api-error";
-import PrimaryButton from "@/components/common/PrimaryButton";
+import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import Link from "next/link";
+import ThemeToggle from "@/components/common/ThemeToggle";
 import type { LoginFormValues } from "@/types/auth";
+
+const POINTS = [
+  { icon: CalendarCheck2, title: "Never miss a follow-up", text: "Calls, meetings and reminders land in one calm daily list." },
+  { icon: BarChart3, title: "See your pipeline at a glance", text: "Drag leads between stages and watch your numbers update." },
+  { icon: ShieldCheck, title: "Private and secure", text: "Everyone sees only what they should, and every change is recorded." },
+];
 
 export default function LoginForm() {
   const router = useRouter();
@@ -57,196 +57,119 @@ export default function LoginForm() {
     : "";
 
   return (
-    <main className="relative flex min-h-screen items-center justify-center overflow-hidden bg-slate-50 px-4 py-8 sm:px-6 lg:px-8">
-      <div className="pointer-events-none absolute -left-40 -top-40 size-[28rem] rounded-full bg-brand-cyan/10 blur-3xl" />
-      <div className="pointer-events-none absolute -bottom-48 -right-40 size-[32rem] rounded-full bg-brand-growth/10 blur-3xl" />
-      <div className="relative grid w-full max-w-6xl overflow-hidden border border-slate-200/80 bg-white shadow-[0_32px_90px_-36px_rgba(8,62,105,0.28)] lg:min-h-[680px] lg:grid-cols-[1.05fr_0.95fr]">
-        <section className="relative hidden overflow-hidden bg-gradient-to-br from-[#075aa3] via-[#0876d1] to-[#064b89] p-12 text-white lg:flex lg:flex-col lg:justify-between xl:p-16">
-          <div className="pointer-events-none absolute -right-24 -top-24 size-80 rounded-full border-[40px] border-brand-cyan/20" />
-          <div className="pointer-events-none absolute -bottom-36 -left-28 size-96 rounded-full border-[52px] border-brand-growth/15" />
-          <div className="relative">
-            <div className="inline-flex border border-white/15 bg-white px-5 py-3 shadow-lg">
-              <Image
-                src="/logo.png"
-                alt="Hasvik"
-                width={224}
-                height={67}
-                priority
-                style={{ height: "auto" }}
-                className="w-52"
-              />
-            </div>
-            <div className="mt-20 max-w-lg">
-              <p className="mb-5 inline-flex items-center gap-2 border border-white/20 bg-white/10 px-3 py-1.5 text-xs font-semibold uppercase tracking-[0.16em] text-white/90">
-                <span className="size-2 bg-brand-growth shadow-[0_0_10px_rgba(99,211,41,0.7)]" />
-                Business, moving forward
-              </p>
-              <h1 className="text-4xl font-semibold leading-[1.15] tracking-tight text-white xl:text-5xl">
-                Turn every{" "}
-                <span className="text-brand-growth">connection</span> into
-                meaningful growth.
-              </h1>
-              <p className="mt-6 max-w-md text-base leading-7 text-blue-100">
-                Keep your business relationships, conversations, and next steps
-                moving in one clear workspace.
-              </p>
-            </div>
-          </div>
-          <div className="relative flex items-center justify-between gap-4 border border-white/15 bg-white/10 p-4 shadow-sm backdrop-blur">
-            <div className="flex items-center gap-3">
-              <div className="flex size-10 items-center justify-center bg-brand-growth/15 text-brand-growth">
-                <ArrowUpRight className="size-5" />
-              </div>
-              <div>
-                <p className="text-sm font-semibold text-white">
-                  Built for better follow-through
-                </p>
-                <p className="mt-0.5 text-xs text-blue-100">
-                  Your leads and follow-ups, together
-                </p>
-              </div>
-            </div>
-            <div className="hidden size-2.5 bg-brand-growth shadow-[0_0_10px_rgba(99,211,41,0.7)] sm:block" />
-          </div>
-        </section>
+    <div className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
+      <aside className="hero-surface relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
+        <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-white/10 blur-3xl" />
+        <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 size-[28rem] rounded-full bg-brand/20 blur-3xl" />
 
-        <section className="flex min-h-[620px] items-center justify-center px-6 py-12 sm:px-12 lg:px-14 xl:px-16">
-          <div className="w-full max-w-sm">
-            <div className="mb-12 lg:hidden">
-              <div className="inline-flex border border-slate-100 bg-white px-4 py-2.5 shadow-sm">
-                <Image
-                  src="/logo.png"
-                  alt="Hasvik"
-                  width={176}
-                  height={53}
-                  priority
-                  style={{ height: "auto" }}
-                  className="w-40"
-                />
-              </div>
-            </div>
-            <div className="mb-9">
-              <p className="mb-3 text-sm font-semibold text-brand-green-strong">Welcome back</p>
-              <h2 className="text-3xl font-semibold tracking-tight text-slate-900">
-                Sign in to Hasvik
-              </h2>
-              <p className="mt-3 text-sm leading-6 text-slate-500">
-                Enter your details to access your workspace.
-              </p>
-            </div>
-            <form
-              className="space-y-5"
-              onSubmit={handleSubmit(onSubmit)}
-              noValidate
-              suppressHydrationWarning
-            >
-              <div className="space-y-2">
-                <label htmlFor="email" className="text-sm font-medium text-slate-700">
-                  Email address
-                </label>
+        <div className="relative">
+          <span className="inline-block rounded-2xl bg-white px-5 py-3 shadow-lg">
+            <Image src="/hasvik-logo.png" alt="HASVIK" width={512} height={171} priority className="h-12 w-auto" />
+          </span>
+        </div>
+
+        <div className="relative max-w-lg">
+          <p className="text-sm font-semibold tracking-[0.18em] text-white/80 uppercase">HASVIK CRM</p>
+          <h2 className="mt-3 text-4xl leading-tight font-bold tracking-tight xl:text-5xl">Turn every connection into growth.</h2>
+          <ul className="mt-10 space-y-5">
+            {POINTS.map((point) => (
+              <li key={point.title} className="flex gap-4">
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-white/12 ring-1 ring-white/20 backdrop-blur ring-inset"><point.icon className="size-5" aria-hidden /></span>
+                <span>
+                  <span className="block font-semibold">{point.title}</span>
+                  <span className="block text-sm leading-relaxed text-white/85">{point.text}</span>
+                </span>
+              </li>
+            ))}
+          </ul>
+        </div>
+
+        <p className="relative flex items-center gap-2 text-sm text-white/80"><Smartphone className="size-4" aria-hidden /> Works on your phone, tablet and computer.</p>
+      </aside>
+
+      <main className="relative flex min-h-dvh flex-col items-center justify-center px-5 py-10">
+        <div className="absolute top-4 right-4"><ThemeToggle /></div>
+        <div className="w-full max-w-[440px]">
+          <div className="mb-8 flex justify-center lg:hidden">
+            <span className="rounded-2xl bg-white px-5 py-3 shadow-pop ring-1 ring-line">
+              <Image src="/hasvik-logo.png" alt="HASVIK" width={512} height={171} priority className="h-12 w-auto" />
+            </span>
+          </div>
+          <div className="fade-up rounded-3xl border border-line bg-surface p-7 shadow-float sm:p-9">
+            <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
+            <p className="mt-1.5 text-sm leading-relaxed text-muted">Sign in to your HASVIK CRM workspace.</p>
+
+            <form className="mt-7 space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate suppressHydrationWarning>
+              <div className="space-y-1.5">
+                <label htmlFor="email" className="block text-sm font-medium text-ink">Email address</label>
                 <div className="relative">
-                  <UserRound className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400" />
+                  <UserRound className="pointer-events-none absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-muted" aria-hidden />
                   <Input
                     id="email"
                     type="email"
                     autoComplete="email"
                     placeholder="you@company.com"
                     aria-invalid={Boolean(errors.email)}
-                    className="h-12 border-slate-200 pl-11 pr-4 text-sm shadow-sm placeholder:text-slate-400 focus-visible:border-brand-blue focus-visible:ring-brand-blue/20"
+                    aria-describedby={errors.email ? "email-error" : undefined}
+                    className="pl-11"
                     {...register("email", {
-                      required: "Email is required",
+                      required: "Enter your email address.",
                       pattern: {
                         value: /^[^\s@]+@[^\s@]+\.[^\s@]+$/,
-                        message: "Enter a valid email",
+                        message: "That doesn’t look like an email address. Check it and try again.",
                       },
                     })}
                   />
                 </div>
-                {errors.email && (
-                  <p className="text-xs text-red-600">{errors.email.message}</p>
-                )}
+                {errors.email && <p id="email-error" role="alert" className="text-xs font-medium text-bad">{errors.email.message}</p>}
               </div>
-              <div className="space-y-2">
-                <label htmlFor="password" className="text-sm font-medium text-slate-700">
-                  Password
-                </label>
+
+              <div className="space-y-1.5">
+                <label htmlFor="password" className="block text-sm font-medium text-ink">Password</label>
                 <div className="relative">
-                  <LockKeyhole className="pointer-events-none absolute left-3.5 top-1/2 size-[18px] -translate-y-1/2 text-slate-400" />
+                  <LockKeyhole className="pointer-events-none absolute top-1/2 left-3.5 size-[18px] -translate-y-1/2 text-muted" aria-hidden />
                   <Input
                     id="password"
                     type={showPassword ? "text" : "password"}
                     autoComplete="current-password"
                     placeholder="Enter your password"
                     aria-invalid={Boolean(errors.password)}
-                    className="h-12 border-slate-200 pl-11 pr-12 text-sm shadow-sm placeholder:text-slate-400 focus-visible:border-brand-blue focus-visible:ring-brand-blue/20"
-                    {...register("password", { required: "Password is required" })}
+                    aria-describedby={errors.password ? "password-error" : undefined}
+                    className="pr-12 pl-11"
+                    {...register("password", { required: "Enter your password." })}
                   />
                   <button
                     type="button"
                     suppressHydrationWarning
-                    title={showPassword ? "Hide password" : "Show password"}
                     aria-label={showPassword ? "Hide password" : "Show password"}
+                    aria-pressed={showPassword}
                     onClick={() => setShowPassword(!showPassword)}
-                    className="absolute right-3.5 top-1/2 -translate-y-1/2 text-slate-400 transition-colors hover:text-primary"
+                    className="absolute top-1/2 right-1 grid size-11 -translate-y-1/2 place-items-center rounded-xl text-muted transition-colors hover:text-brand-strong sm:size-10"
                   >
-                    {showPassword ? (
-                      <EyeOff className="size-[18px]" />
-                    ) : (
-                      <Eye className="size-[18px]" />
-                    )}
+                    {showPassword ? <EyeOff className="size-[18px]" aria-hidden /> : <Eye className="size-[18px]" aria-hidden />}
                   </button>
                 </div>
-                {errors.password && (
-                  <p className="text-xs text-red-600">{errors.password.message}</p>
-                )}
+                {errors.password && <p id="password-error" role="alert" className="text-xs font-medium text-bad">{errors.password.message}</p>}
               </div>
-              {/* <div className="flex items-center justify-between pt-1 text-sm">
-                <label className="flex items-center gap-2 text-slate-600">
-                  <input
-                    type="checkbox"
-                    suppressHydrationWarning
-                    className="size-4 accent-primary"
-                  />
-                  Remember me
-                </label>
-                <button
-                  type="button"
-                  suppressHydrationWarning
-                  className="font-medium text-primary transition-colors hover:text-brand-cyan"
-                >
-                  Forgot password?
-                </button>
-              </div> */}
+
               {loginError && (
-                <p className="text-sm text-red-600" role="alert">
-                  {loginError}
-                </p>
+                <p role="alert" className="rounded-xl bg-bad-soft px-3.5 py-2.5 text-sm font-medium text-bad">{loginError}</p>
               )}
-              <PrimaryButton
-                type="submit"
-                disabled={loginMutation.isPending}
-                className="mt-3 h-12 w-full text-base font-semibold shadow-[0_8px_18px_-8px_rgba(8,118,209,0.65)]"
-              >
-                {loginMutation.isPending ? "Signing in..." : "Sign in"}
-              </PrimaryButton>
+
+              <Button type="submit" size="lg" loading={loginMutation.isPending} className="w-full">
+                {loginMutation.isPending ? "Signing in…" : "Sign in"}
+              </Button>
             </form>
-            <p className="mt-8 flex items-center justify-center gap-2 text-center text-xs text-slate-400">
-              <ShieldCheck className="size-4 text-brand-green-strong" />
-              Your information is protected with secure authentication.
-            </p>
-            <p className="mt-5 text-center text-xs text-slate-500">
-              New to Hasvik?{" "}
-              <Link href="/explore-crm" className="font-semibold text-primary hover:underline">
-                Explore the CRM
-              </Link>
-              {" · "}
-              <Link href="/tenant" className="font-semibold text-primary hover:underline">
-                Tenant signup
-              </Link>
-            </p>
           </div>
-        </section>
-      </div>
-    </main>
+
+          <p className="mt-6 text-center text-xs text-muted">
+            New to HASVIK?{" "}
+            <Link href="/explore-crm" className="font-semibold text-brand-strong hover:underline">Explore the CRM</Link>
+            {" · "}
+            <Link href="/tenant" className="font-semibold text-brand-strong hover:underline">Create a workspace</Link>
+          </p>
+        </div>
+      </main>
+    </div>
   );
 }

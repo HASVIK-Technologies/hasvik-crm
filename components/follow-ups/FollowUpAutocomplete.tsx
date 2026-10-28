@@ -87,19 +87,19 @@ export default function FollowUpAutocomplete({
           type="button"
           aria-expanded={open}
           className={cn(
-            "flex h-10 w-full items-center justify-between border border-slate-300 bg-white px-3 text-xs font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-slate-400 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/15",
-            value && "border-brand-blue/60 bg-blue-50/40",
-            invalid && "border-red-500",
+            "flex h-10 w-full items-center justify-between border border-line bg-surface px-3 text-xs font-medium text-ink-soft shadow-card hover:border-muted focus-visible:border-brand-strong focus-visible:ring-2 focus-visible:ring-brand/15",
+            value && "border-brand-strong/60 bg-brand-soft/40",
+            invalid && "border-bad/30",
           )}
         >
           <span className="flex min-w-0 items-center gap-2">
-            <Icon className="size-3.5 shrink-0 text-[#64748b]" />
+            <Icon className="size-3.5 shrink-0 text-muted" />
             <span className="truncate">{displayLabel || placeholder}</span>
           </span>
           <span className="flex items-center gap-1">
             <span
               className={cn(
-                "rounded p-0.5 text-[#94a3b8] hover:bg-[#e2e8f0]",
+                "rounded p-0.5 text-muted hover:bg-line",
                 !value && "invisible",
               )}
               onClick={(event) => {
@@ -109,23 +109,23 @@ export default function FollowUpAutocomplete({
             >
               <X className="size-3.5" />
             </span>
-            <ChevronDown className="size-3.5 text-[#64748b]" />
+            <ChevronDown className="size-3.5 text-muted" />
           </span>
         </button>
       </PopoverTrigger>
       <PopoverContent
         align="start"
-        className="w-(--radix-popover-trigger-width) overflow-hidden border border-slate-200 bg-white p-0 shadow-xl"
+        className="w-(--radix-popover-trigger-width) overflow-hidden border border-line bg-surface p-0 shadow-xl"
       >
-        <div className="border-b border-[#f1f5f9] p-2.5">
+        <div className="border-b border-surface-2 p-2.5">
           <div className="relative">
-            <Search className="absolute left-3 top-2.5 size-3.5 text-[#94a3b8]" />
+            <Search className="absolute left-3 top-2.5 size-3.5 text-muted" />
             <input
               autoFocus
               value={search}
               onChange={(event) => setSearch(event.target.value)}
               placeholder={`Search ${kind === "business" ? "businesses" : "team members"}...`}
-              className="h-8.5 w-full rounded-lg border border-[#e2e8f0] bg-[#f8fafc] pl-8 text-xs outline-none"
+              className="h-8.5 w-full rounded-lg border border-line bg-surface-2 pl-8 text-xs outline-none"
             />
           </div>
         </div>
@@ -136,14 +136,14 @@ export default function FollowUpAutocomplete({
               onChange(undefined);
               setOpen(false);
             }}
-            className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[#f8fafc]"
+            className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-surface-2"
           >
             Any {kind === "business" ? "business" : "team member"}
-            {!value && <Check className="size-3.5 text-primary" />}
+            {!value && <Check className="size-3.5 text-brand-strong" />}
           </button>
           {isLoading ? (
             <div className="flex justify-center py-6">
-              <Loader2 className="size-4 animate-spin text-primary" />
+              <Loader2 className="size-4 animate-spin text-brand-strong" />
             </div>
           ) : (
             options.map((option) => (
@@ -155,14 +155,14 @@ export default function FollowUpAutocomplete({
                   setOpen(false);
                 }}
                 className={cn(
-                  "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[#f8fafc]",
-                  value === option.id && "bg-primary/10 text-primary",
+                  "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-surface-2",
+                  value === option.id && "bg-btn/10 text-brand-strong",
                 )}
               >
                 <span>
                   <span className="block font-semibold">{option.label}</span>
                   {option.subtitle && (
-                    <span className="text-[10px] text-[#94a3b8]">
+                    <span className="text-[10px] text-muted">
                       {option.subtitle}
                     </span>
                   )}
@@ -172,7 +172,7 @@ export default function FollowUpAutocomplete({
             ))
           )}
           {!isLoading && options.length === 0 && (
-            <p className="px-2.5 py-5 text-center text-xs text-[#94a3b8]">
+            <p className="px-2.5 py-5 text-center text-xs text-muted">
               No matches found
             </p>
           )}

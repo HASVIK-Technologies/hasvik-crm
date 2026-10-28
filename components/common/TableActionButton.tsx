@@ -13,10 +13,10 @@ type TableActionButtonProps = React.ComponentProps<typeof Button> & {
 };
 
 const tones = {
-  neutral: "text-slate-500 hover:bg-slate-100 hover:text-slate-800",
-  brand: "text-brand-blue hover:bg-blue-50 hover:text-brand-blue",
-  success: "text-emerald-700 hover:bg-emerald-50 hover:text-emerald-800",
-  danger: "text-rose-700 hover:bg-rose-50 hover:text-rose-800",
+  neutral: "text-muted hover:bg-surface-2 hover:text-ink",
+  brand: "text-brand-strong hover:bg-brand-soft hover:text-brand-strong",
+  success: "text-ok hover:bg-ok-soft hover:text-ok",
+  danger: "text-bad hover:bg-bad-soft hover:text-bad",
 };
 
 export default function TableActionButton({
@@ -35,7 +35,7 @@ export default function TableActionButton({
           size="icon"
           aria-label={props["aria-label"] ?? tooltip}
           className={cn(
-            "size-8 shrink-0 border border-transparent shadow-none transition-colors focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20",
+            "size-8 shrink-0 border border-transparent shadow-none transition-colors focus-visible:border-brand-strong focus-visible:ring-2 focus-visible:ring-brand/20",
             tones[tone],
             className,
           )}

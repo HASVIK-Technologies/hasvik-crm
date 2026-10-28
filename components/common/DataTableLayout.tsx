@@ -7,7 +7,7 @@ export function DataTableShell({ className, ...props }: HTMLAttributes<HTMLEleme
   return (
     <section
       className={cn(
-        "overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]",
+        "overflow-hidden border border-line bg-surface shadow-card",
         className,
       )}
       {...props}
@@ -29,12 +29,12 @@ export function DataTableHeader({
   className?: string;
 }) {
   return (
-    <div className={cn("flex min-h-17 flex-col gap-3 border-b border-slate-100 p-3 sm:flex-row sm:items-center sm:justify-between md:p-4", className)}>
+    <div className={cn("flex min-h-17 flex-col gap-3 border-b border-surface-2 p-3 sm:flex-row sm:items-center sm:justify-between md:p-4", className)}>
       <div className="min-w-0">
-        <h2 className="truncate text-lg font-bold tracking-tight text-slate-900">
-          {title}{total !== undefined && <span className="font-medium text-slate-500"> ({total})</span>}
+        <h2 className="truncate text-lg font-bold tracking-tight text-ink">
+          {title}{total !== undefined && <span className="font-medium text-muted"> ({total})</span>}
         </h2>
-        {description && <p className="mt-1 text-xs text-slate-500">{description}</p>}
+        {description && <p className="mt-1 text-xs text-muted">{description}</p>}
       </div>
       {actions && <div className="flex shrink-0 flex-wrap items-center gap-2.5">{actions}</div>}
     </div>
@@ -49,7 +49,7 @@ export function DataTableMobileCard({ className, ...props }: HTMLAttributes<HTML
   return (
     <article
       className={cn(
-        "border border-slate-200 bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 sm:p-4",
+        "border border-line bg-surface p-3 shadow-card transition-all duration-500 sm:p-4",
         className,
       )}
       {...props}
@@ -59,8 +59,8 @@ export function DataTableMobileCard({ className, ...props }: HTMLAttributes<HTML
 
 export function DataTableLoading({ label = "Loading records…" }: { label?: string }) {
   return (
-    <div className="flex min-h-44 items-center justify-center px-4 text-sm text-slate-500">
-      <LoaderCircle className="size-5 animate-spin text-primary" />
+    <div className="flex min-h-44 items-center justify-center px-4 text-sm text-muted">
+      <LoaderCircle className="size-5 animate-spin text-brand-strong" />
       <span className="ml-2">{label}</span>
     </div>
   );
@@ -79,11 +79,11 @@ export function DataTableEmptyState({
 }) {
   return (
     <div className="flex flex-col items-center justify-center px-5 py-14 text-center">
-      <span className="flex size-12 items-center justify-center bg-slate-100 text-slate-400">
+      <span className="flex size-12 items-center justify-center bg-surface-2 text-muted">
         <Icon className="size-6" />
       </span>
-      <p className="mt-3 text-sm font-semibold text-slate-900">{title}</p>
-      <p className="mt-1 max-w-sm text-xs leading-5 text-slate-500">{description}</p>
+      <p className="mt-3 text-sm font-semibold text-ink">{title}</p>
+      <p className="mt-1 max-w-sm text-xs leading-5 text-muted">{description}</p>
       {action && <div className="mt-4">{action}</div>}
     </div>
   );

@@ -56,8 +56,8 @@ export default function NumberListField({
                 className={cn(
                   "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
                   canRemove
-                    ? "bg-[#f3f5f6] text-[#667f8d] hover:bg-[#e5edf1] hover:text-[#163b58]"
-                    : "cursor-not-allowed bg-[#f3f5f6] text-[#c3ccd1]",
+                    ? "bg-surface-2 text-brand-strong hover:bg-surface-2 hover:text-brand-strong"
+                    : "cursor-not-allowed bg-surface-2 text-muted",
                 )}
               >
                 <CircleMinus className="size-4" />
@@ -68,7 +68,7 @@ export default function NumberListField({
         <PlainButton
           type="button"
           onClick={onAdd}
-          className="h-10 justify-center gap-1.5 rounded-lg border border-dashed border-[#cfe0e6] text-sm font-medium text-brand-green-strong hover:bg-brand-green/10 hover:text-brand-green-strong"
+          className="h-10 justify-center gap-1.5 rounded-lg border border-dashed border-line text-sm font-medium text-accent-strong hover:bg-surface-2/10 hover:text-accent-strong"
         >
           <AddIcon className="size-4" />
           {addLabel}

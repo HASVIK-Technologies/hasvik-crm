@@ -37,7 +37,7 @@ function ActionMenuItem({ action }: { action: ActionItem }) {
       ? "cursor-pointer text-destructive focus:text-destructive"
       : "cursor-pointer",
     action.disabled &&
-      "cursor-not-allowed text-slate-400 opacity-40 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
+      "cursor-not-allowed text-muted opacity-40 select-none pointer-events-none hover:bg-transparent focus:bg-transparent"
   );
 
   if (action.href && !action.disabled) {
@@ -117,7 +117,7 @@ export default function Actions({
                   <MoreVertical className="size-4" />
                 </OutlinedButton>
             </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
-            <DropdownMenuContent align="end" className="w-44 bg-white">
+            <DropdownMenuContent align="end" className="w-44 bg-surface">
               {secondaryActions.map((action) => (
                 <ActionMenuItem key={action.label} action={action} />
               ))}
@@ -134,7 +134,7 @@ export default function Actions({
                 <MoreVertical className="size-4" />
               </OutlinedButton>
           </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
-          <DropdownMenuContent align="end" className="w-48 bg-white">
+          <DropdownMenuContent align="end" className="w-48 bg-surface">
             {allActions.slice(1).map((action) => (
               <ActionMenuItem key={action.label} action={action} />
             ))}

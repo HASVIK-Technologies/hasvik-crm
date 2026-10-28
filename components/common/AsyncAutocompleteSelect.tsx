@@ -85,7 +85,7 @@ export default function AsyncAutocompleteSelect({
           onOpenChange?.(nextOpen);
         }}
       >
-        <div className="flex h-10 w-full items-center border border-slate-300 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-colors hover:border-slate-400 focus-within:border-brand-blue focus-within:ring-2 focus-within:ring-brand-blue/15">
+        <div className="flex h-10 w-full items-center border border-line bg-surface shadow-card transition-colors hover:border-muted focus-within:border-brand-strong focus-within:ring-2 focus-within:ring-brand/15">
           <PopoverTrigger asChild>
             <button
               id={controlId}
@@ -95,17 +95,17 @@ export default function AsyncAutocompleteSelect({
               aria-expanded={open}
               aria-invalid={invalid}
               className={cn(
-                "flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left text-xs font-medium text-slate-700 outline-none",
-                !selectedLabel && "text-[#64748b]",
+                "flex h-full min-w-0 flex-1 items-center gap-2 px-3 text-left text-xs font-medium text-ink-soft outline-none",
+                !selectedLabel && "text-muted",
               )}
             >
-              <Icon className="size-3.5 shrink-0 text-[#64748b]" />
+              <Icon className="size-3.5 shrink-0 text-muted" />
               <span className="min-w-0 flex-1 truncate">
                 {selectedLabel || placeholder}
               </span>
               <ChevronDown
                 className={cn(
-                  "size-4 shrink-0 text-[#64748b] transition-transform",
+                  "size-4 shrink-0 text-muted transition-transform",
                   open && "rotate-180",
                 )}
               />
@@ -116,7 +116,7 @@ export default function AsyncAutocompleteSelect({
               type="button"
               aria-label={`Clear ${label ?? placeholder}`}
               onClick={() => onChange("", "")}
-              className="mr-2 rounded p-1 text-[#94a3b8] hover:bg-[#f1f5f9] hover:text-[#334155]"
+              className="mr-2 rounded p-1 text-muted hover:bg-surface-2 hover:text-ink-soft"
             >
               <X className="size-3.5" />
             </button>
@@ -124,18 +124,18 @@ export default function AsyncAutocompleteSelect({
         </div>
         <PopoverContent
           align="start"
-          className="w-(--radix-popover-trigger-width) overflow-hidden border border-slate-200 bg-white p-0 shadow-xl"
+          className="w-(--radix-popover-trigger-width) overflow-hidden border border-line bg-surface p-0 shadow-xl"
         >
-          <div className="border-b border-[#f1f5f9] p-2.5">
+          <div className="border-b border-surface-2 p-2.5">
             <div className="relative">
-              <Search className="pointer-events-none absolute left-3 top-2.5 size-3.5 text-[#94a3b8]" />
+              <Search className="pointer-events-none absolute left-3 top-2.5 size-3.5 text-muted" />
               <input
                 autoFocus
                 value={searchValue}
                 onChange={(event) => onSearchChange(event.target.value)}
                 placeholder={searchPlaceholder}
                 aria-label={searchPlaceholder}
-                className="h-8.5 w-full rounded-lg border border-[#e2e8f0] bg-[#f8fafc] pl-8 text-xs outline-none focus:border-primary focus:bg-white"
+                className="h-8.5 w-full rounded-lg border border-line bg-surface-2 pl-8 text-xs outline-none focus:border-brand focus:bg-surface"
               />
             </div>
           </div>
@@ -152,8 +152,8 @@ export default function AsyncAutocompleteSelect({
                 aria-selected={!value}
                 onClick={() => select(emptyOption.value, emptyOption.label)}
                 className={cn(
-                  "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[#f8fafc]",
-                  !value && "bg-primary/10 text-primary",
+                  "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-surface-2",
+                  !value && "bg-btn/10 text-brand-strong",
                 )}
               >
                 {emptyOption.label}
@@ -162,10 +162,10 @@ export default function AsyncAutocompleteSelect({
             )}
             {loading ? (
               <div className="flex justify-center py-6">
-                <Loader2 className="size-4 animate-spin text-primary" />
+                <Loader2 className="size-4 animate-spin text-brand-strong" />
               </div>
             ) : options.length === 0 ? (
-              <p className="px-2.5 py-5 text-center text-xs text-[#94a3b8]">
+              <p className="px-2.5 py-5 text-center text-xs text-muted">
                 {emptyMessage}
               </p>
             ) : (
@@ -177,8 +177,8 @@ export default function AsyncAutocompleteSelect({
                   key={option.value}
                   onClick={() => select(option.value, option.label)}
                   className={cn(
-                    "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[#f8fafc]",
-                    value === option.value && "bg-primary/10 text-primary",
+                    "flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-surface-2",
+                    value === option.value && "bg-btn/10 text-brand-strong",
                   )}
                 >
                   {option.label}

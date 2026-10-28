@@ -15,7 +15,7 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
         const isLast = index === items.length - 1;
         return (
           <span key={index} className="flex items-center gap-1.5">
-            {index > 0 && <ChevronRight className="size-4 sm:size-4.5 md:size-5 text-gray-300" />}
+            {index > 0 && <ChevronRight className="size-4 sm:size-4.5 md:size-5 text-muted" />}
             {item.href ? (
               <Link
                 href={item.href}

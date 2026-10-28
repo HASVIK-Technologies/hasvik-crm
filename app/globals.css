@@ -2,45 +2,125 @@
 @import "tw-animate-css";
 @import "shadcn/tailwind.css";
 
-@custom-variant dark (&:is(.dark *));
+@custom-variant dark (&:is(.dark *, .dark));
+
+/*
+  HASVIK design tokens (shared with HASVIK People).
+  Palette from the brand guide: HASVIK Blue #0876D1, Tech Cyan #08A9E6, HASVIK Green #20B83F, Growth Green #63D329, white.
+  Semantic tokens only: components never use raw hex. Light is the default; `html.dark` swaps the palette.
+*/
+:root {
+  --brand: #08a9e6;              /* Tech Cyan: highlights, focus, active indicators */
+  --brand-strong: #0876d1;       /* HASVIK Blue: links and brand text (4.9:1 on white) */
+  --brand-soft: #e7f4fd;
+  --btn: #0876d1;                /* primary button fill: white text 4.9:1 */
+  --btn-hover: #0665b5;
+  --accent: #20b83f;             /* HASVIK Green: growth, success, secondary brand */
+  --accent-strong: #158a30;      /* green text on white: 4.7:1 */
+  --accent-soft: #e4f7e9;
+  --growth: #63d329;             /* Growth Green: swoosh highlights only */
+  --ink: #0a1f33;
+  --ink-soft: #3f536a;
+  --muted: #5a6d83;
+  --line: #e1e9f2;
+  --surface: #ffffff;
+  --surface-2: #f4f8fc;
+  --canvas: #f0f5fa;
+  --ok: #158a30;     --ok-soft: #e1f6e7;
+  --warn: #a15207;   --warn-soft: #fef3c7;
+  --bad: #b91c1c;    --bad-soft: #fee2e2;
+  --info: #0876d1;   --info-soft: #e7f4fd;
+  --shadow-sm: 0 1px 2px rgba(10, 31, 51, 0.05);
+  --shadow-md: 0 6px 18px rgba(10, 31, 51, 0.07);
+  --shadow-lg: 0 20px 56px rgba(10, 31, 51, 0.14);
+  --ring: rgba(8, 169, 230, 0.4);
+  --hero: linear-gradient(125deg, #054a86 0%, #0876d1 55%, #08a9e6 118%);
+  --brand-gradient: linear-gradient(90deg, #0876d1, #08a9e6 55%, #20b83f);
+  --radius: 0.75rem;
+}
+
+html.dark {
+  color-scheme: dark;
+  --brand: #3dbdf2;
+  --brand-strong: #5bc3f4;
+  --brand-soft: rgba(8, 169, 230, 0.16);
+  --btn: #0b7fd9;
+  --btn-hover: #1a92ee;
+  --accent: #3ccf5c;
+  --accent-strong: #5fdc7b;
+  --accent-soft: rgba(32, 184, 63, 0.16);
+  --growth: #7be045;
+  --ink: #e8f0f8;
+  --ink-soft: #bccadb;
+  --muted: #8da1b8;
+  --line: #1d3045;
+  --surface: #0e1a28;
+  --surface-2: #0a1521;
+  --canvas: #07111a;
+  --ok: #5fdc7b;     --ok-soft: rgba(60, 207, 92, 0.15);
+  --warn: #fbbf24;   --warn-soft: rgba(251, 191, 36, 0.14);
+  --bad: #f87171;    --bad-soft: rgba(248, 113, 113, 0.15);
+  --info: #5bc3f4;   --info-soft: rgba(8, 169, 230, 0.16);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --ring: rgba(61, 189, 242, 0.45);
+  --hero: linear-gradient(125deg, #04284a 0%, #0a5a9f 58%, #0b8fc9 125%);
+  --brand-gradient: linear-gradient(90deg, #0b7fd9, #3dbdf2 55%, #3ccf5c);
+}
 
 @theme inline {
-  --color-brand-blue: var(--brand-blue);
-  --color-brand-cyan: var(--brand-cyan);
-  --color-brand-green: var(--brand-green);
-  --color-brand-green-strong: var(--brand-green-strong);
-  --color-brand-growth: var(--brand-growth);
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --color-sidebar-ring: var(--sidebar-ring);
-  --color-sidebar-border: var(--sidebar-border);
-  --color-sidebar-accent-foreground: var(--sidebar-accent-foreground);
-  --color-sidebar-accent: var(--sidebar-accent);
-  --color-sidebar-primary-foreground: var(--sidebar-primary-foreground);
-  --color-sidebar-primary: var(--sidebar-primary);
-  --color-sidebar-foreground: var(--sidebar-foreground);
-  --color-sidebar: var(--sidebar);
-  --color-chart-5: var(--chart-5);
-  --color-chart-4: var(--chart-4);
-  --color-chart-3: var(--chart-3);
-  --color-chart-2: var(--chart-2);
-  --color-chart-1: var(--chart-1);
-  --color-ring: var(--ring);
-  --color-input: var(--input);
-  --color-border: var(--border);
-  --color-destructive: var(--destructive);
-  --color-accent-foreground: var(--accent-foreground);
+  --color-brand: var(--brand);
+  --color-brand-strong: var(--brand-strong);
+  --color-brand-soft: var(--brand-soft);
+  --color-btn: var(--btn);
+  --color-btn-hover: var(--btn-hover);
   --color-accent: var(--accent);
-  --color-muted-foreground: var(--muted-foreground);
+  --color-accent-strong: var(--accent-strong);
+  --color-accent-soft: var(--accent-soft);
+  --color-growth: var(--growth);
+  --color-ink: var(--ink);
+  --color-ink-soft: var(--ink-soft);
   --color-muted: var(--muted);
-  --color-secondary-foreground: var(--secondary-foreground);
-  --color-secondary: var(--secondary);
-  --color-primary-foreground: var(--primary-foreground);
-  --color-primary: var(--primary);
-  --color-popover-foreground: var(--popover-foreground);
-  --color-popover: var(--popover);
-  --color-card-foreground: var(--card-foreground);
-  --color-card: var(--card);
+  --color-line: var(--line);
+  --color-surface: var(--surface);
+  --color-surface-2: var(--surface-2);
+  --color-canvas: var(--canvas);
+  --color-ok: var(--ok);
+  --color-ok-soft: var(--ok-soft);
+  --color-warn: var(--warn);
+  --color-warn-soft: var(--warn-soft);
+  --color-bad: var(--bad);
+  --color-bad-soft: var(--bad-soft);
+  --color-info: var(--info);
+  --color-info-soft: var(--info-soft);
+  --shadow-card: var(--shadow-sm);
+  --shadow-pop: var(--shadow-md);
+  --shadow-float: var(--shadow-lg);
+  --font-sans: var(--font-geist-sans), system-ui, sans-serif;
+
+  /* shadcn/ui names used by components/ui, mapped onto the HASVIK tokens. */
+  --color-background: var(--canvas);
+  --color-foreground: var(--ink);
+  --color-card: var(--surface);
+  --color-card-foreground: var(--ink);
+  --color-popover: var(--surface);
+  --color-popover-foreground: var(--ink);
+  --color-primary: var(--btn);
+  --color-primary-foreground: #fff;
+  --color-secondary: var(--surface-2);
+  --color-secondary-foreground: var(--ink);
+  --color-muted-foreground: var(--muted);
+  --color-destructive: var(--bad);
+  --color-border: var(--line);
+  --color-input: var(--line);
+  --color-sidebar: var(--surface);
+  --color-sidebar-foreground: var(--ink);
+  --color-chart-1: var(--brand-strong);
+  --color-chart-2: var(--brand);
+  --color-chart-3: var(--accent);
+  --color-chart-4: var(--growth);
+  --color-chart-5: var(--muted);
   --radius-sm: calc(var(--radius) * 0.6);
   --radius-md: calc(var(--radius) * 0.8);
   --radius-lg: var(--radius);
@@ -50,124 +130,82 @@
   --radius-4xl: calc(var(--radius) * 2.6);
 }
 
-:root {
-  --brand-blue: #0870c9;
-  --brand-cyan: #1499d6;
-  --brand-green: #18a849;
-  --brand-green-strong: #117a35;
-  --brand-growth: #57c84d;
-  --background: #f6f8fb;
-  --foreground: oklch(0.145 0 0);
-  --card: oklch(1 0 0);
-  --card-foreground: oklch(0.145 0 0);
-  --popover: oklch(1 0 0);
-  --popover-foreground: oklch(0.145 0 0);
-  /* Green is the primary action colour; blue is reserved for navigation and submits. */
-  --primary: var(--brand-green);
-  --primary-foreground: #ffffff;
-  --secondary: var(--brand-green);
-  --secondary-foreground: #06210b;
-  --muted: #f1f5f9;
-  --muted-foreground: #64748b;
-  --accent: #eef4f8;
-  --accent-foreground: oklch(0.205 0 0);
-  --destructive: oklch(0.577 0.245 27.325);
-  --border: #dfe7ef;
-  --input: #d7e1eb;
-  --ring: var(--brand-green);
-  --chart-1: var(--brand-blue);
-  --chart-2: var(--brand-cyan);
-  --chart-3: var(--brand-green);
-  --chart-4: var(--brand-growth);
-  --chart-5: oklch(0.556 0 0);
-  --radius: 0.5rem;
-  --sidebar: var(--brand-blue);
-  --sidebar-foreground: #ffffff;
-  --sidebar-primary: var(--brand-blue);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: var(--brand-green);
-  --sidebar-accent-foreground: #06210b;
-  --sidebar-border: color-mix(in srgb, white 22%, transparent);
-  --sidebar-ring: oklch(0.708 0 0);
-}
-
-.dark {
-  --background: oklch(0.145 0 0);
-  --foreground: oklch(0.985 0 0);
-  --card: oklch(0.205 0 0);
-  --card-foreground: oklch(0.985 0 0);
-  --popover: oklch(0.205 0 0);
-  --popover-foreground: oklch(0.985 0 0);
-  --primary: var(--brand-green);
-  --primary-foreground: #ffffff;
-  --secondary: var(--brand-green);
-  --secondary-foreground: #06210b;
-  --muted: oklch(0.269 0 0);
-  --muted-foreground: oklch(0.708 0 0);
-  --accent: oklch(0.269 0 0);
-  --accent-foreground: oklch(0.985 0 0);
-  --destructive: oklch(0.704 0.191 22.216);
-  --border: oklch(1 0 0 / 10%);
-  --input: oklch(1 0 0 / 15%);
-  --ring: var(--brand-green);
-  --chart-1: var(--brand-blue);
-  --chart-2: var(--brand-cyan);
-  --chart-3: var(--brand-green);
-  --chart-4: var(--brand-growth);
-  --chart-5: oklch(0.556 0 0);
-  --sidebar: oklch(0.205 0 0);
-  --sidebar-foreground: oklch(0.985 0 0);
-  --sidebar-primary: var(--brand-blue);
-  --sidebar-primary-foreground: #ffffff;
-  --sidebar-accent: color-mix(in srgb, var(--brand-blue) 14%, var(--sidebar));
-  --sidebar-accent-foreground: var(--brand-cyan);
-  --sidebar-border: oklch(1 0 0 / 10%);
-  --sidebar-ring: oklch(0.556 0 0);
-}
+html { color-scheme: light; }
 
 @layer base {
-  * {
-    @apply border-border outline-ring/50;
-  }
+  * { @apply border-line; }
   body {
-    @apply bg-background text-foreground;
-    font-feature-settings: "cv02", "cv03", "cv04", "cv11";
+    background: var(--canvas);
+    background-image:
+      radial-gradient(900px 420px at 88% -140px, rgb(8 169 230 / 0.12), transparent 70%),
+      radial-gradient(620px 340px at -8% 0, rgb(32 184 63 / 0.06), transparent 70%);
+    background-attachment: fixed;
+    color: var(--ink);
+    font-family: var(--font-geist-sans), system-ui, sans-serif;
+    -webkit-tap-highlight-color: transparent;
+    text-rendering: optimizeLegibility;
   }
-
-  /* Hasvik uses a crisp, square visual language across controls and surfaces. */
-  button,
-  input,
-  textarea,
-  select,
-  [role="button"],
-  [data-slot="button"],
-  [data-slot="input"],
-  [data-slot="textarea"],
-  [data-slot="select-trigger"],
-  [data-slot="select-content"],
-  [data-slot="card"] {
-    border-radius: 0 !important;
+  :focus-visible {
+    outline: 3px solid var(--ring);
+    outline-offset: 2px;
+    border-radius: 8px;
   }
-
-  [data-slot="table-header"] {
-    background-color: #f8fafc;
-  }
-
-  /* Form confirmations are intentionally blue, distinct from green primary actions. */
-  button[type="submit"]:not([data-variant="outline"]),
-  input[type="submit"] {
-    background-color: var(--brand-blue) !important;
-    border-color: var(--brand-blue) !important;
-    color: #ffffff !important;
-  }
-
-  button[type="submit"]:not([data-variant="outline"]):hover,
-  input[type="submit"]:hover {
-    background-color: #0667b8 !important;
-    border-color: #0667b8 !important;
-  }
- 
+  button:not(:disabled), [role="button"]:not([aria-disabled="true"]), summary { cursor: pointer; }
 }
+
+.tabular { font-variant-numeric: tabular-nums; }
+
+/* ---------- surfaces ---------- */
+.glass {
+  background: color-mix(in srgb, var(--surface) 82%, transparent);
+  -webkit-backdrop-filter: saturate(160%) blur(14px);
+  backdrop-filter: saturate(160%) blur(14px);
+}
+.hero-surface { background: var(--hero); position: relative; isolation: isolate; }
+/* The green swoosh from the logo, echoed in the corner of every hero panel. */
+.hero-surface::after {
+  content: ""; position: absolute; inset: auto -10% -45% 30%; height: 70%; z-index: -1; pointer-events: none;
+  background: radial-gradient(60% 100% at 70% 100%, rgb(99 211 41 / 0.38), transparent 70%);
+  transform: rotate(-6deg);
+}
+.brand-bar { background: var(--brand-gradient); }
+
+/* ---------- motion ---------- */
+@keyframes fade-up { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }
+@keyframes pop-in { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: none; } }
+@keyframes sheet-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
+@keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
+.fade-up { animation: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.pop-in { animation: pop-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.sheet-up { animation: sheet-up 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.stagger > * { animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.stagger > *:nth-child(2) { animation-delay: 45ms; }
+.stagger > *:nth-child(3) { animation-delay: 90ms; }
+.stagger > *:nth-child(4) { animation-delay: 135ms; }
+.stagger > *:nth-child(5) { animation-delay: 180ms; }
+.stagger > *:nth-child(6) { animation-delay: 225ms; }
+
+.skeleton {
+  background: linear-gradient(90deg, var(--line) 25%, var(--surface-2) 37%, var(--line) 63%);
+  background-size: 200% 100%;
+  animation: shimmer 1.4s linear infinite;
+  border-radius: 10px;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.001ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.001ms !important;
+    scroll-behavior: auto !important;
+  }
+}
+
+* { scrollbar-width: thin; scrollbar-color: var(--line) transparent; }
+
+/* A grid that collapses to one column otherwise grows as wide as its widest child (e.g. a table) and runs off
+   the screen on phones. Letting grid children shrink makes the table scroll inside its own card. */
+.grid > * { min-width: 0; }
 
 .responsive-filter-field [data-slot="select-trigger"],
 .responsive-filter-field [data-slot="popover-trigger"] {
@@ -238,8 +276,8 @@
 
 /* Shared library calendar: viewport-sized cells and keyboard-visible focus. */
 .crm-calendar {
-  --rdp-accent-color: var(--primary);
-  --rdp-accent-background-color: #eff6ff;
+  --rdp-accent-color: var(--btn);
+  --rdp-accent-background-color: var(--brand-soft);
   --rdp-day-height: clamp(2rem, 10vw, 2.5rem);
   --rdp-day-width: clamp(2rem, 10vw, 2.5rem);
   --rdp-day_button-height: clamp(2rem, 10vw, 2.5rem);
@@ -247,4 +285,4 @@
   font-size: 0.875rem;
   margin-inline: auto;
 }
-.crm-calendar button:focus-visible { outline: 2px solid var(--primary); outline-offset: 2px; }
+.crm-calendar button:focus-visible { outline: 2px solid var(--btn); outline-offset: 2px; }

@@ -108,7 +108,7 @@ export default function ListPageLayout({
       </section>
       <div className="w-full lg:hidden">{search}</div>
       {showFilters && (filters || search) && (
-        <div className="hidden grow border border-slate-200 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] lg:flex overflow-visible">
+        <div className="hidden grow border border-line bg-surface p-3 shadow-card lg:flex overflow-visible">
           <div className="flex w-full min-w-0 flex-wrap items-center gap-3">
             {search && <div className="w-full shrink-0 lg:w-60 xl:w-72">{search}</div>}
             {filters && <div className="min-w-0 flex-1"><FilterDisplayContext value="inline">{!filterDrawerOpen && filters}</FilterDisplayContext></div>}
@@ -127,14 +127,14 @@ export default function ListPageLayout({
           onOpenChange={setFilterDrawerOpen}
         >
           <DialogPrimitive.Portal>
-            <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-black/40 lg:hidden" />
-            <DialogPrimitive.Content className="filter-drawer fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-white shadow-2xl outline-none lg:hidden">
-              <div className="flex h-16 shrink-0 items-center justify-between border-b border-slate-200 px-5">
-                <DialogPrimitive.Title className="text-lg font-bold text-[#0f172a]">
+            <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 lg:hidden" />
+            <DialogPrimitive.Content className="filter-drawer fixed inset-y-0 right-0 z-50 flex w-full max-w-sm flex-col bg-surface shadow-2xl outline-none lg:hidden">
+              <div className="flex h-16 shrink-0 items-center justify-between border-b border-line px-5">
+                <DialogPrimitive.Title className="text-lg font-bold text-ink">
                   Filters
                 </DialogPrimitive.Title>
                 <DialogPrimitive.Close
-                  className="rounded-md p-2 text-[#64748b] hover:bg-[#f1f5f9] hover:text-[#0f172a]"
+                  className="rounded-md p-2 text-muted hover:bg-surface-2 hover:text-ink"
                   aria-label="Close filters"
                 >
                   <X className="size-5" />
@@ -144,19 +144,19 @@ export default function ListPageLayout({
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
                 <FilterDisplayContext value="drawer">{filters}</FilterDisplayContext>
               </div>
-              <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4 shadow-[0_-6px_18px_rgba(15,23,42,0.05)]">
+              <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-line bg-surface p-4 shadow-card">
                 <button
                   type="button"
                   onClick={onResetFilters}
                   disabled={!onResetFilters}
-                  className="h-11 border border-slate-300 bg-white px-3 text-sm font-semibold text-slate-700 hover:bg-slate-50 disabled:cursor-not-allowed disabled:opacity-50"
+                  className="h-11 border border-line bg-surface px-3 text-sm font-semibold text-ink-soft hover:bg-surface-2 disabled:cursor-not-allowed disabled:opacity-50"
                 >
                   Reset Filters
                 </button>
                 <button
                   type="button"
                   onClick={() => setFilterDrawerOpen(false)}
-                  className="h-11 border border-brand-green bg-brand-green px-3 text-sm font-semibold text-white hover:bg-brand-green-strong"
+                  className="h-11 border border-accent bg-surface-2 px-3 text-sm font-semibold text-white hover:bg-accent-strong"
                 >
                   Show Results{typeof resultCount === "number" ? ` (${resultCount})` : ""}
                 </button>

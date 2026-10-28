@@ -16,11 +16,11 @@ export default function SearchInput({
 }: SearchInputProps) {
   return (
     <div className={cn("relative", wrapperClassName)}>
-      <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#94a3b8]" />
+      <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
       <Input
         type="search"
         placeholder={placeholder}
-        className={cn("pl-10 bg-white min-h-9", className)}
+        className={cn("pl-10 bg-surface min-h-9", className)}
         {...props}
       />
     </div>

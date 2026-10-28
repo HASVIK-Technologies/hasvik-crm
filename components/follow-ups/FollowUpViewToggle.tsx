@@ -13,7 +13,7 @@ export default function FollowUpViewToggle({
   onChange: (view: FollowUpView) => void;
 }) {
   return (
-    <div className="flex border border-slate-200 bg-slate-50 p-0.5" aria-label="Follow-up view">
+    <div className="flex border border-line bg-surface-2 p-0.5" aria-label="Follow-up view">
       {([
         { value: "table" as const, label: "Table", icon: List },
         { value: "calendar" as const, label: "Calendar", icon: CalendarDays },
@@ -29,8 +29,8 @@ export default function FollowUpViewToggle({
             className={cn(
               "flex h-9 items-center gap-1.5 border px-2 text-xs font-semibold transition-colors sm:gap-2 sm:px-3",
               active
-                ? "border-slate-200 bg-white text-brand-blue shadow-sm"
-                : "border-transparent text-slate-500 hover:bg-white/70 hover:text-slate-800",
+                ? "border-line bg-surface text-brand-strong shadow-sm"
+                : "border-transparent text-muted hover:bg-surface/70 hover:text-ink",
             )}
           >
             <Icon className="size-4" />

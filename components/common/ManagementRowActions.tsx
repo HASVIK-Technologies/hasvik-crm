@@ -60,7 +60,7 @@ export default function ManagementRowActions({
                   variant="ghost"
                   size="icon"
                   aria-label={`More actions for ${editLabel.replace(/^Edit /, "")}`}
-                  className="size-8 border border-transparent text-slate-500 shadow-none hover:bg-slate-100 hover:text-slate-800"
+                  className="size-8 border border-transparent text-muted shadow-none hover:bg-surface-2 hover:text-ink"
                 >
                   <MoreVertical className="size-4" />
                 </Button>
@@ -68,12 +68,12 @@ export default function ManagementRowActions({
             </TooltipTrigger>
             <TooltipContent side="top">More actions</TooltipContent>
           </Tooltip>
-          <DropdownMenuContent align="end" className="w-40 bg-white" onCloseAutoFocus={(event) => { if (activityOpen) event.preventDefault(); }}>
+          <DropdownMenuContent align="end" className="w-40 bg-surface" onCloseAutoFocus={(event) => { if (activityOpen) event.preventDefault(); }}>
             {hasActivity && <DropdownMenuItem onSelect={() => setActivityOpen(true)} className="cursor-pointer gap-2 text-xs"><History className="size-3.5" /><span>View activity</span></DropdownMenuItem>}
             {hasAction && <DropdownMenuItem
               onSelect={onAction}
               disabled={disabled}
-              className={`cursor-pointer gap-2 text-xs ${actionDestructive ? "text-rose-700 focus:text-rose-700" : "text-emerald-700 focus:text-emerald-700"}`}
+              className={`cursor-pointer gap-2 text-xs ${actionDestructive ? "text-bad focus:text-bad" : "text-ok focus:text-ok"}`}
             >
               {actionDestructive ? <Trash2 className="size-3.5" /> : <Power className="size-3.5" />}
               <span>{actionLabel}</span>

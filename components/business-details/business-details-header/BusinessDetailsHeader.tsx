@@ -31,18 +31,18 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
   const leadStatusDisplay = formatLeadStatus(rawLeadStatus);
 
   return (
-    <CardHeader className="flex flex-col gap-4 border-b border-[#eef2f6] bg-[#fbfdff] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
+    <CardHeader className="flex flex-col gap-4 border-b border-line bg-surface-2 p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
 
       {/* LEFT SIDE: Avatar & Name */}
       <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">
         <Avatar className="size-13 sm:size-16 rounded-xl sm:rounded-2xl shrink-0">
-          <AvatarFallback className="bg-primary/10 text-base sm:text-xl font-semibold text-primary">
+          <AvatarFallback className="bg-btn/10 text-base sm:text-xl font-semibold text-brand-strong">
             {business.initials}
           </AvatarFallback>
         </Avatar>
         <div className="mt-0.5 flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
           <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <CardTitle className="min-w-0 max-w-full truncate text-lg font-bold tracking-tight text-[#334155] sm:text-2xl" title={business.name}>{business.name}</CardTitle>
+            <CardTitle className="min-w-0 max-w-full truncate text-lg font-bold tracking-tight text-ink-soft sm:text-2xl" title={business.name}>{business.name}</CardTitle>
             <div className="flex flex-wrap items-center gap-1.5 shrink-0">
               <ActivityStateText active={business.status === "Active"} />
               {leadStatusDisplay && leadStatusDisplay !== "-" && (
@@ -53,12 +53,12 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
               )}
             </div>
           </div>
-          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-[#64748b]">
-            <Building2 className="size-3.5 sm:size-4 shrink-0 text-[#94a3b8]" />
+          <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-muted">
+            <Building2 className="size-3.5 sm:size-4 shrink-0 text-muted" />
             <span>{business.category}</span>
             {business.city && (
               <>
-                <span className="text-[#cbd5e1]">/</span>
+                <span className="text-line">/</span>
                 <span>{business.city}</span>
               </>
             )}
@@ -74,7 +74,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
 
         {/* Maps Button */}
         {locationData.isAvailable ? (
-          <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10 cursor-pointer">
+          <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-brand-strong border-line hover:bg-btn/10 cursor-pointer">
             <a
               href={locationData.mapLink || "#"}
               target="_blank"
@@ -92,7 +92,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
             aria-disabled="true"
             aria-label="Location not available"
             title="Location not available"
-            className="h-9 w-9 p-0 flex items-center justify-center text-slate-300 border-gray-200 opacity-50 cursor-not-allowed"
+            className="h-9 w-9 p-0 flex items-center justify-center text-muted border-line opacity-50 cursor-not-allowed"
           >
             <MapPin className="h-4 w-4" />
           </OutlinedButton>

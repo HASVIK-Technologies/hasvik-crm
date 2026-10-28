@@ -22,7 +22,7 @@ export default async function EditBusinessPage({ params }: EditBusinessPageProps
         />
       }
       content={
-        <Suspense fallback={<div className="p-8 text-center text-sm text-[#64748b]">Loading form...</div>}>
+        <Suspense fallback={<div className="p-8 text-center text-sm text-muted">Loading form...</div>}>
           <BusinessForm businessId={id} />
         </Suspense>
       }

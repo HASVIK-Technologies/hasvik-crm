@@ -25,7 +25,7 @@ export function ChangeBusinessStatusModal({ isOpen, business, targetStatus, isLo
       onCancel={onCancel}
       onConfirm={onConfirm}
     >
-      <p className={`border-l-2 px-3 py-2 text-xs leading-relaxed ${isActivating ? "border-emerald-500 bg-emerald-50 text-emerald-800" : "border-red-500 bg-red-50 text-red-800"}`}>
+      <p className={`border-l-2 px-3 py-2 text-xs leading-relaxed ${isActivating ? "border-ok/30 bg-ok-soft text-ok" : "border-bad/30 bg-bad-soft text-bad"}`}>
         {isActivating ? "Standard operations and editing will be restored." : "Editing will be disabled until the business is reactivated."}
       </p>
     </ManagementConfirmDialog>

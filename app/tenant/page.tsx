@@ -49,7 +49,7 @@ export default function TenantSignupPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#f8fbff] px-4 py-8 sm:px-6 sm:py-12">
+    <main className="min-h-screen bg-surface-2 px-4 py-8 sm:px-6 sm:py-12">
       <div className="mx-auto max-w-2xl">
         <header className="mb-8 flex items-center justify-between gap-4">
           <Link href="/explore-crm" aria-label="Back to Hasvik CRM">
@@ -64,43 +64,43 @@ export default function TenantSignupPage() {
           </Link>
           <Link
             href="/"
-            className="text-sm font-semibold text-primary hover:text-blue-800"
+            className="text-sm font-semibold text-brand-strong hover:text-brand-strong"
           >
             Already have an account? Sign in
           </Link>
         </header>
 
-        <section className="rounded-3xl border border-slate-200 bg-white p-6 shadow-[0_24px_70px_-35px_rgba(15,69,115,0.25)] sm:p-10">
+        <section className="rounded-3xl border border-line bg-surface p-6 shadow-card sm:p-10">
           <Link
             href="/explore-crm"
-            className="inline-flex items-center gap-2 text-xs font-semibold text-slate-500 hover:text-primary"
+            className="inline-flex items-center gap-2 text-xs font-semibold text-muted hover:text-brand-strong"
           >
             <ArrowLeft className="size-3.5" />
             Back to explore
           </Link>
 
           <div className="mt-7 flex items-start gap-4">
-            <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-blue-50 text-primary">
+            <span className="flex size-12 shrink-0 items-center justify-center rounded-2xl bg-brand-soft text-brand-strong">
               <Building2 className="size-5" />
             </span>
             <div>
-              <span className="inline-flex rounded-full bg-emerald-50 px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-emerald-800">
+              <span className="inline-flex rounded-full bg-ok-soft px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-ok">
                 Secure registration
               </span>
-              <h1 className="mt-2 text-2xl font-bold tracking-tight text-slate-950 sm:text-3xl">
+              <h1 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">
                 Create your workspace
               </h1>
-              <p className="mt-2 text-sm leading-6 text-slate-500">
+              <p className="mt-2 text-sm leading-6 text-muted">
                 Enter your organization and admin details to get started.
               </p>
             </div>
           </div>
 
           <div
-            className="mt-7 flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 p-4"
+            className="mt-7 flex items-start gap-3 rounded-xl border border-brand-soft bg-brand-soft p-4"
           >
-            <CircleHelp className="mt-0.5 size-4 shrink-0 text-primary" />
-            <p className="text-xs leading-5 text-blue-950">
+            <CircleHelp className="mt-0.5 size-4 shrink-0 text-brand-strong" />
+            <p className="text-xs leading-5 text-brand-strong">
               Create a workspace and its administrator account. Your password
               is sent securely to Hasvik to create the account.
             </p>
@@ -117,9 +117,9 @@ export default function TenantSignupPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="organization-name"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-ink-soft"
               >
-                Organization Name <span className="text-red-600">*</span>
+                Organization Name <span className="text-bad">*</span>
               </label>
               <Input
                 id="organization-name"
@@ -134,9 +134,9 @@ export default function TenantSignupPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="full-name"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-ink-soft"
               >
-                Full Name <span className="text-red-600">*</span>
+                Full Name <span className="text-bad">*</span>
               </label>
               <Input
                 id="full-name"
@@ -151,9 +151,9 @@ export default function TenantSignupPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="contact-number"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-ink-soft"
               >
-                Contact Number <span className="text-red-600">*</span>
+                Contact Number <span className="text-bad">*</span>
               </label>
               <Input
                 id="contact-number"
@@ -169,9 +169,9 @@ export default function TenantSignupPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="email-id"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-ink-soft"
               >
-                Email ID <span className="text-red-600">*</span>
+                Email ID <span className="text-bad">*</span>
               </label>
               <Input
                 id="email-id"
@@ -187,9 +187,9 @@ export default function TenantSignupPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="password"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-ink-soft"
               >
-                Password <span className="text-red-600">*</span>
+                Password <span className="text-bad">*</span>
               </label>
               <div className="relative">
                 <Input
@@ -211,7 +211,7 @@ export default function TenantSignupPage() {
                   type="button"
                   aria-label={showPassword ? "Hide password" : "Show password"}
                   onClick={() => setShowPassword((show) => !show)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-brand-strong"
                 >
                   {showPassword ? (
                     <EyeOff className="size-4" />
@@ -225,9 +225,9 @@ export default function TenantSignupPage() {
             <div className="space-y-1.5">
               <label
                 htmlFor="confirm-password"
-                className="text-xs font-semibold text-slate-700"
+                className="text-xs font-semibold text-ink-soft"
               >
-                Confirm Password <span className="text-red-600">*</span>
+                Confirm Password <span className="text-bad">*</span>
               </label>
               <div className="relative">
                 <Input
@@ -254,7 +254,7 @@ export default function TenantSignupPage() {
                       : "Show confirm password"
                   }
                   onClick={() => setShowConfirmPassword((show) => !show)}
-                  className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-400 hover:text-primary"
+                  className="absolute right-3 top-1/2 -translate-y-1/2 text-muted hover:text-brand-strong"
                 >
                   {showConfirmPassword ? (
                     <EyeOff className="size-4" />
@@ -264,7 +264,7 @@ export default function TenantSignupPage() {
                 </button>
               </div>
               {!passwordsMatch && (
-                <p className="text-xs text-red-600" role="alert">
+                <p className="text-xs text-bad" role="alert">
                   Passwords do not match.
                 </p>
               )}
@@ -274,8 +274,8 @@ export default function TenantSignupPage() {
               <p
                 className={`rounded-xl border p-3 text-xs leading-5 ${
                   signupComplete
-                    ? "border-emerald-200 bg-emerald-50 text-emerald-900"
-                    : "border-red-200 bg-red-50 text-red-800"
+                    ? "border-ok/30 bg-ok-soft text-ok"
+                    : "border-bad/30 bg-bad-soft text-bad"
                 }`}
                 role={signupComplete ? "status" : "alert"}
               >
@@ -285,7 +285,7 @@ export default function TenantSignupPage() {
             {signupComplete && (
               <Link
                 href="/?welcome=subscription"
-                className="block rounded-xl border border-blue-200 bg-blue-50 px-4 py-3 text-center text-xs font-semibold text-primary transition hover:bg-blue-100"
+                className="block rounded-xl border border-brand/40 bg-brand-soft px-4 py-3 text-center text-xs font-semibold text-brand-strong transition hover:bg-brand-soft"
               >
                 Sign in and choose a subscription plan
               </Link>
@@ -302,9 +302,9 @@ export default function TenantSignupPage() {
             </Button>
           </form>
 
-          <p className="mt-5 text-center text-xs text-slate-500">
+          <p className="mt-5 text-center text-xs text-muted">
             Already registered?{" "}
-            <Link href="/" className="font-semibold text-primary hover:underline">
+            <Link href="/" className="font-semibold text-brand-strong hover:underline">
               Sign in to your workspace
             </Link>
           </p>

@@ -141,12 +141,12 @@ function LimitLine({
 }) {
   if (value === undefined) return null;
   return (
-    <li className="flex items-center justify-between gap-3 text-xs text-[#475569]">
+    <li className="flex items-center justify-between gap-3 text-xs text-ink-soft">
       <span className="flex items-center gap-2">
-        <Icon className="size-3.5 text-[#94a3b8]" />
+        <Icon className="size-3.5 text-muted" />
         {label}
       </span>
-      <span className="font-semibold text-[#334155]">{getLimit(value)}</span>
+      <span className="font-semibold text-ink-soft">{getLimit(value)}</span>
     </li>
   );
 }
@@ -164,38 +164,38 @@ function PlanCard({
 }) {
   return (
     <article
-      className={`relative flex h-full flex-col overflow-hidden rounded-2xl border bg-white shadow-[0_8px_28px_rgba(20,40,60,0.04)] ${
+      className={`relative flex h-full flex-col overflow-hidden rounded-2xl border bg-surface shadow-card ${
         featured
-          ? "border-brand-blue/35 ring-1 ring-brand-blue/10"
-          : "border-[#e4ecf2]"
+          ? "border-brand-strong/35 ring-1 ring-brand/10"
+          : "border-line"
       }`}
     >
       {featured && (
-        <div className="flex items-center gap-1.5 border-b border-blue-100 bg-blue-50 px-5 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-primary">
+        <div className="flex items-center gap-1.5 border-b border-brand-soft bg-brand-soft px-5 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-strong">
           <Sparkles className="size-3.5" aria-hidden="true" />
           Popular choice
         </div>
       )}
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eff6ff] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-brand-strong">
             <Gem className="size-3" aria-hidden="true" />
             {cycleLabels[plan.billingCycle] ?? plan.billingCycle}
           </span>
-          <span className="rounded-full bg-slate-50 px-2 py-1 text-[10px] font-semibold text-slate-500">
+          <span className="rounded-full bg-surface-2 px-2 py-1 text-[10px] font-semibold text-muted">
             {plan.code}
           </span>
         </div>
-        <h3 className="text-lg font-bold tracking-tight text-[#0f172a]">{plan.name}</h3>
-        <p className="mt-1 min-h-10 text-xs leading-5 text-[#64748b]">
+        <h3 className="text-lg font-bold tracking-tight text-ink">{plan.name}</h3>
+        <p className="mt-1 min-h-10 text-xs leading-5 text-muted">
           {plan.description || "A flexible plan for your workspace."}
         </p>
-        <div className="mb-5 mt-4 rounded-xl bg-[#f8fafc] px-4 py-3">
+        <div className="mb-5 mt-4 rounded-xl bg-surface-2 px-4 py-3">
           <div className="flex flex-wrap items-baseline gap-x-1.5 gap-y-0.5">
-            <span className="text-2xl font-extrabold tracking-tight text-[#0f172a] sm:text-3xl">
+            <span className="text-2xl font-extrabold tracking-tight text-ink sm:text-3xl">
               {formatPrice(plan.price, plan.currency)}
             </span>
-            <span className="text-xs text-[#64748b]">
+            <span className="text-xs text-muted">
               {plan.billingCycle === "MONTHLY"
                 ? "/ month"
                 : plan.billingCycle === "YEARLY"
@@ -205,7 +205,7 @@ function PlanCard({
           </div>
         </div>
         {plan.limits && (
-          <ul className="mb-5 space-y-2.5 rounded-xl border border-slate-100 p-3.5">
+          <ul className="mb-5 space-y-2.5 rounded-xl border border-surface-2 p-3.5">
             <LimitLine icon={Users} label="Team members" value={plan.limits.maxUsers} />
             <LimitLine icon={Building2} label="Businesses" value={plan.limits.maxBusinesses} />
             <LimitLine icon={CalendarDays} label="Follow-ups" value={plan.limits.maxFollowUps} />
@@ -217,14 +217,14 @@ function PlanCard({
             {plan.features.map((feature) => (
               <li
                 key={feature.code}
-                className="flex items-start gap-2.5 text-xs leading-5 text-[#475569]"
+                className="flex items-start gap-2.5 text-xs leading-5 text-ink-soft"
                 title={feature.description}
               >
-                <Check className="mt-0.5 size-3.5 shrink-0 text-brand-green-strong" />
+                <Check className="mt-0.5 size-3.5 shrink-0 text-accent-strong" />
                 <span>
                   <span className="font-semibold">{feature.name}</span>
                   {feature.description && (
-                    <span className="mt-0.5 block text-[11px] leading-4 text-slate-500">
+                    <span className="mt-0.5 block text-[11px] leading-4 text-muted">
                       {feature.description}
                     </span>
                   )}
@@ -238,7 +238,7 @@ function PlanCard({
           disabled={disabled || !getPlanId(plan)}
           onClick={() => onChoose(plan)}
           className={`mt-auto h-10 w-full rounded-xl font-semibold ${
-            featured ? "bg-primary text-white hover:bg-primary/90" : ""
+            featured ? "bg-btn text-white hover:bg-btn/90" : ""
           }`}
         >
           {disabled ? "Active subscription exists" : "Choose this plan"}
@@ -302,52 +302,52 @@ function SubscriptionRow({
         <DropdownMenuTrigger asChild>
           <TableActionButton tooltip="More actions" aria-label={`More actions for ${planName}`}><MoreVertical className="size-4" /></TableActionButton>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-52 bg-white" onCloseAutoFocus={(event) => { if (activityOpen) event.preventDefault(); }}>
+        <DropdownMenuContent align="end" className="w-52 bg-surface" onCloseAutoFocus={(event) => { if (activityOpen) event.preventDefault(); }}>
           <DropdownMenuItem onSelect={() => setActivityOpen(true)} className="cursor-pointer gap-2 text-xs"><History className="size-3.5" />View activity</DropdownMenuItem>
           <DropdownMenuItem onSelect={() => { void navigator.clipboard.writeText(id).then(() => toast.success("Subscription ID copied."), () => toast.error("Unable to copy the subscription ID.")); }} className="cursor-pointer gap-2 text-xs"><Copy className="size-3.5" />Copy subscription ID</DropdownMenuItem>
           {writable && ((hasvikAdmin && (status === "ACTIVE" || status === "SUSPENDED" || status === "PENDING")) || (tenantAdmin && status === "ACTIVE")) && <DropdownMenuSeparator />}
           {writable && hasvikAdmin && (status === "ACTIVE" || status === "SUSPENDED") && <DropdownMenuItem disabled={busy} onSelect={() => onSuspensionChange(subscription)} className="cursor-pointer gap-2 text-xs">
             {status === "SUSPENDED" ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}{status === "SUSPENDED" ? "Resume subscription" : "Suspend subscription"}
           </DropdownMenuItem>}
-          {writable && (hasvikAdmin || tenantAdmin) && status === "ACTIVE" && <DropdownMenuItem disabled={busy} onSelect={() => onCancel(subscription)} className="cursor-pointer gap-2 text-xs text-rose-700 focus:text-rose-700"><Ban className="size-3.5" />Cancel subscription</DropdownMenuItem>}
-          {canApprove && <DropdownMenuItem disabled={busy} onSelect={() => onApprove(subscription)} className="cursor-pointer gap-2 text-xs text-emerald-700 focus:text-emerald-700"><CheckCircle2 className="size-3.5" />Approve</DropdownMenuItem>}
-          {canApprove && <DropdownMenuItem disabled={busy} onSelect={() => onReject(subscription)} className="cursor-pointer gap-2 text-xs text-rose-700 focus:text-rose-700"><XCircle className="size-3.5" />Reject request</DropdownMenuItem>}
+          {writable && (hasvikAdmin || tenantAdmin) && status === "ACTIVE" && <DropdownMenuItem disabled={busy} onSelect={() => onCancel(subscription)} className="cursor-pointer gap-2 text-xs text-bad focus:text-bad"><Ban className="size-3.5" />Cancel subscription</DropdownMenuItem>}
+          {canApprove && <DropdownMenuItem disabled={busy} onSelect={() => onApprove(subscription)} className="cursor-pointer gap-2 text-xs text-ok focus:text-ok"><CheckCircle2 className="size-3.5" />Approve</DropdownMenuItem>}
+          {canApprove && <DropdownMenuItem disabled={busy} onSelect={() => onReject(subscription)} className="cursor-pointer gap-2 text-xs text-bad focus:text-bad"><XCircle className="size-3.5" />Reject request</DropdownMenuItem>}
         </DropdownMenuContent>
       </DropdownMenu>}
     </div>
   );
   const planSummary = <div className="flex min-w-0 items-center gap-3">
-    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-brand-blue"><CreditCard className="size-4.5" /></span>
+    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-strong"><CreditCard className="size-4.5" /></span>
     <div className="min-w-0">
-      <p className="max-w-56 truncate text-sm font-semibold text-slate-900" title={planName}>{planName}</p>
-      <p className="mt-0.5 text-xs text-slate-500">{amount !== undefined ? formatPrice(amount, currency) : "Price unavailable"}{billingCycle && ` / ${cycleLabels[billingCycle] ?? billingCycle}`}</p>
+      <p className="max-w-56 truncate text-sm font-semibold text-ink" title={planName}>{planName}</p>
+      <p className="mt-0.5 text-xs text-muted">{amount !== undefined ? formatPrice(amount, currency) : "Price unavailable"}{billingCycle && ` / ${cycleLabels[billingCycle] ?? billingCycle}`}</p>
     </div>
   </div>;
-  const term = <div className="space-y-1 text-xs text-slate-600">
-    {status === "PENDING" ? <p>Requested {formatDate(subscription.createdAt)}</p> : <><p>Starts {formatDate(subscription.startDate)}</p><p className="text-slate-500">{billingCycle === "LIFETIME" ? "No expiry" : `Ends ${formatDate(subscription.endDate)}`}</p></>}
+  const term = <div className="space-y-1 text-xs text-ink-soft">
+    {status === "PENDING" ? <p>Requested {formatDate(subscription.createdAt)}</p> : <><p>Starts {formatDate(subscription.startDate)}</p><p className="text-muted">{billingCycle === "LIFETIME" ? "No expiry" : `Ends ${formatDate(subscription.endDate)}`}</p></>}
   </div>;
   const activity = <EntityActivityDialog entityType="SUBSCRIPTION" entityId={id} name={planName} open={activityOpen} onOpenChange={setActivityOpen} />;
-  const readOnlyMessage = readOnly && <p className="mt-1 text-[11px] text-slate-500">Read-only: tenant or business inactive.</p>;
+  const readOnlyMessage = readOnly && <p className="mt-1 text-[11px] text-muted">Read-only: tenant or business inactive.</p>;
 
   if (mobile) return <>
     {activity}
-    <DataTableMobileCard className={highlighted ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : ""}>
+    <DataTableMobileCard className={highlighted ? "border-brand-strong bg-brand-soft/80 ring-2 ring-brand/20" : ""}>
       <div className="flex items-start justify-between gap-3">{planSummary}{actions}</div>
-      <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-medium text-slate-600">{tenantName}</p><StatusBadge status={status} /></div>
-      <div className="mt-3 flex items-end justify-between gap-3">{term}<p className="text-xs text-slate-500">{subscription.autoRenew ? "Auto-renew on" : "Auto-renew off"}</p></div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-medium text-ink-soft">{tenantName}</p><StatusBadge status={status} /></div>
+      <div className="mt-3 flex items-end justify-between gap-3">{term}<p className="text-xs text-muted">{subscription.autoRenew ? "Auto-renew on" : "Auto-renew off"}</p></div>
       {readOnlyMessage}
     </DataTableMobileCard>
   </>;
 
   return <>
     {activity}
-    <TableRow className={`group ${highlighted ? "bg-blue-50/80 ring-2 ring-inset ring-brand-blue/20" : ""}`}>
+    <TableRow className={`group ${highlighted ? "bg-brand-soft/80 ring-2 ring-inset ring-brand/20" : ""}`}>
       <TableCell className="py-4 pl-6 pr-4">{planSummary}</TableCell>
-      <TableCell className="max-w-56 px-4 py-4 text-xs font-medium text-slate-600"><p className="truncate" title={tenantName}>{tenantName}</p>{readOnlyMessage}</TableCell>
+      <TableCell className="max-w-56 px-4 py-4 text-xs font-medium text-ink-soft"><p className="truncate" title={tenantName}>{tenantName}</p>{readOnlyMessage}</TableCell>
       <TableCell className="px-4 py-4"><StatusBadge status={status} /></TableCell>
       <TableCell className="px-4 py-4">{term}</TableCell>
-      <TableCell className="px-4 py-4 text-xs text-slate-500">{subscription.autoRenew ? "On" : "Off"}</TableCell>
-      <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${highlighted ? "bg-blue-50" : "bg-white group-hover:bg-slate-50"}`}>{actions}</TableCell>
+      <TableCell className="px-4 py-4 text-xs text-muted">{subscription.autoRenew ? "On" : "Off"}</TableCell>
+      <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${highlighted ? "bg-brand-soft" : "bg-surface group-hover:bg-surface-2"}`}>{actions}</TableCell>
     </TableRow>
   </>;
 }
@@ -628,14 +628,14 @@ export default function SubscriptionsPage() {
               value={statusFilter}
               onValueChange={(value) => { setStatusFilter(value as SubscriptionFilter); setPage(1); }}
             >
-              <SelectTrigger id="subscription-status-filter" size="sm" className="w-48 rounded-none text-xs">
+              <SelectTrigger id="subscription-status-filter" size="sm" className="w-48 rounded-xl text-xs">
                 <SelectValue>
-                  {statusFilter === "ALL" ? <span className="text-slate-600">All statuses</span> : <StatusBadge status={statusFilter} />}
+                  {statusFilter === "ALL" ? <span className="text-ink-soft">All statuses</span> : <StatusBadge status={statusFilter} />}
                 </SelectValue>
               </SelectTrigger>
-              <SelectContent className="bg-white">
-                <SelectItem value="ALL" className="rounded-none py-2.5 text-xs">All statuses</SelectItem>
-                {Object.entries(SUBSCRIPTION_STATUS_VISUALS).map(([status, visual]) => <SelectItem key={status} value={status} textValue={visual.label} className="rounded-none py-2.5 text-xs"><span className="inline-flex items-center gap-2.5"><span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${visual.dot}`} /><span>{visual.label}</span></span></SelectItem>)}
+              <SelectContent className="bg-surface">
+                <SelectItem value="ALL" className="rounded-xl py-2.5 text-xs">All statuses</SelectItem>
+                {Object.entries(SUBSCRIPTION_STATUS_VISUALS).map(([status, visual]) => <SelectItem key={status} value={status} textValue={visual.label} className="rounded-xl py-2.5 text-xs"><span className="inline-flex items-center gap-2.5"><span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${visual.dot}`} /><span>{visual.label}</span></span></SelectItem>)}
               </SelectContent>
             </Select> }]} /> : undefined}
       showFilters={showFilters}
@@ -684,48 +684,48 @@ export default function SubscriptionsPage() {
             </div>
           ) : (
             <div className="flex justify-end">
-              <span className="inline-flex w-fit max-w-full items-center rounded-full border border-slate-200 bg-white px-3 py-1.5 text-xs font-semibold text-slate-600">
-                <Building2 className="mr-1.5 size-3.5 shrink-0 text-slate-400" aria-hidden="true" />
+              <span className="inline-flex w-fit max-w-full items-center rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-soft">
+                <Building2 className="mr-1.5 size-3.5 shrink-0 text-muted" aria-hidden="true" />
                 <span className="truncate">{ownTenantName ?? user?.fullName ?? "My workspace"}</span>
               </span>
             </div>
           )}
 
           {notice && (
-            <p role="status" className="rounded-xl border border-emerald-200 bg-emerald-50 px-4 py-3 text-xs text-emerald-900">
+            <p role="status" className="rounded-xl border border-ok/30 bg-ok-soft px-4 py-3 text-xs text-ok">
               {notice}
             </p>
           )}
           {operationError && (
-            <p role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-800">
+            <p role="alert" className="rounded-xl border border-bad/30 bg-bad-soft px-4 py-3 text-xs text-bad">
               {operationError}
             </p>
           )}
 
           {!hasvikAdmin && !ownTenantId && (
-            <div role="alert" className="rounded-xl border border-amber-200 bg-amber-50 px-4 py-3 text-xs leading-5 text-amber-950">
+            <div role="alert" className="rounded-xl border border-warn/30 bg-warn-soft px-4 py-3 text-xs leading-5 text-warn">
               Your account is missing a workspace ID. Subscription requests are unavailable until your workspace administrator restores the tenant ID on your account.
             </div>
           )}
 
           {hasvikAdmin && tenantsQuery.isError && (
-            <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-800">
+            <div role="alert" className="rounded-xl border border-bad/30 bg-bad-soft px-4 py-3 text-xs text-bad">
               Tenant names couldn’t be loaded. {getApiErrorMessage(tenantsQuery.error)}
             </div>
           )}
 
           {!hasvikAdmin && ownTenantId && ownTenantQuery.isError && (
-            <div role="alert" className="rounded-xl border border-red-200 bg-red-50 px-4 py-3 text-xs text-red-800">
+            <div role="alert" className="rounded-xl border border-bad/30 bg-bad-soft px-4 py-3 text-xs text-bad">
               Workspace details couldn’t be loaded. {getApiErrorMessage(ownTenantQuery.error)}
             </div>
           )}
 
-          {tenantAdmin && eligibilityQuery.isError && <p role="alert" className="text-sm text-red-700">Workspace subscription eligibility could not be verified. <button type="button" onClick={() => void eligibilityQuery.refetch()} className="underline">Try again</button></p>}
+          {tenantAdmin && eligibilityQuery.isError && <p role="alert" className="text-sm text-bad">Workspace subscription eligibility could not be verified. <button type="button" onClick={() => void eligibilityQuery.refetch()} className="underline">Try again</button></p>}
 
           {requestExistsForCreateTenant && (
-            <div role="status" className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
-              <CircleHelp className="mt-0.5 size-4 shrink-0 text-primary" />
-              <p className="text-xs leading-5 text-blue-950">
+            <div role="status" className="flex items-start gap-3 rounded-xl border border-brand-soft bg-brand-soft px-4 py-3">
+              <CircleHelp className="mt-0.5 size-4 shrink-0 text-brand-strong" />
+              <p className="text-xs leading-5 text-brand-strong">
                 Your workspace has an active subscription, a suspended subscription, or a pending request. Contact a HASVIK admin to resolve a suspension. Another plan can be requested once the current subscription or request is resolved.
               </p>
             </div>
@@ -741,16 +741,16 @@ export default function SubscriptionsPage() {
               </Button>}
             />
             {subscriptionsQuery.isPending ? (
-              <div className="flex min-h-32 items-center justify-center gap-2 text-sm text-slate-500">
+              <div className="flex min-h-32 items-center justify-center gap-2 text-sm text-muted">
                 <LoaderCircle className="size-4 animate-spin" />
                 Loading subscriptions…
               </div>
             ) : subscriptionsQuery.isError ? (
               <div className="px-5 py-10 text-center">
-                <p role="alert" className="text-sm font-semibold text-slate-800">
+                <p role="alert" className="text-sm font-semibold text-ink">
                   Subscriptions couldn’t be loaded
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted">
                   {getApiErrorMessage(subscriptionsQuery.error)}
                 </p>
                 <Button type="button" variant="outline" size="sm" onClick={() => void subscriptionsQuery.refetch()} className="mt-4 rounded-lg">
@@ -759,15 +759,15 @@ export default function SubscriptionsPage() {
               </div>
             ) : visibleSubscriptions.length === 0 ? (
               <div className="px-5 py-10 text-center">
-                <CreditCard className="mx-auto size-6 text-slate-300" />
-                <p className="mt-3 text-sm font-semibold text-slate-800">
+                <CreditCard className="mx-auto size-6 text-muted" />
+                <p className="mt-3 text-sm font-semibold text-ink">
                   {hasvikAdmin
                     ? statusFilter === "PENDING"
                         ? "No pending subscription requests"
                         : "No subscriptions match this status"
                     : "No subscriptions found"}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted">
                   {hasvikAdmin
                     ? statusFilter === "PENDING"
                         ? "New subscription requests from tenant admins will appear here."
@@ -786,7 +786,7 @@ export default function SubscriptionsPage() {
                       <TableHead className="px-4 py-4">Status</TableHead>
                       <TableHead className="px-4 py-4">Term</TableHead>
                       <TableHead className="px-4 py-4">Auto-renew</TableHead>
-                      <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right">Actions</TableHead>
+                      <TableHead className="sticky right-0 bg-surface-2 py-4 pl-4 pr-6 text-right">Actions</TableHead>
                     </TableRow></TableHeader>
                     <TableBody>{renderSubscriptionRows()}</TableBody>
                   </Table>
@@ -800,36 +800,36 @@ export default function SubscriptionsPage() {
           <section id="available-plans" className="scroll-mt-24">
             <div className="mb-5 flex flex-wrap items-end justify-between gap-3">
               <div>
-                <h2 className="text-xl font-bold tracking-tight text-[#0f172a]">
+                <h2 className="text-xl font-bold tracking-tight text-ink">
                   Available subscription plans
                 </h2>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted">
                   Choose a plan and submit it for HASVIK admin review. Payments are handled manually.
                 </p>
               </div>
               {!plansQuery.isPending && !plansQuery.isError && (
-                <span className="text-xs font-medium text-slate-500">
+                <span className="text-xs font-medium text-muted">
                   {visiblePlans.length} {visiblePlans.length === 1 ? "plan" : "plans"}
                 </span>
               )}
             </div>
             {plansQuery.isPending ? (
-              <div className="flex min-h-48 items-center justify-center rounded-2xl border border-[#e4ecf2] bg-white">
-                <LoaderCircle className="size-5 animate-spin text-primary" />
-                <span className="ml-2 text-sm text-[#64748b]">Loading plans…</span>
+              <div className="flex min-h-48 items-center justify-center rounded-2xl border border-line bg-surface">
+                <LoaderCircle className="size-5 animate-spin text-brand-strong" />
+                <span className="ml-2 text-sm text-muted">Loading plans…</span>
               </div>
             ) : plansQuery.isError ? (
-              <div className="rounded-2xl border border-red-100 bg-white p-8 text-center">
-                <p className="text-sm font-semibold text-[#0f172a]">Plans couldn’t be loaded</p>
-                <p className="mt-1 text-xs text-[#64748b]">{getApiErrorMessage(plansQuery.error)}</p>
+              <div className="rounded-2xl border border-bad-soft bg-surface p-8 text-center">
+                <p className="text-sm font-semibold text-ink">Plans couldn’t be loaded</p>
+                <p className="mt-1 text-xs text-muted">{getApiErrorMessage(plansQuery.error)}</p>
                 <Button variant="outline" size="sm" onClick={() => void plansQuery.refetch()} className="mt-4 rounded-lg">
                   Try again
                 </Button>
               </div>
             ) : visiblePlans.length === 0 ? (
-              <div className="rounded-2xl border border-dashed border-[#cbd5e1] bg-white px-5 py-12 text-center">
-                <CreditCard className="mx-auto size-6 text-[#94a3b8]" />
-                <p className="mt-3 text-sm font-semibold text-[#334155]">
+              <div className="rounded-2xl border border-dashed border-line bg-surface px-5 py-12 text-center">
+                <CreditCard className="mx-auto size-6 text-muted" />
+                <p className="mt-3 text-sm font-semibold text-ink-soft">
                   {plans.length === 0 ? "No plans are available right now" : "No plans match your filters"}
                 </p>
               </div>
@@ -868,51 +868,51 @@ export default function SubscriptionsPage() {
             }}
           >
             <DialogPrimitive.Portal>
-              <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/45 backdrop-blur-[2px]" />
-              <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-[#e4ecf2] bg-white p-5 shadow-2xl outline-none sm:p-7">
+              <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/45 backdrop-blur-[2px]" />
+              <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-line bg-surface p-5 shadow-2xl outline-none sm:p-7">
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-[#eff6ff] px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-primary">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-brand-strong">
                       <CreditCard className="size-3" />
                       Plan request
                     </span>
-                    <DialogPrimitive.Title className="mt-3 text-xl font-bold tracking-tight text-[#0f172a]">
+                    <DialogPrimitive.Title className="mt-3 text-xl font-bold tracking-tight text-ink">
                       Request subscription plan
                     </DialogPrimitive.Title>
-                    <DialogPrimitive.Description className="mt-1 text-xs leading-5 text-[#64748b]">
+                    <DialogPrimitive.Description className="mt-1 text-xs leading-5 text-muted">
                       Submit this plan to HASVIK admin for manual review and approval.
                     </DialogPrimitive.Description>
                   </div>
                   <DialogPrimitive.Close
                     aria-label="Close"
                     disabled={createMutation.isPending || statusMutation.isPending}
-                    className="rounded-lg p-2 text-[#64748b] transition-colors hover:bg-[#f1f5f9] disabled:opacity-50"
+                    className="rounded-lg p-2 text-muted transition-colors hover:bg-surface-2 disabled:opacity-50"
                   >
                     <X className="size-4" />
                   </DialogPrimitive.Close>
                 </div>
                 {chosenPlan && (
                   <form onSubmit={(event) => void submitSubscription(event)} className="space-y-5">
-                    <div className="rounded-xl border border-[#dbeafe] bg-[#f8fbff] p-4">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-slate-500">Selected plan</p>
-                      <p className="mt-1 text-base font-bold text-slate-900">{chosenPlan.name}</p>
-                      <p className="mt-1 text-sm font-semibold text-primary">
+                    <div className="rounded-xl border border-line bg-surface-2 p-4">
+                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted">Selected plan</p>
+                      <p className="mt-1 text-base font-bold text-ink">{chosenPlan.name}</p>
+                      <p className="mt-1 text-sm font-semibold text-brand-strong">
                         {formatPrice(chosenPlan.price, chosenPlan.currency)}
                       </p>
                       {chosenPlan.description && (
-                        <p className="mt-2 text-xs leading-5 text-slate-600">{chosenPlan.description}</p>
+                        <p className="mt-2 text-xs leading-5 text-ink-soft">{chosenPlan.description}</p>
                       )}
                     </div>
-                    <div className="flex items-start gap-2 rounded-xl border border-blue-100 bg-blue-50 p-3 text-[10px] leading-4 text-blue-950">
-                      <FileText className="mt-0.5 size-3.5 shrink-0 text-primary" />
+                    <div className="flex items-start gap-2 rounded-xl border border-brand-soft bg-brand-soft p-3 text-[10px] leading-4 text-brand-strong">
+                      <FileText className="mt-0.5 size-3.5 shrink-0 text-brand-strong" />
                       Payment is handled manually outside the CRM. Submitting creates a pending request; workspace access begins only after HASVIK admin approval.
                     </div>
                     {operationError && (
-                      <p role="alert" className="rounded-xl border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+                      <p role="alert" className="rounded-xl border border-bad/30 bg-bad-soft p-3 text-xs text-bad">
                         {operationError}
                       </p>
                     )}
-                    <div className="flex flex-col-reverse gap-2 border-t border-slate-100 pt-4 sm:flex-row sm:justify-end">
+                    <div className="flex flex-col-reverse gap-2 border-t border-surface-2 pt-4 sm:flex-row sm:justify-end">
                       <Button
                         type="button"
                         variant="outline"
@@ -931,7 +931,7 @@ export default function SubscriptionsPage() {
                           !createTenantId ||
                           !chosenPlanHasValidPrice
                         }
-                        className="rounded-xl bg-primary text-white"
+                        className="rounded-xl bg-btn text-white"
                       >
                         {createMutation.isPending && <LoaderCircle className="size-4 animate-spin" />}
                         {createMutation.isPending ? "Submitting…" : "Request plan"}
@@ -953,12 +953,12 @@ export default function SubscriptionsPage() {
             }}
           >
             <DialogPrimitive.Portal>
-              <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/45 backdrop-blur-[2px]" />
-              <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-[#e4ecf2] bg-white p-5 shadow-2xl outline-none sm:p-7">
-                <DialogPrimitive.Title className="text-lg font-bold text-slate-900">
+              <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/45 backdrop-blur-[2px]" />
+              <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 w-[calc(100%-2rem)] max-w-md -translate-x-1/2 -translate-y-1/2 rounded-2xl border border-line bg-surface p-5 shadow-2xl outline-none sm:p-7">
+                <DialogPrimitive.Title className="text-lg font-bold text-ink">
                   Cancel subscription?
                 </DialogPrimitive.Title>
-                <DialogPrimitive.Description className="mt-2 text-xs leading-5 text-slate-600">
+                <DialogPrimitive.Description className="mt-2 text-xs leading-5 text-ink-soft">
                   {subscriptionToCancel && (
                     <>
                       Cancel {typeof subscriptionToCancel.plan === "object"
@@ -968,7 +968,7 @@ export default function SubscriptionsPage() {
                               getPlanId(plan) === getReferenceId(subscriptionToCancel.planId),
                           )?.name ?? "this subscription"}
                       . The plan will remain active until{" "}
-                      <span className="font-semibold text-slate-900">
+                      <span className="font-semibold text-ink">
                         {formatDate(subscriptionToCancel.endDate)}
                       </span>
                       . Access will end after the current subscription period.
@@ -976,7 +976,7 @@ export default function SubscriptionsPage() {
                   )}
                 </DialogPrimitive.Description>
                 {operationError && (
-                  <p role="alert" className="mt-4 rounded-lg border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+                  <p role="alert" className="mt-4 rounded-lg border border-bad/30 bg-bad-soft p-3 text-xs text-bad">
                     {operationError}
                   </p>
                 )}
@@ -994,7 +994,7 @@ export default function SubscriptionsPage() {
                     type="button"
                     disabled={statusMutation.isPending}
                     onClick={() => void cancelSubscription()}
-                    className="rounded-xl bg-amber-700 text-white hover:bg-amber-800"
+                    className="rounded-xl bg-warn text-white hover:bg-warn"
                   >
                     {statusMutation.isPending && <LoaderCircle className="size-4 animate-spin" />}
                     {statusMutation.isPending ? "Cancelling…" : "Cancel at period end"}
@@ -1036,7 +1036,7 @@ export default function SubscriptionsPage() {
               if (manualVerificationConfirmed) void activate(id);
             }}
           >
-            <label className="mt-5 flex cursor-pointer items-start gap-3 border border-brand-green/20 bg-emerald-50/60 p-3.5">
+            <label className="mt-5 flex cursor-pointer items-start gap-3 border border-accent/20 bg-ok-soft/60 p-3.5">
               <Checkbox
                 checked={manualVerificationConfirmed}
                 onCheckedChange={(checked) =>
@@ -1044,17 +1044,17 @@ export default function SubscriptionsPage() {
                 }
                 className="mt-0.5"
               />
-              <span className="text-xs leading-5 text-slate-700">
-                <span className="block font-semibold text-slate-900">
+              <span className="text-xs leading-5 text-ink-soft">
+                <span className="block font-semibold text-ink">
                   Manual verification completed
                 </span>
-                <span className="block text-[10px] text-slate-500">
+                <span className="block text-[10px] text-muted">
                   I have verified payment or commercial approval outside the CRM.
                 </span>
               </span>
             </label>
             {operationError && (
-              <p role="alert" className="mt-3 border border-red-200 bg-red-50 p-3 text-xs text-red-800">
+              <p role="alert" className="mt-3 border border-bad/30 bg-bad-soft p-3 text-xs text-bad">
                 {operationError}
               </p>
             )}
@@ -1072,7 +1072,7 @@ export default function SubscriptionsPage() {
             onCancel={() => { setSuspensionChange(null); setOperationError(""); }}
             onConfirm={() => void changeSuspension()}
           >
-            {operationError && <p role="alert" className="text-sm text-red-700">{operationError}</p>}
+            {operationError && <p role="alert" className="text-sm text-bad">{operationError}</p>}
           </ManagementConfirmDialog>
 
           <ManagementConfirmDialog
@@ -1107,15 +1107,15 @@ export default function SubscriptionsPage() {
             }}
           >
             <div className="space-y-4">
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-ink-soft">
                 Renewal end date (optional)
-                <input type="date" value={renewalEndDate} onChange={(event) => setRenewalEndDate(event.target.value)} disabled={renewMutation.isPending} className="mt-2 block w-full border border-slate-300 p-2" />
+                <input type="date" value={renewalEndDate} onChange={(event) => setRenewalEndDate(event.target.value)} disabled={renewMutation.isPending} className="mt-2 block w-full border border-line p-2" />
               </label>
-              <label className="block text-sm font-medium text-slate-700">
+              <label className="block text-sm font-medium text-ink-soft">
                 Renewal notes (optional)
-                <textarea value={renewalNotes} onChange={(event) => setRenewalNotes(event.target.value)} maxLength={1000} disabled={renewMutation.isPending} className="mt-2 block w-full border border-slate-300 p-2" rows={3} />
+                <textarea value={renewalNotes} onChange={(event) => setRenewalNotes(event.target.value)} maxLength={1000} disabled={renewMutation.isPending} className="mt-2 block w-full border border-line p-2" rows={3} />
               </label>
-              {operationError && <p role="alert" className="text-sm text-red-700">{operationError}</p>}
+              {operationError && <p role="alert" className="text-sm text-bad">{operationError}</p>}
             </div>
           </ManagementConfirmDialog>
 

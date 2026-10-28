@@ -89,7 +89,7 @@ function StatusBadge({ active }: { active: boolean }) {
   return (
     <span
       className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-semibold ${
-        active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-600"
+        active ? "bg-ok-soft text-ok" : "bg-surface-2 text-ink-soft"
       }`}
     >
       {active ? "Active" : "Inactive"}
@@ -127,16 +127,16 @@ function SubscriptionSummary({
     plans.find((availablePlan) => getPlanId(availablePlan) === planId);
 
   if (!subscription) {
-    return <span className="text-xs text-slate-500">No active subscription</span>;
+    return <span className="text-xs text-muted">No active subscription</span>;
   }
 
   return (
     <div className="min-w-40">
-      <p className="flex items-center gap-1.5 text-xs font-semibold text-slate-800">
-        <CreditCard className="size-3.5 text-emerald-700" />
+      <p className="flex items-center gap-1.5 text-xs font-semibold text-ink">
+        <CreditCard className="size-3.5 text-ok" />
         {plan?.name ?? "Subscription plan"}
       </p>
-      <p className="mt-1 text-[10px] text-slate-500">
+      <p className="mt-1 text-[10px] text-muted">
         {subscription.endDate
           ? `Ends ${formatDate(subscription.endDate)}`
           : "End date not set"}
@@ -166,7 +166,7 @@ function TenantEditor({
   return (
     <form onSubmit={onSubmit} className="space-y-4">
       <label className="block space-y-1.5">
-        <span className="text-xs font-semibold text-slate-700">Organization name</span>
+        <span className="text-xs font-semibold text-ink-soft">Organization name</span>
         <Input
           value={draft.name}
           onChange={(event) => onChange({ ...draft, name: event.target.value })}
@@ -175,7 +175,7 @@ function TenantEditor({
         />
       </label>
       <label className="block space-y-1.5">
-        <span className="text-xs font-semibold text-slate-700">Contact email</span>
+        <span className="text-xs font-semibold text-ink-soft">Contact email</span>
         <Input
           type="email"
           value={draft.contactEmail}
@@ -186,7 +186,7 @@ function TenantEditor({
         />
       </label>
       <label className="block space-y-1.5">
-        <span className="text-xs font-semibold text-slate-700">Contact phone</span>
+        <span className="text-xs font-semibold text-ink-soft">Contact phone</span>
         <Input
           type="tel"
           value={draft.contactPhone}
@@ -197,11 +197,11 @@ function TenantEditor({
         />
       </label>
       {error && (
-        <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
+        <p role="alert" className="rounded-lg border border-bad/30 bg-bad-soft p-3 text-xs text-bad">
           {error}
         </p>
       )}
-      <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+      <div className="flex justify-end gap-2 border-t border-surface-2 pt-4">
         <Button type="button" variant="outline" disabled={saving} onClick={onCancel} className="rounded-lg">
           Cancel
         </Button>
@@ -357,7 +357,7 @@ export default function TenantManagementPage() {
               <SelectTrigger id="tenant-status-filter" size="sm" className="w-40 rounded-lg text-xs">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-surface">
                 <SelectItem value="ALL" className="text-xs">All statuses</SelectItem>
                 <SelectItem value="ACTIVE" className="text-xs">Active</SelectItem>
                 <SelectItem value="INACTIVE" className="text-xs">Inactive</SelectItem>
@@ -374,9 +374,9 @@ export default function TenantManagementPage() {
         showStats={showStats}
         stats={
           <KpiCards items={[
-              { label: "Tenants", value: activeCount + inactiveCount, icon: UsersRound, tone: "text-primary bg-blue-50" },
-              { label: "Active tenants", value: activeCount, icon: Check, tone: "text-emerald-700 bg-emerald-50" },
-              { label: "Inactive tenants", value: inactiveCount, icon: X, tone: "text-slate-600 bg-slate-100" },
+              { label: "Tenants", value: activeCount + inactiveCount, icon: UsersRound, tone: "text-brand-strong bg-brand-soft" },
+              { label: "Active tenants", value: activeCount, icon: Check, tone: "text-ok bg-ok-soft" },
+              { label: "Inactive tenants", value: inactiveCount, icon: X, tone: "text-ink-soft bg-surface-2" },
             ].map((item, index) => ({ ...item, tone: (["blue", "green", "slate"] as const)[index] }))} />
         }
         actions={
@@ -414,34 +414,34 @@ export default function TenantManagementPage() {
               onSortChange={changeSort}
             />
             {notice && (
-              <p role="status" className="border-b border-slate-100 px-4 py-3 text-xs text-slate-700">
+              <p role="status" className="border-b border-surface-2 px-4 py-3 text-xs text-ink-soft">
                 {notice}
               </p>
             )}
             {operationError && (
-              <p role="alert" className="border-b border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+              <p role="alert" className="border-b border-bad-soft bg-bad-soft px-4 py-3 text-xs text-bad">
                 {operationError}
               </p>
             )}
             {subscriptionsQuery.isError && (
-              <p role="alert" className="border-b border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+              <p role="alert" className="border-b border-bad-soft bg-bad-soft px-4 py-3 text-xs text-bad">
                 Subscription details couldn’t be loaded. {getApiErrorMessage(subscriptionsQuery.error)}
               </p>
             )}
             {plansQuery.isError && (
-              <p role="alert" className="border-b border-rose-100 bg-rose-50 px-4 py-3 text-xs text-rose-800">
+              <p role="alert" className="border-b border-bad-soft bg-bad-soft px-4 py-3 text-xs text-bad">
                 Plan details couldn’t be loaded. {getApiErrorMessage(plansQuery.error)}
               </p>
             )}
             {tenantsPending ? (
               <div className="flex min-h-44 items-center justify-center">
-                <LoaderCircle className="size-5 animate-spin text-primary" />
-                <span className="ml-2 text-sm text-slate-500">Loading tenants…</span>
+                <LoaderCircle className="size-5 animate-spin text-brand-strong" />
+                <span className="ml-2 text-sm text-muted">Loading tenants…</span>
               </div>
             ) : tenantsError ? (
               <div className="px-5 py-12 text-center">
-                <p role="alert" className="text-sm font-semibold text-slate-900">Tenants couldn’t be loaded</p>
-                <p className="mt-1 text-xs text-slate-500">{getApiErrorMessage(tenantsErrorValue)}</p>
+                <p role="alert" className="text-sm font-semibold text-ink">Tenants couldn’t be loaded</p>
+                <p className="mt-1 text-xs text-muted">{getApiErrorMessage(tenantsErrorValue)}</p>
                 <Button
                   variant="outline"
                   size="sm"
@@ -453,13 +453,13 @@ export default function TenantManagementPage() {
               </div>
             ) : pagedTenants.length === 0 ? (
               <div className="px-5 py-14 text-center">
-                <Building2 className="mx-auto size-7 text-slate-300" />
-                <p className="mt-3 text-sm font-semibold text-slate-800">
+                <Building2 className="mx-auto size-7 text-muted" />
+                <p className="mt-3 text-sm font-semibold text-ink">
                   {tenants.length === 0
                     ? "No tenants found"
                     : "No tenants match your filters"}
                 </p>
-                <p className="mt-1 text-xs text-slate-500">
+                <p className="mt-1 text-xs text-muted">
                   {tenants.length === 0
                     ? "Tenant workspaces will appear here when they are available."
                     : "Try another search or status filter."}
@@ -469,16 +469,16 @@ export default function TenantManagementPage() {
               <>
                 <DataTableMobileList>
                   {pagedTenants.map((tenant) => (
-                    <DataTableMobileCard key={tenant.id} className={isItemHighlighted(tenant.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : ""}>
+                    <DataTableMobileCard key={tenant.id} className={isItemHighlighted(tenant.id) ? "border-brand-strong bg-brand-soft/80 ring-2 ring-brand/20" : ""}>
                       <div className="flex items-start justify-between gap-3">
                         <div className="flex min-w-0 items-start gap-3">
-                          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-blue-50 text-primary">
+                          <span className="flex size-10 shrink-0 items-center justify-center rounded-xl bg-brand-soft text-brand-strong">
                             <Building2 className="size-4" />
                           </span>
                           <div className="min-w-0">
-                            <p className="truncate text-sm font-bold text-slate-900">{tenant.name}</p>
-                            <p className="mt-0.5 break-all text-xs text-slate-600">{tenant.contactEmail || "No contact email"}</p>
-                            <p className="mt-1 text-[11px] text-slate-500">{tenant.contactPhone || "No contact phone"}</p>
+                            <p className="truncate text-sm font-bold text-ink">{tenant.name}</p>
+                            <p className="mt-0.5 break-all text-xs text-ink-soft">{tenant.contactEmail || "No contact email"}</p>
+                            <p className="mt-1 text-[11px] text-muted">{tenant.contactPhone || "No contact phone"}</p>
                             <div className="mt-2"><StatusBadge active={tenant.isActive} /></div>
                           </div>
                         </div>
@@ -490,7 +490,7 @@ export default function TenantManagementPage() {
                           onToggle={() => setTenantToToggle(tenant)}
                         />
                       </div>
-                      <div className="mt-3 border-t border-slate-100 pt-3">
+                      <div className="mt-3 border-t border-surface-2 pt-3">
                         <SubscriptionSummary
                           subscription={getActiveSubscription(subscriptions, tenant.id)}
                           plans={plans}
@@ -502,31 +502,31 @@ export default function TenantManagementPage() {
                 <div data-layout-desktop>
                   <Table className="w-full min-w-[850px] text-left">
                     <TableHeader>
-                      <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
+                      <TableRow className="border-b border-surface-2 hover:bg-transparent">
                         <TableHead className="py-4 pl-6 pr-4">Workspace</TableHead>
                         <TableHead className="px-4 py-4">Contact</TableHead>
                         <TableHead className="px-4 py-4">Subscription</TableHead>
                         <TableHead className="px-4 py-4">Status</TableHead>
-                        <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right">Actions</TableHead>
+                        <TableHead className="sticky right-0 bg-surface-2 py-4 pl-4 pr-6 text-right">Actions</TableHead>
                       </TableRow>
                     </TableHeader>
-                    <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
+                    <TableBody className="divide-y divide-surface-2 text-sm text-ink-soft">
                       {pagedTenants.map((tenant) => (
-                        <TableRow key={tenant.id} className={`group border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(tenant.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
+                        <TableRow key={tenant.id} className={`group border-b border-surface-2 transition-colors duration-500 hover:bg-surface-2/80 ${isItemHighlighted(tenant.id) ? "bg-brand-soft ring-2 ring-inset ring-brand/25" : ""}`}>
                           <TableCell className="py-4 pl-6 pr-4">
                             <div className="flex items-center gap-3">
-                              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary">
+                              <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-btn/10 text-brand-strong">
                                 <Building2 className="size-4" />
                               </span>
                               <div className="min-w-0">
-                                <p className="truncate text-sm font-bold text-[#0f172a]">{tenant.name}</p>
-                                <p className="mt-0.5 text-xs text-[#64748b]">{tenant.fullName || "Workspace account"}</p>
+                                <p className="truncate text-sm font-bold text-ink">{tenant.name}</p>
+                                <p className="mt-0.5 text-xs text-muted">{tenant.fullName || "Workspace account"}</p>
                               </div>
                             </div>
                           </TableCell>
                           <TableCell className="px-4 py-4">
-                            <p className="text-xs text-slate-700">{tenant.contactEmail || "No contact email"}</p>
-                            <p className="mt-1 text-[11px] text-slate-500">{tenant.contactPhone || "No contact phone"}</p>
+                            <p className="text-xs text-ink-soft">{tenant.contactEmail || "No contact email"}</p>
+                            <p className="mt-1 text-[11px] text-muted">{tenant.contactPhone || "No contact phone"}</p>
                           </TableCell>
                           <TableCell className="px-4 py-4">
                             <SubscriptionSummary
@@ -535,7 +535,7 @@ export default function TenantManagementPage() {
                             />
                           </TableCell>
                           <TableCell className="px-4 py-4"><StatusBadge active={tenant.isActive} /></TableCell>
-                          <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
+                          <TableCell className="sticky right-0 bg-surface py-4 pl-4 pr-6 group-hover:bg-surface-2">
                             <TenantActions
                               tenant={tenant}
                               canManageTenants={hasvikAdmin || tenantAdmin}
@@ -572,13 +572,13 @@ export default function TenantManagementPage() {
         }}
       >
         <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
-          <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px]" />
+          <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-line bg-surface p-5 shadow-2xl outline-none sm:p-6">
             <div className="mb-5">
-              <DialogPrimitive.Title className="text-lg font-bold text-slate-900">
+              <DialogPrimitive.Title className="text-lg font-bold text-ink">
                 Edit workspace details
               </DialogPrimitive.Title>
-              <DialogPrimitive.Description className="mt-1 text-xs leading-5 text-slate-500">
+              <DialogPrimitive.Description className="mt-1 text-xs leading-5 text-muted">
                 Update the organization name and contact information.
               </DialogPrimitive.Description>
             </div>

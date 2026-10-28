@@ -112,12 +112,12 @@ function NextFollowUpForm({
 
   return (
     <>
-      <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
+      <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6">
         <div>
-          <DialogPrimitive.Title className="text-lg font-bold text-[#0f172a]">
+          <DialogPrimitive.Title className="text-lg font-bold text-ink">
             Schedule Next Follow-Up
           </DialogPrimitive.Title>
-          <DialogPrimitive.Description className="mt-1 text-xs text-[#64748b]">
+          <DialogPrimitive.Description className="mt-1 text-xs text-muted">
             Set up the next touchpoint for this completed follow-up.
           </DialogPrimitive.Description>
         </div>
@@ -125,31 +125,31 @@ function NextFollowUpForm({
           <button
             type="button"
             aria-label="Close dialog"
-            className="border border-transparent p-1.5 text-[#64748b] hover:border-slate-200 hover:bg-[#f1f5f9]"
+            className="border border-transparent p-1.5 text-muted hover:border-line hover:bg-surface-2"
           >
             <X className="size-4" />
           </button>
         </DialogPrimitive.Close>
       </header>
 
-      {readOnly && <p className="px-5 pb-5 text-xs text-slate-500">An active business is required to schedule another follow-up.</p>}
+      {readOnly && <p className="px-5 pb-5 text-xs text-muted">An active business is required to schedule another follow-up.</p>}
       {!readOnly && <form
         onSubmit={handleSubmit(submit)}
         noValidate
         className="space-y-5 px-5 sm:px-6"
       >
         <div>
-          <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
+          <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
             Business
           </label>
           <div className="relative">
-            <Search className="pointer-events-none absolute left-3 top-3 size-4 text-[#94a3b8]" />
+            <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted" />
             <Input
               readOnly
               tabIndex={-1}
               value={followUp.businessName}
               title="Business name is prefilled from the completed follow-up"
-              className="h-10 w-full cursor-not-allowed border-[#e2e8f0] bg-[#f8fafc] pl-9 text-xs font-medium text-[#0f172a] select-none focus-visible:ring-0"
+              className="h-10 w-full cursor-not-allowed border-line bg-surface-2 pl-9 text-xs font-medium text-ink select-none focus-visible:ring-0"
             />
           </div>
         </div>
@@ -158,9 +158,9 @@ function NextFollowUpForm({
           <div>
             <label
               htmlFor="next-follow-up-date"
-              className="mb-1.5 block text-xs font-semibold text-[#475569]"
+              className="mb-1.5 block text-xs font-semibold text-ink-soft"
             >
-              Date &amp; Time <span className="text-red-500">*</span>
+              Date &amp; Time <span className="text-bad">*</span>
             </label>
             <Controller
               control={control}
@@ -179,14 +179,14 @@ function NextFollowUpForm({
               )}
             />
             {errors.scheduledAt && (
-              <p role="alert" className="mt-1 text-xs text-red-600">
+              <p role="alert" className="mt-1 text-xs text-bad">
                 {errors.scheduledAt.message}
               </p>
             )}
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-              Assigned to <span className="text-red-500">*</span>
+            <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
+              Assigned to <span className="text-bad">*</span>
             </label>
             <Controller
               control={control}
@@ -205,7 +205,7 @@ function NextFollowUpForm({
               )}
             />
             {errors.assignee && (
-              <p role="alert" className="mt-1 text-xs text-red-600">
+              <p role="alert" className="mt-1 text-xs text-bad">
                 {errors.assignee.message}
               </p>
             )}
@@ -214,8 +214,8 @@ function NextFollowUpForm({
 
         <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-              Type <span className="text-red-500">*</span>
+            <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
+              Type <span className="text-bad">*</span>
             </label>
             <Controller
               control={control}
@@ -231,13 +231,13 @@ function NextFollowUpForm({
               )}
             />
             {errors.type && (
-              <p role="alert" className="mt-1 text-xs text-red-600">
+              <p role="alert" className="mt-1 text-xs text-bad">
                 {errors.type.message}
               </p>
             )}
           </div>
           <div>
-            <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
+            <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
               Reminder
             </label>
             <Controller
@@ -259,7 +259,7 @@ function NextFollowUpForm({
           </div>
         </div>
 
-        <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6">
+        <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-line bg-surface px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6">
           <DialogPrimitive.Close asChild>
             <Button type="button" variant="outline">
               Cancel
@@ -292,8 +292,8 @@ export default function NextFollowUpDialog({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-slate-200 bg-white shadow-2xl outline-none">
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/35 backdrop-blur-[2px]" />
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-line bg-surface shadow-2xl outline-none">
           <NextFollowUpForm
             key={`next-${followUp.id}`}
             followUp={followUp}

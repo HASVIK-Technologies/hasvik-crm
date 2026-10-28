@@ -47,16 +47,16 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
 
   return (
     <div className="space-y-5">
-      <section aria-labelledby="follow-up-heading" className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
-        <div className="flex flex-col justify-between gap-4 border-b border-[#e8eef4] p-4 sm:flex-row sm:items-center sm:p-6 sm:px-7">
+      <section aria-labelledby="follow-up-heading" className="overflow-hidden border border-line bg-surface shadow-card">
+        <div className="flex flex-col justify-between gap-4 border-b border-line p-4 sm:flex-row sm:items-center sm:p-6 sm:px-7">
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-            <Avatar aria-hidden="true" className="size-13 shrink-0 rounded-xl sm:size-16 sm:rounded-2xl"><AvatarFallback className="bg-primary/10 text-base font-semibold text-primary sm:text-xl">{initials}</AvatarFallback></Avatar>
+            <Avatar aria-hidden="true" className="size-13 shrink-0 rounded-xl sm:size-16 sm:rounded-2xl"><AvatarFallback className="bg-btn/10 text-base font-semibold text-brand-strong sm:text-xl">{initials}</AvatarFallback></Avatar>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                <h1 id="follow-up-heading" className="break-words text-lg font-bold tracking-tight text-slate-900 sm:text-2xl [overflow-wrap:anywhere]">{businessName}</h1>
+                <h1 id="follow-up-heading" className="break-words text-lg font-bold tracking-tight text-ink sm:text-2xl [overflow-wrap:anywhere]">{businessName}</h1>
                 <StatusBadge status={followUp.status} />
               </div>
-              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 sm:text-sm"><CalendarClock className="size-4 shrink-0 text-slate-400" /><span>{formatFollowUpType(followUp.type)} follow-up</span>{city && <><span aria-hidden="true">?</span><span>{city}</span></>}</p>
+              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted sm:text-sm"><CalendarClock className="size-4 shrink-0 text-muted" /><span>{formatFollowUpType(followUp.type)} follow-up</span>{city && <><span aria-hidden="true">?</span><span>{city}</span></>}</p>
               {followUp.businessId && <RecordLink href={`/businesses/${followUp.businessId}`} className="mt-2 inline-block text-xs font-semibold">View business details</RecordLink>}
             </div>
           </div>
@@ -79,7 +79,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
 
       <section aria-label="Follow-up workspace" className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-6">
-          <div className="[&>section]:rounded-none [&>section]:border-[#e4ecf2] [&>section]:shadow-[0_4px_20px_rgba(20,40,60,0.03)]"><FollowUpNotes key={followUp.id} followUpId={followUp.id} readOnly={!businessData || isInactive || isFollowUpReadOnly(followUp)} /></div>
+          <div className="[&>section]:rounded-xl [&>section]:border-line [&>section]:shadow-card"><FollowUpNotes key={followUp.id} followUpId={followUp.id} readOnly={!businessData || isInactive || isFollowUpReadOnly(followUp)} /></div>
           <EntityActivity entityType="FOLLOWUP" entityId={followUp.id} />
         </div>
         <aside aria-label="Follow-up reference information" className="min-w-0 space-y-6">
@@ -93,9 +93,9 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
 
 function SummaryItem({ icon, label, children }: { icon: ReactNode; label: string; children: ReactNode }) {
   return (
-    <div className="min-w-0 rounded-xl bg-slate-50/80 p-3.5">
-      <dt className="flex items-center gap-2 text-xs text-slate-500"><span aria-hidden="true" className="text-slate-400">{icon}</span>{label}</dt>
-      <dd className="mt-2 break-words text-sm font-semibold text-slate-900">{children}</dd>
+    <div className="min-w-0 rounded-xl bg-surface-2/80 p-3.5">
+      <dt className="flex items-center gap-2 text-xs text-muted"><span aria-hidden="true" className="text-muted">{icon}</span>{label}</dt>
+      <dd className="mt-2 break-words text-sm font-semibold text-ink">{children}</dd>
     </div>
   );
 }

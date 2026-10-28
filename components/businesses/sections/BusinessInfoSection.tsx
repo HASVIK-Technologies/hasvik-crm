@@ -175,7 +175,7 @@ export default function BusinessInfoSection({
           })}
         />
         {errors.locationUrl && (
-          <p role="alert" className="mt-1 text-xs text-red-600">
+          <p role="alert" className="mt-1 text-xs text-bad">
             {errors.locationUrl.message}
           </p>
         )}

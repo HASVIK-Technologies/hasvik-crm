@@ -15,7 +15,7 @@ export default function WhatsAppButton({ whatsapps }: WhatsAppProps) {
 
   if (whatsapps.length === 1) {
     return (
-      <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10">
+      <OutlinedButton asChild className="h-9 w-9 p-0 flex items-center justify-center text-accent-strong border-line hover:bg-surface-2/10">
         <a href={`https://wa.me/91${cleanNumber(whatsapps[0].number)}`} target="_blank" rel="noopener noreferrer">
           <WhatsAppIcon className="h-4 w-4" />
         </a>
@@ -26,7 +26,7 @@ export default function WhatsAppButton({ whatsapps }: WhatsAppProps) {
   return (
     <DropdownMenu>
       <DropdownMenuTrigger asChild>
-        <OutlinedButton className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10">
+        <OutlinedButton className="h-9 w-9 p-0 flex items-center justify-center text-accent-strong border-line hover:bg-surface-2/10">
           <WhatsAppIcon className="h-4 w-4" />
         </OutlinedButton>
       </DropdownMenuTrigger>

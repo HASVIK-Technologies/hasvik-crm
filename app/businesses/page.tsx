@@ -224,12 +224,12 @@ function BusinessesContent() {
       stats={<BusinessStats stats={kpiData} isLoading={isKpisLoading} />}
       content={
         isListError ? (
-          <div className="rounded-2xl border border-red-200 bg-red-50 p-12 text-center text-sm text-red-700">
+          <div className="rounded-2xl border border-bad/30 bg-bad-soft p-12 text-center text-sm text-bad">
             Unable to load businesses from API.
             <button
               type="button"
               onClick={() => refetchList()}
-              className="ml-2 font-semibold underline hover:text-red-800"
+              className="ml-2 font-semibold underline hover:text-bad"
             >
               Try again
             </button>
@@ -273,7 +273,7 @@ export default function BusinessesPage() {
   return (
     <Suspense
       fallback={
-        <div className="flex h-64 items-center justify-center text-sm text-[#64748b]">
+        <div className="flex h-64 items-center justify-center text-sm text-muted">
           Loading businesses...
         </div>
       }

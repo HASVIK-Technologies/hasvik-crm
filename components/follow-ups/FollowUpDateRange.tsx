@@ -45,10 +45,10 @@ export default function FollowUpDateRange({
       <PopoverTrigger asChild>
         <button
           type="button"
-          className="flex h-10 w-full items-center justify-between border border-slate-300 bg-white px-3 text-left text-xs font-medium text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] hover:border-slate-400 focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/15"
+          className="flex h-10 w-full items-center justify-between border border-line bg-surface px-3 text-left text-xs font-medium text-ink-soft shadow-card hover:border-muted focus-visible:border-brand-strong focus-visible:ring-2 focus-visible:ring-brand/15"
         >
           <span className="flex min-w-0 items-center gap-2">
-            <CalendarDays className="size-3.5 shrink-0 text-[#64748b]" />
+            <CalendarDays className="size-3.5 shrink-0 text-muted" />
             <span className="truncate">
               {from || to
                 ? `${display(from) || "Start"} - ${display(to) || "End"}`
@@ -60,11 +60,11 @@ export default function FollowUpDateRange({
       </PopoverTrigger>
       <PopoverContent
         align="end"
-        collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto space-y-4 border border-slate-200 bg-white p-3 shadow-xl"
+        collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto space-y-4 border border-line bg-surface p-3 shadow-xl"
       >
         <div>
-          <p className="text-xs font-bold text-slate-900">Date range</p>
-          <p className="mt-0.5 text-[10px] text-slate-500">Use a shortcut or choose exact dates.</p>
+          <p className="text-xs font-bold text-ink">Date range</p>
+          <p className="mt-0.5 text-[10px] text-muted">Use a shortcut or choose exact dates.</p>
         </div>
         <div className="grid grid-cols-3 gap-1.5">
           {[
@@ -100,14 +100,14 @@ export default function FollowUpDateRange({
               key={preset.label}
               type="button"
               onClick={() => onChange(...preset.range())}
-              className="h-8 border border-slate-200 bg-slate-50 px-2 text-[10px] font-semibold text-slate-600 hover:border-brand-blue hover:bg-blue-50 hover:text-brand-blue"
+              className="h-8 border border-line bg-surface-2 px-2 text-[10px] font-semibold text-ink-soft hover:border-brand-strong hover:bg-brand-soft hover:text-brand-strong"
             >
               {preset.label}
             </button>
           ))}
         </div>
         <Calendar mode="range" defaultMonth={fromDate} selected={fromDate ? { from: fromDate, to: toDate } : undefined} onSelect={(range) => onChange(range?.from ? inputDate(range.from) : "", range?.to ? inputDate(range.to) : "")} />
-        <button type="button" onClick={() => onChange("", "")} className="h-9 w-full rounded-lg border border-slate-200 text-xs font-semibold text-slate-600 hover:bg-slate-50">Clear dates</button>
+        <button type="button" onClick={() => onChange("", "")} className="h-9 w-full rounded-lg border border-line text-xs font-semibold text-ink-soft hover:bg-surface-2">Clear dates</button>
       </PopoverContent>
     </Popover>
   );

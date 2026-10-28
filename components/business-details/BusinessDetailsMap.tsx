@@ -19,21 +19,21 @@ export default function BusinessDetailsMap({ business }: MapProps) {
 
   if (!locationData.isAvailable || !locationData.embedSrc) {
     return (
-      <div className="bg-white border border-slate-200 p-6 shadow-sm">
+      <div className="bg-surface border border-line p-6 shadow-sm">
         <div className="flex items-center justify-between mb-4">
-          <h3 className="text-lg font-bold text-slate-800">Location</h3>
+          <h3 className="text-lg font-bold text-ink">Location</h3>
         </div>
-        <div className="bg-slate-50 rounded-lg h-60 flex flex-col items-center justify-center border border-slate-200 text-slate-400 gap-2">
-          <MapPin className="w-8 h-8 text-slate-300" />
-          <p className="text-sm font-medium text-slate-500">Location not available</p>
+        <div className="bg-surface-2 rounded-lg h-60 flex flex-col items-center justify-center border border-line text-muted gap-2">
+          <MapPin className="w-8 h-8 text-muted" />
+          <p className="text-sm font-medium text-muted">Location not available</p>
         </div>
       </div>
     );
   }
 
   return (
-    <div className="bg-white border border-slate-200 p-2 shadow-sm">
-      <div className="bg-slate-100 rounded-lg h-90 relative overflow-hidden border border-slate-200">
+    <div className="bg-surface border border-line p-2 shadow-sm">
+      <div className="bg-surface-2 rounded-lg h-90 relative overflow-hidden border border-line">
         <iframe
           src={locationData.embedSrc}
           width="100%"

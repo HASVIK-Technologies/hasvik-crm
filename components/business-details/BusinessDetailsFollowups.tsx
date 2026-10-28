@@ -135,18 +135,18 @@ export default function BusinessDetailsFollowups({
   };
 
   if (isLoading) {
-    return <div className="p-6 text-slate-500">Loading follow-ups...</div>;
+    return <div className="p-6 text-muted">Loading follow-ups...</div>;
   }
   if (isError) {
-    return <div className="p-6 text-red-500">Failed to load follow-ups.</div>;
+    return <div className="p-6 text-bad">Failed to load follow-ups.</div>;
   }
 
   return (
     <>
-      <div className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
-        <div className="flex flex-col gap-1 border-b border-slate-100 px-5 py-4 sm:px-6">
-          <h3 className="text-base font-bold text-slate-900">Follow-up history</h3>
-          <p className="text-xs text-slate-500">
+      <div className="overflow-hidden border border-line bg-surface shadow-card">
+        <div className="flex flex-col gap-1 border-b border-surface-2 px-5 py-4 sm:px-6">
+          <h3 className="text-base font-bold text-ink">Follow-up history</h3>
+          <p className="text-xs text-muted">
             Review scheduled touchpoints, notes, and assigned owners.
           </p>
         </div>
@@ -158,10 +158,10 @@ export default function BusinessDetailsFollowups({
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
                 <TableHead>Assigned to</TableHead>
-                <TableHead className="sticky right-0 bg-slate-50 pr-6 text-right">Actions</TableHead>
+                <TableHead className="sticky right-0 bg-surface-2 pr-6 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-slate-100 text-sm text-slate-700">
+            <TableBody className="divide-y divide-surface-2 text-sm text-ink-soft">
               {followUps.map((item) => {
                 return (
                   <TableRow
@@ -170,13 +170,13 @@ export default function BusinessDetailsFollowups({
                     aria-label={`Open follow-up details for ${formatScheduledAt(item.scheduledAt)}`}
                     onClick={(event) => handleRowClick(event, item.id)}
                     onKeyDown={(event) => handleRowKeyDown(event, item.id)}
-                    className="group cursor-pointer transition-colors hover:bg-slate-50/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40"
+                    className="group cursor-pointer transition-colors hover:bg-surface-2/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand/40"
                   >
-                    <TableCell className="whitespace-nowrap pl-6 font-medium text-slate-900">
+                    <TableCell className="whitespace-nowrap pl-6 font-medium text-ink">
                       {formatScheduledAt(item.scheduledAt)}
                     </TableCell>
                     <TableCell>
-                      <span className="inline-flex border border-slate-200 bg-slate-50 px-2 py-1 text-xs font-medium text-slate-700">
+                      <span className="inline-flex border border-line bg-surface-2 px-2 py-1 text-xs font-medium text-ink-soft">
                         {formatFollowUpType(item.type)}
                       </span>
                     </TableCell>
@@ -186,10 +186,10 @@ export default function BusinessDetailsFollowups({
                         className="rounded-md px-2.5 py-0.5 text-[10px]"
                       />
                     </TableCell>
-                    <TableCell className="text-sm text-slate-600">
+                    <TableCell className="text-sm text-ink-soft">
                       {item.assignedToName || "Unassigned"}
                     </TableCell>
-                    <TableCell className="sticky right-0 bg-white pr-6 group-hover:bg-slate-50" onClick={(e) => e.stopPropagation()}>
+                    <TableCell className="sticky right-0 bg-surface pr-6 group-hover:bg-surface-2" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                         <Tooltip>
                           <TooltipTrigger asChild>
@@ -200,7 +200,7 @@ export default function BusinessDetailsFollowups({
                                 e.stopPropagation();
                                 setNotesFollowUp(item);
                               }}
-                              className="inline-flex size-8 items-center justify-center border border-transparent text-brand-blue transition-colors hover:bg-blue-50 focus-visible:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/20"
+                              className="inline-flex size-8 items-center justify-center border border-transparent text-brand-strong transition-colors hover:bg-brand-soft focus-visible:border-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20"
                             >
                               <MessageSquareText className="size-4" />
                             </button>
@@ -212,19 +212,19 @@ export default function BusinessDetailsFollowups({
                             <button
                               type="button"
                               aria-label={`Actions for follow-up on ${formatScheduledAt(item.scheduledAt)}`}
-                              className="flex size-8 items-center justify-center border border-transparent text-slate-500 outline-none hover:bg-slate-100 hover:text-slate-800"
+                              className="flex size-8 items-center justify-center border border-transparent text-muted outline-none hover:bg-surface-2 hover:text-ink"
                             >
                               <MoreVertical className="size-4" />
                             </button>
                           </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                           <DropdownMenuContent
                             align="end"
-                            className="w-48 rounded-xl border border-slate-200 bg-white p-1.5 shadow-lg"
+                            className="w-48 rounded-xl border border-line bg-surface p-1.5 shadow-lg"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <DropdownMenuItem
                               asChild
-                              className="cursor-pointer gap-2 p-2 text-xs font-medium text-slate-700"
+                              className="cursor-pointer gap-2 p-2 text-xs font-medium text-ink-soft"
                             >
                               <Link href={`/follow-ups/${item.id}`} className="flex items-center gap-2">
                                 <Eye className="size-3.5" /> <span>View Details</span>
@@ -232,7 +232,7 @@ export default function BusinessDetailsFollowups({
                             </DropdownMenuItem>
                             {canEditFollowUp(item) && (
                               <DropdownMenuItem
-                                className="cursor-pointer gap-2 p-2 text-xs font-medium text-slate-700"
+                                className="cursor-pointer gap-2 p-2 text-xs font-medium text-ink-soft"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   openFollowUpModal(businessId, item);
@@ -244,7 +244,7 @@ export default function BusinessDetailsFollowups({
                             )}
                             {canCompleteFollowUp(item) && (
                               <DropdownMenuItem
-                                className="cursor-pointer gap-2 p-2 text-xs font-medium text-brand-green-strong"
+                                className="cursor-pointer gap-2 p-2 text-xs font-medium text-accent-strong"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   void completeFollowUp(item);
@@ -257,7 +257,7 @@ export default function BusinessDetailsFollowups({
                             )}
                             {canCreateNextFollowUp(item) && (
                               <DropdownMenuItem
-                                className="cursor-pointer gap-2 p-2 text-xs font-medium text-brand-green-strong"
+                                className="cursor-pointer gap-2 p-2 text-xs font-medium text-accent-strong"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   openFollowUpModal(businessId);
@@ -269,7 +269,7 @@ export default function BusinessDetailsFollowups({
                             )}
                             {canCancelFollowUp(item) && (
                               <DropdownMenuItem
-                                className="mt-1 cursor-pointer gap-2 p-2 text-xs font-medium text-red-600 focus:bg-red-50 focus:text-red-700"
+                                className="mt-1 cursor-pointer gap-2 p-2 text-xs font-medium text-bad focus:bg-bad-soft focus:text-bad"
                                 onClick={(e) => {
                                   e.stopPropagation();
                                   setCancellingFollowUp(item);
@@ -290,7 +290,7 @@ export default function BusinessDetailsFollowups({
                 <TableRow>
                   <TableCell
                     colSpan={5}
-                    className="px-5 py-12 text-center text-sm text-slate-500"
+                    className="px-5 py-12 text-center text-sm text-muted"
                   >
                     No follow-ups yet. Add a follow-up to start tracking the next touchpoint.
                   </TableCell>

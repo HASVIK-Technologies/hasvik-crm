@@ -84,7 +84,7 @@ export default function SearchWithSuggestions({
 
   return (
     <div className={cn("relative flex items-center w-full", wrapperClassName)}>
-      <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-[#94a3b8]" />
+      <Search className="pointer-events-none absolute left-3.5 top-1/2 size-4 -translate-y-1/2 text-muted" />
 
       <input
         ref={inputRef}
@@ -94,21 +94,21 @@ export default function SearchWithSuggestions({
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
         className={cn(
-          "h-10 w-full border border-slate-300 bg-white pl-10 pr-9 text-xs sm:text-sm text-slate-900 shadow-[0_1px_2px_rgba(15,23,42,0.05)] placeholder:text-slate-400 transition-all hover:border-slate-400 focus:border-brand-blue focus:outline-none focus:ring-2 focus:ring-brand-blue/15",
-          Boolean(inputValue) && "border-primary/40",
+          "h-10 w-full border border-line bg-surface pl-10 pr-9 text-xs sm:text-sm text-ink shadow-card placeholder:text-muted transition-all hover:border-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand/15",
+          Boolean(inputValue) && "border-brand/40",
           className,
         )}
       />
 
       <div className="absolute right-3 top-1/2 -translate-y-1/2 flex items-center gap-1">
         {isSearching && (
-          <Loader2 className="size-3.5 animate-spin text-primary" />
+          <Loader2 className="size-3.5 animate-spin text-brand-strong" />
         )}
         {inputValue && (
           <button
             type="button"
             onClick={handleClear}
-            className="rounded p-1 text-[#94a3b8] hover:bg-[#f1f5f9] hover:text-[#0f172a] transition-colors"
+            className="rounded p-1 text-muted hover:bg-surface-2 hover:text-ink transition-colors"
             title="Clear search"
           >
             <X className="size-3.5" />

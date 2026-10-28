@@ -165,14 +165,14 @@ export default function FollowUpFormDialog({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-[#0f172a]/35 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-slate-200 bg-white shadow-2xl outline-none">
-          <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-slate-200 bg-white px-5 py-4 sm:px-6">
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/35 backdrop-blur-[2px]" />
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-line bg-surface shadow-2xl outline-none">
+          <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6">
             <div>
-              <DialogPrimitive.Title className="text-lg font-bold text-[#0f172a]">
+              <DialogPrimitive.Title className="text-lg font-bold text-ink">
                 {isEdit ? "Edit follow-up" : "Add Follow-up"}
               </DialogPrimitive.Title>
-              <DialogPrimitive.Description className="mt-1 text-xs text-[#64748b]">
+              <DialogPrimitive.Description className="mt-1 text-xs text-muted">
                 {isEdit
                   ? "Update the schedule, assignee, and reminder."
                   : "Schedule the next touchpoint for a business."}
@@ -182,26 +182,26 @@ export default function FollowUpFormDialog({
               <button
                 type="button"
                 aria-label="Close dialog"
-                className="border border-transparent p-1.5 text-[#64748b] hover:border-slate-200 hover:bg-[#f1f5f9]"
+                className="border border-transparent p-1.5 text-muted hover:border-line hover:bg-surface-2"
               >
                 <X className="size-4" />
               </button>
             </DialogPrimitive.Close>
           </header>
-          {inactiveSelection && <p role="status" className="mx-5 mb-4 border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">This business is inactive. Activate it from business details before making changes.</p>}
+          {inactiveSelection && <p role="status" className="mx-5 mb-4 border border-warn/30 bg-warn-soft p-3 text-xs text-warn">This business is inactive. Activate it from business details before making changes.</p>}
           {!inactiveSelection && <form onSubmit={handleSubmit(submit)} noValidate className="space-y-5 px-5 sm:px-6">
             <div>
-              <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                Business {!isEdit && !initialBusiness && <span className="text-red-500">*</span>}
+              <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
+                Business {!isEdit && !initialBusiness && <span className="text-bad">*</span>}
               </label>
               {isEdit || initialBusiness ? (
                 <div className="relative">
-                  <Search className="pointer-events-none absolute left-3 top-3 size-4 text-[#94a3b8]" />
+                  <Search className="pointer-events-none absolute left-3 top-3 size-4 text-muted" />
                   <Input
                     readOnly
                     tabIndex={-1}
                     value={isEdit ? followUp?.businessName ?? "" : initialBusiness?.label ?? ""}
-                    className="h-10 w-full cursor-not-allowed border-[#e2e8f0] bg-[#f8fafc] pl-9 text-xs font-medium text-[#0f172a] select-none focus-visible:ring-0"
+                    className="h-10 w-full cursor-not-allowed border-line bg-surface-2 pl-9 text-xs font-medium text-ink select-none focus-visible:ring-0"
                   />
                 </div>
               ) : (
@@ -221,14 +221,14 @@ export default function FollowUpFormDialog({
                       />
                     )}
                   />
-                  {errors.business && <p role="alert" className="mt-1 text-xs text-red-600">{errors.business.message}</p>}
+                  {errors.business && <p role="alert" className="mt-1 text-xs text-bad">{errors.business.message}</p>}
                 </>
               )}
             </div>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                  Date &amp; Time <span className="text-red-500">*</span>
+                <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
+                  Date &amp; Time <span className="text-bad">*</span>
                 </label>
                 <Controller
                   control={control}
@@ -246,11 +246,11 @@ export default function FollowUpFormDialog({
                     />
                   )}
                 />
-                {errors.scheduledAt && <p role="alert" className="mt-1 text-xs text-red-600">{errors.scheduledAt.message}</p>}
+                {errors.scheduledAt && <p role="alert" className="mt-1 text-xs text-bad">{errors.scheduledAt.message}</p>}
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                  Assigned to <span className="text-red-500">*</span>
+                <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
+                  Assigned to <span className="text-bad">*</span>
                 </label>
                 <Controller
                   control={control}
@@ -265,13 +265,13 @@ export default function FollowUpFormDialog({
                     />
                   )}
                 />
-                {errors.assignee && <p role="alert" className="mt-1 text-xs text-red-600">{errors.assignee.message}</p>}
+                {errors.assignee && <p role="alert" className="mt-1 text-xs text-bad">{errors.assignee.message}</p>}
               </div>
             </div>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                  Type <span className="text-red-500">*</span>
+                <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
+                  Type <span className="text-bad">*</span>
                 </label>
                 <Controller
                   control={control}
@@ -286,10 +286,10 @@ export default function FollowUpFormDialog({
                     />
                   )}
                 />
-                {errors.type && <p role="alert" className="mt-1 text-xs text-red-600">{errors.type.message}</p>}
+                {errors.type && <p role="alert" className="mt-1 text-xs text-bad">{errors.type.message}</p>}
               </div>
               <div>
-                <label className="mb-1.5 block text-xs font-semibold text-[#475569]">Reminder</label>
+                <label className="mb-1.5 block text-xs font-semibold text-ink-soft">Reminder</label>
                 <Controller
                   control={control}
                   name="reminder"
@@ -306,7 +306,7 @@ export default function FollowUpFormDialog({
                 />
               </div>
             </div>
-            <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-slate-200 bg-white px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6">
+            <footer className="sticky bottom-0 z-10 -mx-5 flex flex-col-reverse justify-end gap-2 border-t border-line bg-surface px-5 py-4 sm:-mx-6 sm:flex-row sm:px-6">
               <DialogPrimitive.Close asChild>
                 <Button type="button" variant="outline">Cancel</Button>
               </DialogPrimitive.Close>

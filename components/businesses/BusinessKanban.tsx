@@ -153,11 +153,11 @@ export default function BusinessKanban({
   };
 
   return (
-    <div className="border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
-      <div className="flex flex-col gap-3 border-b border-slate-100 p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
+    <div className="border border-line bg-surface shadow-card">
+      <div className="flex flex-col gap-3 border-b border-surface-2 p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
         <div className="min-w-0">
-          <h2 className="text-lg font-bold tracking-tight text-slate-900">
-            Sales pipeline <span className="font-medium text-slate-500">({totalCount})</span>
+          <h2 className="text-lg font-bold tracking-tight text-ink">
+            Sales pipeline <span className="font-medium text-muted">({totalCount})</span>
           </h2>
         </div>
         <DropdownMenu>
@@ -168,15 +168,15 @@ export default function BusinessKanban({
               <ChevronDown className="size-3.5" />
             </OutlinedButton>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-40 bg-white">
-            <DropdownMenuItem onSelect={() => onSortOrderChange("-createdAt")} className={cn("text-xs", isLatest && "font-semibold text-primary")}>Latest First</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onSortOrderChange("+createdAt")} className={cn("text-xs", !isLatest && "font-semibold text-primary")}>Oldest First</DropdownMenuItem>
+          <DropdownMenuContent align="end" className="w-40 bg-surface">
+            <DropdownMenuItem onSelect={() => onSortOrderChange("-createdAt")} className={cn("text-xs", isLatest && "font-semibold text-brand-strong")}>Latest First</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onSortOrderChange("+createdAt")} className={cn("text-xs", !isLatest && "font-semibold text-brand-strong")}>Oldest First</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>
 
-      <div className="sticky top-[81px] z-10 hidden overflow-hidden bg-slate-50/95 md:block">
-        <div className="flex h-9 items-center justify-between border-b border-slate-200 bg-white px-2">
+      <div className="sticky top-[81px] z-10 hidden overflow-hidden bg-surface-2/95 md:block">
+        <div className="flex h-9 items-center justify-between border-b border-line bg-surface px-2">
           <Tooltip>
             <TooltipTrigger asChild>
               <button
@@ -184,14 +184,14 @@ export default function BusinessKanban({
                 aria-label="Scroll pipeline left"
                 disabled={!canScrollLeft}
                 onClick={() => scrollPipeline("left")}
-                className="flex size-7 items-center justify-center border border-slate-200 bg-white text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 disabled:cursor-not-allowed disabled:border-slate-100 disabled:bg-slate-50 disabled:text-slate-300"
+                className="flex size-7 items-center justify-center border border-line bg-surface text-ink-soft transition-colors hover:border-line hover:bg-surface-2 hover:text-ink disabled:cursor-not-allowed disabled:border-surface-2 disabled:bg-surface-2 disabled:text-muted"
               >
                 <ChevronLeft className="size-4" />
               </button>
             </TooltipTrigger>
             <TooltipContent>Previous stages</TooltipContent>
           </Tooltip>
-          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-slate-400">
+          <span className="text-[11px] font-semibold uppercase tracking-[0.12em] text-muted">
             Click arrows to scroll horizontally
           </span>
           <Tooltip>
@@ -201,7 +201,7 @@ export default function BusinessKanban({
                 aria-label="Scroll pipeline right"
                 disabled={!canScrollRight}
                 onClick={() => scrollPipeline("right")}
-                className="flex size-7 items-center justify-center border border-slate-200 bg-white text-slate-700 transition-colors hover:border-slate-300 hover:bg-slate-50 hover:text-slate-950 disabled:cursor-not-allowed disabled:border-slate-100 disabled:bg-slate-50 disabled:text-slate-300"
+                className="flex size-7 items-center justify-center border border-line bg-surface text-ink-soft transition-colors hover:border-line hover:bg-surface-2 hover:text-ink disabled:cursor-not-allowed disabled:border-surface-2 disabled:bg-surface-2 disabled:text-muted"
               >
                 <ChevronRight className="size-4" />
               </button>
@@ -219,15 +219,15 @@ export default function BusinessKanban({
               return (
                 <div
                   key={stage.value}
-                  className="flex items-center justify-between border border-slate-200 bg-white px-3 py-3"
+                  className="flex items-center justify-between border border-line bg-surface px-3 py-3"
                 >
                   <div className="flex min-w-0 items-center gap-2">
                     <span className={cn("h-5 w-1", getLeadStatusVisual(stage.value).accent)} />
-                    <span className="truncate text-xs font-bold uppercase tracking-wide text-slate-700">
+                    <span className="truncate text-xs font-bold uppercase tracking-wide text-ink-soft">
                       {stage.label}
                     </span>
                   </div>
-                  <span className="flex size-6 items-center justify-center bg-slate-100 text-xs font-bold text-slate-600">
+                  <span className="flex size-6 items-center justify-center bg-surface-2 text-xs font-bold text-ink-soft">
                     {count}
                   </span>
                 </div>
@@ -238,7 +238,7 @@ export default function BusinessKanban({
       </div>
 
       <div className="md:hidden">
-        <div className="sticky top-16 z-10 border-b border-slate-200 bg-white/95 shadow-sm backdrop-blur">
+        <div className="sticky top-16 z-10 border-b border-line bg-surface/95 shadow-sm backdrop-blur">
           <div className="flex snap-x gap-2 overflow-x-auto px-3 py-2.5 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden">
             {STATUS_OPTIONS.map((stage) => {
               const active = mobileStage === stage.value;
@@ -254,26 +254,26 @@ export default function BusinessKanban({
                   className={cn(
                     "flex h-9 shrink-0 snap-center items-center gap-2 border px-3 text-[11px] font-bold uppercase tracking-wide transition-colors",
                     active
-                      ? "border-brand-blue bg-blue-50 text-brand-blue"
-                      : "border-slate-200 bg-white text-slate-500",
+                      ? "border-brand-strong bg-brand-soft text-brand-strong"
+                      : "border-line bg-surface text-muted",
                   )}
                 >
                   <span className={cn("h-4 w-1", getLeadStatusVisual(stage.value).accent)} />
                   {stage.label}
-                  <span className={cn("flex min-w-5 items-center justify-center px-1 py-0.5 text-[10px]", active ? "bg-brand-blue text-white" : "bg-slate-100 text-slate-500")}>{count}</span>
+                  <span className={cn("flex min-w-5 items-center justify-center px-1 py-0.5 text-[10px]", active ? "bg-btn text-white" : "bg-surface-2 text-muted")}>{count}</span>
                 </button>
               );
             })}
           </div>
         </div>
 
-        <div className="space-y-3 bg-slate-50/70 p-3">
+        <div className="space-y-3 bg-surface-2/70 p-3">
           {isLoading ? (
-            Array.from({ length: 3 }, (_, index) => <div key={index} className="h-40 animate-pulse bg-white" />)
+            Array.from({ length: 3 }, (_, index) => <div key={index} className="h-40 animate-pulse bg-surface" />)
           ) : (grouped[mobileStage] ?? []).length === 0 ? (
-            <div className="border border-dashed border-slate-300 bg-white px-4 py-12 text-center">
-              <p className="text-sm font-semibold text-slate-700">{hasActiveFilters ? "No matching businesses" : "No businesses from this page"}</p>
-              <p className="mt-1 text-xs text-slate-500">{hasActiveFilters ? "Adjust the active filters or choose another stage." : "Choose another stage or page to continue reviewing the pipeline."}</p>
+            <div className="border border-dashed border-line bg-surface px-4 py-12 text-center">
+              <p className="text-sm font-semibold text-ink-soft">{hasActiveFilters ? "No matching businesses" : "No businesses from this page"}</p>
+              <p className="mt-1 text-xs text-muted">{hasActiveFilters ? "Adjust the active filters or choose another stage." : "Choose another stage or page to continue reviewing the pipeline."}</p>
             </div>
           ) : (
             (grouped[mobileStage] ?? []).map((business) => (
@@ -286,36 +286,36 @@ export default function BusinessKanban({
                   router.push(`/businesses/${business.id}`);
                 }}
                 className={cn(
-                  "border bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.06)] transition-all duration-500",
-                  isBusinessHighlighted(business.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-slate-200",
+                  "border bg-surface p-4 shadow-card transition-all duration-500",
+                  isBusinessHighlighted(business.id) ? "border-brand-strong bg-brand-soft/80 ring-2 ring-brand/20" : "border-line",
                   business.status === "Active" ? "cursor-pointer" : "opacity-60",
                   mutation.isPending && String(mutation.variables?.id) === String(business.id) && "pointer-events-none opacity-70",
                 )}
                 aria-busy={mutation.isPending && String(mutation.variables?.id) === String(business.id)}
               >
                 <div className="flex items-start gap-3">
-                  <Avatar className="size-10 bg-primary/10 text-primary">
+                  <Avatar className="size-10 bg-btn/10 text-brand-strong">
                     <AvatarFallback className="bg-transparent text-xs font-bold text-inherit">{business.initials}</AvatarFallback>
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-sm" title={business.name}>{business.name}</RecordLink>
-                    <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
+                    <p className="mt-0.5 truncate text-xs text-muted">{business.category}</p>
                   </div>
                   <DropdownMenu>
-                    <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}><PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-8 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
-                    <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(event) => event.stopPropagation()}>
+                    <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}><PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-8 text-muted"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
+                    <DropdownMenuContent align="end" className="w-44 bg-surface" onClick={(event) => event.stopPropagation()}>
                       <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
                       {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
-                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-emerald-700"><Power className="size-4" />Activate business</DropdownMenuItem>}
+                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-ok"><Power className="size-4" />Activate business</DropdownMenuItem>}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
-                  {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
-                  <div className={cn("flex min-w-0 items-center gap-2", business.owner ? "" : "font-semibold text-amber-700")}><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
-                  {business.lastFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
-                  {business.nextFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="truncate">{business.nextFollowUp}</RecordLink> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
+                <div className="mt-3 space-y-2 border-t border-surface-2 pt-3 text-xs text-ink-soft">
+                  {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-strong">Updating lead stage...</p>}
+                  <div className={cn("flex min-w-0 items-center gap-2", business.owner ? "" : "font-semibold text-warn")}><UserRound className="size-3.5 shrink-0 text-muted" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
+                  {business.lastFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-muted" /><span className="shrink-0 text-muted">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
+                  {business.nextFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-muted" /><span className="shrink-0 text-muted">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="truncate">{business.nextFollowUp}</RecordLink> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
                 </div>
                 <div className="mt-3 flex items-center justify-between gap-3" onClick={(event) => event.stopPropagation()}>
                   {business.status === "Inactive" ? <ActivityStateText active={false} /> : <div className="flex items-center gap-1"><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
@@ -330,7 +330,7 @@ export default function BusinessKanban({
                         mutation.mutate({ id: business.id, status });
                       }}
                       aria-label={`Move ${business.name} to stage`}
-                      className="h-9 min-w-0 flex-1 border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 outline-none focus:border-brand-blue"
+                      className="h-9 min-w-0 flex-1 border border-line bg-surface px-2 text-xs font-semibold text-ink-soft outline-none focus:border-brand-strong"
                     >
                       {STATUS_OPTIONS.map((stage) => <option key={stage.value} value={stage.value}>{stage.label}</option>)}
                     </select>
@@ -349,7 +349,7 @@ export default function BusinessKanban({
           setHorizontalOffset(event.currentTarget.scrollLeft);
           updateScrollControls();
         }}
-        className="hidden overflow-x-auto bg-slate-50/70 md:block"
+        className="hidden overflow-x-auto bg-surface-2/70 md:block"
       >
         <div className="min-w-[1680px] p-3 md:p-4">
         <div className="grid grid-cols-6 gap-3">
@@ -368,15 +368,15 @@ export default function BusinessKanban({
                 onDragLeave={() => setOverStage(null)}
                 onDrop={(event) => { event.preventDefault(); moveToStage(stage.value); }}
                 className={cn(
-                  "min-h-[360px] border border-slate-200 bg-slate-100/60 transition-colors",
-                  overStage === stage.value && "border-brand-blue bg-blue-50/70",
+                  "min-h-[360px] border border-line bg-surface-2/60 transition-colors",
+                  overStage === stage.value && "border-brand-strong bg-brand-soft/70",
                 )}
               >
                 <div className="space-y-2 p-2">
                   {isLoading ? (
-                    Array.from({ length: 2 }, (_, index) => <div key={index} className="h-32 animate-pulse bg-white" />)
+                    Array.from({ length: 2 }, (_, index) => <div key={index} className="h-32 animate-pulse bg-surface" />)
                   ) : items.length === 0 ? (
-                    <div className="border border-dashed border-slate-300 bg-white/60 px-3 py-8 text-center text-xs text-slate-500">{hasActiveFilters ? "No businesses match the active filters" : "No businesses from this page"}</div>
+                    <div className="border border-dashed border-line bg-surface/60 px-3 py-8 text-center text-xs text-muted">{hasActiveFilters ? "No businesses match the active filters" : "No businesses from this page"}</div>
                   ) : (
                     items.map((business) => (
                       <article
@@ -399,51 +399,51 @@ export default function BusinessKanban({
                           router.push(`/businesses/${business.id}`);
                         }}
                         className={cn(
-                          "group relative border bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-[border-color,background-color,box-shadow] duration-200",
+                          "group relative border bg-surface p-3 shadow-card transition-[border-color,background-color,box-shadow] duration-200",
                           business.status === "Active" && !mutation.isPending && "cursor-grab [&_*]:cursor-grab active:cursor-grabbing active:[&_*]:cursor-grabbing",
                           isBusinessHighlighted(business.id)
-                            ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20"
-                            : "border-slate-200",
-                          business.status === "Active" ? "hover:border-slate-300 hover:shadow-md" : "cursor-default opacity-60",
-                          String(draggedId) === String(business.id) && "ring-2 ring-brand-blue/30",
-                          mutation.isPending && String(mutation.variables?.id) === String(business.id) && "pointer-events-none ring-2 ring-brand-blue/20",
+                            ? "border-brand-strong bg-brand-soft/80 ring-2 ring-brand/20"
+                            : "border-line",
+                          business.status === "Active" ? "hover:border-line hover:shadow-md" : "cursor-default opacity-60",
+                          String(draggedId) === String(business.id) && "ring-2 ring-brand/30",
+                          mutation.isPending && String(mutation.variables?.id) === String(business.id) && "pointer-events-none ring-2 ring-brand/20",
                         )}
                         aria-busy={mutation.isPending && String(mutation.variables?.id) === String(business.id)}
                       >
                         <div className="flex items-start gap-2.5">
-                          {/* <GripVertical className="mt-1 size-4 shrink-0 text-slate-300 group-hover:text-slate-500" /> */}
-                          <Avatar className="size-9 bg-primary/10 text-primary">
+                          {/* <GripVertical className="mt-1 size-4 shrink-0 text-muted group-hover:text-muted" /> */}
+                          <Avatar className="size-9 bg-btn/10 text-brand-strong">
                             <AvatarFallback className="bg-transparent text-xs font-bold text-inherit">{business.initials}</AvatarFallback>
                           </Avatar>
                           <div className="min-w-0 flex-1">
-                            <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-base text-slate-700 hover:text-brand-blue" title={business.name}>{business.name}</RecordLink>
-                            <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
+                            <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-base text-ink-soft hover:text-brand-strong" title={business.name}>{business.name}</RecordLink>
+                            <p className="mt-0.5 truncate text-xs text-muted">{business.category}</p>
                           </div>
                           <DropdownMenu>
                             <Tooltip>
                               <TooltipTrigger asChild>
                                 <DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}>
-                                  <PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-7 text-slate-500"><MoreVertical className="size-4" /></PlainButton>
+                                  <PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-7 text-muted"><MoreVertical className="size-4" /></PlainButton>
                                 </DropdownMenuTrigger>
                               </TooltipTrigger>
                               <TooltipContent>More actions</TooltipContent>
                             </Tooltip>
-                            <DropdownMenuContent align="end" className="w-40 bg-white" onClick={(event) => event.stopPropagation()}>
+                            <DropdownMenuContent align="end" className="w-40 bg-surface" onClick={(event) => event.stopPropagation()}>
                               <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
                               {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
-                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-emerald-700"><Power className="size-4" />Activate business</DropdownMenuItem>}
+                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-ok"><Power className="size-4" />Activate business</DropdownMenuItem>}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
 
-                        <div className="mt-3 space-y-2 border-t border-slate-100 pt-2.5 text-xs text-slate-600">
-                          {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
-                          <div className={cn("flex items-center gap-2", business.owner ? "" : "text-slate-400")}><UserRound className="size-3.5 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
-                          {business.lastFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
-                          {business.nextFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="truncate">{business.nextFollowUp}</RecordLink> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
+                        <div className="mt-3 space-y-2 border-t border-surface-2 pt-2.5 text-xs text-ink-soft">
+                          {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-strong">Updating lead stage...</p>}
+                          <div className={cn("flex items-center gap-2", business.owner ? "" : "text-muted")}><UserRound className="size-3.5 text-muted" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
+                          {business.lastFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-muted" /><span className="shrink-0 text-muted">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
+                          {business.nextFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-muted" /><span className="shrink-0 text-muted">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="truncate">{business.nextFollowUp}</RecordLink> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
                         </div>
-                        {business.status === "Inactive" ? <ActivityStateText active={false} className="mt-3" /> : <div className="mt-3 flex items-center gap-1 border-t border-slate-100 pt-2" onClick={(event) => event.stopPropagation()}><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
+                        {business.status === "Inactive" ? <ActivityStateText active={false} className="mt-3" /> : <div className="mt-3 flex items-center gap-1 border-t border-surface-2 pt-2" onClick={(event) => event.stopPropagation()}><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
                       </article>
                     ))
                   )}

@@ -158,25 +158,25 @@ export default function FollowUpTable({
   return (
     <>
     <TooltipProvider>
-      <div className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
-        <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
-          <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
+      <div className="overflow-hidden border border-line bg-surface shadow-card">
+        <div className="flex flex-col gap-3.5 border-b border-surface-2 p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
+          <h2 className="text-lg font-bold tracking-tight text-ink">
             Follow-ups{" "}
-            <span className="font-medium text-[#64748b]">({total})</span>
+            <span className="font-medium text-muted">({total})</span>
           </h2>
         </div>
         <div data-layout-mobile>
           {loading ? (
             <div className="flex flex-col gap-3 p-3 md:gap-4 md:p-4">
               {Array.from({ length: 4 }).map((_, index) => (
-                <div key={`follow-up-mobile-skeleton-${index}`} className="space-y-3 border border-[#eaf0f6] bg-white p-4 shadow-sm">
-                  <div className="flex animate-pulse items-center gap-3"><div className="size-10 rounded-full bg-[#f1f5f9]" /><div className="flex-1 space-y-1.5"><div className="h-4 w-32 rounded bg-[#f1f5f9]" /><div className="h-3 w-20 rounded bg-[#f1f5f9]" /></div></div>
-                  <div className="h-3 w-48 animate-pulse rounded bg-[#f1f5f9]" />
+                <div key={`follow-up-mobile-skeleton-${index}`} className="space-y-3 border border-surface-2 bg-surface p-4 shadow-sm">
+                  <div className="flex animate-pulse items-center gap-3"><div className="size-10 rounded-full bg-surface-2" /><div className="flex-1 space-y-1.5"><div className="h-4 w-32 rounded bg-surface-2" /><div className="h-3 w-20 rounded bg-surface-2" /></div></div>
+                  <div className="h-3 w-48 animate-pulse rounded bg-surface-2" />
                 </div>
               ))}
             </div>
           ) : items.length === 0 ? (
-            <div className="px-4 py-16 text-center text-sm text-[#64748b]">No follow-ups match your current search and filter criteria.</div>
+            <div className="px-4 py-16 text-center text-sm text-muted">No follow-ups match your current search and filter criteria.</div>
           ) : (
             <div className="flex flex-col gap-3 p-3 md:gap-4 md:p-4">
               {items.map((item) => (
@@ -187,11 +187,11 @@ export default function FollowUpTable({
                   aria-label={`Open follow-up details for ${item.businessName}`}
                   onClick={(event) => handleRowClick(event, item.id)}
                   onKeyDown={(event) => handleRowKeyDown(event, item.id)}
-                  className={`flex cursor-pointer items-start justify-between gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:p-4 ${isFollowUpHighlighted(item.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}
+                  className={`flex cursor-pointer items-start justify-between gap-3 border bg-surface p-3 shadow-card transition-all duration-500 hover:border-brand/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40 md:p-4 ${isFollowUpHighlighted(item.id) ? "border-brand-strong bg-brand-soft/80 ring-2 ring-brand/20" : "border-surface-2"}`}
                 >
                   <div className="flex min-w-0 items-start gap-3">
                     <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="shrink-0">
-                      <Avatar className="mt-0.5 hidden size-11 rounded-full bg-primary/10 text-sm font-bold text-primary transition-transform hover:scale-105 sm:flex">
+                      <Avatar className="mt-0.5 hidden size-11 rounded-full bg-btn/10 text-sm font-bold text-brand-strong transition-transform hover:scale-105 sm:flex">
                         <AvatarFallback className="bg-transparent text-inherit">{initials(item.businessName)}</AvatarFallback>
                       </Avatar>
                     </Link>
@@ -199,9 +199,9 @@ export default function FollowUpTable({
                       <RecordLink href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="block max-w-52 truncate text-sm" title={item.businessName}>
                         {item.businessName}
                       </RecordLink>
-                      <p className="mt-0.5 text-xs text-[#64748b]">{item.businessCity || "-"}{item.businessPhone ? ` • ${item.businessPhone}` : ""}</p>
-                      <p className="mt-2 text-xs font-medium text-[#475569]">{formatDate(item.scheduledAt)} at {formatTime(item.scheduledAt)}</p>
-                      <p className="mt-1 text-xs text-[#64748b]">
+                      <p className="mt-0.5 text-xs text-muted">{item.businessCity || "-"}{item.businessPhone ? ` • ${item.businessPhone}` : ""}</p>
+                      <p className="mt-2 text-xs font-medium text-ink-soft">{formatDate(item.scheduledAt)} at {formatTime(item.scheduledAt)}</p>
+                      <p className="mt-1 text-xs text-muted">
                         {formatFollowUpType(item.type)} · {item.assignedToName}
                         {item.reminder ? ` · 🔔 ${item.reminder}` : ""}
                       </p>
@@ -227,7 +227,7 @@ export default function FollowUpTable({
                               highlightFollowUp(item.id);
                               setNotesFollowUp(item);
                             }}
-                            className="flex size-8 items-center justify-center border border-transparent text-brand-blue transition-colors hover:bg-blue-50 focus-visible:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/20"
+                            className="flex size-8 items-center justify-center border border-transparent text-brand-strong transition-colors hover:bg-brand-soft focus-visible:border-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20"
                           >
                             <MessageSquareText className="size-4" />
                           </button>
@@ -236,9 +236,9 @@ export default function FollowUpTable({
                       </Tooltip>
                       <DropdownMenu>
                         <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <PlainButton size="icon" aria-label="More actions" className="size-8 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"><MoreVertical className="size-4" /></PlainButton>
+                          <PlainButton size="icon" aria-label="More actions" className="size-8 border border-transparent text-muted hover:bg-surface-2 hover:text-ink"><MoreVertical className="size-4" /></PlainButton>
                         </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
-                        <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuContent align="end" className="w-44 bg-surface" onClick={(e) => e.stopPropagation()}>
                           <DropdownMenuItem asChild className="cursor-pointer gap-2 text-xs"><Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)}><Eye className="size-3.5" /><span>View Details</span></Link></DropdownMenuItem>
                           {canEditFollowUp(item) && (
                             <DropdownMenuItem
@@ -246,14 +246,14 @@ export default function FollowUpTable({
                               onSelect={() => { highlightFollowUp(item.id); onEdit(item); }}
                               className="cursor-pointer text-xs"
                             >
-                              <Pencil className="mr-1.5 size-3.5 text-[#64748b]" /> Edit
+                              <Pencil className="mr-1.5 size-3.5 text-muted" /> Edit
                             </DropdownMenuItem>
                           )}
                         {canCreateNextFollowUp(item) && onNextFollowUp && (
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onNextFollowUp(item); }}
-                              className="cursor-pointer text-xs font-semibold text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong"
+                              className="cursor-pointer text-xs font-semibold text-accent-strong focus:bg-surface-2/10 focus:text-accent-strong"
                             >
                               <Plus className="mr-1.5 size-3.5" /> Next Follow-Up
                             </DropdownMenuItem>
@@ -262,7 +262,7 @@ export default function FollowUpTable({
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onComplete(item); }}
-                              className="cursor-pointer text-xs text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong"
+                              className="cursor-pointer text-xs text-accent-strong focus:bg-surface-2/10 focus:text-accent-strong"
                             >
                               <CheckCircle2 className="mr-1.5 size-3.5" /> Mark as Completed
                             </DropdownMenuItem>
@@ -271,7 +271,7 @@ export default function FollowUpTable({
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onCancel(item); }}
-                              className="cursor-pointer text-xs text-[#b42318] focus:bg-[#fff1f3] focus:text-[#b42318]"
+                              className="cursor-pointer text-xs text-bad focus:bg-surface-2 focus:text-bad"
                             >
                               <Trash2 className="mr-1.5 size-3.5" /> Cancel Follow-up
                             </DropdownMenuItem>
@@ -288,7 +288,7 @@ export default function FollowUpTable({
         <div data-layout-desktop className="overflow-x-auto">
           <Table className="w-full min-w-[920px] text-left">
             <TableHeader>
-              <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
+              <TableRow className="border-b border-surface-2 hover:bg-transparent">
                 <TableHead className="py-4 pl-6 pr-4 font-semibold">
                   Business / Contact
                 </TableHead>
@@ -303,30 +303,30 @@ export default function FollowUpTable({
                 <TableHead className="px-4 py-4 font-semibold">
                   Assigned To
                 </TableHead>
-                <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">
+                <TableHead className="sticky right-0 bg-surface-2 py-4 pl-4 pr-6 text-right font-semibold">
                   Actions
                 </TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
+            <TableBody className="divide-y divide-surface-2 text-sm text-ink-soft">
               {loading ? (
                 Array.from({ length: 6 }).map((_, index) => (
                   <TableRow
                     key={`follow-up-skeleton-${index}`}
-                    className="border-b border-[#f1f5f9]"
+                    className="border-b border-surface-2"
                   >
                     <TableCell className="py-4 pl-6">
                       <div className="flex animate-pulse items-center gap-3">
-                        <div className="size-10 rounded-full bg-[#f1f5f9]" />
+                        <div className="size-10 rounded-full bg-surface-2" />
                         <div className="space-y-1.5">
-                          <div className="h-4 w-32 rounded bg-[#f1f5f9]" />
-                          <div className="h-3 w-20 rounded bg-[#f1f5f9]" />
+                          <div className="h-4 w-32 rounded bg-surface-2" />
+                          <div className="h-3 w-20 rounded bg-surface-2" />
                         </div>
                       </div>
                     </TableCell>
                     {Array.from({ length: 6 }).map((__, cellIndex) => (
                       <TableCell key={cellIndex} className="px-4 py-4">
-                        <div className="h-3.5 w-20 animate-pulse rounded bg-[#f1f5f9]" />
+                        <div className="h-3.5 w-20 animate-pulse rounded bg-surface-2" />
                       </TableCell>
                     ))}
                   </TableRow>
@@ -335,7 +335,7 @@ export default function FollowUpTable({
                 <TableRow>
                   <TableCell
                     colSpan={7}
-                    className="py-16 text-center text-sm text-[#64748b]"
+                    className="py-16 text-center text-sm text-muted"
                   >
                     No follow-ups match your current search and filter criteria.
                   </TableCell>
@@ -349,12 +349,12 @@ export default function FollowUpTable({
                     aria-label={`Open follow-up details for ${item.businessName}`}
                     onClick={(event) => handleRowClick(event, item.id)}
                     onKeyDown={(event) => handleRowKeyDown(event, item.id)}
-                    className={`group cursor-pointer border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-primary/40 ${isFollowUpHighlighted(item.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}
+                    className={`group cursor-pointer border-b border-surface-2 transition-colors duration-500 hover:bg-surface-2/80 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-inset focus-visible:ring-brand/40 ${isFollowUpHighlighted(item.id) ? "bg-brand-soft ring-2 ring-inset ring-brand/25" : ""}`}
                   >
                     <TableCell className="py-4 pl-6 pr-4">
                       <div className="flex items-center gap-3">
                         <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="shrink-0">
-                          <Avatar className="size-10 rounded-full bg-primary/10 text-xs font-bold text-primary transition-transform hover:scale-105">
+                          <Avatar className="size-10 rounded-full bg-btn/10 text-xs font-bold text-brand-strong transition-transform hover:scale-105">
                             <AvatarFallback className="bg-transparent text-inherit">
                               {initials(item.businessName)}
                             </AvatarFallback>
@@ -369,7 +369,7 @@ export default function FollowUpTable({
                           >
                             {item.businessName}
                           </RecordLink>
-                          <p className="mt-0.5 text-xs text-[#64748b]">
+                          <p className="mt-0.5 text-xs text-muted">
                             {item.businessCity || "-"}
                             {item.businessPhone
                               ? ` • ${item.businessPhone}`
@@ -378,13 +378,13 @@ export default function FollowUpTable({
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-xs font-medium text-[#475569]">
+                    <TableCell className="px-4 py-4 text-xs font-medium text-ink-soft">
                       {formatDate(item.scheduledAt)}
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-xs text-[#64748b]">
+                    <TableCell className="px-4 py-4 text-xs text-muted">
                       {formatTime(item.scheduledAt)}
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-xs font-medium text-[#475569]">
+                    <TableCell className="px-4 py-4 text-xs font-medium text-ink-soft">
                       {formatFollowUpType(item.type)}
                     </TableCell>
                     <TableCell className="px-4 py-4">
@@ -393,10 +393,10 @@ export default function FollowUpTable({
                         className="rounded-md px-2.5 py-0.5 text-[10px]"
                       />
                     </TableCell>
-                    <TableCell className="px-4 py-4 text-xs text-[#475569]">
+                    <TableCell className="px-4 py-4 text-xs text-ink-soft">
                       {item.assignedToName}
                     </TableCell>
-                    <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50" onClick={(e) => e.stopPropagation()}>
+                    <TableCell className="sticky right-0 bg-surface py-4 pl-4 pr-6 group-hover:bg-surface-2" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
                         <Tooltip>
@@ -409,7 +409,7 @@ export default function FollowUpTable({
                                 highlightFollowUp(item.id);
                                 setNotesFollowUp(item);
                               }}
-                              className="flex size-8 items-center justify-center border border-transparent text-brand-blue transition-colors hover:bg-blue-50 focus-visible:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/20"
+                              className="flex size-8 items-center justify-center border border-transparent text-brand-strong transition-colors hover:bg-brand-soft focus-visible:border-brand-strong focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/20"
                             >
                               <MessageSquareText className="size-4" />
                             </button>
@@ -423,23 +423,23 @@ export default function FollowUpTable({
                             <PlainButton
                               size="icon"
                               aria-label="More actions"
-                              className="size-8 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                              className="size-8 border border-transparent text-muted hover:bg-surface-2 hover:text-ink"
                             >
                               <MoreVertical className="size-4" />
                             </PlainButton>
                           </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                           <DropdownMenuContent
                             align="end"
-                            className="w-48 rounded-xl border border-[#e2e8f0] bg-white p-1 shadow-lg"
+                            className="w-48 rounded-xl border border-line bg-surface p-1 shadow-lg"
                             onClick={(e) => e.stopPropagation()}
                           >
                             <DropdownMenuItem asChild className="cursor-pointer text-xs">
                               <Link
                                 href={`/follow-ups/${item.id}`}
                                 onClick={() => highlightFollowUp(item.id, true)}
-                                className="flex w-full items-center gap-2 px-2.5 py-1.5 font-medium text-[#344054] hover:bg-[#f1f5f9]"
+                                className="flex w-full items-center gap-2 px-2.5 py-1.5 font-medium text-brand-strong hover:bg-surface-2"
                               >
-                                <Eye className="size-3.5 text-[#64748b]" />
+                                <Eye className="size-3.5 text-muted" />
                                 <span>View Details</span>
                               </Link>
                             </DropdownMenuItem>
@@ -447,34 +447,34 @@ export default function FollowUpTable({
                             {canEditFollowUp(item) && <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onEdit(item); }}
-                              className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#344054] hover:bg-[#f1f5f9] focus:bg-[#f8fafc]"
+                              className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-brand-strong hover:bg-surface-2 focus:bg-surface-2"
                             >
-                              <Pencil className="size-3.5 text-[#64748b]" />
+                              <Pencil className="size-3.5 text-muted" />
                               <span>Edit</span>
                             </DropdownMenuItem>}
 
                             {canCancelFollowUp(item) && <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onCancel(item); }}
-                              className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-[#b42318] hover:bg-[#fff1f3] focus:bg-[#fff1f3] focus:text-[#b42318]"
+                              className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-bad hover:bg-surface-2 focus:bg-surface-2 focus:text-bad"
                             >
-                              <Trash2 className="size-3.5 text-[#b42318]" />
+                              <Trash2 className="size-3.5 text-bad" />
                               <span>Cancel Follow-Up</span>
                             </DropdownMenuItem>}
 
                             {canCompleteFollowUp(item) && <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onComplete(item); }}
-                              className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-brand-green-strong hover:bg-brand-green/10 focus:bg-brand-green/10 focus:text-brand-green-strong"
+                              className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-accent-strong hover:bg-surface-2/10 focus:bg-surface-2/10 focus:text-accent-strong"
                             >
-                              <CheckCircle2 className="size-3.5 text-brand-green-strong" />
+                              <CheckCircle2 className="size-3.5 text-accent-strong" />
                               <span>Mark as Completed</span>
                             </DropdownMenuItem>}
                             {canCreateNextFollowUp(item) && onNextFollowUp && (
                               <DropdownMenuItem
                                 onClick={(e) => e.stopPropagation()}
                                 onSelect={() => { highlightFollowUp(item.id); onNextFollowUp(item); }}
-                                className="cursor-pointer text-xs font-semibold text-brand-green-strong"
+                                className="cursor-pointer text-xs font-semibold text-accent-strong"
                               >
                                 <Plus className="mr-1.5 size-3.5" /> Next Follow-Up
                               </DropdownMenuItem>
@@ -489,27 +489,27 @@ export default function FollowUpTable({
             </TableBody>
           </Table>
         </div>
-        <div className="flex flex-col gap-3 border-t border-[#f1f5f9] p-3 md:gap-4 md:p-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-center text-sm font-medium text-[#64748b] sm:text-left">
-            Showing <span className="font-semibold text-[#0f172a]">{firstResult}</span> to{" "}
-            <span className="font-semibold text-[#0f172a]">{lastResult}</span> of{" "}
-            <span className="font-semibold text-[#0f172a]">{total}</span> results
+        <div className="flex flex-col gap-3 border-t border-surface-2 p-3 md:gap-4 md:p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-center text-sm font-medium text-muted sm:text-left">
+            Showing <span className="font-semibold text-ink">{firstResult}</span> to{" "}
+            <span className="font-semibold text-ink">{lastResult}</span> of{" "}
+            <span className="font-semibold text-ink">{total}</span> results
           </p>
           <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end sm:gap-4">
             <div className="flex items-center gap-1.5">
-              <OutlinedButton size="icon-sm" type="button" disabled={page === 1} onClick={() => onPage(Math.max(1, page - 1))} className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] transition-colors disabled:opacity-50">
+              <OutlinedButton size="icon-sm" type="button" disabled={page === 1} onClick={() => onPage(Math.max(1, page - 1))} className="size-8.5 rounded-lg border border-line text-muted transition-colors disabled:opacity-50">
                 <ChevronLeft className="size-4" />
               </OutlinedButton>
               {visiblePages.map((pageNum) => page === pageNum ? (
                 <PrimaryButton key={pageNum} size="icon-sm" type="button" onClick={() => onPage(pageNum)} className="size-8.5 rounded-lg p-0 text-sm font-semibold shadow-sm">{pageNum}</PrimaryButton>
               ) : (
-                <OutlinedButton key={pageNum} size="icon-sm" type="button" onClick={() => onPage(pageNum)} className="hidden size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc] sm:inline-flex">{pageNum}</OutlinedButton>
+                <OutlinedButton key={pageNum} size="icon-sm" type="button" onClick={() => onPage(pageNum)} className="hidden size-8.5 rounded-lg border border-line bg-surface text-muted hover:bg-surface-2 sm:inline-flex">{pageNum}</OutlinedButton>
               ))}
-              <OutlinedButton size="icon-sm" type="button" disabled={page >= totalPages} onClick={() => onPage(Math.min(totalPages, page + 1))} className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc]"><ChevronRight className="size-4" /></OutlinedButton>
+              <OutlinedButton size="icon-sm" type="button" disabled={page >= totalPages} onClick={() => onPage(Math.min(totalPages, page + 1))} className="size-8.5 rounded-lg border border-line text-muted hover:bg-surface-2"><ChevronRight className="size-4" /></OutlinedButton>
             </div>
             <Select value={`${limit} per page`} onValueChange={(value) => onItemsPerPageChange(Number.parseInt(value, 10))}>
-              <SelectTrigger className="h-8.5 w-auto rounded-lg border border-[#e2e8f0] bg-white pl-3.5 pr-2.5 text-xs font-medium text-[#334155] hover:border-[#cbd5e1] focus-visible:ring-1 focus-visible:ring-primary"><SelectValue /></SelectTrigger>
-              <SelectContent className="bg-white"><SelectItem value="10 per page" className="text-xs">10 per page</SelectItem><SelectItem value="20 per page" className="text-xs">20 per page</SelectItem><SelectItem value="50 per page" className="text-xs">50 per page</SelectItem><SelectItem value="100 per page" className="text-xs">100 per page</SelectItem></SelectContent>
+              <SelectTrigger className="h-8.5 w-auto rounded-lg border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft hover:border-line focus-visible:ring-1 focus-visible:ring-brand"><SelectValue /></SelectTrigger>
+              <SelectContent className="bg-surface"><SelectItem value="10 per page" className="text-xs">10 per page</SelectItem><SelectItem value="20 per page" className="text-xs">20 per page</SelectItem><SelectItem value="50 per page" className="text-xs">50 per page</SelectItem><SelectItem value="100 per page" className="text-xs">100 per page</SelectItem></SelectContent>
             </Select>
           </div>
         </div>

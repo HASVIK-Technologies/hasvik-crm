@@ -10,7 +10,7 @@ export default function RecordLink({
   return (
     <Link
       className={cn(
-        "font-medium text-brand-blue transition-colors hover:text-[#075c9f] hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/25",
+        "font-medium text-brand-strong transition-colors hover:text-brand-strong hover:underline focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/25",
         className,
       )}
       {...props}

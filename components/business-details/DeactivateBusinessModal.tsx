@@ -36,26 +36,26 @@ export function DeactivateBusinessModal({ businessName, businessStatus, business
   if (!isDeactivateModalOpen) return null;
 
   return (
-    <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40 backdrop-blur-sm">
-      <div className="bg-white rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-slate-200 text-center">
+    <div className="fixed inset-0 z-50 flex items-center justify-center bg-ink/40 backdrop-blur-sm">
+      <div className="bg-surface rounded-2xl p-6 w-full max-w-sm shadow-2xl border border-line text-center">
         
-        <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${isInactive ? "bg-brand-green/10" : "bg-red-100"}`}>
-          {isInactive ? <CheckCircle className="h-6 w-6 text-brand-green-strong" /> : <Slash className="h-6 w-6 text-red-600" />}
+        <div className={`mx-auto flex items-center justify-center h-12 w-12 rounded-full mb-4 ${isInactive ? "bg-surface-2/10" : "bg-bad-soft"}`}>
+          {isInactive ? <CheckCircle className="h-6 w-6 text-accent-strong" /> : <Slash className="h-6 w-6 text-bad" />}
         </div>
         
-        <h3 className="text-lg font-bold text-slate-900 mb-2">{actionText} Business</h3>
-        <p className="text-sm text-slate-500 mb-6">
-          Are you sure you want to {actionText.toLowerCase()} <span className="font-semibold text-slate-700">{businessName}</span>?
+        <h3 className="text-lg font-bold text-ink mb-2">{actionText} Business</h3>
+        <p className="text-sm text-muted mb-6">
+          Are you sure you want to {actionText.toLowerCase()} <span className="font-semibold text-ink-soft">{businessName}</span>?
         </p>
 
         <div className="flex justify-center gap-3">
-          <button onClick={closeDeactivateModal} className="px-5 py-2.5 text-sm font-medium text-slate-700 bg-white border border-slate-300 rounded-xl hover:bg-slate-50 transition-colors w-full">
+          <button onClick={closeDeactivateModal} className="px-5 py-2.5 text-sm font-medium text-ink-soft bg-surface border border-line rounded-xl hover:bg-surface-2 transition-colors w-full">
             Cancel
           </button>
           <button
             onClick={handleConfirm}
             disabled={statusMutation.isPending}
-            className={`px-5 py-2.5 text-sm font-medium rounded-xl transition-colors w-full disabled:opacity-50 ${isInactive ? "bg-brand-green text-secondary-foreground hover:bg-brand-green/90" : "bg-red-600 text-white hover:bg-red-700"}`}
+            className={`px-5 py-2.5 text-sm font-medium rounded-xl transition-colors w-full disabled:opacity-50 ${isInactive ? "bg-surface-2 text-secondary-foreground hover:bg-surface-2/90" : "bg-bad text-white hover:bg-bad"}`}
           >
             {statusMutation.isPending ? "Updating..." : `Yes, ${actionText}`}
           </button>

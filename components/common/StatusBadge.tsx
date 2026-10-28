@@ -7,14 +7,14 @@ import { SUBSCRIPTION_STATUS_VISUALS } from "@/lib/subscriptions/status";
 
 const statusStyles: Record<string, string> = {
   ...Object.fromEntries(Object.entries(SUBSCRIPTION_STATUS_VISUALS).map(([status, visual]) => [status, visual.badge])),
-  COMPLETED: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  TODAY: "border-emerald-200 bg-emerald-50 text-emerald-800",
-  INACTIVE: "border-slate-200 bg-slate-50 text-slate-600",
-  NONE: "border-slate-200 bg-slate-50 text-slate-600",
-  SCHEDULED: "border-sky-200 bg-sky-50 text-sky-800",
-  TOMORROW: "border-sky-200 bg-sky-50 text-sky-800",
-  DATE: "border-sky-200 bg-sky-50 text-sky-800",
-  OVERDUE: "border-rose-200 bg-rose-50 text-rose-800",
+  COMPLETED: "border-ok/30 bg-ok-soft text-ok",
+  TODAY: "border-ok/30 bg-ok-soft text-ok",
+  INACTIVE: "border-line bg-surface-2 text-ink-soft",
+  NONE: "border-line bg-surface-2 text-ink-soft",
+  SCHEDULED: "border-brand/40 bg-brand-soft text-brand-strong",
+  TOMORROW: "border-brand/40 bg-brand-soft text-brand-strong",
+  DATE: "border-brand/40 bg-brand-soft text-brand-strong",
+  OVERDUE: "border-bad/30 bg-bad-soft text-bad",
   ...Object.fromEntries(
     Object.entries(LEAD_STATUS_VISUALS).map(([status, visual]) => [status, visual.badge]),
   ),
@@ -42,8 +42,8 @@ export function StatusBadge({
     <Badge
       variant="outline"
       className={cn(
-        "rounded-none border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-[0_1px_2px_rgba(15,23,42,0.06)] hover:bg-inherit",
-        statusStyles[normalizedStatus] ?? "bg-slate-100 text-slate-700",
+        "rounded-xl border px-2.5 py-1 text-[11px] font-semibold leading-none shadow-card hover:bg-inherit",
+        statusStyles[normalizedStatus] ?? "bg-surface-2 text-ink-soft",
         className,
       )}
       {...props}

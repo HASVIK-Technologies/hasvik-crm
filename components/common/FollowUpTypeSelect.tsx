@@ -33,7 +33,7 @@ export default function FollowUpTypeSelect({
       <SelectTrigger className={className} aria-invalid={invalid}>
         <SelectValue placeholder={placeholder} />
       </SelectTrigger>
-      <SelectContent className="bg-white">
+      <SelectContent className="bg-surface">
         {FOLLOW_UP_TYPE_OPTIONS.map((option) => (
           <SelectItem key={option.value} value={option.value}>
             {option.label}

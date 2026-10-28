@@ -43,11 +43,11 @@ function NoteEntry({ note }: { note: FollowUpNote }) {
     new Date(note.updatedAt).getTime() > new Date(note.createdAt).getTime();
 
   return (
-    <article className="rounded-xl border border-slate-200/80 bg-white p-4 shadow-sm">
-      <p className="whitespace-pre-wrap break-words text-sm leading-6 text-slate-700">
+    <article className="rounded-xl border border-line/80 bg-surface p-4 shadow-sm">
+      <p className="whitespace-pre-wrap break-words text-sm leading-6 text-ink-soft">
         {note.content}
       </p>
-      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-400">
+      <div className="mt-3 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted">
         <span>{formatNoteDate(note.createdAt)}</span>
         {edited && <span aria-label="Edited">· Edited</span>}
         {note.createdByName && <span>· {note.createdByName}</span>}
@@ -87,19 +87,19 @@ function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: stri
   };
 
   return (
-    <section className="rounded-2xl border border-slate-200 bg-white p-4 shadow-sm sm:p-6">
+    <section className="rounded-2xl border border-line bg-surface p-4 shadow-sm sm:p-6">
       <div className="flex items-start justify-between gap-4">
         <div>
           <div className="flex items-center gap-2">
-            <MessageSquareText className="size-5 text-primary" />
-            <h2 className="text-base font-bold text-slate-900">Notes</h2>
+            <MessageSquareText className="size-5 text-brand-strong" />
+            <h2 className="text-base font-bold text-ink">Notes</h2>
             {notesPage && (
-              <span className="rounded-full bg-primary/10 px-2 py-0.5 text-xs font-semibold text-primary">
+              <span className="rounded-full bg-btn/10 px-2 py-0.5 text-xs font-semibold text-brand-strong">
                 {notesPage.total}
               </span>
             )}
           </div>
-          <p className="mt-1 text-xs leading-5 text-slate-500">
+          <p className="mt-1 text-xs leading-5 text-muted">
             Keep a running record of conversations and next steps.
           </p>
         </div>
@@ -114,12 +114,12 @@ function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: stri
           value={content}
           onChange={(event) => setContent(event.target.value)}
           placeholder="Write an update or capture an important detail..."
-          className="min-h-24 resize-y rounded-xl border-slate-200 bg-white text-sm"
+          className="min-h-24 resize-y rounded-xl border-line bg-surface text-sm"
           disabled={createMutation.isPending}
         />
         <div className="mt-2 flex flex-wrap items-center justify-between gap-3">
-          <p className="flex items-center gap-1.5 text-xs text-slate-400">
-            <ShieldCheck className="size-3.5 text-brand-green-strong" />
+          <p className="flex items-center gap-1.5 text-xs text-muted">
+            <ShieldCheck className="size-3.5 text-accent-strong" />
             Notes are saved to this follow-up.
           </p>
           <SaveButton
@@ -137,15 +137,15 @@ function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: stri
         </div>
       </form>}
 
-      <div className="mt-6 border-t border-slate-200 pt-5">
+      <div className="mt-6 border-t border-line pt-5">
         {notesQuery.isLoading ? (
-          <div className="flex items-center justify-center gap-2 py-8 text-sm text-slate-500">
+          <div className="flex items-center justify-center gap-2 py-8 text-sm text-muted">
             <Loader2 className="size-4 animate-spin" />
             Loading notes...
           </div>
         ) : notesQuery.isError ? (
           <div className="py-5 text-center">
-            <p className="text-sm text-red-600">
+            <p className="text-sm text-bad">
               {getApiErrorMessage(notesQuery.error)}
             </p>
             <Button
@@ -159,10 +159,10 @@ function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: stri
             </Button>
           </div>
         ) : items.length === 0 ? (
-          <div className="rounded-xl border border-dashed border-slate-300 bg-slate-50 px-4 py-8 text-center">
-            <MessageSquareText className="mx-auto size-6 text-slate-300" />
-            <p className="mt-2 text-sm font-medium text-slate-700">No notes yet</p>
-            <p className="mt-1 text-xs text-slate-500">
+          <div className="rounded-xl border border-dashed border-line bg-surface-2 px-4 py-8 text-center">
+            <MessageSquareText className="mx-auto size-6 text-muted" />
+            <p className="mt-2 text-sm font-medium text-ink-soft">No notes yet</p>
+            <p className="mt-1 text-xs text-muted">
               Add the first note to keep this follow-up&apos;s history in one place.
             </p>
           </div>
@@ -174,7 +174,7 @@ function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: stri
               ))}
             </div>
             <div className="mt-4 flex items-center justify-between gap-3">
-              <p className="text-xs text-slate-500">
+              <p className="text-xs text-muted">
                 {notesPage?.total
                   ? `${(page - 1) * (notesPage.limit || PAGE_SIZE) + 1}–${Math.min(
                       page * (notesPage.limit || PAGE_SIZE),
@@ -237,14 +237,14 @@ export function FollowUpNotesDialog({
   return (
     <DialogPrimitive.Root open={open} onOpenChange={onOpenChange}>
       <DialogPrimitive.Portal>
-        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
-        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-slate-200 bg-white shadow-2xl outline-none">
-          <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-slate-200 bg-white px-4 py-4 sm:px-6">
+        <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px]" />
+        <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-2xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto border border-line bg-surface shadow-2xl outline-none">
+          <header className="sticky top-0 z-10 flex items-start justify-between gap-4 border-b border-line bg-surface px-4 py-4 sm:px-6">
             <div className="min-w-0">
-              <DialogPrimitive.Title className="text-lg font-bold text-slate-900">
+              <DialogPrimitive.Title className="text-lg font-bold text-ink">
                 Follow-up notes
               </DialogPrimitive.Title>
-              <DialogPrimitive.Description className="mt-1 truncate text-sm text-slate-500">
+              <DialogPrimitive.Description className="mt-1 truncate text-sm text-muted">
                 {followUpName}
               </DialogPrimitive.Description>
             </div>
@@ -253,14 +253,14 @@ export function FollowUpNotesDialog({
                 type="button"
                 aria-label="Close follow-up notes"
                 title="Close"
-                className="flex size-9 shrink-0 items-center justify-center border border-transparent text-slate-500 transition-colors hover:border-slate-200 hover:bg-slate-100 hover:text-slate-800 focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40"
+                className="flex size-9 shrink-0 items-center justify-center border border-transparent text-muted transition-colors hover:border-line hover:bg-surface-2 hover:text-ink focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand/40"
               >
                 <X className="size-4" />
               </button>
             </DialogPrimitive.Close>
           </header>
           <div className="px-4 py-4 sm:px-6">{followUpId && open && <FollowUpNotesPanel key={followUpId} followUpId={followUpId} readOnly={cannotWrite} />}</div>
-          <footer className="sticky bottom-0 z-10 flex justify-end border-t border-slate-200 bg-white px-4 py-3 sm:px-6"><DialogPrimitive.Close asChild><Button type="button" variant="outline" className="rounded-none">Close</Button></DialogPrimitive.Close></footer>
+          <footer className="sticky bottom-0 z-10 flex justify-end border-t border-line bg-surface px-4 py-3 sm:px-6"><DialogPrimitive.Close asChild><Button type="button" variant="outline" className="rounded-xl">Close</Button></DialogPrimitive.Close></footer>
         </DialogPrimitive.Content>
       </DialogPrimitive.Portal>
     </DialogPrimitive.Root>

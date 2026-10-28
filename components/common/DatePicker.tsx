@@ -14,7 +14,7 @@ export default function DatePicker({ value, onChange, label = "Select date" }: {
   const date = value ? new Date(`${value}T00:00:00`) : undefined;
   const selected = date && !Number.isNaN(date.getTime()) ? date : undefined;
   return <Popover open={open} onOpenChange={setOpen}>
-    <PopoverTrigger asChild><button type="button" aria-label={label} className="flex h-9 w-full items-center justify-center gap-2 px-2 text-xs font-semibold text-slate-700"><CalendarDays className="size-4 shrink-0" />{selected ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(selected) : label}</button></PopoverTrigger>
+    <PopoverTrigger asChild><button type="button" aria-label={label} className="flex h-9 w-full items-center justify-center gap-2 px-2 text-xs font-semibold text-ink-soft"><CalendarDays className="size-4 shrink-0" />{selected ? new Intl.DateTimeFormat("en-IN", { dateStyle: "medium" }).format(selected) : label}</button></PopoverTrigger>
     <PopoverContent collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto rounded-xl p-3">{open && <Calendar mode="single" selected={selected} defaultMonth={selected} onSelect={(day) => { if (day) { onChange(dateInputValue(day)); setOpen(false); } }} />}</PopoverContent>
   </Popover>;
 }

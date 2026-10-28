@@ -20,15 +20,15 @@ export default function FieldLabel({
     <Label
       htmlFor={htmlFor}
       className={cn(
-        "mb-1.5 text-sm font-semibold text-slate-700",
-        invalid && "text-red-600",
+        "mb-1.5 text-sm font-semibold text-ink-soft",
+        invalid && "text-bad",
         className,
       )}
     >
       {children}
-      {required && <span className="text-red-500">*</span>}
+      {required && <span className="text-bad">*</span>}
       {optional && (
-        <span className="font-normal text-[#8a9eaa]">(Optional)</span>
+        <span className="font-normal text-muted">(Optional)</span>
       )}
     </Label>
   );

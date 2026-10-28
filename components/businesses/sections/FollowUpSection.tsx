@@ -37,7 +37,7 @@ export default function FollowUpSection({
               invalid={Boolean(fieldState.error)}
             />
             {fieldState.error && (
-              <p role="alert" className="mt-1 text-xs text-red-600">
+              <p role="alert" className="mt-1 text-xs text-bad">
                 {fieldState.error.message}
               </p>
             )}
@@ -69,7 +69,7 @@ export default function FollowUpSection({
               invalid={Boolean(errors.nextFollowupDate)}
             />
             {errors.nextFollowupDate && (
-              <p role="alert" className="mt-1 text-xs text-red-600">
+              <p role="alert" className="mt-1 text-xs text-bad">
                 {errors.nextFollowupDate.message}
               </p>
             )}

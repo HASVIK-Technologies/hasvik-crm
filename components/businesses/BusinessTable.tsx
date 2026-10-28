@@ -112,7 +112,7 @@ function RowWhatsAppButton({
             onClick={(e) => e.stopPropagation()}
             aria-label={`No WhatsApp or phone numbers for ${item.name}`}
             className={cn(
-              "flex items-center justify-center border border-transparent text-slate-400 opacity-40 cursor-not-allowed",
+              "flex items-center justify-center border border-transparent text-muted opacity-40 cursor-not-allowed",
               buttonSizeClass,
             )}
           >
@@ -133,7 +133,7 @@ function RowWhatsAppButton({
               type="button"
               aria-label={`WhatsApp numbers for ${item.name}`}
               className={cn(
-                "flex items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus:outline-none focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20",
+                "flex items-center justify-center border border-transparent text-ok transition-colors hover:bg-ok-soft hover:text-ok focus:outline-none focus-visible:border-brand-strong focus-visible:ring-2 focus-visible:ring-brand/20",
                 buttonSizeClass,
               )}
             >
@@ -145,10 +145,10 @@ function RowWhatsAppButton({
       </Tooltip>
       <DropdownMenuContent
         align="end"
-        className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-[#e4ecf2] bg-white p-1.5 shadow-lg"
+        className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface p-1.5 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-2.5 py-1.5 text-[11px] font-semibold text-[#64748b]">
+        <div className="px-2.5 py-1.5 text-[11px] font-semibold text-muted">
           WhatsApp / Phone Numbers
         </div>
         <div className="flex flex-col gap-0.5">
@@ -164,15 +164,15 @@ function RowWhatsAppButton({
                 rel="noopener noreferrer"
                 onClick={(e) => e.stopPropagation()}
                 onPointerDown={onAction}
-                className="flex w-full items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-[#f8fafc]"
+                className="flex w-full items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-surface-2"
               >
                 <div className="flex items-center gap-2 min-w-0">
-                  <WhatsAppIcon className="size-3.5 shrink-0 text-brand-green-strong" />
-                  <span className="font-semibold text-[#0f172a] truncate">
+                  <WhatsAppIcon className="size-3.5 shrink-0 text-accent-strong" />
+                  <span className="font-semibold text-ink truncate">
                     {entry.number}
                   </span>
                 </div>
-                <span className="shrink-0 rounded bg-[#f1f5f9] px-1.5 py-0.5 text-[10px] font-medium text-[#64748b]">
+                <span className="shrink-0 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-muted">
                   {entry.label}
                 </span>
               </a>
@@ -275,12 +275,12 @@ export default function BusinessTable({
 
   return (
     <TooltipProvider>
-      <div className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
+      <div className="overflow-hidden border border-line bg-surface shadow-card">
         {/* Top Bar */}
-        <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
+        <div className="flex flex-col gap-3.5 border-b border-surface-2 p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
-            <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
-              Businesses <span className="font-medium text-[#64748b]">({displayCount})</span>
+            <h2 className="text-lg font-bold tracking-tight text-ink">
+              Businesses <span className="font-medium text-muted">({displayCount})</span>
             </h2>
           </div>
 
@@ -292,7 +292,7 @@ export default function BusinessTable({
                   <span className="hidden xl:inline">Columns</span>
                 </OutlinedButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-52 bg-white">
+              <DropdownMenuContent align="end" className="w-52 bg-surface">
                 {TABLE_COLUMN_OPTIONS.map((column) => (
                   <DropdownMenuCheckboxItem
                     key={column.value}
@@ -314,16 +314,16 @@ export default function BusinessTable({
                   <ChevronDown />
                 </OutlinedButton>
               </DropdownMenuTrigger>
-              <DropdownMenuContent align="end" className="w-40 bg-white">
+              <DropdownMenuContent align="end" className="w-40 bg-surface">
                 <DropdownMenuItem
                   onClick={() => onSortOrderChange && onSortOrderChange("-createdAt")}
-                  className={`cursor-pointer text-xs ${isLatest ? "font-semibold text-primary" : ""}`}
+                  className={`cursor-pointer text-xs ${isLatest ? "font-semibold text-brand-strong" : ""}`}
                 >
                   Latest First
                 </DropdownMenuItem>
                 <DropdownMenuItem
                   onClick={() => onSortOrderChange && onSortOrderChange("+createdAt")}
-                  className={`cursor-pointer text-xs ${!isLatest ? "font-semibold text-primary" : ""}`}
+                  className={`cursor-pointer text-xs ${!isLatest ? "font-semibold text-brand-strong" : ""}`}
                 >
                   Oldest First
                 </DropdownMenuItem>
@@ -338,33 +338,33 @@ export default function BusinessTable({
               {Array.from({ length: 4 }).map((_, i) => (
                 <div
                   key={`skeleton-mobile-${i}`}
-                  className="animate-pulse border border-[#eaf0f6] bg-white p-4 shadow-sm space-y-3"
+                  className="animate-pulse border border-surface-2 bg-surface p-4 shadow-sm space-y-3"
                 >
                   <div className="flex items-center gap-3">
-                    <div className="size-10 rounded-full bg-[#f1f5f9]" />
+                    <div className="size-10 rounded-full bg-surface-2" />
                     <div className="space-y-1.5 flex-1">
-                      <div className="h-4 w-32 rounded bg-[#f1f5f9]" />
-                      <div className="h-3 w-20 rounded bg-[#f1f5f9]" />
+                      <div className="h-4 w-32 rounded bg-surface-2" />
+                      <div className="h-3 w-20 rounded bg-surface-2" />
                     </div>
                   </div>
-                  <div className="h-3 w-48 rounded bg-[#f1f5f9]" />
+                  <div className="h-3 w-48 rounded bg-surface-2" />
                 </div>
               ))}
             </div>
           ) : businesses.length === 0 ? (
             <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-              <div className="flex size-12 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
-                <Building2 className="size-6 text-[#94a3b8]" />
+              <div className="flex size-12 items-center justify-center rounded-2xl bg-surface-2 text-muted mb-3">
+                <Building2 className="size-6 text-muted" />
               </div>
-              <h3 className="text-base font-semibold text-[#0f172a]">No businesses found</h3>
-              <p className="mt-1 text-xs text-[#64748b] max-w-xs">
+              <h3 className="text-base font-semibold text-ink">No businesses found</h3>
+              <p className="mt-1 text-xs text-muted max-w-xs">
                 No businesses match your current search and filter criteria. Try clearing some filters.
               </p>
               {onClearFilters && (
                 <button
                   type="button"
                   onClick={onClearFilters}
-                  className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2 text-xs font-semibold text-[#0f172a] shadow-sm hover:bg-[#f8fafc] transition-colors"
+                  className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-4 py-2 text-xs font-semibold text-ink shadow-sm hover:bg-surface-2 transition-colors"
                 >
                   Clear all filters
                 </button>
@@ -379,42 +379,42 @@ export default function BusinessTable({
                   onClick={(event) =>
                     handleRowClick(event, item.id, item.status === "Active")
                   }
-                  className={`flex items-start justify-between gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 md:gap-4 md:p-4 ${
+                  className={`flex items-start justify-between gap-3 border bg-surface p-3 shadow-card transition-all duration-500 md:gap-4 md:p-4 ${
                     isBusinessHighlighted(item.id)
-                      ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20"
-                      : "border-[#eaf0f6]"
+                      ? "border-brand-strong bg-brand-soft/80 ring-2 ring-brand/20"
+                      : "border-surface-2"
                   } ${
                     item.status === "Active"
-                      ? "cursor-pointer hover:border-primary/40 hover:shadow-md"
+                      ? "cursor-pointer hover:border-brand/40 hover:shadow-md"
                       : ""
                   }`}
                 >
                   {/* Left Side: Avatar + Business Info */}
                   <div className="flex items-start gap-3 min-w-0">
                     <Avatar
-                      className="hidden size-11 shrink-0 rounded-full bg-primary/10 text-sm font-bold text-primary sm:flex"
+                      className="hidden size-11 shrink-0 rounded-full bg-btn/10 text-sm font-bold text-brand-strong sm:flex"
                     >
                       <AvatarFallback className="bg-transparent text-inherit font-bold text-sm">
                         {item.initials}
                       </AvatarFallback>
                     </Avatar>
                     <div className="min-w-0">
-                      <h3 className="max-w-48 truncate text-sm font-bold text-slate-900 sm:max-w-64 sm:text-base" title={item.name}>
+                      <h3 className="max-w-48 truncate text-sm font-bold text-ink sm:max-w-64 sm:text-base" title={item.name}>
                         {item.name}
                       </h3>
-                      <p className="mt-0.5 text-xs text-[#64748b]">
+                      <p className="mt-0.5 text-xs text-muted">
                         {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
                       </p>
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-[#64748b]">
+                      <div className="mt-1 flex items-center gap-1.5 text-xs text-muted">
                         <span>Lead status:</span>
                         {getLeadStatusLabel(item.leadStatus) !== "-" ? (
                           <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-[10px]" />
                         ) : (
-                          <span className="text-[#94a3b8]">-</span>
+                          <span className="text-muted">-</span>
                         )}
                       </div>
-                      <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
-                      <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
+                      <p className="mt-0.5 text-xs text-muted">{item.phone}</p>
+                      <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-muted">
                         <UserRound className="size-3.5 shrink-0" />
                         <span className="truncate">{item.assignedToName || "Not assigned"}</span>
                       </p>
@@ -429,9 +429,9 @@ export default function BusinessTable({
                     </div>
 
                     {/* Follow-up text */}
-                    <div className="text-[11px] font-medium text-[#64748b]">
+                    <div className="text-[11px] font-medium text-muted">
                       {item.nextFollowUpType !== "none" ? (
-                        item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-slate-600">{item.nextFollowUp}</span>
+                        item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-ink-soft">{item.nextFollowUp}</span>
                       ) : <span>-</span>}
                     </div>
 
@@ -451,7 +451,7 @@ export default function BusinessTable({
                                 size="icon"
                                 aria-label={`More actions for ${item.name}`}
                                 onClick={(e) => e.stopPropagation()}
-                                className="size-7 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                                className="size-7 border border-transparent text-muted hover:bg-surface-2 hover:text-ink"
                               >
                                 <MoreVertical className="size-4" />
                               </PlainButton>
@@ -459,7 +459,7 @@ export default function BusinessTable({
                           </TooltipTrigger>
                           <TooltipContent>More actions</TooltipContent>
                         </Tooltip>
-                        <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
+                        <DropdownMenuContent align="end" className="w-44 bg-surface" onClick={(e) => e.stopPropagation()}>
                           {item.status === "Active" && (
                             <>
                               <DropdownMenuItem
@@ -519,7 +519,7 @@ export default function BusinessTable({
         <div className="isolate overflow-x-auto">
           <Table className="w-full min-w-max text-left">
             <TableHeader className="text-[13px] font-semibold">
-              <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
+              <TableRow className="border-b border-surface-2 hover:bg-transparent">
                 <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Business Name</TableHead>
                 {columnVisible("category") && <TableHead className="px-4 py-4 font-semibold">Category</TableHead>}
                 {columnVisible("city") && <TableHead className="px-4 py-4 font-semibold">City</TableHead>}
@@ -528,48 +528,48 @@ export default function BusinessTable({
                 {columnVisible("activity") && <TableHead className="px-4 py-4 font-semibold">Status</TableHead>}
                 {columnVisible("lastFollowUp") && <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>}
                 {columnVisible("nextFollowUp") && <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>}
-                <TableHead className="sticky right-0 z-10 min-w-32 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
+                <TableHead className="sticky right-0 z-10 min-w-32 bg-surface-2 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
-            <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
+            <TableBody className="divide-y divide-surface-2 text-sm text-ink-soft">
               {isLoading ? (
                 Array.from({ length: 6 }).map((_, idx) => (
-                  <TableRow key={`skeleton-row-${idx}`} className="border-b border-[#f1f5f9]">
+                  <TableRow key={`skeleton-row-${idx}`} className="border-b border-surface-2">
                     <TableCell className={cn("pl-6 pr-4", rowPadding)}>
                       <div className="flex items-center gap-3.5 animate-pulse">
-                        <div className="size-4 rounded bg-[#f1f5f9]" />
-                        <div className="size-11 rounded-full bg-[#f1f5f9]" />
+                        <div className="size-4 rounded bg-surface-2" />
+                        <div className="size-11 rounded-full bg-surface-2" />
                         <div className="space-y-1.5 flex-1">
-                          <div className="h-4 w-32 rounded bg-[#f1f5f9]" />
-                          <div className="h-3 w-20 rounded bg-[#f1f5f9]" />
+                          <div className="h-4 w-32 rounded bg-surface-2" />
+                          <div className="h-3 w-20 rounded bg-surface-2" />
                         </div>
                       </div>
                     </TableCell>
                     {columnVisible("category") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                      <div className="h-3.5 w-24 rounded bg-surface-2 animate-pulse" />
                     </TableCell>}
                     {columnVisible("city") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-20 rounded bg-[#f1f5f9] animate-pulse" />
+                      <div className="h-3.5 w-20 rounded bg-surface-2 animate-pulse" />
                     </TableCell>}
                     {columnVisible("responsible") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                      <div className="h-3.5 w-24 rounded bg-surface-2 animate-pulse" />
                     </TableCell>}
                     {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-6 w-16 rounded-full bg-[#f1f5f9] animate-pulse" />
+                      <div className="h-6 w-16 rounded-full bg-surface-2 animate-pulse" />
                     </TableCell>}
                     {columnVisible("activity") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                      <div className="h-3.5 w-24 rounded bg-surface-2 animate-pulse" />
                     </TableCell>}
                     {columnVisible("lastFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-28 rounded bg-[#f1f5f9] animate-pulse" />
+                      <div className="h-3.5 w-28 rounded bg-surface-2 animate-pulse" />
                     </TableCell>}
                     {columnVisible("nextFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-20 rounded bg-[#f1f5f9] animate-pulse" />
+                      <div className="h-3.5 w-20 rounded bg-surface-2 animate-pulse" />
                     </TableCell>}
-                    <TableCell className={cn("sticky right-0 z-10 bg-white pl-4 pr-6 text-right", rowPadding)}>
+                    <TableCell className={cn("sticky right-0 z-10 bg-surface pl-4 pr-6 text-right", rowPadding)}>
                       <div className="flex justify-end gap-2 animate-pulse">
-                        <div className="size-7 rounded bg-[#f1f5f9]" />
-                        <div className="size-7 rounded bg-[#f1f5f9]" />
+                        <div className="size-7 rounded bg-surface-2" />
+                        <div className="size-7 rounded bg-surface-2" />
                       </div>
                     </TableCell>
                   </TableRow>
@@ -578,18 +578,18 @@ export default function BusinessTable({
                 <TableRow>
                   <TableCell colSpan={visibleColumnCount} className="py-0">
                     <div className="flex flex-col items-center justify-center py-16 px-4 text-center">
-                      <div className="flex size-14 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
-                        <Building2 className="size-7 text-[#94a3b8]" />
+                      <div className="flex size-14 items-center justify-center rounded-2xl bg-surface-2 text-muted mb-3">
+                        <Building2 className="size-7 text-muted" />
                       </div>
-                      <h3 className="text-base font-semibold text-[#0f172a]">No businesses found</h3>
-                      <p className="mt-1 text-sm text-[#64748b] max-w-sm">
+                      <h3 className="text-base font-semibold text-ink">No businesses found</h3>
+                      <p className="mt-1 text-sm text-muted max-w-sm">
                         No businesses match your current search and filter criteria. Try clearing some filters or searching for something else.
                       </p>
                       {onClearFilters && (
                         <button
                           type="button"
                           onClick={onClearFilters}
-                          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-[#e2e8f0] bg-white px-4 py-2 text-xs font-semibold text-[#0f172a] shadow-sm hover:bg-[#f8fafc] transition-colors"
+                          className="mt-4 inline-flex items-center gap-1.5 rounded-xl border border-line bg-surface px-4 py-2 text-xs font-semibold text-ink shadow-sm hover:bg-surface-2 transition-colors"
                         >
                           Clear all filters
                         </button>
@@ -605,13 +605,13 @@ export default function BusinessTable({
                     onClick={(event) =>
                       handleRowClick(event, item.id, item.status === "Active")
                     }
-                    className={`group border-b border-[#f1f5f9] transition-colors duration-500 ${
+                    className={`group border-b border-surface-2 transition-colors duration-500 ${
                       isBusinessHighlighted(item.id)
-                        ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25"
+                        ? "bg-brand-soft ring-2 ring-inset ring-brand/25"
                         : ""
                     } ${
                       item.status === "Active"
-                        ? "cursor-pointer hover:bg-[#f8fafc]/80"
+                        ? "cursor-pointer hover:bg-surface-2/80"
                         : ""
                     }`}
                   >
@@ -619,15 +619,15 @@ export default function BusinessTable({
                     <TableCell className={cn("pl-6 pr-4", rowPadding)}>
                       <div className="flex items-center gap-3.5">
                         <Avatar
-                          className="size-10.5 shrink-0 rounded-full bg-primary/10 text-xs font-bold text-primary"
+                          className="size-10.5 shrink-0 rounded-full bg-btn/10 text-xs font-bold text-brand-strong"
                         >
                           <AvatarFallback className="bg-transparent text-inherit font-bold text-xs">
                             {item.initials}
                           </AvatarFallback>
                         </Avatar>
                         <div className="min-w-0 max-w-44">
-                          <p className="truncate text-sm font-bold text-slate-900" title={item.name}>{item.name}</p>
-                          <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
+                          <p className="truncate text-sm font-bold text-ink" title={item.name}>{item.name}</p>
+                          <p className="mt-0.5 text-xs text-muted">{item.phone}</p>
                         </div>
                       </div>
                     </TableCell>
@@ -645,7 +645,7 @@ export default function BusinessTable({
                     {/* Responsible person */}
                     {columnVisible("responsible") && <TableCell className={cn("px-4 text-sm", rowPadding)}>
                       <div className="min-w-0 max-w-40">
-                        <span className={cn("block truncate", item.assignedToName ? "font-medium text-slate-700" : "text-slate-400")} title={item.assignedToName || "Not assigned"}>
+                        <span className={cn("block truncate", item.assignedToName ? "font-medium text-ink-soft" : "text-muted")} title={item.assignedToName || "Not assigned"}>
                           {item.assignedToName || "Not assigned"}
                         </span>
                       </div>
@@ -656,7 +656,7 @@ export default function BusinessTable({
                       {getLeadStatusLabel(item.leadStatus) !== "-" ? (
                         <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={getLeadStatusLabel(item.leadStatus)} />
                       ) : (
-                        <span className="text-[#94a3b8]">-</span>
+                        <span className="text-muted">-</span>
                       )}
                     </TableCell>}
 
@@ -671,15 +671,15 @@ export default function BusinessTable({
                     {/* Next Follow-up */}
                     {columnVisible("nextFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
                       {item.nextFollowUpType !== "none" ? (
-                        item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-slate-700">{item.nextFollowUp}</span>
+                        item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-ink-soft">{item.nextFollowUp}</span>
                       ) : (
-                        <span className="text-[#94a3b8]">-</span>
+                        <span className="text-muted">-</span>
                       )}
                     </TableCell>}
 
                     {/* Actions (Call, WhatsApp, 3 dots) */}
                     <TableCell
-                      className={cn("sticky right-0 z-10 pl-4 pr-6 text-right shadow-[-1px_0_0_#f1f5f9] group-hover:bg-slate-50", rowPadding, isBusinessHighlighted(item.id) ? "bg-blue-50" : "bg-white")}
+                      className={cn("sticky right-0 z-10 pl-4 pr-6 text-right shadow-card group-hover:bg-surface-2", rowPadding, isBusinessHighlighted(item.id) ? "bg-brand-soft" : "bg-surface")}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-end gap-2.5">
@@ -699,7 +699,7 @@ export default function BusinessTable({
                                 <PlainButton
                                   size="icon-sm"
                                   aria-label={`More actions for ${item.name}`}
-                                  className="size-8 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"
+                                  className="size-8 border border-transparent text-muted hover:bg-surface-2 hover:text-ink"
                                 >
                                   <MoreVertical className="size-4" />
                                 </PlainButton>
@@ -707,7 +707,7 @@ export default function BusinessTable({
                             </TooltipTrigger>
                             <TooltipContent>More actions</TooltipContent>
                           </Tooltip>
-                          <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenuContent align="end" className="w-44 bg-surface" onClick={(e) => e.stopPropagation()}>
                             {item.status === "Active" && (
                               <>
                                 <DropdownMenuItem
@@ -766,11 +766,11 @@ export default function BusinessTable({
         </div>
 
         {/* Pagination Footer */}
-        <div className="flex flex-col gap-3 md:gap-4 border-t border-[#f1f5f9] p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
-          <p className="text-center text-sm font-medium text-[#64748b] sm:text-left">
-            Showing <span className="font-semibold text-[#0f172a]">{firstResult}</span> to{" "}
-            <span className="font-semibold text-[#0f172a]">{lastResult}</span> of{" "}
-            <span className="font-semibold text-[#0f172a]">{displayCount}</span> results
+        <div className="flex flex-col gap-3 md:gap-4 border-t border-surface-2 p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
+          <p className="text-center text-sm font-medium text-muted sm:text-left">
+            Showing <span className="font-semibold text-ink">{firstResult}</span> to{" "}
+            <span className="font-semibold text-ink">{lastResult}</span> of{" "}
+            <span className="font-semibold text-ink">{displayCount}</span> results
           </p>
 
           <div className="flex flex-wrap items-center justify-center gap-3 sm:justify-end sm:gap-4">
@@ -780,7 +780,7 @@ export default function BusinessTable({
                 type="button"
                 disabled={currentPage === 1}
                 onClick={() => onPageChange(Math.max(1, currentPage - 1))}
-                className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] transition-colors disabled:opacity-50"
+                className="size-8.5 rounded-lg border border-line text-muted transition-colors disabled:opacity-50"
               >
                 <ChevronLeft className="size-4" />
               </OutlinedButton>
@@ -801,7 +801,7 @@ export default function BusinessTable({
                     size="icon-sm"
                     type="button"
                     onClick={() => onPageChange(pageNum)}
-                    className="size-8.5 rounded-lg border border-[#e2e8f0] bg-white text-[#64748b] hover:bg-[#f8fafc]"
+                    className="size-8.5 rounded-lg border border-line bg-surface text-muted hover:bg-surface-2"
                   >
                     {pageNum}
                   </OutlinedButton>
@@ -812,7 +812,7 @@ export default function BusinessTable({
                 type="button"
                 disabled={totalPages === 0 || currentPage >= totalPages}
                 onClick={() => onPageChange(Math.min(totalPages, currentPage + 1))}
-                className="size-8.5 rounded-lg border border-[#e2e8f0] text-[#64748b] hover:bg-[#f8fafc]"
+                className="size-8.5 rounded-lg border border-line text-muted hover:bg-surface-2"
               >
                 <ChevronRight className="size-4" />
               </OutlinedButton>
@@ -822,10 +822,10 @@ export default function BusinessTable({
               value={`${itemsPerPage} per page`}
               onValueChange={(value) => onItemsPerPageChange(Number.parseInt(value, 10))}
             >
-              <SelectTrigger className="h-8.5 w-auto rounded-lg border border-[#e2e8f0] bg-white pl-3.5 pr-2.5 text-xs font-medium text-[#334155] hover:border-[#cbd5e1] focus-visible:ring-1 focus-visible:ring-primary">
+              <SelectTrigger className="h-8.5 w-auto rounded-lg border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft hover:border-line focus-visible:ring-1 focus-visible:ring-brand">
                 <SelectValue />
               </SelectTrigger>
-              <SelectContent className="bg-white">
+              <SelectContent className="bg-surface">
                 <SelectItem value="10 per page" className="text-xs">
                   10 per page
                 </SelectItem>

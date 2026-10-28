@@ -34,29 +34,29 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
 
   return (
     <div className="w-full">
-      <div className="border border-slate-200 bg-white p-6 shadow-sm">
-        <h3 className="mb-6 text-lg font-bold text-slate-800">Contact Information</h3>
+      <div className="border border-line bg-surface p-6 shadow-sm">
+        <h3 className="mb-6 text-lg font-bold text-ink">Contact Information</h3>
 
         <div className="grid grid-cols-1 gap-5">
           {/* Phone Numbers Column */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-slate-700">Phone Numbers</h4>
+            <h4 className="text-sm font-semibold text-ink-soft">Phone Numbers</h4>
             {phones.length === 0 ? (
-              <p className="text-sm text-slate-400">No phone numbers provided.</p>
+              <p className="text-sm text-muted">No phone numbers provided.</p>
             ) : (
               phones.map((phone: any, index: number) => {
                 const num = phone.number || phone;
                 return (
                   <div
                     key={phone.id || phone._id || index}
-                    className="flex items-center justify-between rounded-lg border border-slate-200 p-3"
+                    className="flex items-center justify-between rounded-lg border border-line p-3"
                   >
-                    <span className="text-sm font-medium text-slate-700">{num}</span>
+                    <span className="text-sm font-medium text-ink-soft">{num}</span>
                     <div className="flex items-center gap-3">
                       {phone.isPrimary && (
                         <Badge
                           variant="secondary"
-                          className="border-0 bg-green-50 font-normal text-green-700"
+                          className="border-0 bg-ok-soft font-normal text-ok"
                         >
                           Primary
                         </Badge>
@@ -65,7 +65,7 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
                         href={`tel:${cleanNumber(num)}`}
                         aria-label={`Call ${num}`}
                       >
-                        <Phone className="size-4 text-brand-green-strong hover:text-brand-green" />
+                        <Phone className="size-4 text-accent-strong hover:text-accent-strong" />
                       </a>}
                     </div>
                   </div>
@@ -76,23 +76,23 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
 
           {/* WhatsApp Numbers Column */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-slate-700">WhatsApp Numbers</h4>
+            <h4 className="text-sm font-semibold text-ink-soft">WhatsApp Numbers</h4>
             {whatsapps.length === 0 ? (
-              <p className="text-sm text-slate-400">No WhatsApp numbers provided.</p>
+              <p className="text-sm text-muted">No WhatsApp numbers provided.</p>
             ) : (
               whatsapps.map((wa: any, index: number) => {
                 const num = wa.number || wa;
                 return (
                   <div
                     key={wa.id || wa._id || index}
-                    className="flex items-center justify-between rounded-lg border border-slate-200 p-3"
+                    className="flex items-center justify-between rounded-lg border border-line p-3"
                   >
-                    <span className="text-sm font-medium text-slate-700">{num}</span>
+                    <span className="text-sm font-medium text-ink-soft">{num}</span>
                     <div className="flex items-center gap-3">
                       {wa.isPrimary && (
                         <Badge
                           variant="secondary"
-                          className="border-0 bg-green-50 font-normal text-green-700"
+                          className="border-0 bg-ok-soft font-normal text-ok"
                         >
                           Primary
                         </Badge>
@@ -103,7 +103,7 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
                         rel="noopener noreferrer"
                         aria-label={`Chat on WhatsApp with ${num}`}
                       >
-                        <WhatsAppIcon className="size-4 text-brand-green-strong hover:text-brand-green" />
+                        <WhatsAppIcon className="size-4 text-accent-strong hover:text-accent-strong" />
                       </a>}
                     </div>
                   </div>
@@ -114,27 +114,27 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
 
           {/* Email Column */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-slate-700">Email</h4>
+            <h4 className="text-sm font-semibold text-ink-soft">Email</h4>
             {email ? (
-              <div className="flex items-center justify-between rounded-lg border border-slate-200 p-3">
+              <div className="flex items-center justify-between rounded-lg border border-line p-3">
                 <div className="flex items-center gap-2 overflow-hidden">
-                  <Mail className="size-4 shrink-0 text-slate-400" />
+                  <Mail className="size-4 shrink-0 text-muted" />
                   {!isInactive ? <a
                     href={`mailto:${email}`}
-                    className="truncate text-sm font-medium text-slate-700 hover:text-primary hover:underline"
+                    className="truncate text-sm font-medium text-ink-soft hover:text-brand-strong hover:underline"
                   >
                     {email}
-                  </a> : <span className="truncate text-sm font-medium text-slate-700">{email}</span>}
+                  </a> : <span className="truncate text-sm font-medium text-ink-soft">{email}</span>}
                 </div>
                 <Badge
                   variant="secondary"
-                  className="border-0 bg-green-50 font-normal text-green-700"
+                  className="border-0 bg-ok-soft font-normal text-ok"
                 >
                   Primary
                 </Badge>
               </div>
             ) : (
-              <p className="text-sm text-slate-400">No email provided.</p>
+              <p className="text-sm text-muted">No email provided.</p>
             )}
           </div>
         </div>

@@ -167,9 +167,9 @@ export default function BusinessCategoriesPage() {
       showStats={showStats}
       stats={
         <KpiCards items={[
-            { label: "All categories", value: total, icon: FolderKanban, tone: "text-primary bg-blue-50" },
-            { label: "Active on page", value: activeCount, icon: Check, tone: "text-emerald-700 bg-emerald-50" },
-            { label: "Inactive on page", value: inactiveCount, icon: CircleAlert, tone: "text-amber-700 bg-amber-50" },
+            { label: "All categories", value: total, icon: FolderKanban, tone: "text-brand-strong bg-brand-soft" },
+            { label: "Active on page", value: activeCount, icon: Check, tone: "text-ok bg-ok-soft" },
+            { label: "Inactive on page", value: inactiveCount, icon: CircleAlert, tone: "text-warn bg-warn-soft" },
           ].map((item, index) => ({ ...item, tone: (["blue", "green", "amber"] as const)[index] }))} />
       }
       actions={
@@ -196,18 +196,18 @@ export default function BusinessCategoriesPage() {
             onSortChange={setSortPreset}
           />
         {categoriesQuery.isPending ? (
-          <div className="flex min-h-44 items-center justify-center"><LoaderCircle className="size-5 animate-spin text-primary" /><span className="ml-2 text-sm text-slate-500">Loading categories…</span></div>
+          <div className="flex min-h-44 items-center justify-center"><LoaderCircle className="size-5 animate-spin text-brand-strong" /><span className="ml-2 text-sm text-muted">Loading categories…</span></div>
         ) : categoriesQuery.isError ? (
           <div className="px-5 py-12 text-center">
-            <p className="text-sm font-semibold text-slate-900">Categories couldn’t be loaded</p>
-            <p className="mt-1 text-xs text-slate-500">Check your access and connection, then try again.</p>
+            <p className="text-sm font-semibold text-ink">Categories couldn’t be loaded</p>
+            <p className="mt-1 text-xs text-muted">Check your access and connection, then try again.</p>
             <Button variant="outline" size="sm" onClick={() => void categoriesQuery.refetch()} className="mt-4 rounded-lg">Try again</Button>
           </div>
         ) : categories.length === 0 ? (
           <div className="px-5 py-14 text-center">
-            <Tags className="mx-auto size-7 text-slate-300" />
-            <p className="mt-3 text-sm font-semibold text-slate-800">No categories found</p>
-            <p className="mt-1 text-xs text-slate-500">Create a category or adjust your search filters.</p>
+            <Tags className="mx-auto size-7 text-muted" />
+            <p className="mt-3 text-sm font-semibold text-ink">No categories found</p>
+            <p className="mt-1 text-xs text-muted">Create a category or adjust your search filters.</p>
           </div>
         ) : (
           <>
@@ -216,13 +216,13 @@ export default function BusinessCategoriesPage() {
                 const id = categoryId(category) || `${category.name}-${index}`;
                 const active = category.isActive !== false;
                 return (
-                  <DataTableMobileCard key={id} className={`flex items-start justify-between gap-3 ${isItemHighlighted(id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : ""}`}>
+                  <DataTableMobileCard key={id} className={`flex items-start justify-between gap-3 ${isItemHighlighted(id) ? "border-brand-strong bg-brand-soft/80 ring-2 ring-brand/20" : ""}`}>
                     <div className="flex min-w-0 items-start gap-3">
-                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-blue-50 text-primary"><Tags className="size-4" /></span>
+                      <span className="flex size-9 shrink-0 items-center justify-center rounded-full bg-brand-soft text-brand-strong"><Tags className="size-4" /></span>
                       <div className="min-w-0">
-                        <p className="truncate text-sm font-bold text-[#0f172a]">{category.name}</p>
-                        <p className="mt-1 text-xs leading-5 text-[#64748b]">{category.description || "No description provided."}</p>
-                        <span className={`mt-2 inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-bold ${active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{active ? "Active" : "Inactive"}</span>
+                        <p className="truncate text-sm font-bold text-ink">{category.name}</p>
+                        <p className="mt-1 text-xs leading-5 text-muted">{category.description || "No description provided."}</p>
+                        <span className={`mt-2 inline-flex w-fit rounded-full px-2.5 py-1 text-[10px] font-bold ${active ? "bg-ok-soft text-ok" : "bg-surface-2 text-muted"}`}>{active ? "Active" : "Inactive"}</span>
                       </div>
                     </div>
                     <ManagementRowActions
@@ -242,7 +242,7 @@ export default function BusinessCategoriesPage() {
             <div data-layout-desktop>
               <Table className="w-full min-w-[820px] text-left">
               <TableHeader>
-                  <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
+                  <TableRow className="border-b border-surface-2 hover:bg-transparent">
                     <TableHead className="py-4 pl-6 pr-4">
                       <SortableColumnHeader label="Category" field="name" sortBy={sortBy} sortOrder={sortOrder} onSort={toggleSort} />
                     </TableHead>
@@ -250,26 +250,26 @@ export default function BusinessCategoriesPage() {
                     <TableHead className="px-4 py-4">
                       <SortableColumnHeader label="Status" field="isActive" sortBy={sortBy} sortOrder={sortOrder} onSort={toggleSort} />
                     </TableHead>
-                    <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
+                    <TableHead className="sticky right-0 bg-surface-2 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
                   </TableRow>
                 </TableHeader>
-                <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
+                <TableBody className="divide-y divide-surface-2 text-sm text-ink-soft">
                   {categories.map((category, index) => {
                     const id = categoryId(category) || `${category.name}-${index}`;
                     const active = category.isActive !== false;
                     return (
-                      <TableRow key={id} className={`group border-b border-[#f1f5f9] transition-colors duration-500 hover:bg-[#f8fafc]/80 ${isItemHighlighted(id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
+                      <TableRow key={id} className={`group border-b border-surface-2 transition-colors duration-500 hover:bg-surface-2/80 ${isItemHighlighted(id) ? "bg-brand-soft ring-2 ring-inset ring-brand/25" : ""}`}>
                         <TableCell className="py-4 pl-6 pr-4">
                           <div className="flex items-center gap-3">
-                            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-primary/10 text-primary"><Tags className="size-4" /></span>
-                            <span className="text-sm font-bold text-[#0f172a]">{category.name}</span>
+                            <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-btn/10 text-brand-strong"><Tags className="size-4" /></span>
+                            <span className="text-sm font-bold text-ink">{category.name}</span>
                           </div>
                         </TableCell>
-                        <TableCell className="max-w-[360px] px-4 py-4 text-xs leading-5 text-[#475569]">{category.description || "No description provided."}</TableCell>
+                        <TableCell className="max-w-[360px] px-4 py-4 text-xs leading-5 text-ink-soft">{category.description || "No description provided."}</TableCell>
                         <TableCell className="px-4 py-4">
-                          <span className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold ${active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{active ? "Active" : "Inactive"}</span>
+                          <span className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold ${active ? "bg-ok-soft text-ok" : "bg-surface-2 text-muted"}`}>{active ? "Active" : "Inactive"}</span>
                         </TableCell>
-                        <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
+                        <TableCell className="sticky right-0 bg-surface py-4 pl-4 pr-6 group-hover:bg-surface-2">
                           <ManagementRowActions
       readOnly={category.isActive === false}
                             activity={{ entityType: "CATEGORY", entityId: categoryId(category), name: category.name }}
@@ -305,17 +305,17 @@ export default function BusinessCategoriesPage() {
 
       <DialogPrimitive.Root open={dialogOpen} onOpenChange={setDialogOpen}>
         <DialogPrimitive.Portal>
-          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
-          <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">
+          <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-ink/40 backdrop-blur-[2px]" />
+          <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-line bg-surface p-5 shadow-2xl outline-none sm:p-6">
             <div className="mb-5 flex items-start justify-between gap-3">
-              <div><DialogPrimitive.Title className="text-lg font-bold text-slate-900">{editingCategory ? "Edit category" : "Add a category"}</DialogPrimitive.Title><DialogPrimitive.Description className="mt-1 text-xs leading-5 text-slate-500">Use a clear name and short description so teammates can classify businesses consistently.</DialogPrimitive.Description></div>
-              <DialogPrimitive.Close aria-label="Close" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X className="size-4" /></DialogPrimitive.Close>
+              <div><DialogPrimitive.Title className="text-lg font-bold text-ink">{editingCategory ? "Edit category" : "Add a category"}</DialogPrimitive.Title><DialogPrimitive.Description className="mt-1 text-xs leading-5 text-muted">Use a clear name and short description so teammates can classify businesses consistently.</DialogPrimitive.Description></div>
+              <DialogPrimitive.Close aria-label="Close" className="rounded-lg p-2 text-muted hover:bg-surface-2"><X className="size-4" /></DialogPrimitive.Close>
             </div>
             <form onSubmit={(event) => void submitCategory(event)} className="space-y-4">
-              <div className="space-y-1.5"><label htmlFor="category-name" className="text-xs font-semibold text-slate-700">Category name</label><Input id="category-name" name="name" required maxLength={100} defaultValue={editingCategory?.name ?? ""} placeholder="e.g. Manufacturing" className="h-11 rounded-xl" /></div>
-              <div className="space-y-1.5"><label htmlFor="category-description" className="text-xs font-semibold text-slate-700">Description <span className="font-normal text-slate-400">(optional)</span></label><textarea id="category-description" name="description" maxLength={500} defaultValue={editingCategory?.description ?? ""} rows={4} placeholder="Describe which businesses belong in this category…" className="w-full resize-y rounded-xl border border-slate-200 bg-white px-3 py-2.5 text-sm text-slate-900 outline-none placeholder:text-slate-400 focus:border-primary focus:ring-2 focus:ring-primary/15" /></div>
-              {formError && <p role="alert" className="rounded-lg bg-rose-50 p-3 text-xs text-rose-700">{formError}</p>}
-              <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
+              <div className="space-y-1.5"><label htmlFor="category-name" className="text-xs font-semibold text-ink-soft">Category name</label><Input id="category-name" name="name" required maxLength={100} defaultValue={editingCategory?.name ?? ""} placeholder="e.g. Manufacturing" className="h-11 rounded-xl" /></div>
+              <div className="space-y-1.5"><label htmlFor="category-description" className="text-xs font-semibold text-ink-soft">Description <span className="font-normal text-muted">(optional)</span></label><textarea id="category-description" name="description" maxLength={500} defaultValue={editingCategory?.description ?? ""} rows={4} placeholder="Describe which businesses belong in this category…" className="w-full resize-y rounded-xl border border-line bg-surface px-3 py-2.5 text-sm text-ink outline-none placeholder:text-muted focus:border-brand focus:ring-2 focus:ring-brand/15" /></div>
+              {formError && <p role="alert" className="rounded-lg bg-bad-soft p-3 text-xs text-bad">{formError}</p>}
+              <div className="flex justify-end gap-2 border-t border-surface-2 pt-4">
                 <Button type="button" variant="outline" disabled={mutationPending} onClick={() => setDialogOpen(false)} className="rounded-xl">Cancel</Button>
                 <Button type="submit" disabled={mutationPending} className="rounded-xl">{mutationPending && <LoaderCircle className="size-4 animate-spin" />}{editingCategory ? "Save changes" : "Create category"}</Button>
               </div>

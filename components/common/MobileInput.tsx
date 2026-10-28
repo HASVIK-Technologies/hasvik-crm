@@ -20,7 +20,7 @@ export default function MobileInput({
     <div
       className={`flex h-12 min-w-0 flex-1 items-center rounded-xl border bg-background px-3 ${
         disabled ? "opacity-60" : ""
-      } ${invalid ? "border-red-400 ring-1 ring-red-100" : ""}`}
+      } ${invalid ? "border-bad/30 ring-1 ring-bad-soft" : ""}`}
     >
       <span className="font-medium text-sm">+91</span>
 

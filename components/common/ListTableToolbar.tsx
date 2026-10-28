@@ -36,12 +36,12 @@ export default function ListTableToolbar({
             <ChevronDown />
           </OutlinedButton>
         </DropdownMenuTrigger>
-        <DropdownMenuContent align="end" className="w-44 bg-white">
+        <DropdownMenuContent align="end" className="w-44 bg-surface">
           {sortOptions.map((option) => (
             <DropdownMenuItem
               key={option.value}
               onSelect={() => onSortChange(option.value)}
-              className={`cursor-pointer text-xs ${option.value === sortValue ? "font-semibold text-primary" : ""}`}
+              className={`cursor-pointer text-xs ${option.value === sortValue ? "font-semibold text-brand-strong" : ""}`}
             >
               {option.label}
             </DropdownMenuItem>

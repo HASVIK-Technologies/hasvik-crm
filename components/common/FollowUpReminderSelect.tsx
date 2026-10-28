@@ -45,14 +45,14 @@ export default function FollowUpReminderSelect({
       <SelectTrigger className={className} aria-invalid={invalid}>
         {showIcon ? (
           <span className="flex items-center gap-2">
-            <Bell className="size-3.5 text-[#94a3b8]" />
+            <Bell className="size-3.5 text-muted" />
             <SelectValue placeholder={placeholder} />
           </span>
         ) : (
           <SelectValue placeholder={placeholder} />
         )}
       </SelectTrigger>
-      <SelectContent className="bg-white">
+      <SelectContent className="bg-surface">
         {allOptions.map((option) => (
           <SelectItem key={option.value} value={option.value}>
             {option.label}
