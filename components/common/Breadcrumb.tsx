@@ -10,7 +10,7 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
   if (!items || items.length === 0) return null;
 
   return (
-    <nav className="flex flex-wrap items-center gap-1.5 text-base sm:text-base md:text-lg">
+    <nav aria-label="Breadcrumb" className="flex flex-wrap items-center gap-1.5 text-base md:text-lg">
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
@@ -21,14 +21,14 @@ export default function Breadcrumb({ items }: { items: BreadcrumbItem[] }) {
                 href={item.href}
                 className={
                   isLast
-                    ? "font-semibold text-secondary hover:underline"
-                    : "font-medium text-secondary hover:underline"
+                    ? "font-semibold text-ink hover:underline"
+                    : "font-medium text-brand-strong hover:underline"
                 }
               >
                 {item.label}
               </Link>
             ) : (
-              <span className="font-semibold">{item.label}</span>
+              <span aria-current="page" className="font-semibold text-ink">{item.label}</span>
             )}
           </span>
         );

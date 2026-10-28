@@ -157,7 +157,7 @@ export default function BusinessDetailsFollowups({
                 <TableHead className="pl-6">Date &amp; time</TableHead>
                 <TableHead>Type</TableHead>
                 <TableHead>Status</TableHead>
-                <TableHead>Assigned to</TableHead>
+                <TableHead>Owner</TableHead>
                 <TableHead className="sticky right-0 bg-surface-2 pr-6 text-right">Actions</TableHead>
               </TableRow>
             </TableHeader>

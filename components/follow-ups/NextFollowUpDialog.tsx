@@ -186,7 +186,7 @@ function NextFollowUpForm({
           </div>
           <div>
             <label className="mb-1.5 block text-xs font-semibold text-ink-soft">
-              Assigned to <span className="text-bad">*</span>
+              Assign to <span className="text-bad">*</span>
             </label>
             <Controller
               control={control}

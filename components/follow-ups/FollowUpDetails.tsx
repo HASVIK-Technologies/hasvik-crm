@@ -71,7 +71,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
           <SummaryItem icon={<CalendarClock className="size-4" />} label="Scheduled for">
             <time dateTime={Number.isNaN(Date.parse(followUp.scheduledAt)) ? undefined : followUp.scheduledAt}>{dateTime(followUp.scheduledAt)}</time>
           </SummaryItem>
-          <SummaryItem icon={<UserRound className="size-4" />} label="Assigned to">{followUp.assignedToName || "Unassigned"}</SummaryItem>
+          <SummaryItem icon={<UserRound className="size-4" />} label="Owner">{followUp.assignedToName || "Unassigned"}</SummaryItem>
           <SummaryItem icon={<Bell className="size-4" />} label="Reminder">{reminder}</SummaryItem>
           <SummaryItem icon={<FileText className="size-4" />} label="Follow-up type">{formatFollowUpType(followUp.type)}</SummaryItem>
         </dl>

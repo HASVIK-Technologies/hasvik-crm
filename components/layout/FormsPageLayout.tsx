@@ -1,5 +1,6 @@
 import PageContainer from "./PageContainer";
 import ScrollToTopOnRoute from "@/components/common/ScrollToTopOnRoute";
+import BackButton from "@/components/common/BackButton";
 
 interface FormsPageLayoutProps {
   content: React.ReactNode;
@@ -13,7 +14,8 @@ export default function FormsPageLayout({
   return (
     <PageContainer className="flex flex-col gap-6">
       <ScrollToTopOnRoute />
-      {breadcrumb}
+      <div className="hidden sm:block">{breadcrumb}</div>
+      <BackButton className="self-start sm:hidden" />
       {content}
     </PageContainer>
   );

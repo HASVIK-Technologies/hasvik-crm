@@ -374,7 +374,7 @@ export default function BusinessDetails() {
                   <Users className="mt-0.5 size-4 shrink-0 text-muted" />
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-muted">
-                      Assigned to
+                      Owner
                     </p>
                     <p className="mt-1 truncate text-sm font-semibold text-ink">
                       {business.assignedToName || business.assignedTo || "Unassigned"}

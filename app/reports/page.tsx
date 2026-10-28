@@ -1,5 +1,5 @@
 import Link from "next/link";
-import { ArrowRight, BarChart3, CalendarCheck2, Filter, Hourglass, PlusCircle, Trophy, Users, Waypoints, type LucideIcon } from "lucide-react";
+import { ArrowRight, BarChart3, ChevronRight, CalendarCheck2, Filter, Hourglass, PlusCircle, Trophy, Users, Waypoints, type LucideIcon } from "lucide-react";
 import PageContainer from "@/components/layout/PageContainer";
 import { REPORTS, type ReportSlug } from "@/lib/reports/definitions";
 
@@ -22,11 +22,15 @@ export default function ReportsPage() {
           const Icon = ICONS[report.slug];
           return (
             <li key={report.slug}>
-              <Link href={`/reports/${report.slug}`} className="group flex h-full min-h-32 flex-col rounded-2xl border border-line bg-surface p-5 shadow-card transition-all duration-150 hover:-translate-y-1 hover:border-brand hover:bg-brand-soft/40 hover:shadow-pop active:scale-[0.98]">
-                <span className="grid size-11 place-items-center rounded-xl bg-brand-soft text-brand-strong"><Icon className="size-5" aria-hidden /></span>
-                <h2 className="mt-4 text-base font-bold tracking-tight text-ink">{report.title}</h2>
-                <p className="mt-1 flex-1 text-sm text-muted">{report.description}</p>
-                <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-brand-strong">Open report<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden /></span>
+              {/* A compact row on phones, a card from tablet up. */}
+              <Link href={`/reports/${report.slug}`} className="group flex h-full items-center gap-4 rounded-2xl border border-line bg-surface p-4 shadow-card transition-all duration-150 hover:-translate-y-1 hover:border-brand hover:bg-brand-soft/40 hover:shadow-pop active:scale-[0.98] sm:min-h-32 sm:flex-col sm:items-start sm:gap-0 sm:p-5">
+                <span className="grid size-11 shrink-0 place-items-center rounded-xl bg-brand-soft text-brand-strong"><Icon className="size-5" aria-hidden /></span>
+                <span className="min-w-0 flex-1 sm:flex sm:flex-col">
+                  <h2 className="text-base font-bold tracking-tight text-ink sm:mt-4">{report.title}</h2>
+                  <p className="mt-0.5 text-sm text-muted sm:mt-1 sm:flex-1">{report.description}</p>
+                  <span className="mt-4 hidden items-center gap-1 text-sm font-semibold text-brand-strong sm:inline-flex">Open report<ArrowRight className="size-4 transition-transform group-hover:translate-x-0.5" aria-hidden /></span>
+                </span>
+                <ChevronRight className="size-5 shrink-0 text-muted sm:hidden" aria-hidden />
               </Link>
             </li>
           );
