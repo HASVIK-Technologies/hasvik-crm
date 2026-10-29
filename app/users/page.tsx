@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import { useAuthStore } from "@/store/auth-store";
 import { isSuperAdmin, canEditManagedUser } from "@/types/auth";
 import { useTenantsQuery } from "@/hooks/use-tenants";
@@ -10,7 +11,7 @@ import { changedFields } from "@/lib/forms/changed-fields";
 
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
-import { useState, type FormEvent } from "react";
+import { Suspense, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
   Filter,
@@ -69,12 +70,24 @@ function RoleBadge({ role }: { role: string }) {
 }
 
 export default function UsersPage() {
+  return (
+    <Suspense fallback={<div className="skeleton m-4 h-64 rounded-2xl" role="status" aria-label="Loading users" />}>
+      <UsersPageContent />
+    </Suspense>
+  );
+}
+
+function UsersPageContent() {
+  const searchParams = useSearchParams();
   const { highlightItem, isItemHighlighted } = useListActionHighlight("users");
   const currentUser = useAuthStore((state) => state.user);
   const superAdmin = isSuperAdmin(currentUser);
   const tenantsQuery = useTenantsQuery(superAdmin, currentUser?.userId);
   const tenants = tenantsQuery.data ?? [];
-  const [statusFilter, setStatusFilter] = useState("ALL");
+  const [statusFilter, setStatusFilter] = useState(() => {
+    const requested = searchParams.get("status");
+    return requested === "ACTIVE" || requested === "INACTIVE" ? requested : "ALL";
+  });
   const [tenantFilter, setTenantFilter] = useState("ALL");
   const [search, setSearch] = useState("");
   const [roleFilter, setRoleFilter] = useState<UserRole | "ALL">("ALL");
@@ -103,7 +116,7 @@ export default function UsersPage() {
   const kpisQuery = useUserKpisQuery({
     search: debouncedSearch,
     role: roleFilter,
-    isActive: statusFilter === "ALL" ? undefined : statusFilter === "ACTIVE",
+    // No status here: the KPI cards set the status filter, so their numbers must not change when tapped.
     tenantId: superAdmin && tenantFilter !== "ALL" ? tenantFilter : undefined,
   });
   const updateMutation = useUpdateUser();
@@ -217,11 +230,15 @@ export default function UsersPage() {
         showStats={showStats}
         stats={
           <div className="space-y-3">
-            <KpiCards loading={kpisQuery.isPending} items={[
-              { label: "Team members", value: kpisQuery.isError ? "—" : kpisQuery.data?.total ?? "—", icon: UsersRound, tone: "blue" },
-              { label: "Active users", value: kpisQuery.isError ? "—" : kpisQuery.data?.active ?? "—", icon: ShieldCheck, tone: "green" },
-              { label: "Inactive users", value: kpisQuery.isError ? "—" : kpisQuery.data?.inactive ?? "—", icon: UserRound, tone: "slate" },
-            ]} />
+            <KpiCards loading={kpisQuery.isPending} items={([
+              { key: "ALL", label: "Team members", value: kpisQuery.isError ? "—" : kpisQuery.data?.total ?? "—", icon: UsersRound, tone: "blue" },
+              { key: "ACTIVE", label: "Active users", value: kpisQuery.isError ? "—" : kpisQuery.data?.active ?? "—", icon: ShieldCheck, tone: "green" },
+              { key: "INACTIVE", label: "Inactive users", value: kpisQuery.isError ? "—" : kpisQuery.data?.inactive ?? "—", icon: UserRound, tone: "slate" },
+            ] as const).map(({ key, ...item }) => ({
+              ...item,
+              active: statusFilter === key,
+              onClick: () => { setStatusFilter(statusFilter === key ? "ALL" : key); setPage(1); },
+            }))} />
             {kpisQuery.isError && <p role="alert" className="text-sm text-warn">User totals could not be loaded. <button type="button" onClick={() => void kpisQuery.refetch()} className="font-semibold underline">Retry totals</button></p>}
           </div>
         }

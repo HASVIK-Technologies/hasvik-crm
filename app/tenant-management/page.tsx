@@ -1,11 +1,12 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import SelectField from "@/components/common/SelectField";
 import { changedFields } from "@/lib/forms/changed-fields";
 
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { Suspense, useMemo, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
   Building2,
@@ -209,6 +210,15 @@ function TenantEditor({
 }
 
 export default function TenantManagementPage() {
+  return (
+    <Suspense fallback={<div className="skeleton m-4 h-64 rounded-2xl" role="status" aria-label="Loading tenants" />}>
+      <TenantManagementPageContent />
+    </Suspense>
+  );
+}
+
+function TenantManagementPageContent() {
+  const searchParams = useSearchParams();
   const { highlightItem, isItemHighlighted } = useListActionHighlight("tenants");
   const user = useAuthStore((state) => state.user);
   const hasvikAdmin = isSuperAdmin(user);
@@ -218,7 +228,10 @@ export default function TenantManagementPage() {
   const updateMutation = useUpdateTenant();
   const statusMutation = useUpdateTenantStatus();
   const [search, setSearch] = useState("");
-  const [filter, setFilter] = useState<TenantFilter>("ACTIVE");
+  const [filter, setFilter] = useState<TenantFilter>(() => {
+    const requested = searchParams.get("status");
+    return requested === "ALL" || requested === "INACTIVE" ? requested : "ACTIVE";
+  });
   const [sortValue, setSortValue] = useState("default");
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -352,11 +365,17 @@ export default function TenantManagementPage() {
         resultCount={total}
         showStats={showStats}
         stats={
-          <KpiCards items={[
-              { label: "Tenants", value: activeCount + inactiveCount, icon: UsersRound, tone: "text-brand-strong bg-brand-soft" },
-              { label: "Active tenants", value: activeCount, icon: Check, tone: "text-ok bg-ok-soft" },
-              { label: "Inactive tenants", value: inactiveCount, icon: X, tone: "text-ink-soft bg-surface-2" },
-            ].map((item, index) => ({ ...item, tone: (["blue", "green", "slate"] as const)[index] }))} />
+          // Tapping a card filters the list; tapping the selected one again shows every tenant.
+          <KpiCards items={([
+              { key: "ALL", label: "Tenants", value: activeCount + inactiveCount, icon: UsersRound },
+              { key: "ACTIVE", label: "Active tenants", value: activeCount, icon: Check },
+              { key: "INACTIVE", label: "Inactive tenants", value: inactiveCount, icon: X },
+            ] as const).map(({ key, ...item }, index) => ({
+              ...item,
+              tone: (["blue", "green", "slate"] as const)[index],
+              active: filter === key,
+              onClick: () => { setFilter(filter === key ? "ALL" : key); setPage(1); },
+            }))} />
         }
         actions={
           <Actions

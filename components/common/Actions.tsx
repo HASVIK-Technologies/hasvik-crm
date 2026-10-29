@@ -24,7 +24,8 @@ export interface ActionItem {
 }
 
 interface ActionsProps {
-  primary: ActionItem;
+  /** Leave out when there is nothing to do right now (e.g. no pending requests). */
+  primary?: ActionItem;
   secondary?: ActionItem[];
   menuItems?: ActionItem[];
   className?: string;
@@ -119,14 +120,14 @@ export default function Actions({
 }: ActionsProps) {
   const secondaryActions = [...secondary, ...menuItems];
   const allActions = [
-    primary,
+    ...(primary ? [primary] : []),
     ...secondaryActions.filter((action) => !action.desktopOnly),
   ];
 
   return (
     <div className={`flex items-center justify-end gap-2 ${className}`}>
       <div className="hidden items-center gap-2 lg:flex">
-        <ActionButton action={primary} />
+        {primary && <ActionButton action={primary} />}
         {secondaryActions.length > 0 && (
           <DropdownMenu>
             <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild>
@@ -144,7 +145,7 @@ export default function Actions({
       </div>
 
       <div className="flex items-center gap-2 lg:hidden">
-        <FloatingAction action={primary} />
+        {primary && <FloatingAction action={primary} />}
         {secondaryActions.filter((action) => !action.desktopOnly).length > 0 && <DropdownMenu>
           <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild>
               <OutlinedButton size="icon" aria-label="More actions">
@@ -152,7 +153,7 @@ export default function Actions({
               </OutlinedButton>
           </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
           <DropdownMenuContent align="end" className="w-48 bg-surface">
-            {allActions.slice(1).map((action) => (
+            {allActions.slice(primary ? 1 : 0).map((action) => (
               <ActionMenuItem key={action.label} action={action} />
             ))}
           </DropdownMenuContent>

@@ -26,10 +26,10 @@ export default function PlatformDashboard({ user, now }: { user: AuthUser; now: 
 
   return <div className="space-y-4">
     <KpiCards className="gap-4 sm:gap-4" variant="solid" items={[
-      { label: "Active tenants", value: metricValue(active, active.data?.total), icon: Landmark, tone: "blue" },
-      { label: "Inactive tenants", value: metricValue(inactive, inactive.data?.total), icon: ShieldCheck, tone: "slate" },
-      { label: "Active users", value: metricValue(users, users.data?.active), icon: Users, tone: "green" },
-      { label: "Pending subscriptions", value: metricValue(subscriptions, summary.pending.length), icon: CreditCard, tone: "amber" },
+      { label: "Active tenants", value: metricValue(active, active.data?.total), icon: Landmark, tone: "blue", href: "/tenant-management?status=ACTIVE" },
+      { label: "Inactive tenants", value: metricValue(inactive, inactive.data?.total), icon: ShieldCheck, tone: "slate", href: "/tenant-management?status=INACTIVE" },
+      { label: "Active users", value: metricValue(users, users.data?.active), icon: Users, tone: "green", href: "/users?status=ACTIVE" },
+      { label: "Pending subscriptions", value: metricValue(subscriptions, summary.pending.length), icon: CreditCard, tone: "amber", href: "/subscriptions?status=PENDING" },
     ]} />
     {(inactive.isError || users.isError) && <div role="alert" className="flex flex-wrap items-center justify-between gap-3 border border-warn/30 bg-warn-soft p-4 text-sm text-warn"><span>Some platform totals are unavailable.</span><button type="button" onClick={() => { if (inactive.isError) void inactive.refetch(); if (users.isError) void users.refetch(); }} className="font-semibold underline">Retry totals</button></div>}
     <div className="grid items-start gap-4 xl:grid-cols-[minmax(0,1.4fr)_minmax(0,1fr)]">

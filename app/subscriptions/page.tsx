@@ -1,5 +1,6 @@
 "use client";
 
+import { useSearchParams } from "next/navigation";
 import SelectField from "@/components/common/SelectField";
 import { isRecordInactive } from "@/lib/records/activity";
 import { EntityActivityDialog } from "@/components/common/EntityActivityButton";
@@ -9,7 +10,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { Suspense, useMemo, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
   ArrowRight,
@@ -347,6 +348,15 @@ function SubscriptionRow({
 }
 
 export default function SubscriptionsPage() {
+  return (
+    <Suspense fallback={<div className="skeleton m-4 h-64 rounded-2xl" role="status" aria-label="Loading subscriptions" />}>
+      <SubscriptionsPageContent />
+    </Suspense>
+  );
+}
+
+function SubscriptionsPageContent() {
+  const searchParams = useSearchParams();
   const { highlightItem, isItemHighlighted } = useListActionHighlight("subscriptions");
   const user = useAuthStore((state) => state.user);
   const hasvikAdmin = isSuperAdmin(user);
@@ -382,7 +392,10 @@ export default function SubscriptionsPage() {
     ownTenant?.name ??
     (typeof embeddedTenant === "object" ? embeddedTenant.name : undefined);
   const [chosenPlan, setChosenPlan] = useState<SubscriptionPlan | null>(null);
-  const [statusFilter, setStatusFilter] = useState<SubscriptionFilter>("ALL");
+  const [statusFilter, setStatusFilter] = useState<SubscriptionFilter>(() => {
+    const requested = searchParams.get("status") as SubscriptionFilter | null;
+    return requested && ["ACTIVE", "PENDING", "CANCELLED", "REJECTED", "SUSPENDED", "EXPIRED"].includes(requested) ? requested : "ALL";
+  });
   const [showFilters, setShowFilters] = useState(true);
   const [notice, setNotice] = useState("");
   const [operationError, setOperationError] = useState("");
@@ -629,8 +642,9 @@ export default function SubscriptionsPage() {
       showStats={false}
       actions={
         <Actions
-          primary={{
-            label: hasvikAdmin ? "Review pending requests" : "Explore plans",
+          // Admins: only when something is waiting, and say how many. Workspaces: browse the plans.
+          primary={hasvikAdmin && !pendingSubscriptionsCount ? undefined : {
+            label: hasvikAdmin ? `Review ${pendingSubscriptionsCount} pending ${pendingSubscriptionsCount === 1 ? "request" : "requests"}` : "Explore plans",
             onSelect: () => {
               if (hasvikAdmin) { setStatusFilter("PENDING"); setPage(1); }
               document

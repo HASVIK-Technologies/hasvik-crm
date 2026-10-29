@@ -58,6 +58,7 @@ export default function BusinessCategoriesPage() {
   const [sortBy, setSortBy] = useState("name");
   const [sortOrder, setSortOrder] = useState<"asc" | "desc">("asc");
   const [showStats, setShowStats] = useState(true);
+  const [statusView, setStatusView] = useState<"ALL" | "ACTIVE" | "INACTIVE">("ALL");
   const [editingCategory, setEditingCategory] = useState<BusinessCategory | null>(null);
   const [changingStatusCategory, setChangingStatusCategory] =
     useState<BusinessCategory | null>(null);
@@ -79,8 +80,10 @@ export default function BusinessCategoriesPage() {
     () => categoriesQuery.data?.items ?? [],
     [categoriesQuery.data],
   );
-  const categories = allCategories;
   const activeCount = allCategories.filter((category) => category.isActive !== false).length;
+  const categories = statusView === "ALL"
+    ? allCategories
+    : allCategories.filter((category) => (category.isActive !== false) === (statusView === "ACTIVE"));
   const inactiveCount = allCategories.length - activeCount;
   const total = categoriesQuery.data?.total ?? 0;
   const mutationPending = createMutation.isPending || updateMutation.isPending;
@@ -166,11 +169,16 @@ export default function BusinessCategoriesPage() {
       searchPlaceholder="Search categories"
       showStats={showStats}
       stats={
-        <KpiCards items={[
-            { label: "All categories", value: total, icon: FolderKanban, tone: "text-brand-strong bg-brand-soft" },
-            { label: "Active on page", value: activeCount, icon: Check, tone: "text-ok bg-ok-soft" },
-            { label: "Inactive on page", value: inactiveCount, icon: CircleAlert, tone: "text-warn bg-warn-soft" },
-          ].map((item, index) => ({ ...item, tone: (["blue", "green", "amber"] as const)[index] }))} />
+        <KpiCards items={([
+            { key: "ALL", label: "All categories", value: total, icon: FolderKanban },
+            { key: "ACTIVE", label: "Active on page", value: activeCount, icon: Check },
+            { key: "INACTIVE", label: "Inactive on page", value: inactiveCount, icon: CircleAlert },
+          ] as const).map(({ key, ...item }, index) => ({
+            ...item,
+            tone: (["blue", "green", "amber"] as const)[index],
+            active: statusView === key,
+            onClick: () => setStatusView(statusView === key ? "ALL" : key),
+          }))} />
       }
       actions={
         <Actions

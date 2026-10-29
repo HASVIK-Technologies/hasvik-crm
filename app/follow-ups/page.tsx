@@ -239,6 +239,11 @@ function FollowupsContent() {
           <FollowUpStats
             data={kpiStats}
             loading={kpisQuery.isLoading}
+            selected={filters.view === "table" ? (filters.tab === "all" ? "total" : filters.tab) : null}
+            onSelect={(tab) => {
+              if (filters.view !== "table") filters.setView("table");
+              filters.setTab(tab === "total" ? "all" : tab);
+            }}
           />
         }
         filters={
