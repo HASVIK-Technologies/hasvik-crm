@@ -46,7 +46,7 @@ export default function FollowUpFilters({ filters, setFilter, reset, view }: Pro
   ];
   if (usesDateRange) fields.push({ key: "dates", label: "Date range", active: Boolean(filters.fromDate || filters.toDate), reset: () => { setFilter("fromDate", ""); setFilter("toDate", ""); }, control: <>
     <FollowUpDateRange from={filters.fromDate} to={filters.toDate} onChange={(from, to) => { setFilter("tab", "all"); setFilter("fromDate", from); setFilter("toDate", to); }} />
-    <p className="mt-1.5 text-[11px] leading-4 text-muted">Choosing a custom range switches to All follow-ups.</p>
+    <p className="mt-1.5 text-xs leading-4 text-muted">Choosing a custom range switches to All follow-ups.</p>
   </> });
   return <ResponsiveFilters fields={fields} onReset={reset} />;
 }

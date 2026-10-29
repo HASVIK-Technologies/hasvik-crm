@@ -92,10 +92,11 @@ function FollowupsContent() {
         : filters.tab === "upcoming"
           ? { fromDate: dayBoundary(1), toDate: "" }
           : filters.tab === "overdue"
-            ? { fromDate: "", toDate: dayBoundary(-1, true) }
+            ? { fromDate: "", toDate: "" }
             : { fromDate: filters.fromDate, toDate: filters.toDate };
     return {
       ...commonFilters,
+      status: filters.tab === "overdue" ? "OVERDUE" : commonFilters.status,
       page: filters.page,
       limit: filters.limit,
       tab: filters.tab,
@@ -253,15 +254,16 @@ function FollowupsContent() {
             <ActiveFilterChips chips={urlFilters.chips} onClearAll={urlFilters.clearAll} />
             {filters.view === "table" && (
               <div className="flex items-center gap-1 overflow-x-auto border-b border-line">
-                {/* {(["all", "today", "upcoming", "overdue"] as const).map((tab) => ( */}
-                {(["all", "today", "upcoming"] as const).map((tab) => (
+                {(["all", "today", "upcoming", "overdue"] as const).map((tab) => (
                   <button
                     type="button"
                     key={tab}
                     onClick={() => filters.setTab(tab)}
-                    className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-brand text-brand-strong" : "border-transparent text-muted hover:text-ink-soft"}`}
+                    aria-pressed={filters.tab === tab}
+                    className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 border-b-2 px-4 text-sm font-semibold capitalize transition-colors ${filters.tab === tab ? "border-brand text-brand-strong" : "border-transparent text-muted hover:text-ink"}`}
                   >
                     {tab}
+                    {tab === "overdue" && kpiData.overdue > 0 && <span className="rounded-full bg-bad-soft px-1.5 text-xs text-bad tabular">{kpiData.overdue}</span>}
                   </button>
                 ))}
               </div>

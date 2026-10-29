@@ -131,7 +131,7 @@ export default function ExploreCrmPage() {
                 <p className="text-xs font-semibold text-muted">YOUR SALES WORKSPACE</p>
                 <p className="mt-1 text-sm font-bold text-ink">Pipeline overview</p>
               </div>
-              <span className="rounded-full bg-ok-soft px-3 py-1.5 text-[11px] font-semibold text-ok">
+              <span className="rounded-full bg-ok-soft px-3 py-1.5 text-xs font-semibold text-ok">
                 This week
               </span>
             </div>
@@ -146,7 +146,7 @@ export default function ExploreCrmPage() {
                     <Icon className="size-4" />
                   </span>
                   <p className="mt-4 text-xl font-bold tracking-tight text-ink sm:text-2xl">{value}</p>
-                  <p className="mt-1 text-[10px] leading-4 text-muted sm:text-xs">{label}</p>
+                  <p className="mt-1 text-xs leading-4 text-muted sm:text-xs">{label}</p>
                 </div>
               ))}
             </div>
@@ -154,7 +154,7 @@ export default function ExploreCrmPage() {
               <div className="rounded-2xl bg-surface-2 p-4 sm:p-5">
                 <div className="mb-4 flex items-center justify-between">
                   <p className="text-xs font-bold text-ink">Next up</p>
-                  <a href="#features" className="text-[11px] font-semibold text-brand-strong">View follow-ups</a>
+                  <a href="#features" className="text-xs font-semibold text-brand-strong">View follow-ups</a>
                 </div>
                 {[
                   { name: "Northstar Manufacturing", task: "Share revised proposal", time: "10:30 AM", badge: "Today" },
@@ -166,11 +166,11 @@ export default function ExploreCrmPage() {
                     </span>
                     <span className="min-w-0 flex-1">
                       <span className="block truncate text-xs font-semibold text-ink">{item.name}</span>
-                      <span className="mt-1 block truncate text-[10px] text-muted">{item.task}</span>
+                      <span className="mt-1 block truncate text-xs text-muted">{item.task}</span>
                     </span>
                     <span className="text-right">
-                      <span className="block text-[10px] font-semibold text-ink-soft">{item.time}</span>
-                      <span className="mt-1 block text-[10px] text-muted">{item.badge}</span>
+                      <span className="block text-xs font-semibold text-ink-soft">{item.time}</span>
+                      <span className="mt-1 block text-xs text-muted">{item.badge}</span>
                     </span>
                   </div>
                 ))}
@@ -183,7 +183,7 @@ export default function ExploreCrmPage() {
             </span>
             <span>
               <span className="block text-xs font-bold text-ink">Nothing slips through</span>
-              <span className="mt-0.5 block text-[10px] text-muted">Every next step stays visible</span>
+              <span className="mt-0.5 block text-xs text-muted">Every next step stays visible</span>
             </span>
           </div>
         </div>
@@ -278,7 +278,7 @@ export default function ExploreCrmPage() {
                   }`}
                 >
                   {index === 0 && plans.length > 1 && (
-                    <span className="absolute -top-3 left-6 rounded-full bg-btn px-3 py-1 text-[10px] font-bold uppercase tracking-wide text-white">
+                    <span className="absolute -top-3 left-6 rounded-full bg-btn px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
                       Start here
                     </span>
                   )}
@@ -287,7 +287,7 @@ export default function ExploreCrmPage() {
                       <h3 className="text-lg font-bold text-ink">{plan.name}</h3>
                       {plan.description && <p className="mt-1 text-xs leading-5 text-muted">{plan.description}</p>}
                     </div>
-                    <span className="rounded-full bg-brand-soft px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-brand-strong">
+                    <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-brand-strong">
                       {plan.billingCycle.toLowerCase()}
                     </span>
                   </div>
@@ -320,7 +320,7 @@ export default function ExploreCrmPage() {
                       Create your workspace <ArrowRight className="ml-2 size-4" />
                     </Link>
                   </Button>
-                  <p className="mt-3 text-center text-[11px] leading-5 text-muted">
+                  <p className="mt-3 text-center text-xs leading-5 text-muted">
                     Subscription purchase is available after tenant signup and admin sign-in.
                   </p>
                 </article>

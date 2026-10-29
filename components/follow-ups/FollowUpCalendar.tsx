@@ -20,6 +20,13 @@ import { cn } from "@/lib/utils";
 import type { FollowUpItem } from "@/types/follow-up";
 import FollowUpCommunicationActions from "@/components/follow-ups/FollowUpCommunicationActions";
 
+const EVENT_TONE: Record<string, string> = {
+  SCHEDULED: "border-brand bg-brand-soft/70",
+  COMPLETED: "border-ok bg-ok-soft/70",
+  OVERDUE: "border-bad bg-bad-soft/70",
+  CANCELLED: "border-muted bg-surface-2 opacity-70",
+};
+
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
 function dateKey(date: Date) {
@@ -221,7 +228,7 @@ export default function FollowUpCalendar({
                     <div className="mb-2 flex items-center justify-between">
                       <span className={cn("flex size-7 items-center justify-center text-xs font-bold", isToday ? "bg-btn text-white" : inMonth ? "text-ink-soft" : "text-muted")}>{day.getDate()}</span>
                       <div className="flex items-center gap-1">
-                        {dayItems.length > 0 && <span className="text-[10px] font-semibold text-muted">{dayItems.length}</span>}
+                        {dayItems.length > 0 && <span className="text-xs font-semibold text-muted">{dayItems.length}</span>}
                         {canSchedule && (
                           <Tooltip>
                             <TooltipTrigger asChild>
@@ -237,12 +244,12 @@ export default function FollowUpCalendar({
                         <div
                           key={item.id}
                           data-follow-up-item-id={item.id}
-                          className={cn("group border-l-2 border-brand-strong bg-brand-soft/70 p-2 transition-colors", isFollowUpHighlighted(item.id) && "bg-brand-soft ring-2 ring-inset ring-brand/30")}
+                          className={cn("group border-l-4 p-2 transition-colors", EVENT_TONE[String(item.status).toUpperCase()] ?? EVENT_TONE.SCHEDULED, isFollowUpHighlighted(item.id) && "bg-brand-soft ring-2 ring-inset ring-brand/30")}
                         >
                           <div className="flex items-start gap-1">
                             <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
-                              <span className="block truncate text-[11px] font-bold text-ink" title={item.businessName}>{timeLabel(item.scheduledAt)} · {item.businessName}</span>
-                              <span className="mt-0.5 block truncate text-[10px] text-muted">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
+                              <span className="block truncate text-xs font-bold text-ink" title={item.businessName}>{timeLabel(item.scheduledAt)} · {item.businessName}</span>
+                              <span className="mt-0.5 block truncate text-xs text-muted">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                             </button>
                             <DropdownMenu>
                               <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-6 text-muted"><MoreVertical className="size-3.5" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
@@ -255,14 +262,14 @@ export default function FollowUpCalendar({
                               </DropdownMenuContent>
                             </DropdownMenu>
                           </div>
-                          <div className="mt-1.5 flex items-center justify-between gap-1"><StatusBadge status={item.status} className="px-1.5 py-0 text-[9px]" /><FollowUpCommunicationActions item={item} className="size-6" onAction={() => highlightFollowUp(item.id)} /></div>
+                          <div className="mt-1.5 flex items-center justify-between gap-1"><StatusBadge status={item.status} className="px-1.5 py-0 text-xs" /><FollowUpCommunicationActions item={item} className="size-6" onAction={() => highlightFollowUp(item.id)} /></div>
                         </div>
                       ))}
                       {dayItems.length > 3 && (
                         <button
                           type="button"
                           onClick={() => setSelectedDay(key)}
-                          className="w-full border border-dashed border-brand-strong/30 bg-brand-soft/50 px-2 py-1.5 text-left text-[10px] font-bold text-brand-strong transition-colors hover:border-brand-strong/60 hover:bg-brand-soft"
+                          className="w-full border border-dashed border-brand-strong/30 bg-brand-soft/50 px-2 py-1.5 text-left text-xs font-bold text-brand-strong transition-colors hover:border-brand-strong/60 hover:bg-brand-soft"
                           aria-label={`View all ${dayItems.length} follow-ups for ${day.toLocaleDateString("en-IN")}`}
                         >
                           +{dayItems.length - 3} more · View day
@@ -279,7 +286,7 @@ export default function FollowUpCalendar({
           <div className="grid grid-cols-[auto_1fr_auto] items-center gap-2 border-b border-line bg-surface-2 px-3 py-2.5 rounded-2xl">
             <button type="button" onClick={() => changeWeek(-1)} aria-label="Previous week" className="flex size-9 items-center justify-center border border-line bg-surface text-ink-soft hover:bg-surface-2"><ChevronLeft className="size-4" /></button>
             <div className="flex min-w-0 flex-col items-center justify-center border border-line bg-surface px-2 py-1 text-center">
-              <span className="text-[9px] font-bold uppercase tracking-wide text-muted">Select week</span>
+              <span className="text-xs font-bold uppercase tracking-wide text-muted">Select week</span>
               <DatePicker value={dateKey(mobileWeekStart)} onChange={selectWeek} label="Select week" />
               <p className="text-xs font-bold text-ink-soft">
                 {new Intl.DateTimeFormat("en-IN", { day: "numeric", month: "short" }).format(mobileDays[0])}
@@ -289,7 +296,7 @@ export default function FollowUpCalendar({
               <span className="sr-only">Week view</span>
             </div>
             <button type="button" onClick={() => changeWeek(1)} aria-label="Next week" className="flex size-9 items-center justify-center border border-line bg-surface text-ink-soft hover:bg-surface-2"><ChevronRight className="size-4" /></button>
-            <button type="button" onClick={goToToday} className="col-span-3 justify-self-center text-[11px] font-bold text-brand-strong hover:underline">Go to this week</button>
+            <button type="button" onClick={goToToday} className="col-span-3 justify-self-center text-xs font-bold text-brand-strong hover:underline">Go to this week</button>
           </div>
           <div className="divide-y divide-line">
             {mobileDays.map((day) => {
@@ -304,11 +311,11 @@ export default function FollowUpCalendar({
                       <span className={cn("flex size-9 shrink-0 items-center justify-center text-sm font-bold", isToday ? "bg-btn text-white" : "border border-line bg-surface text-ink-soft")}>{day.getDate()}</span>
                       <div className="min-w-0">
                         <h3 className="text-xs font-bold text-ink">{new Intl.DateTimeFormat("en-IN", { weekday: "long" }).format(day)}{isToday ? " · Today" : ""}</h3>
-                        <p className="mt-0.5 text-[10px] text-muted">{new Intl.DateTimeFormat("en-IN", { month: "long", year: "numeric" }).format(day)} · {dayItems.length} {dayItems.length === 1 ? "follow-up" : "follow-ups"}</p>
+                        <p className="mt-0.5 text-xs text-muted">{new Intl.DateTimeFormat("en-IN", { month: "long", year: "numeric" }).format(day)} · {dayItems.length} {dayItems.length === 1 ? "follow-up" : "follow-ups"}</p>
                       </div>
                     </div>
                     {canSchedule && (
-                      <button type="button" onClick={() => scheduleForDay(day)} className="flex h-8 shrink-0 items-center gap-1.5 border border-accent bg-surface px-2.5 text-[11px] font-bold text-accent-strong hover:bg-ok-soft"><Plus className="size-3.5" />Add</button>
+                      <button type="button" onClick={() => scheduleForDay(day)} className="flex h-8 shrink-0 items-center gap-1.5 border border-accent bg-surface px-2.5 text-xs font-bold text-accent-strong hover:bg-ok-soft"><Plus className="size-3.5" />Add</button>
                     )}
                   </div>
                   <div className="space-y-2 p-3">
@@ -321,7 +328,7 @@ export default function FollowUpCalendar({
                         <div className="w-14 shrink-0 pt-0.5 text-xs font-bold text-brand-strong">{timeLabel(item.scheduledAt)}</div>
                         <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
                           <span className="block truncate text-sm font-bold text-ink" title={item.businessName}>{item.businessName}</span>
-                          <span className="mt-0.5 block truncate text-[11px] text-muted">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
+                          <span className="mt-0.5 block truncate text-xs text-muted">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                           <StatusBadge status={item.status} className="mt-2" />
                         </button>
                         <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>

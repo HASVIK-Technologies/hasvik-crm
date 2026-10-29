@@ -64,7 +64,7 @@ export function DashboardFacts({ items }: { items: { label: string; value: React
   const colored = useContext(ColoredPanelContext);
   return <dl className={cn("grid grid-cols-2 gap-3", items.length > 2 && "sm:grid-cols-3")}>{items.map((item) => {
     const visual = item.status ? getSubscriptionStatusVisual(item.status) : undefined;
-    return <div key={item.label} className={cn("rounded-xl border p-3", colored ? "border-white/15 bg-surface/5" : "border-surface-2 bg-surface-2", visual && "border-l-[3px]", visual?.accent)}><dt className={cn("flex items-center gap-1.5 text-[11px] leading-relaxed", colored ? "text-white" : "text-muted")}>{visual && <span aria-hidden="true" className={cn("size-1.5 shrink-0 rounded-full", colored ? visual.darkDot : visual.dot)} />}{item.label}</dt><dd className={cn("mt-1 text-lg font-bold", colored ? "text-white" : "text-ink")}>{item.value}</dd></div>;
+    return <div key={item.label} className={cn("rounded-xl border p-3", colored ? "border-white/15 bg-surface/5" : "border-surface-2 bg-surface-2", visual && "border-l-[3px]", visual?.accent)}><dt className={cn("flex items-center gap-1.5 text-xs leading-relaxed", colored ? "text-white" : "text-muted")}>{visual && <span aria-hidden="true" className={cn("size-1.5 shrink-0 rounded-full", colored ? visual.darkDot : visual.dot)} />}{item.label}</dt><dd className={cn("mt-1 text-lg font-bold", colored ? "text-white" : "text-ink")}>{item.value}</dd></div>;
   })}</dl>;
 }
 
@@ -108,7 +108,7 @@ export function FollowUpQueue({ items, shared, emptyMessage, total }: {
         return <Link key={item.id} href={`/follow-ups/${encodeURIComponent(item.id)}`} className={cn("group -mx-2 flex items-start gap-3 rounded-xl px-2 py-3 transition-colors first:pt-0 last:pb-0 focus-visible:outline-2", colored ? "hover:bg-surface/5 focus-visible:outline-white" : "hover:bg-brand-soft/50 focus-visible:outline-brand")}>
           <span className={cn("mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset", item.status === "OVERDUE" ? "bg-bad-soft text-bad ring-bad-soft" : typeStyles[item.type] ?? "bg-surface-2 text-muted ring-line")}><Icon className="size-4" /></span>
           <span className="min-w-0 flex-1"><span className={cn("block truncate text-sm font-semibold", colored ? "text-white" : "text-ink group-hover:text-brand-strong")}>{item.businessName || "Business follow-up"}</span><span className={cn("mt-1 block text-xs leading-relaxed", colored ? "text-white" : "text-muted")}><span className="capitalize">{item.type.toLowerCase().replaceAll("_", " ")}</span> · {dashboardDateLabel(item.scheduledAt, true)}{item.businessCity && <span className="block truncate">{item.businessCity}</span>}{shared && <span className="block truncate">Assigned to {item.assignedToName || "Unassigned"}</span>}{item.notes && <span className="mt-1 line-clamp-1">{item.notes}</span>}</span></span>
-          <span className={cn("mt-0.5 shrink-0 rounded-full px-2 py-1 text-[10px] font-semibold capitalize", statusStyles[item.status] ?? "bg-surface-2 text-ink-soft")}>{item.status.toLowerCase()}</span>
+          <span className={cn("mt-0.5 shrink-0 rounded-full px-2 py-1 text-xs font-semibold capitalize", statusStyles[item.status] ?? "bg-surface-2 text-ink-soft")}>{item.status.toLowerCase()}</span>
         </Link>;
       })}
     </div>

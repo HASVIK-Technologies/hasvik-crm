@@ -84,7 +84,7 @@ export default function TenantSignupPage() {
               <Building2 className="size-5" />
             </span>
             <div>
-              <span className="inline-flex rounded-full bg-ok-soft px-2.5 py-1 text-[10px] font-bold uppercase tracking-wide text-ok">
+              <span className="inline-flex rounded-full bg-ok-soft px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-ok">
                 Secure registration
               </span>
               <h1 className="mt-2 text-2xl font-bold tracking-tight text-ink sm:text-3xl">

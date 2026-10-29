@@ -163,7 +163,7 @@ export default function FollowUpAutocomplete({
                 <span>
                   <span className="block font-semibold">{option.label}</span>
                   {option.subtitle && (
-                    <span className="text-[10px] text-muted">
+                    <span className="text-xs text-muted">
                       {option.subtitle}
                     </span>
                   )}

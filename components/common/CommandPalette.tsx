@@ -86,7 +86,7 @@ export default function CommandPalette({ open, onClose }: { open: boolean; onClo
             aria-label="Search"
             className="h-14 w-full bg-transparent text-base text-ink outline-none placeholder:text-muted"
           />
-          <kbd className="hidden rounded-md border border-line px-1.5 py-0.5 text-[11px] font-semibold text-muted sm:block">Esc</kbd>
+          <kbd className="hidden rounded-md border border-line px-1.5 py-0.5 text-xs font-semibold text-muted sm:block">Esc</kbd>
         </div>
         <ul role="listbox" aria-label="Results" className="max-h-[50vh] overflow-y-auto p-2">
           {entries.length === 0 && <li className="px-3 py-8 text-center text-sm text-muted">Nothing matches “{query}”. Try a business name or a page like “reports”.</li>}

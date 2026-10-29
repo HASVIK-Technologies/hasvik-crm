@@ -51,7 +51,7 @@ export default function ColumnChart({ points, ariaLabel, unit = "", className, o
           );
         })}
       </div>
-      <div aria-hidden className="mt-1.5 flex gap-1 text-[10px] text-muted sm:gap-1.5">
+      <div aria-hidden className="mt-1.5 flex gap-1 text-xs text-muted sm:gap-1.5">
         {points.map((point, index) => (
           <span key={point.key} className="min-w-0 flex-1 truncate text-center">{index % every === 0 ? point.label.slice(point.label.length > 7 ? 5 : 0) : ""}</span>
         ))}

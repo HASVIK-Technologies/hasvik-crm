@@ -65,14 +65,14 @@ export default function TrendChart({ actual, forecast, ariaLabel, unit = "", onS
           {ticks.map((t) => (
             <g key={t}>
               <line x1={PAD.left} x2={W - PAD.right} y1={y(t)} y2={y(t)} className="stroke-line" strokeWidth={1} />
-              <text x={PAD.left - 6} y={y(t) + 4} textAnchor="end" className="fill-muted text-[10px]">{t}</text>
+              <text x={PAD.left - 6} y={y(t) + 4} textAnchor="end" className="fill-muted text-xs">{t}</text>
             </g>
           ))}
           {band && <path d={band} className="fill-brand/20" />}
           {actual.length > 1 && <path d={actualPath} fill="none" className="stroke-brand-strong" strokeWidth={2.5} strokeLinejoin="round" />}
           {forecast.length > 0 && <path d={expectedPath} fill="none" className="stroke-accent" strokeWidth={2.5} strokeDasharray="6 5" strokeLinejoin="round" />}
           {all.filter((_, i) => i % Math.max(1, Math.ceil(total / 8)) === 0).map((p) => (
-            <text key={p.key} x={x(p.index)} y={H - 6} textAnchor="middle" className="fill-muted text-[10px]">{p.label.slice(2)}</text>
+            <text key={p.key} x={x(p.index)} y={H - 6} textAnchor="middle" className="fill-muted text-xs">{p.label.slice(2)}</text>
           ))}
         </svg>
         {/* Touch and keyboard targets laid over the points. */}

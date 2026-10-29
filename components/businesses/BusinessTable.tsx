@@ -148,7 +148,7 @@ function RowWhatsAppButton({
         className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-line bg-surface p-1.5 shadow-lg"
         onClick={(e) => e.stopPropagation()}
       >
-        <div className="px-2.5 py-1.5 text-[11px] font-semibold text-muted">
+        <div className="px-2.5 py-1.5 text-xs font-semibold text-muted">
           WhatsApp / Phone Numbers
         </div>
         <div className="flex flex-col gap-0.5">
@@ -172,7 +172,7 @@ function RowWhatsAppButton({
                     {entry.number}
                   </span>
                 </div>
-                <span className="shrink-0 rounded bg-surface-2 px-1.5 py-0.5 text-[10px] font-medium text-muted">
+                <span className="shrink-0 rounded bg-surface-2 px-1.5 py-0.5 text-xs font-medium text-muted">
                   {entry.label}
                 </span>
               </a>
@@ -408,7 +408,7 @@ export default function BusinessTable({
                       <div className="mt-1 flex items-center gap-1.5 text-xs text-muted">
                         <span>Lead status:</span>
                         {getLeadStatusLabel(item.leadStatus) !== "-" ? (
-                          <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-[10px]" />
+                          <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-xs" />
                         ) : (
                           <span className="text-muted">-</span>
                         )}
@@ -429,7 +429,7 @@ export default function BusinessTable({
                     </div>
 
                     {/* Follow-up text */}
-                    <div className="text-[11px] font-medium text-muted">
+                    <div className="text-xs font-medium text-muted">
                       {item.nextFollowUpType !== "none" ? (
                         item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-ink-soft">{item.nextFollowUp}</span>
                       ) : <span>-</span>}
@@ -654,7 +654,7 @@ export default function BusinessTable({
                     {/* Lead Status */}
                     {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
                       {getLeadStatusLabel(item.leadStatus) !== "-" ? (
-                        <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={getLeadStatusLabel(item.leadStatus)} />
+                        <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-xs" title={getLeadStatusLabel(item.leadStatus)} />
                       ) : (
                         <span className="text-muted">-</span>
                       )}

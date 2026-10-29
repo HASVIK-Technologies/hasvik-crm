@@ -9,10 +9,10 @@ import { EmptyDashboardState } from "./DashboardPrimitives";
 import SubscriptionStatusBadge from "@/components/common/SubscriptionStatusBadge";
 
 const columns = "grid-cols-2 gap-x-4 gap-y-3 @xl:grid-cols-[minmax(0,1.25fr)_minmax(0,1.25fr)_minmax(0,0.8fr)_7rem]";
-const fieldLabel = "mb-1 text-[10px] font-medium uppercase tracking-wide text-muted @xl:sr-only";
+const fieldLabel = "mb-1 text-xs font-medium uppercase tracking-wide text-muted @xl:sr-only";
 
 function ListHeading({ labels }: { labels: string[] }) {
-  return <div aria-hidden="true" className={`${columns} hidden border-b border-line bg-surface-2 px-3 py-2 text-[10px] font-semibold uppercase tracking-wide text-muted @xl:grid`}>
+  return <div aria-hidden="true" className={`${columns} hidden border-b border-line bg-surface-2 px-3 py-2 text-xs font-semibold uppercase tracking-wide text-muted @xl:grid`}>
     {labels.map((label, index) => <span key={label} className={index === labels.length - 1 ? "text-right" : ""}>{label}</span>)}
   </div>;
 }
@@ -37,7 +37,7 @@ export function PendingSubscriptionList({ subscriptions, tenantName }: {
           </div>
           <div className="order-3 min-w-0 @xl:order-2">
             <dt className={fieldLabel}>Plan</dt>
-            <dd className="break-words text-xs font-medium text-ink-soft">{plan?.name || "Plan not provided"}{plan?.billingCycle && <span className="mt-1 block text-[11px] font-normal capitalize text-muted">{plan.billingCycle.toLowerCase().replaceAll("_", " ")}</span>}</dd>
+            <dd className="break-words text-xs font-medium text-ink-soft">{plan?.name || "Plan not provided"}{plan?.billingCycle && <span className="mt-1 block text-xs font-normal capitalize text-muted">{plan.billingCycle.toLowerCase().replaceAll("_", " ")}</span>}</dd>
           </div>
           <div className="order-4 min-w-0 @xl:order-3">
             <dt className={fieldLabel}>Requested</dt>
@@ -65,7 +65,7 @@ export function WorkspaceDirectoryList({ tenants, total }: { tenants: Tenant[]; 
       {rows.map((tenant) => <dl key={tenant.id} className={`${columns} grid items-start px-3 py-3 transition-colors hover:bg-surface-2/70`}>
         <div className="order-1 min-w-0">
           <dt className={fieldLabel}>Workspace</dt>
-          <dd className="flex items-start gap-2.5"><span className="flex size-8 shrink-0 items-center justify-center bg-brand-soft text-brand-strong"><Landmark className="size-4" /></span><span className="min-w-0"><span className="block break-words text-sm font-semibold text-ink">{tenant.name}</span>{tenant.fullName && <span className="mt-1 block break-words text-[11px] text-muted">{tenant.fullName}</span>}</span></dd>
+          <dd className="flex items-start gap-2.5"><span className="flex size-8 shrink-0 items-center justify-center bg-brand-soft text-brand-strong"><Landmark className="size-4" /></span><span className="min-w-0"><span className="block break-words text-sm font-semibold text-ink">{tenant.name}</span>{tenant.fullName && <span className="mt-1 block break-words text-xs text-muted">{tenant.fullName}</span>}</span></dd>
         </div>
         <div className="order-3 min-w-0 @xl:order-2">
           <dt className={fieldLabel}>Contact details</dt>
@@ -77,7 +77,7 @@ export function WorkspaceDirectoryList({ tenants, total }: { tenants: Tenant[]; 
         </div>
         <div className="order-2 text-right @xl:order-4">
           <dt className="sr-only">Status</dt>
-          <dd><span className="inline-block bg-ok-soft px-2 py-1 text-[10px] font-semibold text-ok">Active</span></dd>
+          <dd><span className="inline-block bg-ok-soft px-2 py-1 text-xs font-semibold text-ok">Active</span></dd>
         </div>
       </dl>)}
     </div>

@@ -68,7 +68,7 @@ function roleLabel(role: string) {
 
 function RoleBadge({ role }: { role: string }) {
   return (
-    <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-2 px-2.5 py-1 text-[10px] font-semibold text-ink-soft">
+    <span className="inline-flex items-center gap-1.5 rounded-md border border-line bg-surface-2 px-2.5 py-1 text-xs font-semibold text-ink-soft">
       <ShieldCheck className="size-3" />
       {roleLabel(role)}
     </span>
@@ -306,7 +306,7 @@ export default function UsersPage() {
                           <span className="min-w-0">
                             <span className="block truncate text-sm font-bold text-ink">{user.fullName}</span>
                             <span className="mt-0.5 block break-all text-xs text-muted">{user.email}</span>
-                            <span className="mt-1.5 block text-[11px] text-muted">{user.phoneNumber || "No contact number"}</span>
+                            <span className="mt-1.5 block text-xs text-muted">{user.phoneNumber || "No contact number"}</span>
                             <span className="mt-2 flex flex-wrap items-center gap-2"><RoleBadge role={user.role} /><ActivityStateText active={!isRecordInactive(user)} /></span>
                             {superAdmin && <span className="mt-2 block text-xs text-muted">Tenant: {getUserTenant(user, tenants).name}</span>}
                             {getUserTenant(user, tenants).isActive === false && <span className="mt-1 block text-xs text-muted">Tenant inactive. Activate the tenant first.</span>}
@@ -361,7 +361,7 @@ export default function UsersPage() {
                             <TableCell className="px-4 py-4 text-xs text-ink-soft">{user.email}</TableCell>
                             {superAdmin && <TableCell className="px-4 py-4">{getUserTenant(user, tenants).name}</TableCell>}
                             <TableCell className="px-4 py-4"><RoleBadge role={user.role} /></TableCell>
-                            <TableCell className="px-4 py-4"><ActivityStateText active={!isRecordInactive(user)} />{getUserTenant(user, tenants).isActive === false && <p className="mt-1 text-[10px] text-muted">Tenant inactive. Activate the tenant first.</p>}</TableCell>
+                            <TableCell className="px-4 py-4"><ActivityStateText active={!isRecordInactive(user)} />{getUserTenant(user, tenants).isActive === false && <p className="mt-1 text-xs text-muted">Tenant inactive. Activate the tenant first.</p>}</TableCell>
                             <TableCell className="sticky right-0 bg-surface py-4 pl-4 pr-6 group-hover:bg-surface-2">
                               <ManagementRowActions
                                 activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}

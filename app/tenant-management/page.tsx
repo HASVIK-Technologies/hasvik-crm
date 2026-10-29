@@ -88,7 +88,7 @@ function formatDate(value?: string) {
 function StatusBadge({ active }: { active: boolean }) {
   return (
     <span
-      className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-semibold ${
+      className={`inline-flex rounded-md px-2.5 py-1 text-xs font-semibold ${
         active ? "bg-ok-soft text-ok" : "bg-surface-2 text-ink-soft"
       }`}
     >
@@ -136,7 +136,7 @@ function SubscriptionSummary({
         <CreditCard className="size-3.5 text-ok" />
         {plan?.name ?? "Subscription plan"}
       </p>
-      <p className="mt-1 text-[10px] text-muted">
+      <p className="mt-1 text-xs text-muted">
         {subscription.endDate
           ? `Ends ${formatDate(subscription.endDate)}`
           : "End date not set"}
@@ -478,7 +478,7 @@ export default function TenantManagementPage() {
                           <div className="min-w-0">
                             <p className="truncate text-sm font-bold text-ink">{tenant.name}</p>
                             <p className="mt-0.5 break-all text-xs text-ink-soft">{tenant.contactEmail || "No contact email"}</p>
-                            <p className="mt-1 text-[11px] text-muted">{tenant.contactPhone || "No contact phone"}</p>
+                            <p className="mt-1 text-xs text-muted">{tenant.contactPhone || "No contact phone"}</p>
                             <div className="mt-2"><StatusBadge active={tenant.isActive} /></div>
                           </div>
                         </div>
@@ -526,7 +526,7 @@ export default function TenantManagementPage() {
                           </TableCell>
                           <TableCell className="px-4 py-4">
                             <p className="text-xs text-ink-soft">{tenant.contactEmail || "No contact email"}</p>
-                            <p className="mt-1 text-[11px] text-muted">{tenant.contactPhone || "No contact phone"}</p>
+                            <p className="mt-1 text-xs text-muted">{tenant.contactPhone || "No contact phone"}</p>
                           </TableCell>
                           <TableCell className="px-4 py-4">
                             <SubscriptionSummary

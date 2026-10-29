@@ -310,7 +310,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               >
                 <Search className="size-4" aria-hidden />
                 <span className="hidden flex-1 text-left text-sm sm:block">Search…</span>
-                <kbd className="hidden rounded-md border border-line px-1.5 py-0.5 text-[11px] font-semibold md:block">Ctrl K</kbd>
+                <kbd className="hidden rounded-md border border-line px-1.5 py-0.5 text-xs font-semibold md:block">Ctrl K</kbd>
               </button>
               {!hasvikAdmin && currentTenantName && (
                 <span className="hidden max-w-48 items-center gap-2 rounded-xl border border-line bg-surface-2 px-3 py-2 text-xs font-semibold text-ink-soft xl:flex" title={currentTenantName}>
@@ -331,9 +331,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <p className="truncate text-sm font-bold text-ink">{displayName}</p>
                     <p className="mt-0.5 truncate text-xs text-muted">{user?.email}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-1 text-[11px] font-semibold text-brand-strong"><ShieldCheck className="size-3" aria-hidden />{displayRole}</span>
+                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-1 text-xs font-semibold text-brand-strong"><ShieldCheck className="size-3" aria-hidden />{displayRole}</span>
                       {currentTenantName && !hasvikAdmin && (
-                        <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-surface px-2 py-1 text-[11px] font-semibold text-ink-soft ring-1 ring-line"><Building2 className="size-3 shrink-0" aria-hidden /><span className="truncate">{currentTenantName}</span></span>
+                        <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-surface px-2 py-1 text-xs font-semibold text-ink-soft ring-1 ring-line"><Building2 className="size-3 shrink-0" aria-hidden /><span className="truncate">{currentTenantName}</span></span>
                       )}
                     </div>
                   </DropdownMenuLabel>
@@ -413,7 +413,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             const active = isActivePath(pathname, item.href);
             return (
               <li key={item.href} className="flex-1">
-                <Link href={item.href} aria-current={active ? "page" : undefined} className={cn("flex min-h-14 flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition-colors", active ? "text-brand-strong" : "text-muted")}>
+                <Link href={item.href} aria-current={active ? "page" : undefined} className={cn("flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-semibold transition-colors", active ? "text-brand-strong" : "text-muted")}>
                   <span className={cn("grid h-7 w-12 place-items-center rounded-full transition-colors", active && "bg-brand-soft")}><Icon className="size-5" aria-hidden /></span>
                   {item.label}
                 </Link>
@@ -421,7 +421,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             );
           })}
           <li className="flex-1">
-            <button type="button" onClick={() => setMoreOpen(true)} aria-haspopup="dialog" className={cn("flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-[11px] font-semibold transition-colors", moreActive ? "text-brand-strong" : "text-muted")}>
+            <button type="button" onClick={() => setMoreOpen(true)} aria-haspopup="dialog" className={cn("flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-semibold transition-colors", moreActive ? "text-brand-strong" : "text-muted")}>
               <span className={cn("grid h-7 w-12 place-items-center rounded-full", moreActive && "bg-brand-soft")}><MoreHorizontal className="size-5" aria-hidden /></span>
               More
             </button>

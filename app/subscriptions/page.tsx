@@ -171,18 +171,18 @@ function PlanCard({
       }`}
     >
       {featured && (
-        <div className="flex items-center gap-1.5 border-b border-brand-soft bg-brand-soft px-5 py-2 text-[10px] font-bold uppercase tracking-[0.12em] text-brand-strong">
+        <div className="flex items-center gap-1.5 border-b border-brand-soft bg-brand-soft px-5 py-2 text-xs font-bold uppercase tracking-[0.12em] text-brand-strong">
           <Sparkles className="size-3.5" aria-hidden="true" />
           Popular choice
         </div>
       )}
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-brand-strong">
+          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-brand-strong">
             <Gem className="size-3" aria-hidden="true" />
             {cycleLabels[plan.billingCycle] ?? plan.billingCycle}
           </span>
-          <span className="rounded-full bg-surface-2 px-2 py-1 text-[10px] font-semibold text-muted">
+          <span className="rounded-full bg-surface-2 px-2 py-1 text-xs font-semibold text-muted">
             {plan.code}
           </span>
         </div>
@@ -224,7 +224,7 @@ function PlanCard({
                 <span>
                   <span className="font-semibold">{feature.name}</span>
                   {feature.description && (
-                    <span className="mt-0.5 block text-[11px] leading-4 text-muted">
+                    <span className="mt-0.5 block text-xs leading-4 text-muted">
                       {feature.description}
                     </span>
                   )}
@@ -327,7 +327,7 @@ function SubscriptionRow({
     {status === "PENDING" ? <p>Requested {formatDate(subscription.createdAt)}</p> : <><p>Starts {formatDate(subscription.startDate)}</p><p className="text-muted">{billingCycle === "LIFETIME" ? "No expiry" : `Ends ${formatDate(subscription.endDate)}`}</p></>}
   </div>;
   const activity = <EntityActivityDialog entityType="SUBSCRIPTION" entityId={id} name={planName} open={activityOpen} onOpenChange={setActivityOpen} />;
-  const readOnlyMessage = readOnly && <p className="mt-1 text-[11px] text-muted">Read-only: tenant or business inactive.</p>;
+  const readOnlyMessage = readOnly && <p className="mt-1 text-xs text-muted">Read-only: tenant or business inactive.</p>;
 
   if (mobile) return <>
     {activity}
@@ -872,7 +872,7 @@ export default function SubscriptionsPage() {
               <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-line bg-surface p-5 shadow-2xl outline-none sm:p-7">
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-[10px] font-semibold uppercase tracking-wide text-brand-strong">
+                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-brand-strong">
                       <CreditCard className="size-3" />
                       Plan request
                     </span>
@@ -894,7 +894,7 @@ export default function SubscriptionsPage() {
                 {chosenPlan && (
                   <form onSubmit={(event) => void submitSubscription(event)} className="space-y-5">
                     <div className="rounded-xl border border-line bg-surface-2 p-4">
-                      <p className="text-[10px] font-semibold uppercase tracking-wide text-muted">Selected plan</p>
+                      <p className="text-xs font-semibold uppercase tracking-wide text-muted">Selected plan</p>
                       <p className="mt-1 text-base font-bold text-ink">{chosenPlan.name}</p>
                       <p className="mt-1 text-sm font-semibold text-brand-strong">
                         {formatPrice(chosenPlan.price, chosenPlan.currency)}
@@ -903,7 +903,7 @@ export default function SubscriptionsPage() {
                         <p className="mt-2 text-xs leading-5 text-ink-soft">{chosenPlan.description}</p>
                       )}
                     </div>
-                    <div className="flex items-start gap-2 rounded-xl border border-brand-soft bg-brand-soft p-3 text-[10px] leading-4 text-brand-strong">
+                    <div className="flex items-start gap-2 rounded-xl border border-brand-soft bg-brand-soft p-3 text-xs leading-4 text-brand-strong">
                       <FileText className="mt-0.5 size-3.5 shrink-0 text-brand-strong" />
                       Payment is handled manually outside the CRM. Submitting creates a pending request; workspace access begins only after HASVIK admin approval.
                     </div>
@@ -1048,7 +1048,7 @@ export default function SubscriptionsPage() {
                 <span className="block font-semibold text-ink">
                   Manual verification completed
                 </span>
-                <span className="block text-[10px] text-muted">
+                <span className="block text-xs text-muted">
                   I have verified payment or commercial approval outside the CRM.
                 </span>
               </span>

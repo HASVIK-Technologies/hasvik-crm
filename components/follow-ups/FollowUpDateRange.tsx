@@ -64,7 +64,7 @@ export default function FollowUpDateRange({
       >
         <div>
           <p className="text-xs font-bold text-ink">Date range</p>
-          <p className="mt-0.5 text-[10px] text-muted">Use a shortcut or choose exact dates.</p>
+          <p className="mt-0.5 text-xs text-muted">Use a shortcut or choose exact dates.</p>
         </div>
         <div className="grid grid-cols-3 gap-1.5">
           {[
@@ -100,7 +100,7 @@ export default function FollowUpDateRange({
               key={preset.label}
               type="button"
               onClick={() => onChange(...preset.range())}
-              className="h-8 border border-line bg-surface-2 px-2 text-[10px] font-semibold text-ink-soft hover:border-brand-strong hover:bg-brand-soft hover:text-brand-strong"
+              className="h-8 border border-line bg-surface-2 px-2 text-xs font-semibold text-ink-soft hover:border-brand-strong hover:bg-brand-soft hover:text-brand-strong"
             >
               {preset.label}
             </button>

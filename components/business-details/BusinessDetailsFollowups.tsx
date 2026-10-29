@@ -183,7 +183,7 @@ export default function BusinessDetailsFollowups({
                     <TableCell>
                       <StatusBadge
                         status={item.status}
-                        className="rounded-md px-2.5 py-0.5 text-[10px]"
+                        className="rounded-md px-2.5 py-0.5 text-xs"
                       />
                     </TableCell>
                     <TableCell className="text-sm text-ink-soft">

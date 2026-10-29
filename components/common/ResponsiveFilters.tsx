@@ -49,7 +49,7 @@ export default function ResponsiveFilters({ fields, onReset, hasActiveFilters }:
       <PopoverTrigger asChild>
         <button type="button" className={`inline-flex h-10 shrink-0 items-center gap-2 rounded-xl border px-3 text-sm font-semibold ${activeMore ? "border-brand-strong bg-brand-soft text-brand-strong" : "border-line bg-surface text-ink-soft hover:bg-surface-2"}`}>
           <Filter className="size-3.5" />More filters
-          {activeMore > 0 && <span className="rounded-full bg-btn px-1.5 text-[10px] text-primary-foreground">{activeMore}</span>}
+          {activeMore > 0 && <span className="rounded-full bg-btn px-1.5 text-xs text-primary-foreground">{activeMore}</span>}
         </button>
       </PopoverTrigger>
       <PopoverContent align="start" collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto border border-line bg-surface p-4 shadow-xl rounded-2xl">

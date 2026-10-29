@@ -41,7 +41,7 @@ export default function BusinessDetailsQuickActions({
               <p className="text-xs font-semibold text-ink group-hover:text-brand-strong">
                 Edit business
               </p>
-              <p className="text-[11px] text-muted">
+              <p className="text-xs text-muted">
                 Update business details
               </p>
             </div>
@@ -93,7 +93,7 @@ export default function BusinessDetailsQuickActions({
               >
                 {isInactive ? "Activate business" : "Deactivate business"}
               </p>
-              <p className="text-[11px] text-muted">
+              <p className="text-xs text-muted">
                 {isInactive
                   ? "Restore full access & status"
                   : "Pause operations for this business"}

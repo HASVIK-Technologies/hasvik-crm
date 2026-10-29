@@ -214,7 +214,7 @@ export default function FollowUpTable({
                   >
                     <StatusBadge
                       status={item.status}
-                      className="rounded-md px-2.5 py-0.5 text-[10px]"
+                      className="rounded-md px-2.5 py-0.5 text-xs"
                     />
                     <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                       <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
@@ -392,7 +392,7 @@ export default function FollowUpTable({
                     <TableCell className="px-4 py-4">
                       <StatusBadge
                         status={item.status}
-                        className="rounded-md px-2.5 py-0.5 text-[10px]"
+                        className="rounded-md px-2.5 py-0.5 text-xs"
                       />
                     </TableCell>
                     <TableCell className="px-4 py-4 text-xs text-ink-soft">
