@@ -26,6 +26,7 @@ import {
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import BusinessViewToggle from "@/components/businesses/BusinessViewToggle";
+import type { BusinessStatsFilter } from "@/components/businesses/BusinessStats";
 import ActiveFilterChips, { type FilterChip } from "@/components/common/ActiveFilterChips";
 import { useLeadsData } from "@/hooks/use-analytics";
 import { STAGE_LABELS } from "@/lib/analytics/metrics";
@@ -156,16 +157,16 @@ function BusinessesContent() {
     [page, limit, sortBy, search, categoryId, city, status, isActive],
   );
 
+  // Stage and activity are left out on purpose: the KPI cards set those filters themselves, so their
+  // numbers must not change (or reload) when one is tapped.
   const kpiQueryParams = useMemo(
     () =>
       buildBusinessKpiParams({
         search,
         categoryId,
         city,
-        status,
-        isActive,
       }),
-    [search, categoryId, city, status, isActive],
+    [search, categoryId, city],
   );
 
   const {
@@ -206,6 +207,19 @@ function BusinessesContent() {
   const resetEverything = () => {
     setViewFilter({});
     resetAllFilters();
+  };
+
+  // The KPI cards double as quick filters: each one sets the stage / activity filter it counts.
+  const hasStage = Boolean(status && status !== "All statuses");
+  const kpiSelection: BusinessStatsFilter | null =
+    !hasStage && isActive === undefined ? "total"
+    : !hasStage && isActive === true ? "active"
+    : status === "INTERESTED" && isActive === undefined ? "interested"
+    : status === "WON" && isActive === undefined ? "won"
+    : null;
+  const selectKpi = (filter: BusinessStatsFilter) => {
+    setIsActive(filter === "active" ? true : undefined);
+    setStatus(filter === "interested" ? "INTERESTED" : filter === "won" ? "WON" : "");
   };
 
   const day = (iso?: string) => (iso ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso)) : "any date");
@@ -291,7 +305,7 @@ function BusinessesContent() {
           ]}
         />
       }
-      stats={<BusinessStats stats={kpiData} isLoading={isKpisLoading} />}
+      stats={<BusinessStats stats={kpiData} isLoading={isKpisLoading} selected={kpiSelection} onSelect={selectKpi} />}
       content={
         <div className="space-y-4">
         <ActiveFilterChips chips={chips} onClearAll={resetEverything} />

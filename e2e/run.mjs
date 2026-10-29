@@ -267,6 +267,18 @@ await t.step("pincode fills in the city and state, and dropdowns filter as you t
   await page.keyboard.press("Escape");
 });
 
+await t.step("KPI cards filter the business list and toggle back to all", async () => {
+  await page.goto(`${BASE}/businesses`);
+  const won = page.getByRole("button", { name: /^Won: / });
+  await won.waitFor({ timeout: 30000 });
+  await settle(page, 800);
+  await won.click();
+  await page.getByText("Stage: Won").first().waitFor({ timeout: 10000 });
+  if ((await won.getAttribute("aria-pressed")) !== "true") throw new Error("Won card not shown as selected");
+  await won.click();
+  await page.getByText("Stage: Won").first().waitFor({ state: "detached", timeout: 10000 });
+});
+
 await t.step("saving an empty business form points at what is missing", async () => {
   await page.goto(`${BASE}/businesses/form`);
   await page.getByPlaceholder("Enter business name").waitFor({ timeout: 30000 });

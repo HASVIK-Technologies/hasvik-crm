@@ -93,8 +93,9 @@ export default function SearchWithSuggestions({
         onChange={handleInputChange}
         onKeyDown={handleKeyDown}
         placeholder={placeholder}
+        aria-label={placeholder.replace(/\.+$/, "")}
         className={cn(
-          "h-10 w-full border border-line bg-surface pl-10 pr-9 text-xs sm:text-sm text-ink shadow-card placeholder:text-muted transition-all hover:border-muted focus:border-brand-strong focus:outline-none focus:ring-2 focus:ring-brand/15",
+          "h-11 w-full rounded-xl border border-line bg-surface pl-10 pr-10 text-base text-ink shadow-card transition-colors placeholder:text-muted hover:border-muted focus-visible:border-brand-strong focus-visible:outline-none focus-visible:ring-4 focus-visible:ring-(--ring) sm:h-10 sm:text-sm",
           Boolean(inputValue) && "border-brand/40",
           className,
         )}
@@ -108,10 +109,11 @@ export default function SearchWithSuggestions({
           <button
             type="button"
             onClick={handleClear}
-            className="rounded p-1 text-muted hover:bg-surface-2 hover:text-ink transition-colors"
+            className="grid size-7 place-items-center rounded-full text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+            aria-label="Clear search"
             title="Clear search"
           >
-            <X className="size-3.5" />
+            <X className="size-4" aria-hidden />
           </button>
         )}
       </div>
