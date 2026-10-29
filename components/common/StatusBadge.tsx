@@ -3,13 +3,13 @@ import { cn } from "@/lib/utils";
 import type { ComponentProps } from "react";
 import { getLeadStatusLabel, LEAD_STATUS_VISUALS } from "@/lib/business/form-options";
 import { FOLLOW_UP_STATUS_LABELS, formatFollowUpStatus } from "@/lib/follow-ups/status";
+import { SUBSCRIPTION_STATUS_VISUALS } from "@/lib/subscriptions/status";
 
 const statusStyles: Record<string, string> = {
-  ACTIVE: "border-emerald-200 bg-emerald-50 text-emerald-800",
+  ...Object.fromEntries(Object.entries(SUBSCRIPTION_STATUS_VISUALS).map(([status, visual]) => [status, visual.badge])),
   COMPLETED: "border-emerald-200 bg-emerald-50 text-emerald-800",
   TODAY: "border-emerald-200 bg-emerald-50 text-emerald-800",
   INACTIVE: "border-slate-200 bg-slate-50 text-slate-600",
-  CANCELLED: "border-slate-300 bg-slate-100 text-slate-700",
   NONE: "border-slate-200 bg-slate-50 text-slate-600",
   SCHEDULED: "border-sky-200 bg-sky-50 text-sky-800",
   TOMORROW: "border-sky-200 bg-sky-50 text-sky-800",

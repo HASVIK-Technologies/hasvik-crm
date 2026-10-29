@@ -450,7 +450,7 @@ export default function BusinessTable({
         </div>
 
         <div data-layout-desktop>
-        <div className="overflow-x-auto">
+        <div className="isolate overflow-x-auto">
           <Table className="w-full min-w-max text-left">
             <TableHeader className="text-[13px] font-semibold">
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
@@ -462,7 +462,7 @@ export default function BusinessTable({
                 {columnVisible("activity") && <TableHead className="px-4 py-4 font-semibold">Status</TableHead>}
                 {columnVisible("lastFollowUp") && <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>}
                 {columnVisible("nextFollowUp") && <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>}
-                <TableHead className="sticky right-0 z-20 min-w-32 bg-white py-4 pl-4 pr-6 text-right font-semibold shadow-[-1px_0_0_#e2e8f0]">Actions</TableHead>
+                <TableHead className="sticky right-0 z-10 min-w-32 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-[#f1f5f9] text-sm text-[#334155]">
@@ -625,7 +625,7 @@ export default function BusinessTable({
 
                     {/* Actions (Call, WhatsApp, 3 dots) */}
                     <TableCell
-                      className={cn("sticky right-0 z-10 pl-4 pr-6 text-right shadow-[-1px_0_0_#f1f5f9]", rowPadding, isBusinessHighlighted(item.id) ? "bg-blue-50" : "bg-white")}
+                      className={cn("sticky right-0 z-10 pl-4 pr-6 text-right shadow-[-1px_0_0_#f1f5f9] group-hover:bg-slate-50", rowPadding, isBusinessHighlighted(item.id) ? "bg-blue-50" : "bg-white")}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-end gap-2.5">

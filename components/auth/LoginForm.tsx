@@ -45,7 +45,7 @@ export default function LoginForm() {
       router.replace(
         returningFromSignup && role === "ADMIN"
           ? "/subscriptions"
-          : "/businesses",
+          : "/dashboard",
       );
     } catch {
       // The mutation error is rendered below.

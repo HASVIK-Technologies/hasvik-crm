@@ -24,11 +24,14 @@ export function getSubscriptionTenantId(subscription: Subscription) {
   return tenant?.id ?? tenant?._id ?? "";
 }
 
-export function hasCurrentSubscriptionAccess(subscription: Subscription) {
+export function hasCurrentSubscriptionAccess(subscription: Subscription, now = Date.now()) {
   const status = subscription.status?.toUpperCase();
-  if (status === "ACTIVE") return true;
-  if (status !== "CANCELLED") return false;
+  if (status !== "ACTIVE" && status !== "CANCELLED") return false;
+  if (subscription.startDate) {
+    const startTime = Date.parse(subscription.startDate);
+    if (!Number.isFinite(startTime) || startTime > now) return false;
+  }
   if (!subscription.endDate) return true;
   const endTime = new Date(subscription.endDate).getTime();
-  return Number.isNaN(endTime) || endTime > Date.now();
+  return Number.isFinite(endTime) && endTime > now;
 }

@@ -1,7 +1,7 @@
 "use client";
 
 import { useAuthStore } from "@/store/auth-store";
-import { isSuperAdmin } from "@/types/auth";
+import { isSuperAdmin, canEditManagedUser } from "@/types/auth";
 import { useTenantsQuery } from "@/hooks/use-tenants";
 import { getUserTenant } from "@/lib/users/tenant";
 import { ActivityStateText } from "@/components/common/ActivityStateText";
@@ -32,6 +32,7 @@ import ManagementRowActions from "@/components/common/ManagementRowActions";
 import ListPagination from "@/components/common/ListPagination";
 import ListTableToolbar from "@/components/common/ListTableToolbar";
 import { DataTableMobileCard, DataTableMobileList, DataTableShell } from "@/components/common/DataTableLayout";
+import ResponsiveFilters from "@/components/common/ResponsiveFilters";
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import SortableColumnHeader from "@/components/common/SortableColumnHeader";
 import {
@@ -50,7 +51,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
-import { useCreateUser, useUpdateUserStatus, useUpdateUser, useUsersQuery } from "@/hooks/use-users";
+import { useCreateUser, useUpdateUserStatus, useUpdateUser, useUsersQuery, useUserKpisQuery } from "@/hooks/use-users";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import type { CreateUserPayload, UserRecord, UserRole } from "@/types/user";
 
@@ -105,6 +106,12 @@ export default function UsersPage() {
     superAdmin && tenantFilter !== "ALL" ? tenantFilter : undefined,
   );
   const createMutation = useCreateUser();
+  const kpisQuery = useUserKpisQuery({
+    search: debouncedSearch,
+    role: roleFilter,
+    isActive: statusFilter === "ALL" ? undefined : statusFilter === "ACTIVE",
+    tenantId: superAdmin && tenantFilter !== "ALL" ? tenantFilter : undefined,
+  });
   const updateMutation = useUpdateUser();
   const statusMutation = useUpdateUserStatus();
   const users = usersQuery.data?.items ?? [];
@@ -136,6 +143,7 @@ export default function UsersPage() {
   }
 
   function openEdit(user: UserRecord) {
+    if (!canEditManagedUser(useAuthStore.getState().user, user)) return;
     if (isRecordInactive(user) || getUserTenant(user, tenants).isActive === false) return;
     setEditingUser(user);
     setFormError("");
@@ -152,6 +160,7 @@ export default function UsersPage() {
 
     try {
       if (editingUser) {
+        if (!canEditManagedUser(useAuthStore.getState().user, editingUser)) throw new Error("You do not have permission to update this user.");
         const latest = users.find((item) => userId(item) === userId(editingUser)) ?? editingUser;
         if (isRecordInactive(latest) || getUserTenant(latest, tenants).isActive === false) throw new Error("Inactive records are read-only. Activate the user or tenant before editing.");
         const id = userId(editingUser);
@@ -173,6 +182,7 @@ export default function UsersPage() {
   }
 
   async function confirmUserStatus() {
+    if (statusUser && isSuperAdmin(statusUser) && !isRecordInactive(statusUser)) return;
     if (!statusUser || getUserTenant(statusUser, tenants).isActive === false) return;
     const id = userId(statusUser);
     if (!id) return;
@@ -195,10 +205,8 @@ export default function UsersPage() {
           setPage(1);
         }}
         searchPlaceholder="Search users by name or email"
-        filters={
-          <div className="flex flex-wrap items-center gap-3">
-            <label htmlFor="users-role-filter" className="text-xs font-medium text-slate-600">Role</label>
-            <Select
+        filters={<ResponsiveFilters onReset={() => { setSearch(""); setRoleFilter("ALL"); setStatusFilter("ALL"); setTenantFilter("ALL"); setPage(1); }} fields={[
+            { key: "role", label: "Role", active: roleFilter !== "ALL", reset: () => { setRoleFilter("ALL"); setPage(1); }, control: <Select
               value={roleFilter}
               onValueChange={(value) => {
                 setRoleFilter(value as UserRole | "ALL");
@@ -216,22 +224,16 @@ export default function UsersPage() {
                   </SelectItem>
                 ))}
               </SelectContent>
-            </Select>
-            {superAdmin && <>
-              <label htmlFor="users-tenant-filter" className="text-xs font-medium text-slate-600">Tenant</label>
-              <Select value={tenantFilter} onValueChange={(value) => { setTenantFilter(value); setPage(1); }}>
+            </Select> },
+            ...(superAdmin ? [{ key: "tenant", label: "Workspace", active: tenantFilter !== "ALL", reset: () => { setTenantFilter("ALL"); setPage(1); }, control: <><Select value={tenantFilter} onValueChange={(value) => { setTenantFilter(value); setPage(1); }}>
                 <SelectTrigger id="users-tenant-filter" size="sm" disabled={tenantsQuery.isPending} className="w-48 max-w-full rounded-lg text-xs"><SelectValue placeholder="All tenants" /></SelectTrigger>
                 <SelectContent className="max-h-72 bg-white"><SelectItem value="ALL">All tenants</SelectItem>{tenants.map((tenant) => <SelectItem key={tenant.id} value={tenant.id}>{tenant.name}{tenant.isActive ? "" : " (Inactive)"}</SelectItem>)}</SelectContent>
-              </Select>
-              {tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-primary hover:underline">Retry loading tenants</button>}
-            </>}
-            <label htmlFor="users-status-filter" className="text-xs font-medium text-slate-600">Status</label>
-            <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
+              </Select>{tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-primary hover:underline">Retry loading tenants</button>}</> }] : []),
+            { key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
               <SelectTrigger id="users-status-filter" size="sm" className="w-36 rounded-lg text-xs"><SelectValue /></SelectTrigger>
               <SelectContent className="bg-white"><SelectItem value="ALL">All statuses</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
-            </Select>
-          </div>
-        }
+            </Select> },
+          ]} />}
         showFilters={showFilters}
         onToggleFilters={() => setShowFilters((visible) => !visible)}
         onResetFilters={() => {
@@ -244,18 +246,21 @@ export default function UsersPage() {
         resultCount={total}
         showStats={showStats}
         stats={
-          <KpiCards items={[
-              { label: "Team members", value: total, icon: UsersRound, tone: "text-primary bg-blue-50" },
-              { label: "Administrators on page", value: users.filter((item) => item.role.toUpperCase() === "ADMIN").length, icon: ShieldCheck, tone: "text-emerald-700 bg-emerald-50" },
-              { label: "Workspace roles", value: roles.length, icon: UserRound, tone: "text-violet-700 bg-violet-50" },
-            ].map((item, index) => ({ ...item, tone: (["blue", "green", "violet"] as const)[index] }))} />
+          <div className="space-y-3">
+            <KpiCards loading={kpisQuery.isPending} items={[
+              { label: "Team members", value: kpisQuery.isError ? "—" : kpisQuery.data?.total ?? "—", icon: UsersRound, tone: "blue" },
+              { label: "Active users", value: kpisQuery.isError ? "—" : kpisQuery.data?.active ?? "—", icon: ShieldCheck, tone: "green" },
+              { label: "Inactive users", value: kpisQuery.isError ? "—" : kpisQuery.data?.inactive ?? "—", icon: UserRound, tone: "slate" },
+            ]} />
+            {kpisQuery.isError && <p role="alert" className="text-sm text-amber-800">User totals could not be loaded. <button type="button" onClick={() => void kpisQuery.refetch()} className="font-semibold underline">Retry totals</button></p>}
+          </div>
         }
         actions={
           <Actions
             primary={{ label: "Add user", onSelect: openCreate, icon: <Plus className="size-4" /> }}
             menuItems={[
               { label: showStats ? "Hide KPIs" : "Show KPIs", icon: <ChartNoAxesCombined className="size-4" />, onSelect: () => setShowStats((visible) => !visible) },
-              { label: showFilters ? "Hide filters" : "Show filters", onSelect: () => setShowFilters((visible) => !visible), icon: <Filter className="size-4" /> },
+              { label: showFilters ? "Hide filters" : "Show filters", desktopOnly: true, onSelect: () => setShowFilters((visible) => !visible), icon: <Filter className="size-4" /> },
             ]}
           />
         }
@@ -309,8 +314,9 @@ export default function UsersPage() {
                         <ManagementRowActions
                           activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}
                           editLabel={`Edit ${user.fullName}`}
+                          showEdit={canEditManagedUser(currentUser, user)}
                           readOnly={isRecordInactive(user) || getUserTenant(user, tenants).isActive === false}
-                          actionLabel={getUserTenant(user, tenants).isActive === false ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
+                          actionLabel={getUserTenant(user, tenants).isActive === false || (isSuperAdmin(user) && !isRecordInactive(user)) ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
                           actionDestructive={!isRecordInactive(user)}
                           disabled={statusMutation.isPending}
                           onEdit={() => openEdit(user)}
@@ -359,8 +365,9 @@ export default function UsersPage() {
                               <ManagementRowActions
                                 activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}
                                 editLabel={`Edit ${user.fullName}`}
+                                showEdit={canEditManagedUser(currentUser, user)}
                                 readOnly={isRecordInactive(user) || getUserTenant(user, tenants).isActive === false}
-                          actionLabel={getUserTenant(user, tenants).isActive === false ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
+                          actionLabel={getUserTenant(user, tenants).isActive === false || (isSuperAdmin(user) && !isRecordInactive(user)) ? undefined : isRecordInactive(user) ? "Activate user" : "Deactivate user"}
                                 actionDestructive={!isRecordInactive(user)}
                                 disabled={statusMutation.isPending}
                                 onEdit={() => openEdit(user)}
@@ -391,7 +398,7 @@ export default function UsersPage() {
         }
       />
 
-      <DialogPrimitive.Root open={dialogOpen} onOpenChange={setDialogOpen}>
+      <DialogPrimitive.Root open={dialogOpen && (!editingUser || canEditManagedUser(currentUser, editingUser))} onOpenChange={setDialogOpen}>
         <DialogPrimitive.Portal>
           <DialogPrimitive.Overlay className="fixed inset-0 z-50 bg-slate-950/40 backdrop-blur-[2px]" />
           <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[90vh] w-[calc(100%-2rem)] max-w-lg -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-slate-200 bg-white p-5 shadow-2xl outline-none sm:p-6">

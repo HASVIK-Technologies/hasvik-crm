@@ -10,6 +10,7 @@ import {
   CreditCard,
   FolderKanban,
   Landmark,
+  LayoutDashboard,
   LogOut,
   Menu,
   PanelLeftClose,
@@ -42,6 +43,7 @@ import {
 } from "@/components/ui/dropdown-menu";
 
 const navigation = [
+  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
   { label: "Businesses", href: "/businesses", icon: Building2 },
   { label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2 },
   { label: "User management", href: "/users", icon: Users },
@@ -188,7 +190,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         new URLSearchParams(window.location.search).get("welcome") ===
         "subscription";
       router.replace(
-        signupWelcome && tenantAdmin ? "/subscriptions" : "/businesses",
+        signupWelcome && tenantAdmin ? "/subscriptions" : "/dashboard",
       );
     }
     if (
@@ -310,15 +312,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   const displayName = user?.fullName || user?.email || "Hasvik user";
-  const firstName =
-    user?.firstName?.trim() ||
-    user?.fullName?.trim().split(/\s+/)[0] ||
-    user?.email?.split("@")[0] ||
-    "there";
-  const currentPageTitle =
-    pathname === "/dashboard"
-      ? `Good morning, ${firstName}`
-      : pageDetailsForPath.title;
+  const currentPageTitle = pageDetailsForPath.title;
   const displayRole = hasvikAdmin ? "SUPER ADMIN" : user?.role || "User";
   const currentTenantName = tenantQuery.data?.name;
   const initials = displayName
@@ -585,7 +579,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </>
         )}
 
-        <main className="min-h-[calc(100vh-4rem)] px-3 py-4 sm:min-h-[calc(100vh-5rem)] sm:px-5 sm:py-5 lg:px-7 lg:py-6">
+        <main className={`min-h-[calc(100vh-4rem)] px-3 sm:min-h-[calc(100vh-5rem)] sm:px-5 lg:px-7 ${pathname === "/dashboard" ? "py-4" : "py-4 sm:py-5 lg:py-6"}`}>
           <div className="mx-auto w-full">
             {subscriptionAccessPending ? (
               <div className="flex min-h-64 items-center justify-center text-sm text-slate-500">

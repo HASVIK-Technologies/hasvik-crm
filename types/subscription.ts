@@ -76,3 +76,18 @@ export interface RenewSubscriptionPayload {
   endDate?: string;
   notes?: string;
 }
+
+export interface SubscriptionQueryParams {
+  page?: number;
+  limit?: number;
+  search?: string;
+  status?: SubscriptionStatus;
+  tenantId?: string;
+  billingCycle?: BillingCycle;
+  sortBy?: string;
+}
+
+export interface SubscriptionsPage {
+  data: Subscription[];
+  total: number;
+}

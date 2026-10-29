@@ -1,7 +1,10 @@
 "use client";
 
 import { isRecordInactive } from "@/lib/records/activity";
-import EntityActivityButton from "@/components/common/EntityActivityButton";
+import { EntityActivityDialog } from "@/components/common/EntityActivityButton";
+import TableActionButton from "@/components/common/TableActionButton";
+import { TooltipProvider } from "@/components/ui/tooltip";
+import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuItem, DropdownMenuSeparator } from "@/components/ui/dropdown-menu";
 
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
@@ -9,6 +12,13 @@ import { useMemo, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
   ArrowRight,
+  MoreVertical,
+  History,
+  Pause,
+  Play,
+  Ban,
+  CheckCircle2,
+  XCircle,
   Building2,
   CalendarDays,
   Check,
@@ -32,10 +42,12 @@ import {
   useRenewSubscription,
   useSubscriptionPlansQuery,
   useSubscriptionsQuery,
+  useSubscriptionsPageQuery,
   useUpdateSubscriptionStatus,
 } from "@/hooks/use-subscriptions";
 import { useTenantQuery, useTenantsQuery } from "@/hooks/use-tenants";
 import { getApiErrorMessage } from "@/lib/api/api-error";
+import { buildRenewalPayload } from "@/lib/subscriptions/renewal";
 import {
   getSubscriptionId,
   getSubscriptionTenantId,
@@ -57,9 +69,15 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
+import { DataTableShell, DataTableHeader, DataTableMobileCard, DataTableMobileList } from "@/components/common/DataTableLayout";
+import ListPagination from "@/components/common/ListPagination";
+import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from "@/components/ui/table";
 import Actions from "@/components/common/Actions";
 import Breadcrumb from "@/components/common/Breadcrumb";
+import ResponsiveFilters from "@/components/common/ResponsiveFilters";
 import ListPageLayout from "@/components/layout/ListPageLayout";
+import StatusBadge from "@/components/common/SubscriptionStatusBadge";
+import { getSubscriptionStatusVisual, SUBSCRIPTION_STATUS_VISUALS } from "@/lib/subscriptions/status";
 
 const cycleLabels: Record<BillingCycle, string> = {
   MONTHLY: "Monthly",
@@ -109,28 +127,7 @@ function getLimit(value: number | undefined) {
 }
 
 function normalizeStatus(status?: string) {
-  return status?.toUpperCase() ?? "UNKNOWN";
-}
-
-function StatusBadge({ status }: { status: string }) {
-  const normalized = normalizeStatus(status);
-  const style =
-    normalized === "ACTIVE"
-      ? "bg-emerald-50 text-emerald-700"
-      : normalized === "EXPIRED"
-        ? "bg-rose-50 text-rose-700"
-        : normalized === "REJECTED"
-          ? "bg-rose-50 text-rose-700"
-          : normalized === "SUSPENDED"
-            ? "bg-slate-100 text-slate-700"
-            : normalized === "PENDING" || normalized === "CANCELLED"
-          ? "bg-amber-50 text-amber-800"
-          : "bg-slate-100 text-slate-600";
-  return (
-    <span className={`inline-flex rounded-full px-2.5 py-1 text-[10px] font-bold uppercase ${style}`}>
-      {normalized.replaceAll("_", " ")}
-    </span>
-  );
+  return status?.trim().toUpperCase() ?? "UNKNOWN";
 }
 
 function LimitLine({
@@ -264,7 +261,12 @@ function SubscriptionRow({
   onRenew,
   onCancel,
   onReject,
+  onSuspensionChange,
+  highlighted,
+  mobile = false,
 }: {
+  mobile?: boolean;
+  highlighted: boolean;
   subscription: Subscription;
   plan?: SubscriptionPlan;
   tenantName: string;
@@ -276,136 +278,78 @@ function SubscriptionRow({
   onRenew: (subscription: Subscription) => void;
   onCancel: (subscription: Subscription) => void;
   onReject: (subscription: Subscription) => void;
+  onSuspensionChange: (subscription: Subscription) => void;
 }) {
   const id = getSubscriptionId(subscription);
   const status = normalizeStatus(subscription.status);
-  const embeddedPlan =
-    typeof subscription.plan === "object" ? subscription.plan : undefined;
+  const embeddedPlan = subscription.plan ?? (typeof subscription.planId === "object" ? subscription.planId : undefined);
   const planName =
     embeddedPlan?.name ??
     plan?.name ??
-    (typeof subscription.planId === "object" ? subscription.planId.name : "") ??
     "Subscription plan";
   const amount = embeddedPlan?.price ?? plan?.price;
   const currency = embeddedPlan?.currency ?? plan?.currency ?? "INR";
-  const billingCycle = embeddedPlan?.billingCycle ?? plan?.billingCycle;
+  const billingCycle = embeddedPlan?.billingCycle ?? plan?.billingCycle ?? (typeof subscription.planId === "object" ? subscription.planId.billingCycle : undefined);
 
-  return (
-    <article className="flex flex-col gap-4 p-4 sm:p-5 lg:flex-row lg:items-center lg:justify-between">
-      <div className="min-w-0">
-        <div className="flex flex-wrap items-center gap-2">
-          <h3 className="text-sm font-bold text-slate-900">{planName}</h3>
-          {id && <EntityActivityButton entityType="SUBSCRIPTION" entityId={id} name={planName} />}
-          <StatusBadge status={status} />
-        </div>
-        <p className="mt-1 text-xs text-slate-600">
-          {tenantName}
-          {amount !== undefined ? ` · ${formatPrice(amount, currency)}` : ""}
-          {billingCycle
-            ? ` · ${cycleLabels[billingCycle] ?? billingCycle}`
-            : ""}
-          {subscription.autoRenew ? " · Auto-renew on" : " · Auto-renew off"}
-        </p>
-        <p className="mt-1 text-[10px] text-slate-500">
-          {status === "PENDING"
-            ? `Requested ${formatDate(subscription.createdAt)}`
-            : `Starts ${formatDate(subscription.startDate)} · Ends ${formatDate(subscription.endDate)}`}
-        </p>
-        {id && (
-          <button
-            type="button"
-            onClick={() => {
-              void navigator.clipboard.writeText(id).then(
-                () => toast.success("Subscription ID copied."),
-                () => toast.error("Unable to copy the subscription ID."),
-              );
-            }}
-            className="mt-2 inline-flex items-center gap-1.5 text-[10px] font-medium text-slate-400 hover:text-brand-blue"
-            title={id}
-          >
-            <Copy className="size-3" />
-            <span className="max-w-48 truncate">ID: {id}</span>
-          </button>
-        )}
-        {status === "PENDING" && (
-          <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-950">
-            {hasvikAdmin
-              ? "This subscription request is awaiting your review."
-              : "Your request is awaiting HASVIK admin approval. Access starts after approval."}
-          </p>
-        )}
-        {status === "CANCELLED" && (
-          <p className="mt-2 rounded-lg border border-amber-200 bg-amber-50 px-3 py-2 text-[11px] leading-5 text-amber-950">
-            Plan cancelled. Access remains active until{" "}
-            <span className="font-semibold">{formatDate(subscription.endDate)}</span>.
-          </p>
-        )}
-        {status === "REJECTED" && (
-          <p className="mt-2 rounded-lg border border-rose-200 bg-rose-50 px-3 py-2 text-[11px] leading-5 text-rose-900">
-            This subscription request was rejected by a HASVIK admin.
-          </p>
-        )}
-        {status === "SUSPENDED" && (
-          <p className="mt-2 rounded-lg border border-slate-200 bg-slate-50 px-3 py-2 text-[11px] leading-5 text-slate-700">
-            This subscription is suspended. Workspace access may be restricted.
-          </p>
-        )}
-      </div>
-      {readOnly && <p className="text-xs text-slate-500">Read-only. Activate the tenant before changing subscriptions.</p>}
-      {!readOnly && <div className="flex flex-wrap gap-2">
-        {(hasvikAdmin || tenantAdmin) && status === "ACTIVE" && id && (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={busy}
-            onClick={() => onCancel(subscription)}
-            className="h-9 rounded-lg border-amber-300 text-amber-900 hover:bg-amber-50"
-          >
-            Cancel subscription
-          </Button>
-        )}
-        {hasvikAdmin && status === "PENDING" && id && (
-          <>
-            <Button
-              type="button"
-              size="sm"
-              disabled={busy}
-              onClick={() => onApprove(subscription)}
-              className="h-9 rounded-lg"
-            >
-              {busy && <LoaderCircle className="size-3.5 animate-spin" />}
-              Approve
-            </Button>
-            <Button
-              type="button"
-              size="sm"
-              variant="outline"
-              disabled={busy}
-              onClick={() => onReject(subscription)}
-              className="h-9 rounded-lg border-rose-200 text-rose-700 hover:bg-rose-50"
-            >
-              Reject
-            </Button>
-          </>
-        )}
-        {(status === "ACTIVE" || status === "EXPIRED") && id && (
-          <Button
-            type="button"
-            size="sm"
-            variant="outline"
-            disabled={busy}
-            onClick={() => onRenew(subscription)}
-            className="h-9 rounded-lg"
-          >
-            {busy && <LoaderCircle className="size-3.5 animate-spin" />}
-            <RefreshCw className="size-3.5" />
-            Renew
-          </Button>
-        )}
-      </div>}
-    </article>
+  const [activityOpen, setActivityOpen] = useState(false);
+  const writable = !readOnly && Boolean(id);
+  const canApprove = writable && hasvikAdmin && status === "PENDING";
+  const canRenew = writable && (hasvikAdmin || tenantAdmin) && (status === "ACTIVE" || status === "EXPIRED") && billingCycle !== "LIFETIME";
+  const actions = (
+    <div className="flex items-center justify-end gap-1.5">
+      {canRenew && <TableActionButton tooltip="Renew subscription" tone="brand" disabled={busy} onClick={() => onRenew(subscription)}><RefreshCw className="size-4" /></TableActionButton>}
+      {id && <DropdownMenu>
+        <DropdownMenuTrigger asChild>
+          <TableActionButton tooltip="More actions" aria-label={`More actions for ${planName}`}><MoreVertical className="size-4" /></TableActionButton>
+        </DropdownMenuTrigger>
+        <DropdownMenuContent align="end" className="w-52 bg-white" onCloseAutoFocus={(event) => { if (activityOpen) event.preventDefault(); }}>
+          <DropdownMenuItem onSelect={() => setActivityOpen(true)} className="cursor-pointer gap-2 text-xs"><History className="size-3.5" />View activity</DropdownMenuItem>
+          <DropdownMenuItem onSelect={() => { void navigator.clipboard.writeText(id).then(() => toast.success("Subscription ID copied."), () => toast.error("Unable to copy the subscription ID.")); }} className="cursor-pointer gap-2 text-xs"><Copy className="size-3.5" />Copy subscription ID</DropdownMenuItem>
+          {writable && ((hasvikAdmin && (status === "ACTIVE" || status === "SUSPENDED" || status === "PENDING")) || (tenantAdmin && status === "ACTIVE")) && <DropdownMenuSeparator />}
+          {writable && hasvikAdmin && (status === "ACTIVE" || status === "SUSPENDED") && <DropdownMenuItem disabled={busy} onSelect={() => onSuspensionChange(subscription)} className="cursor-pointer gap-2 text-xs">
+            {status === "SUSPENDED" ? <Play className="size-3.5" /> : <Pause className="size-3.5" />}{status === "SUSPENDED" ? "Resume subscription" : "Suspend subscription"}
+          </DropdownMenuItem>}
+          {writable && (hasvikAdmin || tenantAdmin) && status === "ACTIVE" && <DropdownMenuItem disabled={busy} onSelect={() => onCancel(subscription)} className="cursor-pointer gap-2 text-xs text-rose-700 focus:text-rose-700"><Ban className="size-3.5" />Cancel subscription</DropdownMenuItem>}
+          {canApprove && <DropdownMenuItem disabled={busy} onSelect={() => onApprove(subscription)} className="cursor-pointer gap-2 text-xs text-emerald-700 focus:text-emerald-700"><CheckCircle2 className="size-3.5" />Approve</DropdownMenuItem>}
+          {canApprove && <DropdownMenuItem disabled={busy} onSelect={() => onReject(subscription)} className="cursor-pointer gap-2 text-xs text-rose-700 focus:text-rose-700"><XCircle className="size-3.5" />Reject request</DropdownMenuItem>}
+        </DropdownMenuContent>
+      </DropdownMenu>}
+    </div>
   );
+  const planSummary = <div className="flex min-w-0 items-center gap-3">
+    <span className="flex size-10 shrink-0 items-center justify-center rounded-full bg-blue-50 text-brand-blue"><CreditCard className="size-4.5" /></span>
+    <div className="min-w-0">
+      <p className="max-w-56 truncate text-sm font-semibold text-slate-900" title={planName}>{planName}</p>
+      <p className="mt-0.5 text-xs text-slate-500">{amount !== undefined ? formatPrice(amount, currency) : "Price unavailable"}{billingCycle && ` / ${cycleLabels[billingCycle] ?? billingCycle}`}</p>
+    </div>
+  </div>;
+  const term = <div className="space-y-1 text-xs text-slate-600">
+    {status === "PENDING" ? <p>Requested {formatDate(subscription.createdAt)}</p> : <><p>Starts {formatDate(subscription.startDate)}</p><p className="text-slate-500">{billingCycle === "LIFETIME" ? "No expiry" : `Ends ${formatDate(subscription.endDate)}`}</p></>}
+  </div>;
+  const activity = <EntityActivityDialog entityType="SUBSCRIPTION" entityId={id} name={planName} open={activityOpen} onOpenChange={setActivityOpen} />;
+  const readOnlyMessage = readOnly && <p className="mt-1 text-[11px] text-slate-500">Read-only: tenant or business inactive.</p>;
+
+  if (mobile) return <>
+    {activity}
+    <DataTableMobileCard className={highlighted ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : ""}>
+      <div className="flex items-start justify-between gap-3">{planSummary}{actions}</div>
+      <div className="mt-3 flex flex-wrap items-center justify-between gap-2"><p className="text-xs font-medium text-slate-600">{tenantName}</p><StatusBadge status={status} /></div>
+      <div className="mt-3 flex items-end justify-between gap-3">{term}<p className="text-xs text-slate-500">{subscription.autoRenew ? "Auto-renew on" : "Auto-renew off"}</p></div>
+      {readOnlyMessage}
+    </DataTableMobileCard>
+  </>;
+
+  return <>
+    {activity}
+    <TableRow className={`group ${highlighted ? "bg-blue-50/80 ring-2 ring-inset ring-brand-blue/20" : ""}`}>
+      <TableCell className="py-4 pl-6 pr-4">{planSummary}</TableCell>
+      <TableCell className="max-w-56 px-4 py-4 text-xs font-medium text-slate-600"><p className="truncate" title={tenantName}>{tenantName}</p>{readOnlyMessage}</TableCell>
+      <TableCell className="px-4 py-4"><StatusBadge status={status} /></TableCell>
+      <TableCell className="px-4 py-4">{term}</TableCell>
+      <TableCell className="px-4 py-4 text-xs text-slate-500">{subscription.autoRenew ? "On" : "Off"}</TableCell>
+      <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${highlighted ? "bg-blue-50" : "bg-white group-hover:bg-slate-50"}`}>{actions}</TableCell>
+    </TableRow>
+  </>;
 }
 
 export default function SubscriptionsPage() {
@@ -414,7 +358,7 @@ export default function SubscriptionsPage() {
   const hasvikAdmin = isSuperAdmin(user);
   const tenantAdmin = isTenantAdmin(user);
   const plansQuery = useSubscriptionPlansQuery();
-  const subscriptionsQuery = useSubscriptionsQuery(user?.userId);
+  const eligibilityQuery = useSubscriptionsQuery(user?.userId, tenantAdmin && Boolean(user?.tenantId));
   const ownTenantQuery = useTenantQuery(user?.tenantId, !hasvikAdmin);
   const tenantsQuery = useTenantsQuery(hasvikAdmin, user?.userId);
   const createMutation = useCreateSubscription();
@@ -430,8 +374,8 @@ export default function SubscriptionsPage() {
   const tenants = tenantsQuery.data ?? [];
   const ownTenantId = user?.tenantId;
   const ownTenant = ownTenantQuery.data;
-  const subscriptions = subscriptionsQuery.data ?? [];
-  const embeddedTenant = subscriptions.find(
+
+  const embeddedTenant = eligibilityQuery.data?.find(
     (subscription) => getSubscriptionTenantId(subscription) === ownTenantId,
   )?.tenant;
   function subscriptionReadOnly(subscription?: Subscription | null) {
@@ -444,11 +388,7 @@ export default function SubscriptionsPage() {
     ownTenant?.name ??
     (typeof embeddedTenant === "object" ? embeddedTenant.name : undefined);
   const [chosenPlan, setChosenPlan] = useState<SubscriptionPlan | null>(null);
-  const [search, setSearch] = useState("");
-  const [cycleFilter, setCycleFilter] = useState<BillingCycle | "ALL">("ALL");
-  const [statusFilter, setStatusFilter] = useState<SubscriptionFilter>(
-    hasvikAdmin ? "PENDING" : "ALL",
-  );
+  const [statusFilter, setStatusFilter] = useState<SubscriptionFilter>("ALL");
   const [showFilters, setShowFilters] = useState(true);
   const [notice, setNotice] = useState("");
   const [operationError, setOperationError] = useState("");
@@ -456,63 +396,51 @@ export default function SubscriptionsPage() {
     useState<Subscription | null>(null);
   const [subscriptionToRenew, setSubscriptionToRenew] =
     useState<Subscription | null>(null);
+  const [renewalEndDate, setRenewalEndDate] = useState("");
+  const [renewalNotes, setRenewalNotes] = useState("");
   const [subscriptionToReject, setSubscriptionToReject] =
     useState<Subscription | null>(null);
   const [subscriptionToApprove, setSubscriptionToApprove] =
     useState<Subscription | null>(null);
+  const [suspensionChange, setSuspensionChange] = useState<{
+    subscription: Subscription;
+    status: "SUSPENDED" | "ACTIVE";
+  } | null>(null);
   const [manualVerificationConfirmed, setManualVerificationConfirmed] =
     useState(false);
 
-  const visibleSubscriptions = subscriptions.filter((subscription) => {
-    if (!hasvikAdmin && ownTenantId && getSubscriptionTenantId(subscription) !== ownTenantId) {
-      return false;
-    }
-    if (!hasvikAdmin && !ownTenantId) return false;
-    const status = normalizeStatus(subscription.status);
-    if (statusFilter !== "ALL" && status !== statusFilter) {
-      return false;
-    }
-    const planId = getReferenceId(subscription.planId);
-    const planName =
-      (typeof subscription.plan === "object" ? subscription.plan.name : "") ??
-      plans.find((plan) => getPlanId(plan) === planId)?.name ??
-      "";
-    const tenantName =
-      (typeof subscription.tenant === "object" ? subscription.tenant.name : "") ??
-      tenants.find((tenant) => tenant.id === getSubscriptionTenantId(subscription))?.name ??
-      "";
-    const query = search.trim().toLowerCase();
-    return !query || `${planName} ${tenantName} ${status}`.toLowerCase().includes(query);
-  });
-  const activeSubscriptions = visibleSubscriptions.filter(
-    (subscription) => normalizeStatus(subscription.status) === "ACTIVE",
-  );
-  const pendingSubscriptionsCount = subscriptions.filter(
-    (subscription) => normalizeStatus(subscription.status) === "PENDING",
-  ).length;
+  const [page, setPage] = useState(1);
+  const [limit, setLimit] = useState(10);
+  const subscriptionsQuery = useSubscriptionsPageQuery({
+    page, limit,
+    status: statusFilter === "ALL" ? undefined : statusFilter,
+    tenantId: hasvikAdmin ? undefined : ownTenantId,
+  }, user?.userId, Boolean(user) && (hasvikAdmin || Boolean(ownTenantId)));
+  const pendingQuery = useSubscriptionsPageQuery({ page: 1, limit: 1, status: "PENDING" }, user?.userId, hasvikAdmin);
+  const subscriptions = subscriptionsQuery.data?.data ?? [];
+  const visibleSubscriptions = subscriptions;
+  const total = subscriptionsQuery.data?.total ?? 0;
+  const pendingSubscriptionsCount = pendingQuery.data?.total;
+  if (subscriptionsQuery.isSuccess && page > Math.max(1, Math.ceil(total / limit))) {
+    setPage(Math.max(1, Math.ceil(total / limit)));
+  }
   const createTenantId = ownTenantId ?? "";
-  const requestExistsForCreateTenant = subscriptions.some(
+  const requestExistsForCreateTenant = (eligibilityQuery.data ?? []).some(
     (subscription) =>
       getSubscriptionTenantId(subscription) === createTenantId &&
       (hasCurrentSubscriptionAccess(subscription) ||
-        normalizeStatus(subscription.status) === "PENDING"),
+        normalizeStatus(subscription.status) === "PENDING" ||
+        normalizeStatus(subscription.status) === "SUSPENDED"),
   );
   const canChoosePlan =
     Boolean(createTenantId) && ownTenant?.isActive === true &&
     !hasvikAdmin &&
     !requestExistsForCreateTenant &&
-    !subscriptionsQuery.isPending &&
-    !subscriptionsQuery.isError &&
+    !eligibilityQuery.isPending &&
+    !eligibilityQuery.isError &&
     !ownTenantQuery.isError;
 
-  const visiblePlans = plans.filter((plan) => {
-    const matchesCycle = cycleFilter === "ALL" || plan.billingCycle === cycleFilter;
-    const query = search.trim().toLowerCase();
-    const matchesSearch =
-      !query ||
-      `${plan.name} ${plan.code} ${plan.description ?? ""}`.toLowerCase().includes(query);
-    return matchesCycle && matchesSearch;
-  });
+  const visiblePlans = plans;
 
   function openCheckout(plan: SubscriptionPlan) {
     if (!canChoosePlan || plan.isActive === false) return;
@@ -533,7 +461,7 @@ export default function SubscriptionsPage() {
         planId,
         autoRenew: false,
       });
-      const createdStatus = createdSubscription.status?.toUpperCase();
+      const createdStatus = createdSubscription.status?.trim().toUpperCase();
       setChosenPlan(null);
       setNotice(
         createdStatus === "PENDING"
@@ -564,12 +492,14 @@ export default function SubscriptionsPage() {
   }
 
   async function renew(id: string): Promise<boolean> {
+    if (renewMutation.isPending || !subscriptionToRenew || (!hasvikAdmin && !tenantAdmin)) return false;
     if (subscriptionReadOnly(subscriptions.find((item) => getSubscriptionId(item) === id))) return false;
     setOperationError("");
     try {
-      await renewMutation.mutateAsync({ id });
+      const payload = buildRenewalPayload(subscriptionToRenew, renewalEndDate, renewalNotes);
+      const renewed = await renewMutation.mutateAsync({ id, payload });
       highlightItem(id);
-      setNotice("Subscription renewed.");
+      setNotice(renewed.status === "PENDING" ? "Renewal submitted and awaiting HASVIK admin approval." : "Subscription renewed.");
       return true;
     } catch (error) {
       setOperationError(getApiErrorMessage(error));
@@ -612,8 +542,31 @@ export default function SubscriptionsPage() {
     }
   }
 
-  const busySubscriptionId =
-    renewMutation.variables?.id ?? statusMutation.variables?.id;
+  async function changeSuspension() {
+    if (!hasvikAdmin || !suspensionChange || statusMutation.isPending) return;
+    const { subscription, status } = suspensionChange;
+    const id = getSubscriptionId(subscription);
+    const latest = subscriptions.find((item) => getSubscriptionId(item) === id);
+    if (!id || subscriptionReadOnly(latest)) return;
+    const expectedStatus = status === "SUSPENDED" ? "ACTIVE" : "SUSPENDED";
+    if (normalizeStatus(latest?.status) !== expectedStatus) {
+      setOperationError("The subscription status has changed. Close this dialog and refresh before trying again.");
+      return;
+    }
+    setOperationError("");
+    try {
+      await statusMutation.mutateAsync({ id, status });
+      highlightItem(id);
+      setNotice(status === "SUSPENDED" ? "Subscription suspended. It no longer grants workspace access." : "Subscription resumed. Workspace access follows its current term dates.");
+      setSuspensionChange(null);
+    } catch (error) {
+      setOperationError(getApiErrorMessage(error));
+    }
+  }
+
+  const busySubscriptionId = renewMutation.isPending
+    ? renewMutation.variables?.id
+    : statusMutation.variables?.id;
   const busy =
     createMutation.isPending ||
     renewMutation.isPending ||
@@ -623,83 +576,94 @@ export default function SubscriptionsPage() {
     Number.isFinite(chosenPlan.price) &&
     chosenPlan.price >= 0;
 
+  function renderSubscriptionRows(mobile = false) {
+    return visibleSubscriptions.map((subscription) => {
+    const planId = getReferenceId(subscription.planId);
+    const tenantId = getSubscriptionTenantId(subscription);
+    const tenantName =
+      (typeof subscription.tenant === "object" ? subscription.tenant.name : undefined) ??
+      tenants.find((tenant) => tenant.id === tenantId)?.name ??
+      (hasvikAdmin ? "Tenant" : ownTenantName ?? "Your workspace");
+    const busyThisSubscription =
+      busy && getSubscriptionId(subscription) === busySubscriptionId;
+    const subscriptionId = getSubscriptionId(subscription) || `${tenantId}-${planId}`;
+    return (
+      <SubscriptionRow
+        key={subscriptionId}
+        mobile={mobile}
+        highlighted={isItemHighlighted(subscriptionId)}
+        subscription={subscription}
+        plan={plans.find((plan) => getPlanId(plan) === planId)}
+        tenantName={tenantName}
+        readOnly={subscriptionReadOnly(subscription)}
+        hasvikAdmin={hasvikAdmin}
+        tenantAdmin={tenantAdmin}
+        busy={busyThisSubscription}
+        onApprove={(approvalSubscription) => {
+          setOperationError("");
+          setManualVerificationConfirmed(false);
+          setSubscriptionToApprove(approvalSubscription);
+        }}
+        onRenew={(renewalSubscription) => {
+          setRenewalEndDate("");
+          setRenewalNotes("");
+          setOperationError("");
+          setSubscriptionToRenew(renewalSubscription);
+        }}
+        onCancel={setSubscriptionToCancel}
+        onReject={setSubscriptionToReject}
+        onSuspensionChange={(subscription) => {
+          setOperationError("");
+          setSuspensionChange({ subscription, status: normalizeStatus(subscription.status) === "SUSPENDED" ? "ACTIVE" : "SUSPENDED" });
+        }}
+      />
+    );
+  });
+  }
+
   return (
     <ListPageLayout
       breadcrumb={<Breadcrumb items={[{ label: "Subscriptions" }]} />}
-      searchValue={search}
-      onSearchChange={setSearch}
-      searchPlaceholder={
-        hasvikAdmin
-          ? "Search subscriptions by workspace or plan"
-          : "Search plans and subscriptions"
-      }
-      filters={tenantAdmin || hasvikAdmin ? (
-        <div className="flex flex-wrap items-center gap-4">
-          {tenantAdmin && (
-          <label htmlFor="subscription-cycle-filter" className="flex items-center gap-2 text-xs font-medium text-slate-600">
-            Billing cycle
-            <Select
-              value={cycleFilter}
-              onValueChange={(value) => setCycleFilter(value as BillingCycle | "ALL")}
-            >
-              <SelectTrigger id="subscription-cycle-filter" size="sm" className="w-36 rounded-lg text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-white">
-                <SelectItem value="ALL" className="text-xs">All cycles</SelectItem>
-                {Object.entries(cycleLabels).map(([cycle, label]) => (
-                  <SelectItem key={cycle} value={cycle} className="text-xs">{label}</SelectItem>
-                ))}
-              </SelectContent>
-            </Select>
-          </label>
-          )}
-          <label htmlFor="subscription-status-filter" className="flex items-center gap-2 text-xs font-medium text-slate-600">
-            Status
-            <Select
+      filters={tenantAdmin || hasvikAdmin ? <ResponsiveFilters onReset={() => { setStatusFilter("ALL"); setPage(1); }} fields={[{ key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <Select
               value={statusFilter}
-              onValueChange={(value) => setStatusFilter(value as SubscriptionFilter)}
+              onValueChange={(value) => { setStatusFilter(value as SubscriptionFilter); setPage(1); }}
             >
-              <SelectTrigger id="subscription-status-filter" size="sm" className="w-36 rounded-lg text-xs">
-                <SelectValue />
+              <SelectTrigger id="subscription-status-filter" size="sm" className="w-48 rounded-none text-xs">
+                <SelectValue>
+                  {statusFilter === "ALL" ? <span className="text-slate-600">All statuses</span> : <StatusBadge status={statusFilter} />}
+                </SelectValue>
               </SelectTrigger>
               <SelectContent className="bg-white">
-                <SelectItem value="ALL" className="text-xs">All statuses</SelectItem>
-                <SelectItem value="ACTIVE" className="text-xs">Active</SelectItem>
-                <SelectItem value="PENDING" className="text-xs">Pending</SelectItem>
-                <SelectItem value="CANCELLED" className="text-xs">Cancelled</SelectItem>
-                <SelectItem value="REJECTED" className="text-xs">Rejected</SelectItem>
-                <SelectItem value="SUSPENDED" className="text-xs">Suspended</SelectItem>
-                <SelectItem value="EXPIRED" className="text-xs">Expired</SelectItem>
+                <SelectItem value="ALL" className="rounded-none py-2.5 text-xs">All statuses</SelectItem>
+                {Object.entries(SUBSCRIPTION_STATUS_VISUALS).map(([status, visual]) => <SelectItem key={status} value={status} textValue={visual.label} className="rounded-none py-2.5 text-xs"><span className="inline-flex items-center gap-2.5"><span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${visual.dot}`} /><span>{visual.label}</span></span></SelectItem>)}
               </SelectContent>
-            </Select>
-          </label>
-        </div>
-      ) : undefined}
+            </Select> }]} /> : undefined}
       showFilters={showFilters}
       onToggleFilters={() => setShowFilters((visible) => !visible)}
       onResetFilters={() => {
-        setSearch("");
-        setCycleFilter("ALL");
-        setStatusFilter(hasvikAdmin ? "PENDING" : "ALL");
+        setStatusFilter("ALL");
+        setPage(1);
       }}
-      resultCount={visibleSubscriptions.length}
+      resultCount={total}
       showStats={false}
       actions={
         <Actions
           primary={{
             label: hasvikAdmin ? "Review pending requests" : "Explore plans",
-            onSelect: () =>
+            onSelect: () => {
+              if (hasvikAdmin) { setStatusFilter("PENDING"); setPage(1); }
               document
                 .getElementById(
                   hasvikAdmin ? "subscription-requests" : "available-plans",
                 )
-                ?.scrollIntoView({ behavior: "smooth" }),
+                ?.scrollIntoView({ behavior: "smooth" });
+            },
             icon: <ArrowRight className="size-4" />,
           }}
           menuItems={tenantAdmin || hasvikAdmin ? [
             {
               label: showFilters ? "Hide filters" : "Show filters",
+              desktopOnly: true,
               onSelect: () => setShowFilters((visible) => !visible),
               icon: <Filter className="size-4" />,
             },
@@ -709,16 +673,14 @@ export default function SubscriptionsPage() {
       content={
         <div className="flex flex-col gap-5">
           {hasvikAdmin ? (
-            <div className="flex flex-col gap-3 rounded-2xl border border-amber-200 bg-gradient-to-r from-amber-50 to-white p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between">
+            <div className={`flex flex-col gap-3 rounded-2xl border p-4 shadow-sm sm:flex-row sm:items-center sm:justify-between ${getSubscriptionStatusVisual("PENDING").badge}`}>
               <div>
-                <p className="text-sm font-bold text-amber-950">Subscription approval queue</p>
-                <p className="mt-1 text-xs leading-5 text-amber-900">
+                <p className="text-sm font-bold">Subscription approval queue</p>
+                <p className="mt-1 text-xs leading-5">
                   Review pending requests from all workspaces. Approving a request activates its subscription.
                 </p>
               </div>
-              <span className="w-fit shrink-0 rounded-full border border-amber-200 bg-white px-3 py-1.5 text-xs font-bold text-amber-950">
-                {pendingSubscriptionsCount} awaiting review
-              </span>
+              <StatusBadge status="PENDING" label={pendingQuery.isError ? "Queue unavailable" : pendingSubscriptionsCount === undefined ? "Loading queue" : `${pendingSubscriptionsCount} awaiting review`} className="w-fit px-3 py-1.5 text-xs" />
             </div>
           ) : (
             <div className="flex justify-end">
@@ -758,52 +720,26 @@ export default function SubscriptionsPage() {
             </div>
           )}
 
+          {tenantAdmin && eligibilityQuery.isError && <p role="alert" className="text-sm text-red-700">Workspace subscription eligibility could not be verified. <button type="button" onClick={() => void eligibilityQuery.refetch()} className="underline">Try again</button></p>}
+
           {requestExistsForCreateTenant && (
             <div role="status" className="flex items-start gap-3 rounded-xl border border-blue-100 bg-blue-50 px-4 py-3">
               <CircleHelp className="mt-0.5 size-4 shrink-0 text-primary" />
               <p className="text-xs leading-5 text-blue-950">
-                Your workspace already has an active subscription or a pending request. Another plan cannot be requested until the current request is resolved or the subscription ends.
+                Your workspace has an active subscription, a suspended subscription, or a pending request. Contact a HASVIK admin to resolve a suspension. Another plan can be requested once the current subscription or request is resolved.
               </p>
             </div>
           )}
 
-          <section id="subscription-requests" aria-label="Current subscriptions" className="overflow-hidden rounded-2xl border border-[#e4ecf2] bg-white shadow-[0_4px_16px_rgba(20,40,60,0.03)]">
-            <div className="flex items-center justify-between gap-3 border-b border-[#edf2f7] px-4 py-4 sm:px-5">
-              <div>
-                <h2 className="text-sm font-bold text-[#0f172a]">
-                  {hasvikAdmin ? "Subscription requests and history" : "Your subscriptions"}
-                </h2>
-                <p className="mt-1 text-xs text-[#64748b]">
-                  {hasvikAdmin
-                    ? "Review pending requests or filter the complete subscription history."
-                    : "View your active plan, dates, and any requests awaiting approval."}
-                </p>
-              </div>
-              <div className="flex shrink-0 items-center gap-2">
-                <span className="rounded-full bg-slate-100 px-2.5 py-1 text-[10px] font-bold text-slate-600">
-                  {hasvikAdmin
-                    ? statusFilter === "PENDING"
-                      ? `${pendingSubscriptionsCount} pending`
-                      : `${visibleSubscriptions.length} shown`
-                    : `${activeSubscriptions.length} active`}
-                </span>
-                {hasvikAdmin && (
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    disabled={subscriptionsQuery.isFetching}
-                    onClick={() => void subscriptionsQuery.refetch()}
-                    className="h-8 rounded-lg px-2.5 text-xs"
-                  >
-                    <RefreshCw
-                      className={`size-3.5 ${subscriptionsQuery.isFetching ? "animate-spin" : ""}`}
-                    />
-                    <span className="sr-only sm:not-sr-only">Refresh</span>
-                  </Button>
-                )}
-              </div>
-            </div>
+          <TooltipProvider><DataTableShell id="subscription-requests" aria-label="Current subscriptions">
+            <DataTableHeader
+              title={hasvikAdmin ? "Subscriptions" : "Your subscriptions"}
+              total={total}
+              description="Review subscription plans, terms, and requests."
+              actions={<Button type="button" variant="outline" size="sm" disabled={subscriptionsQuery.isFetching} onClick={() => { void subscriptionsQuery.refetch(); if (hasvikAdmin) void pendingQuery.refetch(); else void eligibilityQuery.refetch(); }} className="h-8 text-xs">
+                <RefreshCw className={`size-3.5 ${subscriptionsQuery.isFetching ? "animate-spin" : ""}`} />Refresh
+              </Button>}
+            />
             {subscriptionsQuery.isPending ? (
               <div className="flex min-h-32 items-center justify-center gap-2 text-sm text-slate-500">
                 <LoaderCircle className="size-4 animate-spin" />
@@ -826,63 +762,39 @@ export default function SubscriptionsPage() {
                 <CreditCard className="mx-auto size-6 text-slate-300" />
                 <p className="mt-3 text-sm font-semibold text-slate-800">
                   {hasvikAdmin
-                    ? search.trim()
-                      ? "No subscriptions match your search"
-                      : statusFilter === "PENDING"
+                    ? statusFilter === "PENDING"
                         ? "No pending subscription requests"
                         : "No subscriptions match this status"
                     : "No subscriptions found"}
                 </p>
                 <p className="mt-1 text-xs text-slate-500">
                   {hasvikAdmin
-                    ? search.trim()
-                      ? "Try another workspace or plan name."
-                      : statusFilter === "PENDING"
+                    ? statusFilter === "PENDING"
                         ? "New subscription requests from tenant admins will appear here."
                         : "Choose another status to review subscription history."
                     : "Choose an available plan below to create a subscription."}
                 </p>
               </div>
             ) : (
-              <div className="divide-y divide-[#edf2f7]">
-                {visibleSubscriptions.map((subscription) => {
-                  const planId = getReferenceId(subscription.planId);
-                  const tenantId = getSubscriptionTenantId(subscription);
-                  const tenantName =
-                    (typeof subscription.tenant === "object" ? subscription.tenant.name : undefined) ??
-                    tenants.find((tenant) => tenant.id === tenantId)?.name ??
-                    (hasvikAdmin ? "Tenant" : ownTenantName ?? "Your workspace");
-                  const busyThisSubscription =
-                    busy && getSubscriptionId(subscription) === busySubscriptionId;
-                  const subscriptionId = getSubscriptionId(subscription) || `${tenantId}-${planId}`;
-                  return (
-                    <div key={subscriptionId} className={`transition-all duration-500 ${isItemHighlighted(subscriptionId) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : ""}`}>
-                    <SubscriptionRow
-                      subscription={subscription}
-                      plan={plans.find((plan) => getPlanId(plan) === planId)}
-                      tenantName={tenantName}
-                      readOnly={subscriptionReadOnly(subscription)}
-                      hasvikAdmin={hasvikAdmin}
-                      tenantAdmin={tenantAdmin}
-                      busy={busyThisSubscription}
-                      onApprove={(approvalSubscription) => {
-                        setOperationError("");
-                        setManualVerificationConfirmed(false);
-                        setSubscriptionToApprove(approvalSubscription);
-                      }}
-                      onRenew={(renewalSubscription) => {
-                        setOperationError("");
-                        setSubscriptionToRenew(renewalSubscription);
-                      }}
-                      onCancel={setSubscriptionToCancel}
-                      onReject={setSubscriptionToReject}
-                    />
-                    </div>
-                  );
-                })}
-              </div>
+              <>
+                <DataTableMobileList>{renderSubscriptionRows(true)}</DataTableMobileList>
+                <div data-layout-desktop className="overflow-x-auto">
+                  <Table>
+                    <TableHeader><TableRow>
+                      <TableHead className="py-4 pl-6 pr-4">Subscription</TableHead>
+                      <TableHead className="px-4 py-4">Workspace</TableHead>
+                      <TableHead className="px-4 py-4">Status</TableHead>
+                      <TableHead className="px-4 py-4">Term</TableHead>
+                      <TableHead className="px-4 py-4">Auto-renew</TableHead>
+                      <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right">Actions</TableHead>
+                    </TableRow></TableHeader>
+                    <TableBody>{renderSubscriptionRows()}</TableBody>
+                  </Table>
+                </div>
+              </>
             )}
-          </section>
+            {subscriptionsQuery.isSuccess && <ListPagination total={total} page={page} limit={limit} onPageChange={setPage} onLimitChange={(value) => { setLimit(value); setPage(1); }} />}
+          </DataTableShell></TooltipProvider>
 
           {tenantAdmin && (
           <section id="available-plans" className="scroll-mt-24">
@@ -1149,6 +1061,21 @@ export default function SubscriptionsPage() {
           </ManagementConfirmDialog>
 
           <ManagementConfirmDialog
+            open={Boolean(suspensionChange)}
+            title={suspensionChange?.status === "SUSPENDED" ? "Suspend subscription?" : "Resume subscription?"}
+            description={suspensionChange?.status === "SUSPENDED"
+              ? "This subscription will stop granting workspace access immediately. A HASVIK admin can resume it later."
+              : "This will reactivate the subscription using its existing start and end dates. An expired term will still require renewal."}
+            confirmLabel={suspensionChange?.status === "SUSPENDED" ? "Suspend subscription" : "Resume subscription"}
+            destructive={suspensionChange?.status === "SUSPENDED"}
+            pending={statusMutation.isPending}
+            onCancel={() => { setSuspensionChange(null); setOperationError(""); }}
+            onConfirm={() => void changeSuspension()}
+          >
+            {operationError && <p role="alert" className="text-sm text-red-700">{operationError}</p>}
+          </ManagementConfirmDialog>
+
+          <ManagementConfirmDialog
             open={Boolean(subscriptionToRenew)}
             title="Renew subscription?"
             description={
@@ -1161,7 +1088,7 @@ export default function SubscriptionsPage() {
                             getPlanId(plan) ===
                             getReferenceId(subscriptionToRenew.planId),
                         )?.name ?? "this subscription"
-                  }. This will submit the renewal through the existing subscription flow.`
+                  }. Leave the end date blank to renew using the plan billing cycle.`
                 : ""
             }
             confirmLabel="Confirm renewal"
@@ -1178,7 +1105,19 @@ export default function SubscriptionsPage() {
                 });
               }
             }}
-          />
+          >
+            <div className="space-y-4">
+              <label className="block text-sm font-medium text-slate-700">
+                Renewal end date (optional)
+                <input type="date" value={renewalEndDate} onChange={(event) => setRenewalEndDate(event.target.value)} disabled={renewMutation.isPending} className="mt-2 block w-full border border-slate-300 p-2" />
+              </label>
+              <label className="block text-sm font-medium text-slate-700">
+                Renewal notes (optional)
+                <textarea value={renewalNotes} onChange={(event) => setRenewalNotes(event.target.value)} maxLength={1000} disabled={renewMutation.isPending} className="mt-2 block w-full border border-slate-300 p-2" rows={3} />
+              </label>
+              {operationError && <p role="alert" className="text-sm text-red-700">{operationError}</p>}
+            </div>
+          </ManagementConfirmDialog>
 
           <ManagementConfirmDialog
             open={Boolean(subscriptionToReject)}
