@@ -42,7 +42,8 @@ import { cn } from "@/lib/utils";
 
 const STALE_DAYS = 14;
 const TYPE_ICON: Record<string, LucideIcon> = { CALL: Phone, MEETING: Video, EMAIL: Mail, WHATSAPP: MessageCircle };
-const STAGE_TONE = { NEW: "brand", CONTACTED: "brand-strong", INTERESTED: "accent", PROPOSAL_AND_NEGOTIATION: "growth", WON: "accent", LOST: "muted" } as const;
+// Same colours as the pipeline board: one stage, one colour, everywhere.
+const STAGE_TONE = { NEW: "brand", CONTACTED: "brand-strong", INTERESTED: "warn", PROPOSAL_AND_NEGOTIATION: "muted", WON: "accent", LOST: "bad" } as const;
 
 type Scope = "mine" | "team";
 

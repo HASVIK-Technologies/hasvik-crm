@@ -39,7 +39,7 @@ function SettingsContent() {
   const tabs = TABS.filter((tab) => !tab.adminOnly || admin);
   const requested = params.get("tab") as TabId | null;
   const active = requested ? tabs.find((tab) => tab.id === requested) : undefined;
-  const open = (id: TabId | null) => router.replace(id ? `/settings?tab=${id}` : "/settings", { scroll: false });
+  const open = (id: TabId | null) => router.push(id ? `/settings?tab=${id}` : "/settings", { scroll: false });
   // Desktop always shows a section; phones show the list until one is chosen.
   const current = active ?? tabs[0];
 

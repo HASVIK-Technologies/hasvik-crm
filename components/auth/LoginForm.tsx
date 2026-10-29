@@ -24,6 +24,7 @@ export default function LoginForm() {
   const router = useRouter();
   const loginMutation = useLogin();
   const [showPassword, setShowPassword] = useState(false);
+  const [capsLock, setCapsLock] = useState(false);
   const sessionEnded = useSyncExternalStore(sessionEndedStore.subscribe, sessionEndedStore.get, sessionEndedStore.server);
   const {
     register,
@@ -145,7 +146,9 @@ export default function LoginForm() {
                     aria-invalid={Boolean(errors.password)}
                     aria-describedby={errors.password ? "password-error" : undefined}
                     className="pr-12 pl-11"
-                    {...register("password", { required: "Enter your password." })}
+                    onKeyUp={(event) => setCapsLock(event.getModifierState("CapsLock"))}
+                    onKeyDown={(event) => setCapsLock(event.getModifierState("CapsLock"))}
+                    {...register("password", { required: "Enter your password.", onBlur: () => setCapsLock(false) })}
                   />
                   <button
                     type="button"
@@ -158,6 +161,7 @@ export default function LoginForm() {
                     {showPassword ? <EyeOff className="size-4.5" aria-hidden /> : <Eye className="size-4.5" aria-hidden />}
                   </button>
                 </div>
+                {capsLock && <p role="status" className="text-sm font-medium text-warn">Caps Lock is on.</p>}
                 {errors.password && <p id="password-error" role="alert" className="text-xs font-medium text-bad">{errors.password.message}</p>}
               </div>
 

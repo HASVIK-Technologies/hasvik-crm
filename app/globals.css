@@ -37,6 +37,11 @@
   --hero: linear-gradient(125deg, #054a86 0%, #0876d1 55%, #08a9e6 118%);
   --brand-gradient: linear-gradient(90deg, #0876d1, #08a9e6 55%, #20b83f);
   --radius: 0.75rem;
+  /* One motion scale for the whole app (see also prefers-reduced-motion below). */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 400ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
 }
 
 html.dark {
@@ -175,9 +180,9 @@ html { color-scheme: light; }
 @keyframes pop-in { from { opacity: 0; transform: scale(0.96) translateY(6px); } to { opacity: 1; transform: none; } }
 @keyframes sheet-up { from { opacity: 0; transform: translateY(40px); } to { opacity: 1; transform: none; } }
 @keyframes shimmer { from { background-position: -200% 0; } to { background-position: 200% 0; } }
-.fade-up { animation: fade-up 0.4s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.pop-in { animation: pop-in 0.18s cubic-bezier(0.22, 1, 0.36, 1) both; }
-.sheet-up { animation: sheet-up 0.26s cubic-bezier(0.22, 1, 0.36, 1) both; }
+.fade-up { animation: fade-up var(--motion-slow) var(--ease-out) both; }
+.pop-in { animation: pop-in var(--motion-base) var(--ease-out) both; }
+.sheet-up { animation: sheet-up var(--motion-base) var(--ease-out) both; }
 .stagger > * { animation: fade-up 0.45s cubic-bezier(0.22, 1, 0.36, 1) both; }
 .stagger > *:nth-child(2) { animation-delay: 45ms; }
 .stagger > *:nth-child(3) { animation-delay: 90ms; }

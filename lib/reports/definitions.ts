@@ -67,7 +67,7 @@ export interface ReportChart {
   kind: "bars" | "columns";
   ariaLabel: string;
   unit?: string;
-  rows: { key: string; label: string; value: number; valueLabel?: string; href?: string }[];
+  rows: { key: string; label: string; value: number; valueLabel?: string; href?: string; tone?: "brand-strong" | "brand" | "accent" | "growth" | "muted" | "warn" | "bad" }[];
 }
 
 export interface ReportResult {
@@ -79,6 +79,8 @@ export interface ReportResult {
   rowHref?: (row: Record<string, Cell>) => string | undefined;
   note?: string;
 }
+
+const STAGE_TONE: Record<string, "brand-strong" | "brand" | "accent" | "muted" | "warn" | "bad"> = { NEW: "brand", CONTACTED: "brand-strong", INTERESTED: "warn", PROPOSAL_AND_NEGOTIATION: "muted", WON: "accent", LOST: "bad" };
 
 const pct = (value: number | null) => (value === null ? "—" : `${value}%`);
 
@@ -118,7 +120,7 @@ export function buildReport(slug: ReportSlug, ctx: ReportContext): ReportResult 
           { label: "Won", value: summary.won, count: summary.won, href: leadsHref({ status: "WON", isActive: true, ...owner, ...source }), tone: "ok" },
           { label: "Lost", value: summary.lost, count: summary.lost, href: leadsHref({ status: "LOST", isActive: true, ...owner, ...source }), tone: "bad" },
         ],
-        chart: { kind: "bars", ariaLabel: "Active leads by stage", rows: stages.map((s) => ({ key: s.status, label: STAGE_LABELS[s.status], value: s.count, valueLabel: `${s.count} · ${total ? Math.round((s.count / total) * 100) : 0}%`, href: leadsHref({ status: s.status, isActive: true, ...owner, ...source }) })) },
+        chart: { kind: "bars", ariaLabel: "Active leads by stage", rows: stages.map((s) => ({ key: s.status, label: STAGE_LABELS[s.status], tone: STAGE_TONE[s.status], value: s.count, valueLabel: `${s.count} · ${total ? Math.round((s.count / total) * 100) : 0}%`, href: leadsHref({ status: s.status, isActive: true, ...owner, ...source }) })) },
         columns: [{ key: "stage", label: "Stage" }, { key: "leads", label: "Leads", numeric: true }, { key: "share", label: "Share of total", numeric: true }],
         rows: stages.map((s) => ({ stage: STAGE_LABELS[s.status], leads: s.count, share: pct(total ? Math.round((s.count / total) * 100) : 0), _status: s.status })),
         rowHref: (row) => (row.leads ? leadsHref({ status: String(row._status), isActive: true, ...owner, ...source }) : undefined),
@@ -244,7 +246,7 @@ export function buildReport(slug: ReportSlug, ctx: ReportContext): ReportResult 
           { label: "Won", value: funnel[4].reached, count: funnel[4].reached, tone: "ok", href: leadsHref({ status: "WON", isActive: true, ...owner, ...source }) },
           { label: "Overall conversion", value: `${funnel[4].percentOfStart}%`, count: funnel[4].reached },
         ],
-        chart: { kind: "bars", ariaLabel: "Leads that reached each stage", rows: funnel.map((s) => ({ key: s.status, label: STAGE_LABELS[s.status], value: s.reached, valueLabel: `${s.reached} · ${s.percentOfStart}%` })) },
+        chart: { kind: "bars", ariaLabel: "Leads that reached each stage", rows: funnel.map((s) => ({ key: s.status, label: STAGE_LABELS[s.status], tone: STAGE_TONE[s.status], value: s.reached, valueLabel: `${s.reached} · ${s.percentOfStart}%` })) },
         columns: [{ key: "stage", label: "Stage" }, { key: "reached", label: "Reached", numeric: true }, { key: "start", label: "% of start", numeric: true }, { key: "step", label: "From previous stage", numeric: true }],
         rows: funnel.map((s, i) => ({ stage: STAGE_LABELS[s.status], reached: s.reached, start: `${s.percentOfStart}%`, step: i === 0 ? "—" : pct(funnel[i - 1].reached ? Math.round((s.reached / funnel[i - 1].reached) * 100) : null) })),
         note: "Each lead is counted at its current stage and every stage before it. Lost leads are left out.",
