@@ -289,6 +289,101 @@ describe("Business Follow-up & Date Validation", () => {
       assert.notStrictEqual(item.nextFollowUp, "-");
       assert.ok(item.nextFollowUp.includes("Nov") || item.nextFollowUp.includes("11"));
     });
+
+    test("handles businessDetails endpoint ~/api/businesses/6aa20415baa82530f0848d21 wrapped payload", () => {
+      const apiResponse = {
+        data: {
+          _id: "6aa20415baa82530f0848d21",
+          name: "Hasvik Tech",
+          createdAt: "2024-01-15T00:00:00.000Z",
+          lastFollowup: {
+            _id: "fu-last-6aa",
+            scheduledAt: "2026-10-18T10:00:00.000Z",
+            status: "COMPLETED",
+            completedAt: "2026-10-18T10:30:00.000Z",
+          },
+          nextFollowups: [
+            {
+              _id: "fu-next-6aa",
+              scheduledAt: "2026-11-05T14:00:00.000Z",
+              status: "SCHEDULED",
+            },
+          ],
+        },
+      } as unknown as ApiBusiness;
+
+      const item = toBusinessItem(apiResponse);
+      assert.strictEqual(item.id, "6aa20415baa82530f0848d21");
+      assert.strictEqual(item.name, "Hasvik Tech");
+      assert.notStrictEqual(item.lastFollowUp, "-");
+      assert.ok(item.lastFollowUp.includes("Oct") || item.lastFollowUp.includes("18"));
+      assert.ok(!item.lastFollowUp.includes("2024"), "Must NOT show business createdAt");
+      assert.strictEqual(item.lastFollowUpId, "fu-last-6aa");
+      assert.notStrictEqual(item.nextFollowUp, "-");
+      assert.ok(item.nextFollowUp.includes("Nov") || item.nextFollowUp.includes("05") || item.nextFollowUp.includes("5"));
+      assert.strictEqual(item.nextFollowUpId, "fu-next-6aa");
+    });
+
+    test("handles camelCase lastFollowUp and nextFollowUp from list of businesses endpoint", () => {
+      const business = {
+        _id: "biz-camel",
+        name: "CamelCase Followups Biz",
+        createdAt: "2024-06-01T00:00:00.000Z",
+        lastFollowUp: {
+          _id: "fu-last-camel",
+          completedAt: "2026-09-25T11:00:00.000Z",
+          status: "COMPLETED",
+        },
+        nextFollowUp: {
+          _id: "fu-next-camel",
+          scheduledAt: "2026-12-01T10:00:00.000Z",
+          status: "SCHEDULED",
+        },
+      } as unknown as ApiBusiness;
+
+      const item = toBusinessItem(business);
+      assert.notStrictEqual(item.lastFollowUp, "-");
+      assert.ok(item.lastFollowUp.includes("Sep") || item.lastFollowUp.includes("09"));
+      assert.ok(!item.lastFollowUp.includes("2024"));
+      assert.strictEqual(item.lastFollowUpId, "fu-last-camel");
+      assert.notStrictEqual(item.nextFollowUp, "-");
+      assert.ok(item.nextFollowUp.includes("Dec") || item.nextFollowUp.includes("12"));
+      assert.strictEqual(item.nextFollowUpId, "fu-next-camel");
+    });
+
+    test("handles array lastFollowups and nextFollowUps", () => {
+      const business = {
+        _id: "biz-plural",
+        name: "Plural Followups Biz",
+        lastFollowups: [
+          {
+            _id: "fu-last-1",
+            date: "2026-08-10T10:00:00.000Z",
+            status: "COMPLETED",
+          },
+          {
+            _id: "fu-last-2",
+            date: "2026-08-20T10:00:00.000Z",
+            status: "COMPLETED",
+          },
+        ],
+        nextFollowUps: [
+          {
+            _id: "fu-next-1",
+            scheduledAt: "2026-12-10T10:00:00.000Z",
+            status: "SCHEDULED",
+          },
+        ],
+      } as unknown as ApiBusiness;
+
+      const item = toBusinessItem(business);
+      assert.notStrictEqual(item.lastFollowUp, "-");
+      assert.ok(item.lastFollowUp.includes("Aug") || item.lastFollowUp.includes("20"));
+      assert.strictEqual(item.lastFollowUpId, "fu-last-2");
+      assert.notStrictEqual(item.nextFollowUp, "-");
+      assert.ok(item.nextFollowUp.includes("Dec") || item.nextFollowUp.includes("10"));
+      assert.strictEqual(item.nextFollowUpId, "fu-next-1");
+    });
   });
 
   describe("formatFollowUpDate", () => {
@@ -412,7 +507,8 @@ describe("Business Follow-up & Date Validation", () => {
 
   describe("lead status display labels", () => {
     test("uses the canonical user-friendly label for every backend lead status", () => {
-      assert.strictEqual(getLeadStatusLabel("NEW"), "New Lead");
+      assert.strictEqual(getLeadStatusLabel("NEW"), "New");
+      assert.strictEqual(getLeadStatusLabel("New Lead"), "New");
       assert.strictEqual(getLeadStatusLabel("CONTACTED"), "Contacted");
       assert.strictEqual(
         getLeadStatusLabel("PROPOSAL_AND_NEGOTIATION"),
@@ -430,7 +526,27 @@ describe("Business Follow-up & Date Validation", () => {
         }),
         "Proposal & Negotiation",
       );
+      assert.strictEqual(
+        formatLeadStatus("NEW", {
+          NEW: "NEW",
+        }),
+        "New",
+      );
       assert.strictEqual(formatLeadStatus("FOLLOW_UP_REQUIRED"), "Follow Up Required");
+    });
+
+    test("normalizes array responses and maps them to friendly labels without numeric keys", () => {
+      const rawArray = ["NEW", "CONTACTED", "INTERESTED", "PROPOSAL_AND_NEGOTIATION", "WON", "LOST"];
+      const normalized = Object.fromEntries(
+        rawArray.map((status) => [status, formatLeadStatus(status)]),
+      );
+      assert.strictEqual(normalized.NEW, "New");
+      assert.strictEqual(normalized.CONTACTED, "Contacted");
+      assert.strictEqual(normalized.INTERESTED, "Interested");
+      assert.strictEqual(normalized.PROPOSAL_AND_NEGOTIATION, "Proposal & Negotiation");
+      assert.strictEqual(normalized.WON, "Won");
+      assert.strictEqual(normalized.LOST, "Lost");
+      assert.ok(!Object.keys(normalized).includes("0"));
     });
   });
 });
