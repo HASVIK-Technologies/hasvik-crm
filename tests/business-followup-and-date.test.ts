@@ -416,7 +416,7 @@ describe("Business Follow-up & Date Validation", () => {
       assert.strictEqual(getLeadStatusLabel("CONTACTED"), "Contacted");
       assert.strictEqual(
         getLeadStatusLabel("PROPOSAL_AND_NEGOTIATION"),
-        "Proposal & Negotiation",
+        "Proposal & negotiation",
       );
       assert.strictEqual(getLeadStatusLabel("INTERESTED"), "Interested");
       assert.strictEqual(getLeadStatusLabel("WON"), "Won");
@@ -428,7 +428,7 @@ describe("Business Follow-up & Date Validation", () => {
         formatLeadStatus("PROPOSAL_AND_NEGOTIATION", {
           PROPOSAL_AND_NEGOTIATION: "PROPOSAL_AND_NEGOTIATION",
         }),
-        "Proposal & Negotiation",
+        "Proposal & negotiation",
       );
       assert.strictEqual(formatLeadStatus("FOLLOW_UP_REQUIRED"), "Follow Up Required");
     });

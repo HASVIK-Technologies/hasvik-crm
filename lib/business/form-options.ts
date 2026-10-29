@@ -69,8 +69,8 @@ export const STATE_OPTIONS = [
 export const STATUS_OPTIONS = [
   { value: "NEW", label: "New lead" },
   { value: "CONTACTED", label: "Contacted" },
-  { value: "PROPOSAL_AND_NEGOTIATION", label: "Proposal & Negotiation" },
   { value: "INTERESTED", label: "Interested" },
+  { value: "PROPOSAL_AND_NEGOTIATION", label: "Proposal & negotiation" },
   { value: "WON", label: "Won" },
   { value: "LOST", label: "Lost" },
 ];
@@ -81,43 +81,43 @@ export const LEAD_STATUS_VISUALS: Record<
   { badge: string; accent: string; dot: string }
 > = {
   NEW: {
-    badge: "border-blue-200 bg-blue-50 text-blue-700",
-    accent: "bg-blue-500",
-    dot: "bg-blue-500",
+    badge: "border-brand/40 bg-brand-soft text-brand-strong",
+    accent: "bg-brand",
+    dot: "bg-brand",
   },
   CONTACTED: {
-    badge: "border-cyan-200 bg-cyan-50 text-cyan-800",
-    accent: "bg-cyan-500",
-    dot: "bg-cyan-500",
+    badge: "border-info/40 bg-info-soft text-info",
+    accent: "bg-info",
+    dot: "bg-info",
   },
   INTERESTED: {
-    badge: "border-amber-200 bg-amber-50 text-amber-800",
-    accent: "bg-amber-500",
-    dot: "bg-amber-500",
+    badge: "border-warn/30 bg-warn-soft text-warn",
+    accent: "bg-warn",
+    dot: "bg-warn",
   },
   PROPOSAL_AND_NEGOTIATION: {
-    badge: "border-violet-200 bg-violet-50 text-violet-700",
-    accent: "bg-violet-500",
-    dot: "bg-violet-500",
+    badge: "border-line bg-surface-2 text-ink",
+    accent: "bg-ink-soft",
+    dot: "bg-ink-soft",
   },
   WON: {
-    badge: "border-emerald-200 bg-emerald-50 text-emerald-800",
-    accent: "bg-emerald-500",
-    dot: "bg-emerald-500",
+    badge: "border-ok/30 bg-ok-soft text-ok",
+    accent: "bg-ok",
+    dot: "bg-ok",
   },
   LOST: {
-    badge: "border-rose-200 bg-rose-50 text-rose-800",
-    accent: "bg-rose-500",
-    dot: "bg-rose-500",
+    badge: "border-bad/30 bg-bad-soft text-bad",
+    accent: "bg-bad",
+    dot: "bg-bad",
   },
 };
 
 export function getLeadStatusVisual(status?: string | null) {
   const normalized = status?.trim().toUpperCase() ?? "";
   return LEAD_STATUS_VISUALS[normalized] ?? {
-    badge: "border-slate-200 bg-slate-100 text-slate-700",
-    accent: "bg-slate-400",
-    dot: "bg-slate-400",
+    badge: "border-line bg-surface-2 text-ink-soft",
+    accent: "bg-muted",
+    dot: "bg-muted",
   };
 }
 
@@ -125,7 +125,7 @@ export const LEAD_STATUS_DISPLAY_NAMES: Record<string, string> = {
   NEW: "New",
   CONTACTED: "Contacted",
   INTERESTED: "Interested",
-  PROPOSAL_AND_NEGOTIATION: "Proposal & Negotiation",
+  PROPOSAL_AND_NEGOTIATION: "Proposal & negotiation",
   WON: "Won",
   LOST: "Lost",
 };
