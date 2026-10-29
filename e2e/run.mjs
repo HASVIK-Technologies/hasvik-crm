@@ -201,9 +201,9 @@ await t.step("settings: profile validates and password mismatch is flagged", asy
 await t.step("Kanban shows true column counts and the view choice is remembered", async () => {
   await page.goto(`${BASE}/businesses`);
   await page.getByRole("button", { name: "Kanban" }).first().click();
-  await page.getByText(/Sales pipeline/).first().waitFor({ timeout: 20000 });
+  await page.getByRole("heading", { name: /^Pipeline/ }).first().waitFor({ timeout: 20000 });
   await page.reload();
-  await page.getByText(/Sales pipeline/).first().waitFor({ timeout: 20000 });
+  await page.getByRole("heading", { name: /^Pipeline/ }).first().waitFor({ timeout: 20000 });
   await page.getByRole("button", { name: "Table" }).first().click();
 });
 

@@ -35,7 +35,7 @@ export default function ResponsiveFilters({ fields, onReset, hasActiveFilters }:
   const { visible, more } = splitFilters(fields, count);
   const activeMore = more.filter((field) => field.active).length;
   const renderField = (field: ResponsiveFilter, expanded: boolean) => (
-    <div key={field.key} role="group" aria-label={field.label} className={`responsive-filter-field min-w-0 ${expanded ? "w-full space-y-1.5" : "w-40 xl:w-44"}`}>
+    <div key={field.key} role="group" aria-label={field.label} className={`responsive-filter-field min-w-0 ${expanded ? "w-full space-y-1.5" : "w-44 xl:w-56"}`}>
       <p className={expanded ? "text-xs font-medium text-ink-soft" : "sr-only"}>{field.label}</p>
       {field.control}
     </div>

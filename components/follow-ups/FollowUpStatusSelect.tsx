@@ -15,10 +15,10 @@ export default function FollowUpStatusSelect({ value = "", onChange, className }
   const { data: statuses = {} } = useFollowUpStatusesQuery();
   return (
     <Select value={value || "ALL"} onValueChange={(next) => onChange?.(next === "ALL" ? "" : next)}>
-      <SelectTrigger aria-label="Follow-up status" className={`h-10 w-full bg-surface text-xs font-medium ${className ?? ""}`}>
-        <div className="flex min-w-0 flex-1 items-center gap-2"><Activity className="size-3.5 shrink-0 text-muted" /><span className="truncate text-left">{value ? formatFollowUpStatus(statuses[value] ?? value) : "All Follow-up Statuses"}</span></div>
+      <SelectTrigger aria-label="Follow-up status" className={`w-full bg-surface ${className ?? ""}`}>
+        <div className="flex min-w-0 flex-1 items-center gap-2"><Activity className="size-3.5 shrink-0 text-muted" /><span className="truncate text-left">{value ? formatFollowUpStatus(statuses[value] ?? value) : "All statuses"}</span></div>
       </SelectTrigger>
-      <SelectContent className="bg-surface"><SelectItem value="ALL" className="text-xs">All Follow-up Statuses</SelectItem>{Object.entries(statuses).map(([key, label]) => <SelectItem key={key} value={key} className="text-xs">{formatFollowUpStatus(label || key)}</SelectItem>)}</SelectContent>
+      <SelectContent className="bg-surface"><SelectItem value="ALL">All statuses</SelectItem>{Object.entries(statuses).map(([key, label]) => <SelectItem key={key} value={key}>{formatFollowUpStatus(label || key)}</SelectItem>)}</SelectContent>
     </Select>
   );
 }
