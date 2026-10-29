@@ -270,13 +270,9 @@ await t.step("pincode fills in the city and state, and dropdowns filter as you t
 await t.step("saving an empty business form points at what is missing", async () => {
   await page.goto(`${BASE}/businesses/form`);
   await page.getByPlaceholder("Enter business name").waitFor({ timeout: 30000 });
-  if (size === "desktop") {
-    await page.getByRole("button", { name: "Save business" }).click();
-    await page.getByText(/required/i).first().waitFor({ timeout: 10000 });
-  } else {
-    await page.getByRole("button", { name: /^Next/ }).click();
-    await page.getByText(/required/i).first().waitFor({ timeout: 10000 });
-  }
+  const button = page.getByRole("button", { name: size === "desktop" ? "Save business" : /^Next/ }).first();
+  if (await button.isEnabled()) throw new Error("the button is enabled on an empty form");
+  if (size === "desktop") await page.getByText(/^Still needed: Business name/).first().waitFor({ timeout: 10000 });
   if (!new URL(page.url()).pathname.startsWith("/businesses/form")) throw new Error("left the form");
 });
 

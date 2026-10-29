@@ -63,7 +63,7 @@ export default function FormActionBar({
       <div className="flex flex-col-reverse gap-2 sm:flex-row sm:items-center sm:gap-3">
         {hint && <p className="text-center text-sm text-muted sm:text-right">{hint}</p>}
         {secondaryLabel && (
-          <Button type="submit" variant="outline" value={secondaryValue} disabled={submitting} className="w-full sm:w-auto">
+          <Button type="submit" variant="outline" value={secondaryValue} disabled={submitting || primaryDisabled} className="w-full sm:w-auto">
             {secondaryLabel}
           </Button>
         )}

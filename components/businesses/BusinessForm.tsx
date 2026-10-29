@@ -93,20 +93,35 @@ const describeErrors = (errors: FieldErrors<BusinessFormValues>): string[] =>
 // / ContactInfoSection), but computed live off watched values so the
 // Save/Next buttons can be disabled proactively - before the person has
 // tried to submit - rather than only rejecting a click after the fact.
-const isBusinessInfoComplete = (values: BusinessFormValues) =>
-  Boolean(values.businessName?.trim()) &&
-  Boolean(values.category) &&
-  Boolean(values.city) &&
-  Boolean(values.state?.trim()) &&
-  /^\d{6}$/.test(values.pincode ?? "") &&
-  Boolean(values.address?.trim()) &&
-  Boolean(values.status);
+const missingBusinessInfo = (values: BusinessFormValues): string[] =>
+  [
+    !values.businessName?.trim() && "Business name",
+    !values.category && "Category",
+    !values.status && "Stage",
+    !values.address?.trim() && "Address",
+    !/^\d{6}$/.test(values.pincode ?? "") && "Pincode",
+    !values.city && "City",
+    !values.state?.trim() && "State",
+  ].filter((label): label is string => Boolean(label));
 
-const isContactInfoComplete = (values: BusinessFormValues) =>
-  isNumberListComplete(values.phoneNumbers) &&
-  values.whatsappNumbers.every(
-    (number) => !number.value.trim() || /^\d{10}$/.test(number.value.trim()),
-  );
+const missingContactInfo = (values: BusinessFormValues): string[] =>
+  [
+    !isNumberListComplete(values.phoneNumbers) && "Phone number",
+    !values.whatsappNumbers.every(
+      (number) => !number.value.trim() || /^\d{10}$/.test(number.value.trim()),
+    ) && "WhatsApp number",
+  ].filter((label): label is string => Boolean(label));
+
+const isBusinessInfoComplete = (values: BusinessFormValues) => missingBusinessInfo(values).length === 0;
+const isContactInfoComplete = (values: BusinessFormValues) => missingContactInfo(values).length === 0;
+
+/** "Still needed: Business name, Category and 3 more" - says why Save/Next is disabled. */
+const describeMissing = (missing: string[]): string | undefined => {
+  if (missing.length === 0) return undefined;
+  const shown = missing.slice(0, 2).join(", ");
+  const rest = missing.length - 2;
+  return `Still needed: ${rest > 0 ? `${shown} and ${rest} more` : missing.join(" and ")}`;
+};
 
 const isNumberListComplete = (numbers: BusinessFormValues["phoneNumbers"]) =>
   numbers.some((number) => /^\d{10}$/.test(number.value.trim())) &&
@@ -687,12 +702,16 @@ export default function BusinessForm({
 
   const isLastStep = currentStep === steps.length - 1;
 
-  const isCurrentStepComplete = (() => {
+  const currentStepMissing = (() => {
     const key = steps[currentStep].key;
-    if (key === "business") return isBusinessInfoComplete(watchedValues);
-    if (key === "contact") return isContactInfoComplete(watchedValues);
-    return true;
+    if (key === "business") return missingBusinessInfo(watchedValues);
+    if (key === "contact") return missingContactInfo(watchedValues);
+    return [];
   })();
+  const isCurrentStepComplete = currentStepMissing.length === 0;
+  const formMissing = [...missingBusinessInfo(watchedValues), ...missingContactInfo(watchedValues)];
+  const isFormComplete = formMissing.length === 0;
+  const saveHint = isEditMode && !isDirty ? "No changes to save yet." : describeMissing(formMissing);
 
   const isStepAccessible = (stepIndex: number) =>
     steps.slice(0, stepIndex).every((step) => {
@@ -910,6 +929,8 @@ export default function BusinessForm({
                   secondaryValue="stay"
                   primaryLabel="Save business"
                   primaryValue="close"
+                  primaryDisabled={!isFormComplete}
+                  hint={saveHint}
                   submitting={isSubmitting}
                 />
               )}
@@ -977,8 +998,8 @@ export default function BusinessForm({
                     secondaryValue="stay"
                     primaryLabel={isEditMode ? "Save changes" : "Save business"}
                     primaryValue="close"
-                    primaryDisabled={isEditMode && !isDirty}
-                    hint={isEditMode && !isDirty ? "No changes to save yet." : undefined}
+                    primaryDisabled={!isFormComplete || (isEditMode && !isDirty)}
+                    hint={saveHint}
                     submitting={isSubmitting}
                   />
                 ) : (
@@ -986,10 +1007,15 @@ export default function BusinessForm({
                     <Button type="button" variant="ghost" onClick={currentStep === 0 ? handleBackToBusinesses : goBack}>
                       {currentStep === 0 ? "Cancel" : "Back"}
                     </Button>
-                    <Button type="button" onClick={() => void goNext()} className="min-w-32">
-                      Next
-                      <ArrowRight className="size-4" aria-hidden />
-                    </Button>
+                    <div className="flex items-center gap-3">
+                      {!isCurrentStepComplete && (
+                        <p className="hidden text-right text-sm text-muted min-[380px]:block">{describeMissing(currentStepMissing)}</p>
+                      )}
+                      <Button type="button" onClick={() => void goNext()} disabled={!isCurrentStepComplete} className="min-w-32">
+                        Next
+                        <ArrowRight className="size-4" aria-hidden />
+                      </Button>
+                    </div>
                   </div>
                 )}
               </CardContent>
@@ -1005,8 +1031,8 @@ export default function BusinessForm({
               onReset={handleReset}
               canReset={isDirty}
               primaryLabel="Save changes"
-              primaryDisabled={!isDirty}
-              hint={!isDirty ? "No changes to save yet." : undefined}
+              primaryDisabled={!isDirty || !isFormComplete}
+              hint={saveHint}
               submitting={isSubmitting}
             />
           </>
@@ -1014,9 +1040,10 @@ export default function BusinessForm({
       </form>
       <ManagementConfirmDialog
         open={isDiscardDialogOpen}
-        title="Discard changes?"
-        description="You have unsaved changes to this business. If you leave now, those changes will be discarded."
-        confirmLabel="Discard changes"
+        title="Leave without saving?"
+        description="You have changes that are not saved yet. If you leave now, they will be lost."
+        confirmLabel="Leave without saving"
+        cancelLabel="Keep editing"
         onCancel={cancelDiscardChanges}
         onConfirm={discardChangesAndLeave}
       />

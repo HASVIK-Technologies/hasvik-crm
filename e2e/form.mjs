@@ -46,14 +46,30 @@ await t.step("saving an empty form points at what is missing", async () => {
   await page.goto(`${BASE}/businesses/form`);
   await page.getByPlaceholder("Enter business name").waitFor({ timeout: 30000 });
   await settle(page, 500);
-  await page.getByRole("button", { name: size === "desktop" ? "Save business" : /^Next/ }).first().click();
-  await page.getByText(/required/i).first().waitFor({ timeout: 10000 });
+  const button = page.getByRole("button", { name: size === "desktop" ? "Save business" : /^Next/ }).first();
+  if (await button.isEnabled()) throw new Error("the button is enabled on an empty form");
+  await page.getByText(/^Still needed: Business name/).first().waitFor({ timeout: 10000 });
   if (!new URL(page.url()).pathname.startsWith("/businesses/form")) throw new Error("left the form");
   if (shots) {
     await page.evaluate(() => window.scrollTo(0, document.body.scrollHeight));
     await page.waitForTimeout(400);
     await page.screenshot({ path: `${shots}/${size}-form-footer.png` });
   }
+});
+
+await t.step("the button turns on once every required field is filled", async () => {
+  if (size !== "desktop") return; // the phone wizard is covered by the Next check above
+  await page.getByPlaceholder("Enter business name").fill("ZZ-TEST form gate (not saved)");
+  const category = page.getByRole("combobox", { name: /^Category/ }).first();
+  await category.click();
+  await page.getByRole("option").first().click();
+  await page.getByPlaceholder("Enter complete address").fill("1 Test Road");
+  await page.getByLabel(/^Pincode/).first().fill("277001");
+  await page.getByText("Ballia, Uttar Pradesh").first().waitFor({ timeout: 20000 });
+  await page.getByPlaceholder("Mobile number").first().fill("9876543210");
+  const button = page.getByRole("button", { name: "Save business" }).first();
+  await page.waitForFunction((el) => !el.disabled, await button.elementHandle(), { timeout: 10000 });
+  if (shots) await page.screenshot({ path: `${shots}/${size}-form-ready.png` });
 });
 
 t.done();
