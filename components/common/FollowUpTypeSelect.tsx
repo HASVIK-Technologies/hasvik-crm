@@ -1,12 +1,6 @@
 "use client";
 
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import TypeaheadField from "@/components/common/TypeaheadField";
 import { FOLLOW_UP_TYPE_OPTIONS } from "@/lib/business/form-options";
 import type { FollowUpType } from "@/types/follow-up";
 
@@ -16,30 +10,27 @@ interface FollowUpTypeSelectProps {
   placeholder?: string;
   className?: string;
   invalid?: boolean;
+  id?: string;
 }
 
 export default function FollowUpTypeSelect({
   value,
   onChange,
-  placeholder = "Select follow-up type",
-  className = "h-10 text-xs",
+  placeholder = "Call, meeting, WhatsApp…",
+  className,
   invalid = false,
+  id,
 }: FollowUpTypeSelectProps) {
   return (
-    <Select
-      value={value || undefined}
-      onValueChange={(selected) => onChange(selected as FollowUpType)}
-    >
-      <SelectTrigger className={className} aria-label="Select option" aria-invalid={invalid}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent className="bg-surface">
-        {FOLLOW_UP_TYPE_OPTIONS.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <TypeaheadField
+      id={id}
+      ariaLabel="Follow-up type"
+      placeholder={placeholder}
+      options={FOLLOW_UP_TYPE_OPTIONS.map((option) => ({ value: option.value, label: option.label }))}
+      value={value}
+      onChange={(next) => next && onChange(next as FollowUpType)}
+      invalid={invalid}
+      className={className}
+    />
   );
 }

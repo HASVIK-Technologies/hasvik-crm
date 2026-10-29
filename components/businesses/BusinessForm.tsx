@@ -1,5 +1,7 @@
 "use client";
 
+import FormActionBar from "@/components/common/FormActionBar";
+import { Button } from "@/components/ui/button";
 import { Switch } from "@/components/ui/switch";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -20,16 +22,12 @@ import {
   FileText,
   Loader2,
   Phone,
-  RotateCcw,
-  Save,
   UserRoundCheck,
   CalendarPlus,
 } from "lucide-react";
 
 import { Card, CardContent } from "@/components/ui/card";
 import OutlinedButton from "@/components/common/OutlinedButton";
-import SecondaryButton from "@/components/common/SecondaryButton";
-import SaveButton from "@/components/common/SaveButton";
 import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
 
 import FormSection from "@/components/businesses/FormSection";
@@ -50,6 +48,7 @@ import {
   defaultBusinessFormValues,
   toFollowUpPayload,
   type BusinessFormValues,
+  STEP_FIELD_NAMES,
 } from "@/lib/business/form-types";
 import { normalizeHttpUrl } from "@/lib/business/url-validation";
 import { toBusinessUpdatePayload } from "@/lib/business/update-payload";
@@ -290,6 +289,7 @@ export default function BusinessForm({
     control,
     handleSubmit,
     reset,
+    trigger,
     formState: { isDirty },
   } = methods;
 
@@ -328,10 +328,6 @@ export default function BusinessForm({
   useEffect(() => {
     hasUnsavedChangesRef.current = hasUnsavedChanges;
   }, [hasUnsavedChanges]);
-  const isFormComplete =
-    isBusinessInfoComplete(watchedValues) &&
-    isContactInfoComplete(watchedValues);
-
   useEffect(() => {
     if (targetId) return;
 
@@ -669,7 +665,7 @@ export default function BusinessForm({
     },
     {
       key: "contact",
-      title: "Contact & Details",
+      title: "Contact and details",
       render: (idPrefix: string) => (
         <div className="space-y-6">
           <ContactInfoSection idPrefix={idPrefix} phoneArray={phoneArray} whatsappArray={whatsappArray} />
@@ -705,7 +701,15 @@ export default function BusinessForm({
       return true;
     });
 
-  const goNext = () => {
+  const goNext = async () => {
+    const key = steps[currentStep].key;
+    const fields = key === "business"
+      ? [...STEP_FIELD_NAMES.business]
+      : key === "contact" ? (["phoneNumbers", "whatsappNumbers", "email"] as const) : [];
+    if (!isCurrentStepComplete) {
+      await trigger(fields as unknown as (keyof BusinessFormValues)[], { shouldFocus: true });
+      return;
+    }
     setCurrentStep((step) => Math.min(step + 1, steps.length - 1));
   };
 
@@ -895,45 +899,19 @@ export default function BusinessForm({
                 <BusinessOwnershipSection />
               </FormSection>
 
-              {!isEditMode && <FormSection icon={CalendarPlus} title="First Follow-up" optional><OptionalFollowUp idPrefix="desktop-" /></FormSection>}
+              {!isEditMode && <FormSection icon={CalendarPlus} title="First follow-up" optional><OptionalFollowUp idPrefix="desktop-" /></FormSection>}
 
               {!isEditMode && (
-                <div className="sticky bottom-0 z-20 -mx-4 mt-6 flex flex-col-reverse gap-3 border-t border-line bg-surface/95 px-4 py-4 shadow-card backdrop-blur sm:-mx-7 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:-mx-8 lg:px-8 rounded-2xl">
-                  <OutlinedButton
-                    type="button"
-                    size="lg"
-                    onClick={handleBackToBusinesses}
-                    className="w-full sm:w-auto"
-                  >
-                    Back to Business
-                  </OutlinedButton>
-
-                  <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
-                    <OutlinedButton
-                      type="button"
-                      size="lg"
-                      onClick={handleReset}
-                      className="w-full sm:w-auto"
-                    >
-                      <RotateCcw className="size-4" />
-                      Reset
-                    </OutlinedButton>
-
-                    <SaveButton
-                      type="submit"
-                      size="lg"
-                      disabled={
-                        !isFormComplete || (isEditMode && !isDirty) || isSubmitting
-                      }
-                      className="w-full sm:w-auto"
-                      value="stay"
-                    >
-                      <Save className="size-4" />
-                      {isSubmitting ? "Saving..." : "Save & add another"}
-                    </SaveButton>
-                    <OutlinedButton type="submit" size="lg" value="close" disabled={!isFormComplete || isSubmitting} className="w-full sm:w-auto">Save & close</OutlinedButton>
-                  </div>
-                </div>
+                <FormActionBar
+                  onCancel={handleBackToBusinesses}
+                  onReset={handleReset}
+                  canReset={isDirty}
+                  secondaryLabel="Save and add another"
+                  secondaryValue="stay"
+                  primaryLabel="Save business"
+                  primaryValue="close"
+                  submitting={isSubmitting}
+                />
               )}
             </CardContent>
           </Card>
@@ -957,10 +935,9 @@ export default function BusinessForm({
                         disabled={!isStepAccessible(index)}
                         onClick={() => setCurrentStep(index)}
                         className={cn(
-                          "flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed",
-                          isCompleted &&
-                            "border-accent bg-surface-2 text-secondary-foreground",
-                          isActive && "border-accent text-accent-strong",
+                          "flex size-9 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed",
+                          isCompleted && "border-ok bg-ok text-white",
+                          isActive && "border-btn bg-brand-soft text-brand-strong",
                           !isActive &&
                             !isCompleted &&
                             "border-line text-muted disabled:opacity-50",
@@ -972,7 +949,7 @@ export default function BusinessForm({
                         <div
                           className={cn(
                             "mx-2 h-0.5 flex-1 rounded-full transition-colors",
-                            isCompleted ? "bg-surface-2" : "bg-surface-2",
+                            isCompleted ? "bg-ok" : "bg-line",
                           )}
                         />
                       )}
@@ -980,9 +957,9 @@ export default function BusinessForm({
                   );
                 })}
               </div>
-              <p className="mt-3 text-sm font-semibold text-brand-strong">
-                Step {currentStep + 1} of {steps.length} —{" "}
-                {steps[currentStep].title}
+              <p className="mt-3 text-sm text-muted">
+                Step {currentStep + 1} of {steps.length}
+                <span className="block text-base font-semibold text-ink">{steps[currentStep].title}</span>
               </p>
             </div>
 
@@ -990,61 +967,31 @@ export default function BusinessForm({
               <CardContent className="p-5 sm:p-6">
                 {steps[currentStep].render("mobile-")}
 
-                <div className="sticky bottom-0 z-20 -mx-5 mt-6 flex flex-col-reverse gap-3 border-t border-line bg-surface/95 px-5 py-4 shadow-card backdrop-blur sm:-mx-6 sm:flex-row sm:items-center sm:justify-between sm:px-6 rounded-2xl">
-                  <OutlinedButton
-                    type="button"
-                    onClick={
-                      currentStep === 0 ? handleBackToBusinesses : goBack
-                    }
-                    className="w-full sm:w-auto"
-                  >
-                    {currentStep === 0 ? "Back to Business" : "Back"}
-                  </OutlinedButton>
-
-                  {isLastStep ? (
-                    <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
-                      <OutlinedButton
-                        type="button"
-                        onClick={handleReset}
-                        className="w-full sm:w-auto"
-                      >
-                        <RotateCcw className="size-4" />
-                        Reset
-                      </OutlinedButton>
-                      <SaveButton
-                        type="submit"
-                        disabled={
-                          !isFormComplete ||
-                          (isEditMode && !isDirty) ||
-                          isSubmitting
-                        }
-                        className="w-full sm:w-auto"
-                        value="stay"
-                      >
-                        <Save className="size-4" />
-                        {isSubmitting ? "Saving..." : isEditMode ? "Save changes" : "Save & add another"}
-                      </SaveButton>
-                      {!isEditMode && <OutlinedButton type="submit" value="close" disabled={!isFormComplete || isSubmitting} className="w-full sm:w-auto">Save & close</OutlinedButton>}
-                    </div>
-                  ) : (
-                    <div className="flex flex-col items-stretch gap-2 sm:items-end">
-                      {!isCurrentStepComplete && (
-                        <p className="text-xs text-muted">
-                          Fill in all required fields to continue.
-                        </p>
-                      )}
-                      <SecondaryButton
-                        type="button"
-                        onClick={goNext}
-                        disabled={!isCurrentStepComplete}
-                        className="w-full sm:w-auto"
-                      >
-                        Next
-                        <ArrowRight className="size-4" />
-                      </SecondaryButton>
-                    </div>
-                  )}
-                </div>
+                {isLastStep ? (
+                  <FormActionBar
+                    cancelLabel="Back"
+                    onCancel={goBack}
+                    onReset={handleReset}
+                    canReset={isDirty}
+                    secondaryLabel={isEditMode ? undefined : "Save and add another"}
+                    secondaryValue="stay"
+                    primaryLabel={isEditMode ? "Save changes" : "Save business"}
+                    primaryValue="close"
+                    primaryDisabled={isEditMode && !isDirty}
+                    hint={isEditMode && !isDirty ? "No changes to save yet." : undefined}
+                    submitting={isSubmitting}
+                  />
+                ) : (
+                  <div className="sticky bottom-0 z-20 -mx-5 mt-8 flex items-center justify-between gap-3 border-t border-line bg-surface/95 px-5 pt-4 pb-[calc(1rem+env(safe-area-inset-bottom))] backdrop-blur sm:-mx-6 sm:px-6 sm:pb-4">
+                    <Button type="button" variant="ghost" onClick={currentStep === 0 ? handleBackToBusinesses : goBack}>
+                      {currentStep === 0 ? "Cancel" : "Back"}
+                    </Button>
+                    <Button type="button" onClick={() => void goNext()} className="min-w-32">
+                      Next
+                      <ArrowRight className="size-4" aria-hidden />
+                    </Button>
+                  </div>
+                )}
               </CardContent>
             </Card>
           </div>
@@ -1053,38 +1000,15 @@ export default function BusinessForm({
         {isEditMode && targetId && (
           <>
             <BusinessDetailsFollowups businessId={targetId} />
-            <div className="flex flex-col-reverse gap-4 border-t border-line pt-5 sm:flex-row sm:items-center sm:justify-between">
-              <OutlinedButton
-                type="button"
-                size="lg"
-                onClick={handleBackToBusinesses}
-                className="w-full sm:w-auto"
-              >
-                Back to Business
-              </OutlinedButton>
-              <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
-                <OutlinedButton
-                  type="button"
-                  size="lg"
-                  onClick={handleReset}
-                  className="w-full sm:w-auto"
-                >
-                  <RotateCcw className="size-4" />
-                  Reset
-                </OutlinedButton>
-                <SaveButton
-                  type="submit"
-                  size="lg"
-                  disabled={
-                    !isFormComplete || (isEditMode && !isDirty) || isSubmitting
-                  }
-                  className="w-full sm:w-auto"
-                >
-                  <Save className="size-4" />
-                  {isSubmitting ? "Saving..." : "Save business"}
-                </SaveButton>
-              </div>
-            </div>
+            <FormActionBar
+              onCancel={handleBackToBusinesses}
+              onReset={handleReset}
+              canReset={isDirty}
+              primaryLabel="Save changes"
+              primaryDisabled={!isDirty}
+              hint={!isDirty ? "No changes to save yet." : undefined}
+              submitting={isSubmitting}
+            />
           </>
         )}
       </form>

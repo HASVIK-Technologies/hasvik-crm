@@ -1,18 +1,9 @@
 import FieldLabel from "@/components/businesses/FieldLabel";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import TypeaheadField from "@/components/common/TypeaheadField";
 
 export type SelectOption = string | { value: string; label: string };
 
-function normalizeOption(option: SelectOption): {
-  value: string;
-  label: string;
-} {
+function normalizeOption(option: SelectOption): { value: string; label: string } {
   return typeof option === "string" ? { value: option, label: option } : option;
 }
 
@@ -42,18 +33,15 @@ export default function LabeledSelect({
       <FieldLabel required={required} optional={optional}>
         {label}
       </FieldLabel>
-      <Select value={value} onValueChange={onChange} disabled={disabled}>
-        <SelectTrigger className="w-full" aria-label={label} aria-invalid={invalid}>
-          <SelectValue placeholder={placeholder} />
-        </SelectTrigger>
-        <SelectContent>
-          {options.map(normalizeOption).map((option) => (
-            <SelectItem key={option.value} value={option.value}>
-              {option.label}
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
+      <TypeaheadField
+        ariaLabel={label}
+        placeholder={placeholder}
+        options={options.map(normalizeOption)}
+        value={value}
+        onChange={(next) => onChange(next)}
+        invalid={invalid}
+        disabled={disabled}
+      />
     </div>
   );
 }

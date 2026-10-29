@@ -1,14 +1,8 @@
 "use client";
 
-import FieldLabel from "@/components/businesses/FieldLabel";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-} from "@/components/ui/select";
+import TypeaheadField from "@/components/common/TypeaheadField";
 import { useBusinessStatuses } from "@/hooks/use-filter-options";
-import { formatLeadStatus, getLeadStatusVisual, STATUS_OPTIONS } from "@/lib/business/form-options";
+import { formatLeadStatus, STATUS_OPTIONS } from "@/lib/business/form-options";
 
 interface FormLeadStatusSelectProps {
   id?: string;
@@ -28,33 +22,21 @@ export default function FormLeadStatusSelect({
   invalid,
 }: FormLeadStatusSelectProps) {
   const { data: statuses = {} } = useBusinessStatuses();
-  const statusKeys = Object.keys(statuses).length > 0
-    ? Object.keys(statuses)
-    : STATUS_OPTIONS.map((option) => option.value);
+  // Always the shared stage order; the API's list only supplies names when it has them.
+  const options = STATUS_OPTIONS.map((option) => ({ value: option.value, label: formatLeadStatus(option.value, statuses) }));
 
   return (
-    <div>
-      <FieldLabel htmlFor={id} required={required} invalid={invalid}>
-        {label}
-      </FieldLabel>
-      <Select value={value} onValueChange={onChange}>
-        <SelectTrigger id={id} aria-label="Lead status" aria-invalid={invalid} className="w-full">
-          <span className="flex items-center gap-2 truncate text-left">
-            {value && <span className={`size-2 shrink-0 ${getLeadStatusVisual(value).dot}`} />}
-            {value ? formatLeadStatus(value, statuses) : "Select status"}
-          </span>
-        </SelectTrigger>
-        <SelectContent>
-          {statusKeys.map((status) => (
-            <SelectItem key={status} value={status}>
-              <span className="flex items-center gap-2">
-                <span className={`size-2 shrink-0 ${getLeadStatusVisual(status).dot}`} />
-                {formatLeadStatus(status, statuses)}
-              </span>
-            </SelectItem>
-          ))}
-        </SelectContent>
-      </Select>
-    </div>
+    <TypeaheadField
+      id={id}
+      label={label}
+      ariaLabel="Stage"
+      clearable={false}
+      placeholder="Select a stage"
+      options={options}
+      value={value}
+      onChange={(next) => onChange(next)}
+      required={required}
+      invalid={invalid}
+    />
   );
 }

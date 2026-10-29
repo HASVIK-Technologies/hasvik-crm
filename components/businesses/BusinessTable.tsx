@@ -1,5 +1,6 @@
 "use client";
 
+import SelectField from "@/components/common/SelectField";
 import React, { useState } from "react";
 import { useRouter } from "next/navigation";
 import {
@@ -40,13 +41,6 @@ import {
   DropdownMenuItem,
   DropdownMenuCheckboxItem,
 } from "@/components/ui/dropdown-menu";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Tooltip,
   TooltipContent,
@@ -820,28 +814,7 @@ export default function BusinessTable({
               </OutlinedButton>
             </div>
 
-            <Select
-              value={`${itemsPerPage} per page`}
-              onValueChange={(value) => onItemsPerPageChange(Number.parseInt(value, 10))}
-            >
-              <SelectTrigger aria-label="Rows per page" className="h-8.5 w-auto rounded-lg border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft hover:border-line focus-visible:ring-1 focus-visible:ring-brand">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-surface">
-                <SelectItem value="10 per page" className="text-xs">
-                  10 per page
-                </SelectItem>
-                <SelectItem value="20 per page" className="text-xs">
-                  20 per page
-                </SelectItem>
-                <SelectItem value="50 per page" className="text-xs">
-                  50 per page
-                </SelectItem>
-                <SelectItem value="100 per page" className="text-xs">
-                  100 per page
-                </SelectItem>
-              </SelectContent>
-            </Select>
+            <SelectField ariaLabel="Rows per page" className="w-40" value={String(itemsPerPage)} onChange={(value) => value && onItemsPerPageChange(Number.parseInt(value, 10))} options={[10, 20, 50, 100].map((size) => ({ value: String(size), label: `${size} per page` }))} />
           </div>
         </div>
       </div>

@@ -1,7 +1,7 @@
 "use client";
 
+import SelectField from "@/components/common/SelectField";
 import ResponsiveFilters from "@/components/common/ResponsiveFilters";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CategoryAutocomplete from "@/components/common/CategoryAutocomplete";
 import CityAutocomplete from "@/components/common/CityAutocomplete";
 import LeadStatusSelect from "@/components/common/LeadStatusSelect";
@@ -38,14 +38,8 @@ export default function BusinessFilters({ selectedCategoryId = "", selectedCateg
   return <ResponsiveFilters onReset={onResetFilters} hasActiveFilters={hasActiveFilters} fields={[
     { key: "category", label: "Category", active: Boolean(selectedCategoryId), reset: () => onCategorySelect?.("", ""), control: <CategoryAutocomplete value={selectedCategoryId} label={selectedCategoryName} onChange={onCategorySelect} placeholder="All categories" /> },
     { key: "lead-status", label: "Lead status", active: Boolean(selectedStatus), reset: () => onStatusChange?.(""), control: <LeadStatusSelect value={selectedStatus} onChange={onStatusChange} /> },
-    { key: "owner", label: "Owner", active: Boolean(selectedOwner), reset: () => onOwnerChange?.(""), control: <Select value={selectedOwner || "ALL"} onValueChange={(value) => onOwnerChange?.(value === "ALL" ? "" : value)}>
-      <SelectTrigger className="w-full bg-surface" aria-label="Owner"><SelectValue /></SelectTrigger>
-      <SelectContent className="bg-surface"><SelectItem value="ALL">All owners</SelectItem><SelectItem value="none">Unassigned</SelectItem>{owners.map((owner) => <SelectItem key={owner.id} value={owner.id}>{owner.name}</SelectItem>)}</SelectContent>
-    </Select> },
+    { key: "owner", label: "Owner", active: Boolean(selectedOwner), reset: () => onOwnerChange?.(""), control: <SelectField ariaLabel="Owner" value={selectedOwner || "ALL"} onChange={(value) => onOwnerChange?.(value === "ALL" ? "" : value)} options={[{ value: "ALL", label: "All owners" }, { value: "none", label: "Unassigned" }, ...owners.map((owner) => ({ value: owner.id, label: owner.name }))]} /> },
     { key: "city", label: "City", active: Boolean(selectedCity), reset: () => onCityChange?.(""), control: <CityAutocomplete value={selectedCity} onChange={onCityChange} placeholder="All cities" /> },
-    { key: "activity", label: "Activity status", active: isActive !== undefined, reset: () => onIsActiveChange?.(undefined), control: <Select value={isActive === undefined ? "ALL" : isActive ? "ACTIVE" : "INACTIVE"} onValueChange={(value) => onIsActiveChange?.(value === "ALL" ? undefined : value === "ACTIVE")}>
-      <SelectTrigger className="w-full bg-surface" aria-label="Activity status"><SelectValue /></SelectTrigger>
-      <SelectContent className="bg-surface"><SelectItem value="ALL">All statuses</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
-    </Select> },
+    { key: "activity", label: "Activity status", active: isActive !== undefined, reset: () => onIsActiveChange?.(undefined), control: <SelectField ariaLabel="Activity status" value={isActive === undefined ? "ALL" : isActive ? "ACTIVE" : "INACTIVE"} onChange={(value) => onIsActiveChange?.(value === "ALL" || !value ? undefined : value === "ACTIVE")} options={[{ value: "ALL", label: "All statuses" }, { value: "ACTIVE", label: "Active" }, { value: "INACTIVE", label: "Inactive" }]} /> },
   ]} />;
 }

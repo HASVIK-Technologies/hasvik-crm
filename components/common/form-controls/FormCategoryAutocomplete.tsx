@@ -2,7 +2,7 @@
 
 import { useState } from "react";
 import { Tag } from "lucide-react";
-import AsyncAutocompleteSelect from "@/components/common/AsyncAutocompleteSelect";
+import TypeaheadField from "@/components/common/TypeaheadField";
 import { useCategoryAutocomplete } from "@/hooks/use-filter-options";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 
@@ -29,34 +29,24 @@ export default function FormCategoryAutocomplete({
 }: FormCategoryAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const debouncedSearch = useDebouncedValue(search);
-  const { data: categories = [], isLoading } = useCategoryAutocomplete(
-    debouncedSearch,
-    open,
-  );
+  const debounced = useDebouncedValue(search.trim());
+  const { data: categories = [], isFetching } = useCategoryAutocomplete(debounced, open);
 
   return (
-    <AsyncAutocompleteSelect
+    <TypeaheadField
       id={id}
       label={label}
+      ariaLabel="Category"
+      icon={Tag}
+      placeholder={placeholder}
+      options={categories.map((category) => ({ value: category._id, label: category.name }))}
       value={value}
       valueLabel={valueLabel}
-      onChange={(categoryId, categoryName) => {
-        onChange(categoryId);
-        if (categoryId || !categoryName) setSearch("");
-      }}
-      options={categories.map((category) => ({
-        value: category._id,
-        label: category.name,
-      }))}
-      loading={isLoading}
-      searchValue={search}
-      onSearchChange={setSearch}
+      onChange={(categoryId) => onChange(categoryId)}
+      onQueryChange={setSearch}
       onOpenChange={setOpen}
-      placeholder={placeholder}
-      searchPlaceholder="Search categories..."
-      emptyMessage="No matching category."
-      icon={Tag}
+      loading={open && isFetching && categories.length === 0}
+      emptyText="No matching category. An admin can add one under Business categories."
       required={required}
       invalid={invalid}
     />

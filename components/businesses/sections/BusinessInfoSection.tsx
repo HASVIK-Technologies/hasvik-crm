@@ -1,6 +1,8 @@
 "use client";
 
+import { useEffect } from "react";
 import { Controller, useFormContext, useWatch } from "react-hook-form";
+import { CircleCheck, Loader2 } from "lucide-react";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
@@ -11,6 +13,7 @@ import StateAutocomplete from "@/components/common/StateAutocomplete";
 import { STATE_OPTIONS } from "@/lib/business/form-options";
 import { isValidHttpUrl } from "@/lib/business/url-validation";
 import type { BusinessFormValues } from "@/lib/business/form-types";
+import { usePincodeLookup } from "@/hooks/use-location";
 
 /**
  * Order: who it is (name, category, stage), where it is (address, pincode, city, state), then the map link.
@@ -24,10 +27,24 @@ export default function BusinessInfoSection({
   const {
     control,
     register,
+    getValues,
+    setValue,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
 
   const categoryName = useWatch({ control, name: "categoryName" });
+  const pincode = useWatch({ control, name: "pincode" });
+  const state = useWatch({ control, name: "state" });
+  const lookup = usePincodeLookup(pincode?.trim() ?? "");
+  const found = lookup.data;
+
+  // A known pincode fills in an empty city and state; anything the user already typed is left alone.
+  useEffect(() => {
+    if (!found) return;
+    const options = { shouldDirty: true, shouldValidate: true } as const;
+    if (!getValues("state").trim() && found.state) setValue("state", found.state, options);
+    if (!getValues("city").trim() && found.district) setValue("city", found.district, options);
+  }, [found, getValues, setValue]);
 
   return (
     <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2 lg:grid-cols-6">
@@ -115,6 +132,21 @@ export default function BusinessInfoSection({
             },
           })}
         />
+        <p aria-live="polite" className="mt-1.5 min-h-5 text-sm">
+          {errors.pincode ? (
+            <span role="alert" className="text-bad">{errors.pincode.message}</span>
+          ) : lookup.isFetching ? (
+            <span className="inline-flex items-center gap-1.5 text-muted"><Loader2 className="size-3.5 animate-spin" aria-hidden />Looking up this pincode…</span>
+          ) : found ? (
+            <span className="inline-flex items-center gap-1.5 text-ok"><CircleCheck className="size-4" aria-hidden />{[found.district, found.state].filter(Boolean).join(", ")}</span>
+          ) : lookup.isError ? (
+            <span className="text-muted">Pincode lookup is unavailable. Fill in the city and state yourself.</span>
+          ) : lookup.isSuccess ? (
+            <span className="text-warn">We couldn&apos;t find this pincode. Check it, or fill in the city and state yourself.</span>
+          ) : (
+            <span className="text-muted">Enter it first and we&apos;ll fill in the city and state.</span>
+          )}
+        </p>
       </div>
 
       <div className="lg:col-span-2">
@@ -126,6 +158,8 @@ export default function BusinessInfoSection({
             <FormCityAutocomplete
               id={`${idPrefix}city`}
               label="City"
+              state={state}
+              suggestions={found ? [found.district, ...found.areas] : []}
               value={field.value}
               onChange={field.onChange}
               placeholder="Select a city"

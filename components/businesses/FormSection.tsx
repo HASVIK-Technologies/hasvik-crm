@@ -3,12 +3,12 @@ import type { LucideIcon } from "lucide-react";
 export default function FormSection({
   icon: Icon,
   title,
-  optional = false,
   first = false,
   children,
 }: {
   icon?: LucideIcon;
   title: string;
+  /** Kept so callers read well; optional sections are simply unmarked. */
   optional?: boolean;
   first?: boolean;
   children: React.ReactNode;
@@ -22,9 +22,6 @@ export default function FormSection({
           </span>
         )}
         {title}
-        {optional && (
-          <span className="text-xs font-medium text-muted">(Optional)</span>
-        )}
       </h2>
       <div className="mt-5">{children}</div>
     </section>

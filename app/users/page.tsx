@@ -44,13 +44,6 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { useDebouncedValue } from "@/hooks/use-debounced-value";
 import { useCreateUser, useUpdateUserStatus, useUpdateUser, useUsersQuery, useUserKpisQuery } from "@/hooks/use-users";
 import { getApiErrorMessage } from "@/lib/api/api-error";
@@ -207,33 +200,9 @@ export default function UsersPage() {
         }}
         searchPlaceholder="Search users by name or email"
         filters={<ResponsiveFilters onReset={() => { setSearch(""); setRoleFilter("ALL"); setStatusFilter("ALL"); setTenantFilter("ALL"); setPage(1); }} fields={[
-            { key: "role", label: "Role", active: roleFilter !== "ALL", reset: () => { setRoleFilter("ALL"); setPage(1); }, control: <Select
-              value={roleFilter}
-              onValueChange={(value) => {
-                setRoleFilter(value as UserRole | "ALL");
-                setPage(1);
-              }}
-            >
-              <SelectTrigger id="users-role-filter" aria-label="Role" size="sm" className="w-44 rounded-lg text-xs">
-                <SelectValue placeholder="All roles" />
-              </SelectTrigger>
-              <SelectContent className="bg-surface">
-                <SelectItem value="ALL" className="text-xs">All roles</SelectItem>
-                {roles.map((role) => (
-                  <SelectItem key={role} value={role} className="text-xs">
-                    {roleLabel(role)}
-                  </SelectItem>
-                ))}
-              </SelectContent>
-            </Select> },
-            ...(superAdmin ? [{ key: "tenant", label: "Workspace", active: tenantFilter !== "ALL", reset: () => { setTenantFilter("ALL"); setPage(1); }, control: <><Select value={tenantFilter} onValueChange={(value) => { setTenantFilter(value); setPage(1); }}>
-                <SelectTrigger id="users-tenant-filter" aria-label="Workspace" size="sm" disabled={tenantsQuery.isPending} className="w-48 max-w-full rounded-lg text-xs"><SelectValue placeholder="All tenants" /></SelectTrigger>
-                <SelectContent className="max-h-72 bg-surface"><SelectItem value="ALL">All tenants</SelectItem>{tenants.map((tenant) => <SelectItem key={tenant.id} value={tenant.id}>{tenant.name}{tenant.isActive ? "" : " (Inactive)"}</SelectItem>)}</SelectContent>
-              </Select>{tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-brand-strong hover:underline">Retry loading tenants</button>}</> }] : []),
-            { key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <Select value={statusFilter} onValueChange={(value) => { setStatusFilter(value); setPage(1); }}>
-              <SelectTrigger id="users-status-filter" aria-label="Account status" size="sm" className="w-36 rounded-lg text-xs"><SelectValue /></SelectTrigger>
-              <SelectContent className="bg-surface"><SelectItem value="ALL">All statuses</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
-            </Select> },
+            { key: "role", label: "Role", active: roleFilter !== "ALL", reset: () => { setRoleFilter("ALL"); setPage(1); }, control: <SelectField id="users-role-filter" ariaLabel="Role" value={roleFilter} onChange={(value) => { setRoleFilter((value || "ALL") as UserRole | "ALL"); setPage(1); }} options={[{ value: "ALL", label: "All roles" }, ...roles.map((role) => ({ value: role, label: roleLabel(role) }))]} /> },
+            ...(superAdmin ? [{ key: "tenant", label: "Workspace", active: tenantFilter !== "ALL", reset: () => { setTenantFilter("ALL"); setPage(1); }, control: <><SelectField id="users-tenant-filter" ariaLabel="Workspace" disabled={tenantsQuery.isPending} value={tenantFilter} onChange={(value) => { setTenantFilter(value || "ALL"); setPage(1); }} options={[{ value: "ALL", label: "All workspaces" }, ...tenants.map((tenant) => ({ value: tenant.id, label: `${tenant.name}${tenant.isActive ? "" : " (inactive)"}` }))]} />{tenantsQuery.isError && <button type="button" onClick={() => void tenantsQuery.refetch()} className="text-xs text-brand-strong hover:underline">Retry loading tenants</button>}</> }] : []),
+            { key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <SelectField id="users-status-filter" ariaLabel="Account status" value={statusFilter} onChange={(value) => { setStatusFilter(value || "ALL"); setPage(1); }} options={[{ value: "ALL", label: "All statuses" }, { value: "ACTIVE", label: "Active" }, { value: "INACTIVE", label: "Inactive" }]} /> },
           ]} />}
         showFilters={showFilters}
         onToggleFilters={() => setShowFilters((visible) => !visible)}

@@ -1,5 +1,6 @@
 "use client";
 
+import SelectField from "@/components/common/SelectField";
 import { changedFields } from "@/lib/forms/changed-fields";
 
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
@@ -29,13 +30,6 @@ import ResponsiveFilters from "@/components/common/ResponsiveFilters";
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import {
   Table,
   TableBody,
@@ -347,22 +341,7 @@ export default function TenantManagementPage() {
           setPage(1);
         }}
         searchPlaceholder="Search tenants by name or contact"
-        filters={<ResponsiveFilters onReset={() => { setSearch(""); setFilter("ACTIVE"); setPage(1); }} fields={[{ key: "status", label: "Status", active: filter !== "ALL", reset: () => { setFilter("ALL"); setPage(1); }, control: <Select
-              value={filter}
-              onValueChange={(value) => {
-                setFilter(value as TenantFilter);
-                setPage(1);
-              }}
-            >
-              <SelectTrigger id="tenant-status-filter" aria-label="Tenant status" size="sm" className="w-40 rounded-lg text-xs">
-                <SelectValue />
-              </SelectTrigger>
-              <SelectContent className="bg-surface">
-                <SelectItem value="ALL" className="text-xs">All statuses</SelectItem>
-                <SelectItem value="ACTIVE" className="text-xs">Active</SelectItem>
-                <SelectItem value="INACTIVE" className="text-xs">Inactive</SelectItem>
-              </SelectContent>
-            </Select> }]} />}
+        filters={<ResponsiveFilters onReset={() => { setSearch(""); setFilter("ACTIVE"); setPage(1); }} fields={[{ key: "status", label: "Status", active: filter !== "ALL", reset: () => { setFilter("ALL"); setPage(1); }, control: <SelectField id="tenant-status-filter" ariaLabel="Tenant status" value={filter} onChange={(value) => { setFilter((value || "ALL") as TenantFilter); setPage(1); }} options={[{ value: "ALL", label: "All statuses" }, { value: "ACTIVE", label: "Active" }, { value: "INACTIVE", label: "Inactive" }]} /> }]} />}
         showFilters={showFilters}
         onToggleFilters={() => setShowFilters((visible) => !visible)}
         onResetFilters={() => {

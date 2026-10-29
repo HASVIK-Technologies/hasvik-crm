@@ -1,20 +1,17 @@
 "use client";
 
 import { useState } from "react";
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
-import { cn } from "@/lib/utils";
+import TypeaheadField from "@/components/common/TypeaheadField";
 
 export interface SelectFieldOption {
   value: string;
   label: string;
 }
 
-// Radix does not allow an empty string as an item value, so "no choice" travels as this token.
-const EMPTY = "__empty__";
-
 /**
- * The one dropdown for short fixed lists (stage, role, hour, report filters ...). It replaces every native <select>
- * so the control, its list and its focus ring look and behave the same everywhere, in both themes.
+ * A pick-one-from-a-list field with the same click-and-type feel as every other dropdown in the app (it is a
+ * TypeaheadField underneath). Use it for fixed lists: filters, roles, rows per page, times. It also works inside a
+ * plain <form>: pass `name` (and optionally `defaultValue`) and the choice is submitted with the form.
  */
 export default function SelectField({ value, defaultValue = "", name, onChange, options, placeholder, ariaLabel, id, disabled, invalid, className }: {
   value?: string;
@@ -34,22 +31,24 @@ export default function SelectField({ value, defaultValue = "", name, onChange, 
 }) {
   const [inner, setInner] = useState(defaultValue);
   const actual = value ?? inner;
-  const current = actual === "" && options.some((option) => option.value === "") ? EMPTY : actual;
   return (
     <>
-    {name && <input type="hidden" name={name} value={actual} />}
-    <Select value={current} onValueChange={(next) => { const real = next === EMPTY ? "" : next; setInner(real); onChange?.(real); }} disabled={disabled}>
-      <SelectTrigger id={id} aria-label={ariaLabel} aria-invalid={invalid} className={cn("w-full", className)}>
-        <SelectValue placeholder={placeholder} />
-      </SelectTrigger>
-      <SelectContent>
-        {options.map((option) => (
-          <SelectItem key={option.value || EMPTY} value={option.value === "" ? EMPTY : option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+      {name && <input type="hidden" name={name} value={actual} />}
+      <TypeaheadField
+        id={id}
+        ariaLabel={ariaLabel}
+        placeholder={placeholder}
+        options={options}
+        value={actual}
+        onChange={(next) => {
+          setInner(next);
+          onChange?.(next);
+        }}
+        clearable={false}
+        disabled={disabled}
+        invalid={invalid}
+        className={className}
+      />
     </>
   );
 }

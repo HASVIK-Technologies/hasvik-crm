@@ -1,5 +1,6 @@
 "use client";
 
+import SelectField from "@/components/common/SelectField";
 import { isRecordInactive } from "@/lib/records/activity";
 import { EntityActivityDialog } from "@/components/common/EntityActivityButton";
 import TableActionButton from "@/components/common/TableActionButton";
@@ -62,13 +63,6 @@ import type {
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { toast } from "sonner";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 import { DataTableShell, DataTableHeader, DataTableMobileCard, DataTableMobileList } from "@/components/common/DataTableLayout";
 import ListPagination from "@/components/common/ListPagination";
 import { Table, TableHeader, TableHead, TableRow, TableBody, TableCell } from "@/components/ui/table";
@@ -624,20 +618,7 @@ export default function SubscriptionsPage() {
   return (
     <ListPageLayout
       breadcrumb={<Breadcrumb items={[{ label: "Subscriptions" }]} />}
-      filters={tenantAdmin || hasvikAdmin ? <ResponsiveFilters onReset={() => { setStatusFilter("ALL"); setPage(1); }} fields={[{ key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <Select
-              value={statusFilter}
-              onValueChange={(value) => { setStatusFilter(value as SubscriptionFilter); setPage(1); }}
-            >
-              <SelectTrigger id="subscription-status-filter" aria-label="Subscription status" size="sm" className="w-48 rounded-xl text-xs">
-                <SelectValue>
-                  {statusFilter === "ALL" ? <span className="text-ink-soft">All statuses</span> : <StatusBadge status={statusFilter} />}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="bg-surface">
-                <SelectItem value="ALL" className="rounded-xl py-2.5 text-xs">All statuses</SelectItem>
-                {Object.entries(SUBSCRIPTION_STATUS_VISUALS).map(([status, visual]) => <SelectItem key={status} value={status} textValue={visual.label} className="rounded-xl py-2.5 text-xs"><span className="inline-flex items-center gap-2.5"><span aria-hidden="true" className={`size-2 shrink-0 rounded-full ${visual.dot}`} /><span>{visual.label}</span></span></SelectItem>)}
-              </SelectContent>
-            </Select> }]} /> : undefined}
+      filters={tenantAdmin || hasvikAdmin ? <ResponsiveFilters onReset={() => { setStatusFilter("ALL"); setPage(1); }} fields={[{ key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <SelectField id="subscription-status-filter" ariaLabel="Subscription status" value={statusFilter} onChange={(value) => { setStatusFilter((value || "ALL") as SubscriptionFilter); setPage(1); }} options={[{ value: "ALL", label: "All statuses" }, ...Object.entries(SUBSCRIPTION_STATUS_VISUALS).map(([status, visual]) => ({ value: status, label: visual.label }))]} /> }]} /> : undefined}
       showFilters={showFilters}
       onToggleFilters={() => setShowFilters((visible) => !visible)}
       onResetFilters={() => {

@@ -1,13 +1,7 @@
 "use client";
 
 import { Bell } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
+import TypeaheadField from "@/components/common/TypeaheadField";
 
 export interface FollowUpReminderOption {
   value: string;
@@ -23,6 +17,7 @@ interface FollowUpReminderSelectProps {
   invalid?: boolean;
   showIcon?: boolean;
   emptyOption?: FollowUpReminderOption;
+  id?: string;
 }
 
 export default function FollowUpReminderSelect({
@@ -30,35 +25,27 @@ export default function FollowUpReminderSelect({
   onChange,
   options,
   placeholder = "Select reminder",
-  className = "h-10 text-xs",
+  className,
   invalid = false,
   showIcon = false,
   emptyOption,
+  id,
 }: FollowUpReminderSelectProps) {
   const baseOptions = emptyOption ? [emptyOption, ...options] : options;
   const allOptions = value && !baseOptions.some((option) => option.value === value)
     ? [...baseOptions, { value, label: value }]
     : baseOptions;
-
   return (
-    <Select value={value || undefined} onValueChange={onChange}>
-      <SelectTrigger className={className} aria-label="Select option" aria-invalid={invalid}>
-        {showIcon ? (
-          <span className="flex items-center gap-2">
-            <Bell className="size-3.5 text-muted" />
-            <SelectValue placeholder={placeholder} />
-          </span>
-        ) : (
-          <SelectValue placeholder={placeholder} />
-        )}
-      </SelectTrigger>
-      <SelectContent className="bg-surface">
-        {allOptions.map((option) => (
-          <SelectItem key={option.value} value={option.value}>
-            {option.label}
-          </SelectItem>
-        ))}
-      </SelectContent>
-    </Select>
+    <TypeaheadField
+      id={id}
+      ariaLabel="Reminder"
+      icon={showIcon ? Bell : undefined}
+      placeholder={placeholder}
+      options={allOptions}
+      value={value}
+      onChange={(next) => onChange(next || (emptyOption?.value ?? ""))}
+      invalid={invalid}
+      className={className}
+    />
   );
 }

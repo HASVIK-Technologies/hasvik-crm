@@ -1,15 +1,9 @@
 "use client";
 
+import SelectField from "@/components/common/SelectField";
 import { ChevronLeft, ChevronRight } from "lucide-react";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PrimaryButton from "@/components/common/PrimaryButton";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 export default function ListPagination({
   total,
@@ -86,21 +80,7 @@ export default function ListPagination({
             <ChevronRight className="size-4" />
           </OutlinedButton>
         </div>
-        <Select
-          value={`${limit} per page`}
-          onValueChange={(value) => onLimitChange(Number.parseInt(value, 10))}
-        >
-          <SelectTrigger aria-label="Rows per page" className="h-8.5 w-auto border border-line bg-surface pl-3.5 pr-2.5 text-xs font-medium text-ink-soft">
-            <SelectValue />
-          </SelectTrigger>
-          <SelectContent className="bg-surface">
-            {[10, 20, 50, 100].map((size) => (
-              <SelectItem key={size} value={`${size} per page`} className="text-xs">
-                {size} per page
-              </SelectItem>
-            ))}
-          </SelectContent>
-        </Select>
+        <SelectField ariaLabel="Rows per page" className="w-40" value={String(limit)} onChange={(value) => value && onLimitChange(Number.parseInt(value, 10))} options={[10, 20, 50, 100].map((size) => ({ value: String(size), label: `${size} per page` }))} />
       </div>
     </div>
   );

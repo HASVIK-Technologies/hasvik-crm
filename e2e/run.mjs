@@ -246,6 +246,40 @@ await t.step("API failure shows a friendly retry state, not a blank screen", asy
   await page.unroute("**/api/businesses*");
 });
 
+// ---------- Business form ----------
+await t.step("pincode fills in the city and state, and dropdowns filter as you type", async () => {
+  await page.goto(`${BASE}/businesses/form`);
+  const pincode = page.getByLabel(/^Pincode/).first();
+  await pincode.waitFor({ timeout: 30000 });
+  await pincode.fill("277001");
+  await page.getByText("Ballia, Uttar Pradesh").first().waitFor({ timeout: 20000 });
+  const state = page.getByRole("combobox", { name: /^State/ }).first();
+  const city = page.getByRole("combobox", { name: /^City/ }).first();
+  if ((await state.inputValue()) !== "Uttar Pradesh") throw new Error(`state was "${await state.inputValue()}"`);
+  if ((await city.inputValue()) !== "Ballia") throw new Error(`city was "${await city.inputValue()}"`);
+  const stage = page.getByRole("combobox", { name: /^Stage/ }).first();
+  await stage.click();
+  await stage.fill("won");
+  const options = page.getByRole("option");
+  await options.first().waitFor();
+  const labels = await options.allInnerTexts();
+  if (labels.length !== 1 || !/won/i.test(labels[0])) throw new Error(`typing "won" left ${JSON.stringify(labels)}`);
+  await page.keyboard.press("Escape");
+});
+
+await t.step("saving an empty business form points at what is missing", async () => {
+  await page.goto(`${BASE}/businesses/form`);
+  await page.getByPlaceholder("Enter business name").waitFor({ timeout: 30000 });
+  if (size === "desktop") {
+    await page.getByRole("button", { name: "Save business" }).click();
+    await page.getByText(/required/i).first().waitFor({ timeout: 10000 });
+  } else {
+    await page.getByRole("button", { name: /^Next/ }).click();
+    await page.getByText(/required/i).first().waitFor({ timeout: 10000 });
+  }
+  if (!new URL(page.url()).pathname.startsWith("/businesses/form")) throw new Error("left the form");
+});
+
 // ---------- Accessibility ----------
 const axeRoutes = ["/dashboard", "/businesses", "/follow-ups", "/reports", "/reports/win-loss", "/forecast", "/audit-logs", "/settings?tab=profile", "/users"];
 for (const route of axeRoutes) {
