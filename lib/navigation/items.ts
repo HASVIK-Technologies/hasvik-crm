@@ -14,12 +14,18 @@ import {
 } from "lucide-react";
 import { isSuperAdmin, isTenantAdmin, type AuthUser } from "@/types/auth";
 
+export type NavGroup = "sell" | "insights" | "admin" | "settings";
+
+export const NAV_GROUP_LABELS: Record<NavGroup, string> = { sell: "Sell", insights: "Insights", admin: "Admin", settings: "" };
+
 export interface NavItem {
   label: string;
   href: string;
   icon: LucideIcon;
   /** Shown in the bottom tab bar on phones (the rest live under "More"). */
   primary?: boolean;
+  /** Sidebar section. Settings is pinned to the bottom of the sidebar. */
+  group: NavGroup;
   /** Extra words the command palette matches on. */
   keywords?: string;
   visible?: (user: Pick<AuthUser, "role"> | null | undefined) => boolean;
@@ -29,17 +35,17 @@ const admins = (user: Pick<AuthUser, "role"> | null | undefined) => isSuperAdmin
 const reviewers = (user: Pick<AuthUser, "role"> | null | undefined) => admins(user) || user?.role?.trim().toUpperCase() === "MANAGER";
 
 export const navigation: NavItem[] = [
-  { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, primary: true, keywords: "home overview" },
-  { label: "Businesses", href: "/businesses", icon: Building2, primary: true, keywords: "leads kanban pipeline companies" },
-  { label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2, primary: true, keywords: "tasks calls meetings calendar" },
-  { label: "Reports", href: "/reports", icon: BarChart3, primary: true, keywords: "analytics export csv" },
-  { label: "Forecast", href: "/forecast", icon: TrendingUp, keywords: "predict trend win rate" },
-  { label: "Audit logs", href: "/audit-logs", icon: History, keywords: "activity history changes", visible: reviewers },
-  { label: "Users", href: "/users", icon: Users, keywords: "team people roles", visible: admins },
-  { label: "Business categories", href: "/business-categories", icon: FolderKanban, keywords: "industries", visible: admins },
-  { label: "Tenant management", href: "/tenant-management", icon: Landmark, keywords: "workspaces organisations", visible: admins },
-  { label: "Subscriptions", href: "/subscriptions", icon: CreditCard, keywords: "plans billing", visible: admins },
-  { label: "Settings", href: "/settings", icon: Settings2, keywords: "profile password theme appearance dark" },
+  { group: "sell", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, primary: true, keywords: "home overview" },
+  { group: "sell", label: "Businesses", href: "/businesses", icon: Building2, primary: true, keywords: "leads kanban pipeline companies" },
+  { group: "sell", label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2, primary: true, keywords: "tasks calls meetings calendar" },
+  { group: "insights", label: "Reports", href: "/reports", icon: BarChart3, primary: true, keywords: "analytics export csv" },
+  { group: "insights", label: "Forecast", href: "/forecast", icon: TrendingUp, keywords: "predict trend win rate" },
+  { group: "admin", label: "Users", href: "/users", icon: Users, keywords: "team people roles", visible: admins },
+  { group: "admin", label: "Business categories", href: "/business-categories", icon: FolderKanban, keywords: "industries", visible: admins },
+  { group: "admin", label: "Tenant management", href: "/tenant-management", icon: Landmark, keywords: "workspaces organisations", visible: admins },
+  { group: "admin", label: "Subscriptions", href: "/subscriptions", icon: CreditCard, keywords: "plans billing", visible: admins },
+  { group: "admin", label: "Audit logs", href: "/audit-logs", icon: History, keywords: "activity history changes", visible: reviewers },
+  { group: "settings", label: "Settings", href: "/settings", icon: Settings2, keywords: "profile password theme appearance dark" },
 ];
 
 export function visibleNavigation(user: Pick<AuthUser, "role"> | null | undefined): NavItem[] {

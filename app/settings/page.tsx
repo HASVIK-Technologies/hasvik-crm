@@ -1,9 +1,8 @@
 "use client";
 
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Building2, ChevronLeft, ChevronRight, FolderKanban, Lock, Palette, UserRound, Users, type LucideIcon } from "lucide-react";
+import { Building2, ChevronLeft, ChevronRight, Lock, Palette, UserRound, type LucideIcon } from "lucide-react";
 import AppearanceSettings from "@/components/settings/AppearanceSettings";
 import CompanySettings from "@/components/settings/CompanySettings";
 import ProfileSettings from "@/components/settings/ProfileSettings";
@@ -14,7 +13,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { isSuperAdmin, isTenantAdmin } from "@/types/auth";
 import { cn } from "@/lib/utils";
 
-type TabId = "profile" | "security" | "appearance" | "company" | "workspace";
+type TabId = "profile" | "security" | "appearance" | "company";
 
 interface Tab {
   id: TabId;
@@ -29,21 +28,7 @@ const TABS: Tab[] = [
   { id: "security", label: "Security", description: "Password and signing out", icon: Lock },
   { id: "appearance", label: "Appearance", description: "Light, dark or system", icon: Palette },
   { id: "company", label: "Company details", description: "Workspace name and contacts", icon: Building2, adminOnly: true },
-  { id: "workspace", label: "Users and categories", description: "Manage people and business categories", icon: Users, adminOnly: true },
 ];
-
-function WorkspaceLinks() {
-  return (
-    <div className="space-y-3">
-      <p className="text-sm text-muted">People, roles and categories are managed on their own pages.</p>
-      {[{ href: "/users", label: "Users and roles", icon: Users }, { href: "/business-categories", label: "Business categories", icon: FolderKanban }].map(({ href, label, icon: Icon }) => (
-        <Link key={href} href={href} className="flex min-h-14 items-center gap-3 rounded-2xl border border-line bg-surface-2 px-4 text-sm font-semibold text-ink transition-colors hover:border-brand">
-          <Icon className="size-5 text-brand-strong" aria-hidden />{label}<ChevronRight className="ml-auto size-4 text-muted" aria-hidden />
-        </Link>
-      ))}
-    </div>
-  );
-}
 
 function SettingsContent() {
   const router = useRouter();
@@ -88,7 +73,6 @@ function SettingsContent() {
             {current.id === "security" && <SecuritySettings />}
             {current.id === "appearance" && <AppearanceSettings />}
             {current.id === "company" && <CompanySettings />}
-            {current.id === "workspace" && <WorkspaceLinks />}
           </Card>
         </section>
       </div>

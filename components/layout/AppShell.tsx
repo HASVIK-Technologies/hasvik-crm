@@ -23,7 +23,8 @@ import { useAuthStore } from "@/store/auth-store";
 import { isSuperAdmin, isTenantAdmin } from "@/types/auth";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import { getSubscriptionTenantId, hasCurrentSubscriptionAccess } from "@/lib/subscriptions/access";
-import { isActivePath, navigation, pageTitle, visibleNavigation } from "@/lib/navigation/items";
+import { isActivePath, NAV_GROUP_LABELS, navigation, pageTitle, visibleNavigation } from "@/lib/navigation/items";
+import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import CommandPalette from "@/components/common/CommandPalette";
@@ -216,11 +217,10 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const navLink = (item: (typeof items)[number], compact = false) => {
     const Icon = item.icon;
     const active = isActivePath(pathname, item.href);
-    return (
+    const link = (
       <Link
         key={item.href}
         href={item.href}
-        title={compact ? item.label : undefined}
         aria-current={active ? "page" : undefined}
         className={cn(
           "group relative flex min-h-11 items-center rounded-xl text-sm font-semibold transition-colors",
@@ -233,6 +233,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         {compact ? <span className="sr-only">{item.label}</span> : <span className="truncate">{item.label}</span>}
       </Link>
     );
+    return compact ? (
+      <Tooltip key={item.href}>
+        <TooltipTrigger asChild>{link}</TooltipTrigger>
+        <TooltipContent side="right">{item.label}</TooltipContent>
+      </Tooltip>
+    ) : link;
   };
 
   return (
@@ -241,7 +247,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
 
       {/* Desktop sidebar */}
       <aside id="app-sidebar" className={cn("fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-line bg-surface transition-[width] duration-200 lg:flex", sidebarCollapsed ? "w-19" : "w-64")}>
-        <div className={cn("flex h-16 shrink-0 items-center", sidebarCollapsed ? "justify-center" : "px-5")}>
+        {/* The sidebar toggle lives in the sidebar itself: at the end of the logo row when open, under the logo when
+            collapsed. Always visible and never covered; Ctrl/Cmd+B does the same. */}
+        <div className={cn("flex shrink-0", sidebarCollapsed ? "flex-col items-center gap-2 py-3" : "h-16 items-center justify-between pr-3 pl-5")}>
           <Link href="/dashboard" aria-label="HASVIK CRM home" className="flex items-center">
             {sidebarCollapsed ? (
               <Image src="/hasvik-icon.png" alt="HASVIK" width={40} height={40} priority className="size-9" />
@@ -249,10 +257,36 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Image src="/hasvik-logo.png" alt="HASVIK" width={512} height={171} priority className="h-10 w-auto dark:rounded-lg dark:bg-white dark:px-2" />
             )}
           </Link>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <button
+                type="button"
+                onClick={toggleSidebar}
+                aria-label={sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"}
+                aria-expanded={!sidebarCollapsed}
+                aria-controls="app-sidebar"
+                aria-keyshortcuts="Control+B"
+                className="grid size-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+              >
+                {sidebarCollapsed ? <PanelLeftOpen className="size-5" aria-hidden /> : <PanelLeftClose className="size-5" aria-hidden />}
+              </button>
+            </TooltipTrigger>
+            <TooltipContent side="right">{sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} (Ctrl+B)</TooltipContent>
+          </Tooltip>
         </div>
         <div aria-hidden className="brand-bar h-0.5 shrink-0 opacity-70" />
-        <nav aria-label="Main navigation" className="flex-1 space-y-1 overflow-y-auto px-3 py-4">
-          {items.map((item) => navLink(item, sidebarCollapsed))}
+        <nav aria-label="Main navigation" className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-3">
+          {(["sell", "insights", "admin"] as const).map((group) => {
+            const groupItems = items.filter((item) => item.group === group);
+            if (!groupItems.length) return null;
+            return (
+              <div key={group} role="group" aria-label={NAV_GROUP_LABELS[group]} className="mb-1">
+                {sidebarCollapsed ? <div aria-hidden className="mx-3 my-2 h-px bg-line first:hidden" /> : <p className="px-3.5 pt-3 pb-1.5 text-xs font-semibold tracking-wide text-muted">{NAV_GROUP_LABELS[group]}</p>}
+                <div className="space-y-1">{groupItems.map((item) => navLink(item, sidebarCollapsed))}</div>
+              </div>
+            );
+          })}
+          <div className="mt-auto space-y-1 border-t border-line pt-3">{items.filter((item) => item.group === "settings").map((item) => navLink(item, sidebarCollapsed))}</div>
         </nav>
       </aside>
 
@@ -261,19 +295,6 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           {/* Same max width as <main> so the page title lines up with the content below it. */}
           <div className="mx-auto flex h-14 w-full max-w-400 items-center justify-between gap-3 sm:h-16">
             <div className="flex min-w-0 items-center gap-2">
-              {/* The sidebar toggle stays in this spot whether the sidebar is open or not, so it is never lost. */}
-              <button
-                type="button"
-                onClick={toggleSidebar}
-                aria-label={sidebarCollapsed ? "Show navigation" : "Hide navigation"}
-                aria-expanded={!sidebarCollapsed}
-                aria-controls="app-sidebar"
-                aria-keyshortcuts="Control+B"
-                title={`${sidebarCollapsed ? "Show" : "Hide"} navigation (Ctrl+B)`}
-                className="-ml-2 hidden size-10 place-items-center rounded-xl text-ink-soft transition-colors hover:bg-surface-2 hover:text-ink lg:grid"
-              >
-                {sidebarCollapsed ? <PanelLeftOpen className="size-5" aria-hidden /> : <PanelLeftClose className="size-5" aria-hidden />}
-              </button>
               <Link href="/dashboard" aria-label="HASVIK CRM home" className="lg:hidden">
                 <Image src="/hasvik-icon.png" alt="HASVIK" width={40} height={40} className="size-9" />
               </Link>
