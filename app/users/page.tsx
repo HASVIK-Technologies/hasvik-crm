@@ -22,6 +22,7 @@ import {
   UsersRound,
   X,
 } from "lucide-react";
+import SelectField from "@/components/common/SelectField";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import Actions from "@/components/common/Actions";
@@ -409,7 +410,7 @@ export default function UsersPage() {
             <form onSubmit={(event) => void submitUser(event)} className="space-y-4">
               <div className="space-y-1.5"><label htmlFor="user-full-name" className="text-xs font-semibold text-ink-soft">Full name</label><Input id="user-full-name" name="fullName" required defaultValue={editingUser?.fullName ?? ""} autoComplete="name" className="h-11 rounded-xl" /></div>
               <div className="space-y-1.5"><label htmlFor="user-email" className="text-xs font-semibold text-ink-soft">Email</label><Input id="user-email" name="email" type="email" required defaultValue={editingUser?.email ?? ""} autoComplete="email" className="h-11 rounded-xl" /></div>
-              <div className="space-y-1.5"><label htmlFor="user-role" className="text-xs font-semibold text-ink-soft">Role</label><select id="user-role" name="role" defaultValue={editingUser?.role ?? "USER"} className="h-11 w-full rounded-xl border border-line bg-surface px-3 text-sm text-ink-soft outline-none focus:border-brand">{roles.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}</select></div>
+              <div className="space-y-1.5"><label htmlFor="user-role" className="text-xs font-semibold text-ink-soft">Role</label><SelectField id="user-role" name="role" defaultValue={editingUser?.role ?? "USER"} options={roles.map((role) => ({ value: role, label: roleLabel(role) }))} /></div>
               <div className="space-y-1.5"><label htmlFor="user-password" className="text-xs font-semibold text-ink-soft">Password {editingUser && <span className="font-normal text-muted">(leave blank to keep current)</span>}</label><Input id="user-password" name="password" type="password" autoComplete={editingUser ? "new-password" : "new-password"} required={!editingUser} minLength={8} className="h-11 rounded-xl" /></div>
               {formError && <p role="alert" className="rounded-lg bg-bad-soft p-3 text-xs text-bad">{formError}</p>}
               <div className="flex justify-end gap-2 border-t border-surface-2 pt-4">

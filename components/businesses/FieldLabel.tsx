@@ -1,10 +1,10 @@
 import { Label } from "@/components/ui/label";
 import { cn } from "@/lib/utils";
 
+/** Required fields carry a * ; everything else is simply unmarked (never write "(Optional)"). `optional` is kept so callers still read well. */
 export default function FieldLabel({
   htmlFor,
   required = false,
-  optional = false,
   invalid = false,
   className,
   children,
@@ -26,9 +26,11 @@ export default function FieldLabel({
       )}
     >
       {children}
-      {required && <span className="text-bad">*</span>}
-      {optional && (
-        <span className="font-normal text-muted">(Optional)</span>
+      {required && (
+        <>
+          <span aria-hidden className="ml-0.5 text-bad">*</span>
+          <span className="sr-only"> (required)</span>
+        </>
       )}
     </Label>
   );

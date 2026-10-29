@@ -1,5 +1,6 @@
 "use client";
 
+import { Switch } from "@/components/ui/switch";
 import { useEffect, useRef, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import {
@@ -38,7 +39,6 @@ import AdditionalInfoSection from "@/components/businesses/sections/AdditionalIn
 import FollowUpSection from "@/components/businesses/sections/FollowUpSection";
 import BusinessDetailsFollowups from "@/components/business-details/BusinessDetailsFollowups";
 import BusinessOwnershipSection from "@/components/businesses/sections/BusinessOwnershipSection";
-import { Checkbox } from "@/components/ui/checkbox";
 import { cn } from "@/lib/utils";
 import { useIsDesktop } from "@/lib/use-is-desktop";
 import {
@@ -119,14 +119,14 @@ function OptionalFollowUp({ idPrefix }: { idPrefix: string }) {
   const { control } = useFormContext<BusinessFormValues>();
   const enabled = useWatch({ control, name: "scheduleFollowUp" });
   return (
-    <div className="border border-line bg-surface-2/50">
+    <div className="rounded-2xl border border-line bg-surface-2/50">
       <Controller
         control={control}
         name="scheduleFollowUp"
         render={({ field }) => (
-          <label className="flex cursor-pointer items-start gap-3 px-4 py-3.5">
-            <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} className="mt-0.5 rounded-xl" />
-            <span><span className="block text-sm font-semibold text-ink">Schedule the first follow-up</span><span className="mt-0.5 block text-xs text-muted">Optional. You can add this later from the business details page.</span></span>
+          <label htmlFor={`${idPrefix}schedule-follow-up`} className="flex min-h-16 cursor-pointer items-center justify-between gap-4 px-4 py-3">
+            <span><span className="block text-base font-semibold text-ink">Schedule the first follow-up</span><span className="mt-0.5 block text-sm text-muted">You can also add it later from the business page.</span></span>
+            <Switch id={`${idPrefix}schedule-follow-up`} checked={field.value} onCheckedChange={field.onChange} />
           </label>
         )}
       />

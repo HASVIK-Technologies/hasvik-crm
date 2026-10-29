@@ -1,5 +1,6 @@
 "use client";
 
+import SelectField from "@/components/common/SelectField";
 import { useState } from "react";
 import { CalendarDays, X } from "lucide-react";
 import Calendar from "@/components/common/Calendar";
@@ -51,8 +52,8 @@ export default function DateTimePicker({ id, value = "", onChange, placeholder =
         <div className="min-h-0 overflow-y-auto overscroll-contain p-3">
         <fieldset className="mb-3 flex items-center gap-2 border-b border-surface-2 pb-3">
           <legend className="px-1 text-xs font-semibold text-ink-soft">Time (24-hour)</legend>
-          <label className="flex-1 text-xs text-muted">Hour<select aria-label="Hour" value={time.slice(0, 2)} onChange={(event) => changeTime(event.target.value, time.slice(3, 5))} className="mt-1 h-10 w-full rounded-lg border border-line bg-surface px-2 text-sm text-ink">{Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((hour) => <option key={hour}>{hour}</option>)}</select></label>
-          <label className="flex-1 text-xs text-muted">Minute<select aria-label="Minute" value={time.slice(3, 5)} onChange={(event) => changeTime(time.slice(0, 2), event.target.value)} className="mt-1 h-10 w-full rounded-lg border border-line bg-surface px-2 text-sm text-ink">{Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0")).map((minute) => <option key={minute}>{minute}</option>)}</select></label>
+          <div className="flex-1 text-sm text-muted">Hour<SelectField ariaLabel="Hour" className="mt-1" value={time.slice(0, 2)} onChange={(next) => changeTime(next, time.slice(3, 5))} options={Array.from({ length: 24 }, (_, i) => String(i).padStart(2, "0")).map((hour) => ({ value: hour, label: hour }))} /></div>
+          <div className="flex-1 text-sm text-muted">Minute<SelectField ariaLabel="Minute" className="mt-1" value={time.slice(3, 5)} onChange={(next) => changeTime(time.slice(0, 2), next)} options={Array.from({ length: 60 }, (_, i) => String(i).padStart(2, "0")).map((minute) => ({ value: minute, label: minute }))} /></div>
         </fieldset>
         {open && <Calendar mode="single" selected={selectedDraft} defaultMonth={selectedDraft ?? minimum} disabled={{ before: minimumDay }} onSelect={(date) => {
           if (!date) return;

@@ -3,7 +3,6 @@
 import { CircleMinus } from "lucide-react";
 import PlainButton from "@/components/common/PlainButton";
 import FieldLabel from "@/components/businesses/FieldLabel";
-import { cn } from "@/lib/utils";
 
 export default function NumberListField({
   label,
@@ -48,27 +47,23 @@ export default function NumberListField({
             <div key={key} className="flex items-center gap-2">
               {renderRow(index)}
               {renderRowActions?.(index)}
-              <button
-                type="button"
-                aria-label="Remove number"
-                onClick={() => onRemove(index)}
-                disabled={!canRemove}
-                className={cn(
-                  "flex size-9 shrink-0 items-center justify-center rounded-lg transition-colors",
-                  canRemove
-                    ? "bg-surface-2 text-brand-strong hover:bg-surface-2 hover:text-brand-strong"
-                    : "cursor-not-allowed bg-surface-2 text-muted",
-                )}
-              >
-                <CircleMinus className="size-4" />
-              </button>
+              {canRemove && (
+                <button
+                  type="button"
+                  aria-label={`Remove number ${index + 1}`}
+                  onClick={() => onRemove(index)}
+                  className="grid size-11 shrink-0 place-items-center rounded-xl text-muted transition-colors hover:bg-bad-soft hover:text-bad sm:size-10"
+                >
+                  <CircleMinus className="size-5" aria-hidden />
+                </button>
+              )}
             </div>
           );
         })}
         <PlainButton
           type="button"
           onClick={onAdd}
-          className="h-10 justify-center gap-1.5 rounded-lg border border-dashed border-line text-sm font-medium text-accent-strong hover:bg-surface-2/10 hover:text-accent-strong"
+          className="h-11 justify-center gap-1.5 rounded-xl border border-dashed border-line text-sm font-semibold text-brand-strong hover:bg-brand-soft sm:h-10"
         >
           <AddIcon className="size-4" />
           {addLabel}

@@ -171,7 +171,8 @@ await t.step("forecast explains why there is not enough data", async () => {
 await t.step("audit logs list entries and filter by action", async () => {
   await page.goto(`${BASE}/audit-logs`);
   await page.locator("ul li").first().waitFor({ timeout: 30000 });
-  await page.getByLabel("Action").selectOption("CREATE");
+  await page.getByLabel("Action").click();
+  await page.getByRole("option", { name: "Create" }).click();
   await settle(page, 600);
 });
 

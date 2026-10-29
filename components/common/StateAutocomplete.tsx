@@ -55,7 +55,7 @@ export default function StateAutocomplete({
           id={id}
           placeholder={placeholder}
           aria-invalid={invalid}
-          className="h-9 w-full"
+          className="h-11 w-full rounded-xl sm:h-10"
           showTrigger={!value}
           showClear={Boolean(value)}
           onChange={(event) => {

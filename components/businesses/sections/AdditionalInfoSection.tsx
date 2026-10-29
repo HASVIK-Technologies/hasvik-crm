@@ -1,11 +1,15 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { Controller, useFormContext } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
+import SelectField from "@/components/common/SelectField";
 import { isValidHttpUrl } from "@/lib/business/url-validation";
 import type { BusinessFormValues } from "@/lib/business/form-types";
+
+/** Where leads usually come from. The API stores free text, so a value outside this list is kept as it is. */
+const LEAD_SOURCES = ["WhatsApp", "Referral", "Walk-in", "Website", "Cold call", "Social media"];
 
 export default function AdditionalInfoSection({
   idPrefix = "",
@@ -13,6 +17,7 @@ export default function AdditionalInfoSection({
   idPrefix?: string;
 }) {
   const {
+    control,
     register,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
@@ -38,19 +43,25 @@ export default function AdditionalInfoSection({
         )}
       </div>
 
-      <div>
-        <FieldLabel htmlFor={`${idPrefix}leadSource`} optional>Lead source</FieldLabel>
-        <Input
-          id={`${idPrefix}leadSource`}
-          list={`${idPrefix}leadSource-options`}
-          placeholder="e.g. WhatsApp, Referral, Walk-in"
-          autoComplete="off"
-          {...register("leadSource")}
-        />
-        <datalist id={`${idPrefix}leadSource-options`}>
-          {["WhatsApp", "Referral", "Walk-in", "Website", "Cold call", "Social media"].map((option) => <option key={option} value={option} />)}
-        </datalist>
-      </div>
+      <Controller
+        control={control}
+        name="leadSource"
+        render={({ field }) => {
+          const known = LEAD_SOURCES.includes(field.value) || !field.value;
+          return (
+            <div>
+              <FieldLabel htmlFor={`${idPrefix}leadSource`}>Lead source</FieldLabel>
+              <SelectField
+                id={`${idPrefix}leadSource`}
+                value={field.value}
+                onChange={field.onChange}
+                placeholder="Where did this lead come from?"
+                options={[{ value: "", label: "Not sure" }, ...(known ? [] : [{ value: field.value, label: field.value }]), ...LEAD_SOURCES.map((source) => ({ value: source, label: source }))]}
+              />
+            </div>
+          );
+        }}
+      />
 
       <div>
         <FieldLabel htmlFor={`${idPrefix}description`}>Description</FieldLabel>
