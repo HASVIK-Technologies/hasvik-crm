@@ -117,8 +117,8 @@ export default function ReportView({ meta }: { meta: ReportMeta }) {
         <Link href="/reports" className="no-print inline-flex min-h-11 items-center gap-1.5 text-sm font-semibold text-brand-strong hover:underline"><ArrowLeft className="size-4" aria-hidden />All reports</Link>
         <div className="flex flex-wrap items-start justify-between gap-3">
           <div className="min-w-0">
-            <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-[1.7rem]">{meta.title}</h1>
-            <p className="mt-1 max-w-2xl text-sm text-muted">{meta.description}{meta.usesRange ? ` · ${range.label}` : " · As of today"}</p>
+            <h1 className="sr-only">{meta.title}</h1>
+            <p className="max-w-2xl text-sm leading-relaxed text-muted">{meta.description}{meta.usesRange ? ` · ${range.label}` : " · As of today"}</p>
           </div>
           <div className="no-print flex flex-wrap items-center gap-2">
             <Button variant="outline" onClick={exportCsv} disabled={loading || failed}><Download className="size-4" aria-hidden />CSV</Button>

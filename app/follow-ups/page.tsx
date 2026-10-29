@@ -205,6 +205,7 @@ function FollowupsContent() {
         showFilters={filters.showFilters}
         onToggleFilters={filters.toggleFilters}
         onResetFilters={filters.reset}
+        activeFilterCount={urlFilters.chips.length + (filters.businessId ? 1 : 0)}
         resultCount={listQuery.data?.total ?? 0}
         viewSwitcher={<FollowUpViewToggle value={filters.view} onChange={filters.setView} />}
         actions={

@@ -265,6 +265,7 @@ function BusinessesContent() {
       showFilters={showFilters}
       onToggleFilters={toggleFilters}
       onResetFilters={resetEverything}
+      activeFilterCount={chips.length + (categoryId ? 1 : 0) + (city && city !== "All Cities" ? 1 : 0)}
       resultCount={totalCount}
       viewSwitcher={<BusinessViewToggle value={view} onChange={setView} />}
       actions={

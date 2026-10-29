@@ -82,6 +82,10 @@ export interface ReportResult {
 
 const pct = (value: number | null) => (value === null ? "—" : `${value}%`);
 
+/** "Up 12% on the previous period", or a plain sentence when there is nothing to compare with. */
+const vsPrevious = (change: number | null) =>
+  change === null ? "Nothing to compare with yet" : change === 0 ? "Same as the previous period" : `${change > 0 ? "Up" : "Down"} ${Math.abs(change)}% on the previous period`;
+
 export function scopeLeads(leads: LeadRecord[], filters: ReportFilters): LeadRecord[] {
   return leads.filter((lead) => {
     if (!lead.isActive) return false;
@@ -137,14 +141,14 @@ export function buildReport(slug: ReportSlug, ctx: ReportContext): ReportResult 
       const monthRows = [...months.entries()].sort(([a], [b]) => a.localeCompare(b));
       return {
         kpis: [
-          { label: "Won", value: won.length, count: won.length, tone: "ok", href: leadsHref({ status: "WON", updatedFrom: range.from, updatedTo: range.to, isActive: true, ...owner, ...source }), hint: `${pct(percentChange(won.length, prev.filter((l) => l.status === "WON").length))} vs previous period` },
+          { label: "Won", value: won.length, count: won.length, tone: "ok", href: leadsHref({ status: "WON", updatedFrom: range.from, updatedTo: range.to, isActive: true, ...owner, ...source }), hint: vsPrevious(percentChange(won.length, prev.filter((l) => l.status === "WON").length)) },
           { label: "Lost", value: lost.length, count: lost.length, tone: "bad", href: leadsHref({ status: "LOST", updatedFrom: range.from, updatedTo: range.to, isActive: true, ...owner, ...source }) },
           { label: "Win rate", value: pct(rate), count: closed.length, tone: "brand", hint: closed.length ? `Based on ${closed.length} closed lead${closed.length === 1 ? "" : "s"}` : "Nothing closed in this period" },
         ],
         chart: { kind: "bars", ariaLabel: "Won and lost leads", rows: [{ key: "won", label: "Won", value: won.length }, { key: "lost", label: "Lost", value: lost.length }] },
         columns: [{ key: "month", label: "Month" }, { key: "won", label: "Won", numeric: true }, { key: "lost", label: "Lost", numeric: true }, { key: "rate", label: "Win rate", numeric: true }],
         rows: monthRows.map(([month, v]) => ({ month, won: v.won, lost: v.lost, rate: pct(Math.round((v.won / (v.won + v.lost)) * 100)) })),
-        note: "A lead counts as closed in the period when it is Won or Lost and was last updated then. The API does not store a separate close date.",
+        note: "A lead counts as closed when it is marked Won or Lost, on the day it was last updated.",
       };
     }
 
@@ -204,7 +208,7 @@ export function buildReport(slug: ReportSlug, ctx: ReportContext): ReportResult 
       const previous = activityByOwner(acts, range.previous).reduce((s, r) => s + r.total, 0);
       return {
         kpis: [
-          { label: "Completed activities", value: total, count: total, tone: "ok", href: followUpsHref({ status: "COMPLETED", fromDate: range.from, toDate: range.to, ...(filters.owner && filters.owner !== UNASSIGNED ? { assignedTo: filters.owner } : {}) }), hint: `${pct(percentChange(total, previous))} vs previous period` },
+          { label: "Completed activities", value: total, count: total, tone: "ok", href: followUpsHref({ status: "COMPLETED", fromDate: range.from, toDate: range.to, ...(filters.owner && filters.owner !== UNASSIGNED ? { assignedTo: filters.owner } : {}) }), hint: vsPrevious(percentChange(total, previous)) },
           { label: "Calls", value: rows.reduce((s, r) => s + r.calls, 0), count: rows.reduce((s, r) => s + r.calls, 0), href: followUpsHref({ status: "COMPLETED", type: "CALL", fromDate: range.from, toDate: range.to, ...(filters.owner && filters.owner !== UNASSIGNED ? { assignedTo: filters.owner } : {}) }) },
           { label: "Meetings", value: rows.reduce((s, r) => s + r.meetings, 0), count: rows.reduce((s, r) => s + r.meetings, 0), href: followUpsHref({ status: "COMPLETED", type: "MEETING", fromDate: range.from, toDate: range.to, ...(filters.owner && filters.owner !== UNASSIGNED ? { assignedTo: filters.owner } : {}) }) },
         ],
@@ -222,7 +226,7 @@ export function buildReport(slug: ReportSlug, ctx: ReportContext): ReportResult 
       const best = series.reduce((a, b) => (b.value > a.value ? b : a), series[0] ?? { key: "", label: "", value: 0 });
       return {
         kpis: [
-          { label: "New leads", value: made.length, count: made.length, tone: "brand", href: leadsHref({ createdFrom: range.from, createdTo: range.to, isActive: true, ...owner, ...source }), hint: `${pct(percentChange(made.length, previous))} vs previous period` },
+          { label: "New leads", value: made.length, count: made.length, tone: "brand", href: leadsHref({ createdFrom: range.from, createdTo: range.to, isActive: true, ...owner, ...source }), hint: vsPrevious(percentChange(made.length, previous)) },
           { label: "Average per day", value: series.length ? Math.round((made.length / Math.max(1, Math.round((Date.parse(range.to) - Date.parse(range.from)) / 86_400_000) + 1)) * 10) / 10 : 0, count: made.length },
           { label: "Busiest period", value: best.value ? best.label : "—", count: best.value, hint: best.value ? `${best.value} leads` : undefined },
         ],
@@ -243,7 +247,7 @@ export function buildReport(slug: ReportSlug, ctx: ReportContext): ReportResult 
         chart: { kind: "bars", ariaLabel: "Leads that reached each stage", rows: funnel.map((s) => ({ key: s.status, label: STAGE_LABELS[s.status], value: s.reached, valueLabel: `${s.reached} · ${s.percentOfStart}%` })) },
         columns: [{ key: "stage", label: "Stage" }, { key: "reached", label: "Reached", numeric: true }, { key: "start", label: "% of start", numeric: true }, { key: "step", label: "From previous stage", numeric: true }],
         rows: funnel.map((s, i) => ({ stage: STAGE_LABELS[s.status], reached: s.reached, start: `${s.percentOfStart}%`, step: i === 0 ? "—" : pct(funnel[i - 1].reached ? Math.round((s.reached / funnel[i - 1].reached) * 100) : null) })),
-        note: "Counts each lead at its current stage or beyond. The API does not keep stage history, so a lead that was lost is left out.",
+        note: "Each lead is counted at its current stage and every stage before it. Lost leads are left out.",
       };
     }
   }

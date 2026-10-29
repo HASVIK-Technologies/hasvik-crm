@@ -5,6 +5,7 @@ import { ChevronLeft, ChevronRight, History } from "lucide-react";
 import { useState } from "react";
 import FilterSelect from "@/components/common/FilterSelect";
 import PageContainer from "@/components/layout/PageContainer";
+import PageHeader from "@/components/layout/PageHeader";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import { Card } from "@/components/ui/card";
@@ -41,10 +42,7 @@ export default function AuditLogsPage() {
 
   return (
     <PageContainer className="space-y-5">
-      <div className="fade-up">
-        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-[1.7rem]">Audit logs</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted">A record of who changed what, newest first. Open an entry to see the record it affected.</p>
-      </div>
+      <PageHeader title="Audit logs" description="A record of who changed what, newest first. Open an entry to see the record it affected." />
 
       <div className="grid grid-cols-2 gap-3 sm:max-w-md">
         <FilterSelect label="Action" value={action} onChange={(v) => { setAction(v); setPage(1); }} options={[{ value: "", label: "All actions" }, ...ACTIONS.map((a) => ({ value: a, label: label(a) }))]} />

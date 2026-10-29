@@ -8,6 +8,7 @@ import CompanySettings from "@/components/settings/CompanySettings";
 import ProfileSettings from "@/components/settings/ProfileSettings";
 import SecuritySettings from "@/components/settings/SecuritySettings";
 import PageContainer from "@/components/layout/PageContainer";
+import PageHeader from "@/components/layout/PageHeader";
 import { Card } from "@/components/ui/card";
 import { useAuthStore } from "@/store/auth-store";
 import { isSuperAdmin, isTenantAdmin } from "@/types/auth";
@@ -44,10 +45,7 @@ function SettingsContent() {
 
   return (
     <PageContainer className="space-y-5">
-      <div className="fade-up">
-        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-[1.7rem]">Settings</h1>
-        <p className="mt-1 text-sm text-muted">Manage your account and how the app looks.</p>
-      </div>
+      <PageHeader title="Settings" description="Manage your account and how the app looks." />
 
       <div className="grid gap-5 lg:grid-cols-[18rem_minmax(0,1fr)]">
         <nav aria-label="Settings sections" className={cn("space-y-2", active && "hidden lg:block")}>

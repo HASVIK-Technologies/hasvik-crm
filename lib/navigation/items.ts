@@ -13,6 +13,9 @@ import {
   type LucideIcon,
 } from "lucide-react";
 import { isSuperAdmin, isTenantAdmin, type AuthUser } from "@/types/auth";
+import { reportMeta } from "@/lib/reports/definitions";
+
+const reportTitle = (slug: string) => reportMeta(slug)?.title;
 
 export type NavGroup = "sell" | "insights" | "admin" | "settings";
 
@@ -76,5 +79,7 @@ const TITLES: [string, string][] = [
 ];
 
 export function pageTitle(pathname: string) {
+  const report = pathname.match(/^\/reports\/([^/]+)/);
+  if (report) return reportTitle(report[1]) ?? "Report";
   return TITLES.find(([prefix]) => (prefix.endsWith("/") ? pathname.startsWith(prefix) : pathname === prefix))?.[1] ?? "HASVIK CRM";
 }

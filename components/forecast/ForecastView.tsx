@@ -4,6 +4,7 @@ import { useRouter } from "next/navigation";
 import { useMemo, useState } from "react";
 import { Info, Scale, Target, TrendingUp, Trophy } from "lucide-react";
 import ChartFrame from "@/components/common/ChartFrame";
+import PageHeader from "@/components/layout/PageHeader";
 import FilterSelect from "@/components/common/FilterSelect";
 import KpiCards from "@/components/common/KpiCards";
 import { Card } from "@/components/ui/card";
@@ -55,19 +56,17 @@ export default function ForecastView() {
 
   return (
     <div className="space-y-5">
-      <div className="fade-up flex flex-wrap items-start justify-between gap-3">
-        <div>
-          <h1 className="flex flex-wrap items-center gap-2 text-2xl font-bold tracking-tight text-ink sm:text-[1.7rem]">
-            Forecast
-            <span className="rounded-full bg-warn-soft px-2.5 py-0.5 text-xs font-semibold tracking-wide text-warn uppercase">Estimate</span>
-          </h1>
-          <p className="mt-1 max-w-2xl text-sm text-muted">A decision aid built from your own lead history. It shows lead counts, not revenue, because leads carry no deal value in this system.</p>
-        </div>
+      <PageHeader
+        title="Forecast"
+        badge={<span className="rounded-full bg-warn-soft px-2.5 py-0.5 text-xs font-semibold text-warn">Estimate</span>}
+        description="A decision aid built from your own lead history. It shows lead counts, not revenue, because leads carry no deal value in this system."
+        actions={
         <div className="grid w-full grid-cols-2 gap-3 sm:w-auto">
           <FilterSelect label="Owner" value={owner} onChange={setOwner} options={[{ value: "", label: user?.role === "SALES" ? "Everyone I can see" : "Whole team" }, ...owners]} />
           <FilterSelect label="Look ahead" value={horizon} onChange={setHorizon} options={[3, 4, 5, 6].map((n) => ({ value: String(n), label: `${n} months` }))} />
         </div>
-      </div>
+        }
+      />
 
       {failed && <div role="alert" className="rounded-2xl border border-warn/30 bg-warn-soft p-4 text-sm text-warn">We couldn&apos;t load your lead history. Check your connection and refresh the page.</div>}
 

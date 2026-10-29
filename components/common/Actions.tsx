@@ -94,6 +94,23 @@ function ActionButton({ action }: { action: ActionItem }) {
   return <PrimaryButton onClick={action.onSelect}>{content}</PrimaryButton>;
 }
 
+/** Phone only: the primary action floats above the bottom tab bar, in easy thumb reach. */
+function FloatingAction({ action }: { action: ActionItem }) {
+  const className = "fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-20 inline-flex h-14 items-center gap-2 rounded-full bg-btn px-5 text-base font-semibold text-white shadow-float transition-transform active:scale-95 lg:hidden";
+  const content = (
+    <>
+      <span className="[&_svg]:size-5">{action.icon}</span>
+      {action.label}
+    </>
+  );
+  if (action.disabled) return null;
+  return action.href ? (
+    <Link href={action.href} className={className}>{content}</Link>
+  ) : (
+    <button type="button" onClick={action.onSelect} className={className}>{content}</button>
+  );
+}
+
 export default function Actions({
   primary,
   secondary = [],
@@ -127,7 +144,7 @@ export default function Actions({
       </div>
 
       <div className="flex items-center gap-2 lg:hidden">
-        <ActionButton action={primary} />
+        <FloatingAction action={primary} />
         {secondaryActions.filter((action) => !action.desktopOnly).length > 0 && <DropdownMenu>
           <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild>
               <OutlinedButton size="icon" aria-label="More actions">

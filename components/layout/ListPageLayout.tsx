@@ -21,6 +21,8 @@ interface LayoutProps {
   showFilters?: boolean;
   onToggleFilters?: () => void;
   onResetFilters?: () => void;
+  /** Number of filters currently applied, shown as a badge on the phone Filters button. */
+  activeFilterCount?: number;
   resultCount?: number;
   actions?: React.ReactNode;
   viewSwitcher?: React.ReactNode;
@@ -41,6 +43,7 @@ export default function ListPageLayout({
   showFilters: controlledShowFilters,
   onToggleFilters,
   onResetFilters,
+  activeFilterCount = 0,
   resultCount,
   actions,
   viewSwitcher,
@@ -104,14 +107,15 @@ export default function ListPageLayout({
                 aria-label="Open filters"
               >
                 <Filter className="size-4" />
-                <span className="hidden min-[380px]:inline">Filters</span>
+                <span>Filters</span>
+                {activeFilterCount > 0 && <span className="grid min-w-5 place-items-center rounded-full bg-btn px-1.5 text-xs font-semibold text-white tabular">{activeFilterCount}</span>}
               </OutlinedButton>
             )}
             {actions}
           </div>
         </div>
       </section>
-      <div className="w-full lg:hidden">{search}</div>
+      <div className="order-first w-full lg:hidden">{search}</div>
       {showFilters && (filters || search) && (
         <div className="hidden grow border border-line bg-surface p-3 shadow-card lg:flex overflow-visible rounded-2xl">
           <div className="flex w-full min-w-0 flex-wrap items-center gap-3">

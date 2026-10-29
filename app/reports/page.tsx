@@ -1,6 +1,7 @@
 import Link from "next/link";
 import { ArrowRight, BarChart3, ChevronRight, CalendarCheck2, Filter, Hourglass, PlusCircle, Trophy, Users, Waypoints, type LucideIcon } from "lucide-react";
 import PageContainer from "@/components/layout/PageContainer";
+import PageHeader from "@/components/layout/PageHeader";
 import { REPORTS, type ReportSlug } from "@/lib/reports/definitions";
 
 export const metadata = { title: "Reports" };
@@ -13,10 +14,7 @@ const ICONS: Record<ReportSlug, LucideIcon> = {
 export default function ReportsPage() {
   return (
     <PageContainer className="space-y-6">
-      <div className="fade-up">
-        <h1 className="text-2xl font-bold tracking-tight text-ink sm:text-[1.7rem]">Reports</h1>
-        <p className="mt-1 max-w-2xl text-sm text-muted">Pick a report to see the numbers, filter them, and export exactly what is on screen to CSV or Excel.</p>
-      </div>
+      <PageHeader title="Reports" description="Pick a report to see the numbers, filter them, and export exactly what is on screen to CSV or Excel." />
       <ul className="stagger grid gap-4 sm:grid-cols-2 xl:grid-cols-3">
         {REPORTS.map((report) => {
           const Icon = ICONS[report.slug];
