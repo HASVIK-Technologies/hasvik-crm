@@ -252,7 +252,7 @@ export default function BusinessDetailsFollowups({
                                 onSelect={() => void completeFollowUp(item)}
                                 disabled={completeMutation.isPending}
                               >
-                                <CheckCircle2 className="size-3.5" /> <span>Mark as Completed</span>
+                                <CheckCircle2 className="size-3.5" /> <span>Mark as completed</span>
                               </DropdownMenuItem>
                             )}
                             {canCreateNextFollowUp(item) && (
@@ -264,7 +264,7 @@ export default function BusinessDetailsFollowups({
                                 }}
                                 onSelect={() => openFollowUpModal(businessId)}
                               >
-                                <Plus className="size-3.5" /> <span>Schedule Next Follow-up</span>
+                                <Plus className="size-3.5" /> <span>Schedule next follow-up</span>
                               </DropdownMenuItem>
                             )}
                             {canCancelFollowUp(item) && (
@@ -276,7 +276,7 @@ export default function BusinessDetailsFollowups({
                                 }}
                                 onSelect={() => setCancellingFollowUp(item)}
                               >
-                                <Trash2 className="size-3.5" /> <span>Cancel Follow-up</span>
+                                <Trash2 className="size-3.5" /> <span>Cancel follow-up</span>
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>

@@ -446,7 +446,7 @@ export default function BusinessDetails() {
           </section>
           {/* New Follow-up Modal */}
           <AddFollowUpModal businessName={business?.name || "Business"} />
-          {/* Deactivate Business Modal */}
+          {/* Deactivate business Modal */}
           <DeactivateBusinessModal
             businessName={business?.name || ""}
             businessStatus={business?.status || ""}

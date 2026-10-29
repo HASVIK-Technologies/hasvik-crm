@@ -256,7 +256,7 @@ export default function FollowUpTable({
                               onSelect={() => { highlightFollowUp(item.id); onNextFollowUp(item); }}
                               className="cursor-pointer text-xs font-semibold text-accent-strong focus:bg-surface-2/10 focus:text-accent-strong"
                             >
-                              <Plus className="mr-1.5 size-3.5" /> Next Follow-Up
+                              <Plus className="mr-1.5 size-3.5" /> Next follow-up
                             </DropdownMenuItem>
                           )}
                           {canCompleteFollowUp(item) && (
@@ -265,7 +265,7 @@ export default function FollowUpTable({
                               onSelect={() => { highlightFollowUp(item.id); onComplete(item); }}
                               className="cursor-pointer text-xs text-accent-strong focus:bg-surface-2/10 focus:text-accent-strong"
                             >
-                              <CheckCircle2 className="mr-1.5 size-3.5" /> Mark as Completed
+                              <CheckCircle2 className="mr-1.5 size-3.5" /> Mark as completed
                             </DropdownMenuItem>
                           )}
                           {canCancelFollowUp(item) && (
@@ -274,7 +274,7 @@ export default function FollowUpTable({
                               onSelect={() => { highlightFollowUp(item.id); onCancel(item); }}
                               className="cursor-pointer text-xs text-bad focus:bg-surface-2 focus:text-bad"
                             >
-                              <Trash2 className="mr-1.5 size-3.5" /> Cancel Follow-up
+                              <Trash2 className="mr-1.5 size-3.5" /> Cancel follow-up
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -461,7 +461,7 @@ export default function FollowUpTable({
                               className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-bad hover:bg-surface-2 focus:bg-surface-2 focus:text-bad"
                             >
                               <Trash2 className="size-3.5 text-bad" />
-                              <span>Cancel Follow-Up</span>
+                              <span>Cancel follow-up</span>
                             </DropdownMenuItem>}
 
                             {canCompleteFollowUp(item) && <DropdownMenuItem
@@ -470,7 +470,7 @@ export default function FollowUpTable({
                               className="flex cursor-pointer items-center gap-2 px-2.5 py-1.5 text-xs font-medium text-accent-strong hover:bg-surface-2/10 focus:bg-surface-2/10 focus:text-accent-strong"
                             >
                               <CheckCircle2 className="size-3.5 text-accent-strong" />
-                              <span>Mark as Completed</span>
+                              <span>Mark as completed</span>
                             </DropdownMenuItem>}
                             {canCreateNextFollowUp(item) && onNextFollowUp && (
                               <DropdownMenuItem
@@ -478,7 +478,7 @@ export default function FollowUpTable({
                                 onSelect={() => { highlightFollowUp(item.id); onNextFollowUp(item); }}
                                 className="cursor-pointer text-xs font-semibold text-accent-strong"
                               >
-                                <Plus className="mr-1.5 size-3.5" /> Next Follow-Up
+                                <Plus className="mr-1.5 size-3.5" /> Next follow-up
                               </DropdownMenuItem>
                             )}
                           </DropdownMenuContent>

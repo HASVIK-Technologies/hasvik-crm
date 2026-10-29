@@ -28,7 +28,7 @@ export default function BusinessDetailsQuickActions({
 
       <div className="flex flex-col gap-2.5">
         {!isInactive && <>
-        {/* Edit Business */}
+        {/* Edit business */}
         <Link
           href={`/businesses/form/${business?.id}`}
           className="group flex items-center justify-between rounded-xl border border-line/90 bg-surface p-3 transition-all hover:border-brand/30 hover:bg-btn/5"
@@ -39,7 +39,7 @@ export default function BusinessDetailsQuickActions({
             </div>
             <div>
               <p className="text-xs font-semibold text-ink group-hover:text-brand-strong">
-                Edit Business
+                Edit business
               </p>
               <p className="text-[11px] text-muted">
                 Update business details

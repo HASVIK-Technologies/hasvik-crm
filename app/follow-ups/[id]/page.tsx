@@ -131,7 +131,7 @@ export default function FollowUpDetailsPage() {
         actions={readOnly ? undefined : canCreateNextFollowUp(followUp) ? (
             <Actions
               primary={{
-                label: "Next Follow-Up",
+                label: "Next follow-up",
                 icon: <Plus className="size-4" />,
                 onSelect: () => setNextFollowUpOpen(true),
               }}
@@ -145,7 +145,7 @@ export default function FollowUpDetailsPage() {
                   : []),
                 ...(canCancelFollowUp(followUp)
                   ? [{
-                      label: "Cancel Follow-Up",
+                      label: "Cancel follow-up",
                       icon: <Trash2 className="size-4" />,
                       destructive: true,
                       onSelect: () => setCancelOpen(true),
@@ -156,7 +156,7 @@ export default function FollowUpDetailsPage() {
           ) : canCompleteFollowUp(followUp) ? (
             <Actions
               primary={{
-                label: "Mark as Completed",
+                label: "Mark as completed",
                 icon: <CheckCircle2 className="size-4" />,
                 onSelect: () => setCompleteOpen(true),
               }}
@@ -170,7 +170,7 @@ export default function FollowUpDetailsPage() {
                   : []),
                 ...(canCancelFollowUp(followUp)
                   ? [{
-                      label: "Cancel Follow-Up",
+                      label: "Cancel follow-up",
                       icon: <Trash2 className="size-4" />,
                       destructive: true,
                       onSelect: () => setCancelOpen(true),

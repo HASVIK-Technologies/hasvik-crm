@@ -668,7 +668,7 @@ export default function BusinessTable({
                       {item.status === "Active" && item.lastFollowUpId ? <RecordLink href={`/follow-ups/${item.lastFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.lastFollowUp}</RecordLink> : item.lastFollowUp}
                     </TableCell>}
 
-                    {/* Next Follow-up */}
+                    {/* Next follow-up */}
                     {columnVisible("nextFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
                       {item.nextFollowUpType !== "none" ? (
                         item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-ink-soft">{item.nextFollowUp}</span>

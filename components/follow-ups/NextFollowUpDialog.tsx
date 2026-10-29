@@ -115,7 +115,7 @@ function NextFollowUpForm({
       <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6 rounded-2xl">
         <div>
           <DialogPrimitive.Title className="text-lg font-bold text-ink">
-            Schedule Next Follow-Up
+            Schedule next Follow-Up
           </DialogPrimitive.Title>
           <DialogPrimitive.Description className="mt-1 text-xs text-muted">
             Set up the next touchpoint for this completed follow-up.
@@ -275,7 +275,7 @@ function NextFollowUpForm({
                 <Loader2 className="size-4 animate-spin" /> Scheduling...
               </>
             ) : (
-              "Schedule Next Follow-Up"
+              "Schedule next Follow-Up"
             )}
           </SaveButton>
         </footer>
