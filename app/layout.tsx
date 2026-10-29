@@ -1,3 +1,4 @@
+import { INSTALL_CAPTURE_SCRIPT } from "@/lib/pwa/install";
 import type { Metadata, Viewport } from "next";
 import { Geist, Geist_Mono } from "next/font/google";
 import AppShell from "@/components/layout/AppShell";
@@ -41,6 +42,7 @@ export default function RootLayout({
     >
       <head>
         <script dangerouslySetInnerHTML={{ __html: themeScript }} />
+        <script dangerouslySetInnerHTML={{ __html: INSTALL_CAPTURE_SCRIPT }} />
       </head>
       <body suppressHydrationWarning className="flex min-h-full flex-col">
         <AppProviders>

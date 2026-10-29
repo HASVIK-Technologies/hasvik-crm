@@ -2,9 +2,10 @@
 
 import { useRouter, useSearchParams } from "next/navigation";
 import { Suspense } from "react";
-import { Building2, ChevronLeft, ChevronRight, Lock, Palette, UserRound, type LucideIcon } from "lucide-react";
+import { Building2, ChevronLeft, ChevronRight, Download, Lock, Palette, UserRound, type LucideIcon } from "lucide-react";
 import AppearanceSettings from "@/components/settings/AppearanceSettings";
 import CompanySettings from "@/components/settings/CompanySettings";
+import InstallAppSettings from "@/components/settings/InstallAppSettings";
 import ProfileSettings from "@/components/settings/ProfileSettings";
 import SecuritySettings from "@/components/settings/SecuritySettings";
 import PageContainer from "@/components/layout/PageContainer";
@@ -14,7 +15,7 @@ import { useAuthStore } from "@/store/auth-store";
 import { isSuperAdmin, isTenantAdmin } from "@/types/auth";
 import { cn } from "@/lib/utils";
 
-type TabId = "profile" | "security" | "appearance" | "company";
+type TabId = "profile" | "security" | "appearance" | "app" | "company";
 
 interface Tab {
   id: TabId;
@@ -28,6 +29,7 @@ const TABS: Tab[] = [
   { id: "profile", label: "Profile", description: "Your name and contact details", icon: UserRound },
   { id: "security", label: "Security", description: "Password and signing out", icon: Lock },
   { id: "appearance", label: "Appearance", description: "Light, dark or system", icon: Palette },
+  { id: "app", label: "Install app", description: "Use HASVIK CRM like a phone or desktop app", icon: Download },
   { id: "company", label: "Company details", description: "Workspace name and contacts", icon: Building2, adminOnly: true },
 ];
 
@@ -70,6 +72,7 @@ function SettingsContent() {
             {current.id === "profile" && <ProfileSettings />}
             {current.id === "security" && <SecuritySettings />}
             {current.id === "appearance" && <AppearanceSettings />}
+            {current.id === "app" && <InstallAppSettings />}
             {current.id === "company" && <CompanySettings />}
           </Card>
         </section>

@@ -1,0 +1,28 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="theme-color" content="#0876d1">
+<title>You are offline | HASVIK CRM</title>
+<style>
+  :root { --bg: #f1f5f9; --card: #ffffff; --ink: #0f172a; --muted: #475569; --btn: #0876d1; --line: #e2e8f0; }
+  @media (prefers-color-scheme: dark) { :root { --bg: #0b1220; --card: #111a2e; --ink: #e2e8f0; --muted: #94a3b8; --line: #1e293b; } }
+  * { box-sizing: border-box; }
+  body { margin: 0; min-height: 100vh; display: grid; place-items: center; padding: 16px; background: var(--bg); color: var(--ink); font: 16px/1.5 system-ui, -apple-system, "Segoe UI", Roboto, sans-serif; }
+  main { width: 100%; max-width: 420px; background: var(--card); border: 1px solid var(--line); border-radius: 20px; padding: 32px 24px; text-align: center; }
+  img { width: 56px; height: 56px; border-radius: 14px; }
+  h1 { margin: 16px 0 8px; font-size: 20px; }
+  p { margin: 0 0 24px; color: var(--muted); font-size: 15px; }
+  button { width: 100%; min-height: 44px; border: 0; border-radius: 12px; background: var(--btn); color: #fff; font: 600 15px system-ui, sans-serif; cursor: pointer; }
+</style>
+</head>
+<body>
+<main>
+  <img src="/icon-192.png" alt="">
+  <h1>You are offline</h1>
+  <p>HASVIK CRM needs an internet connection to load your leads and follow-ups. Check your Wi-Fi or mobile data and try again.</p>
+  <button type="button" onclick="location.reload()">Try again</button>
+</main>
+</body>
+</html>

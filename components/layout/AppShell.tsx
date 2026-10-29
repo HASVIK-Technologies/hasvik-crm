@@ -6,6 +6,7 @@ import { usePathname, useRouter } from "next/navigation";
 import {
   Building2,
   CreditCard,
+  Download,
   LogOut,
   MoreHorizontal,
   PanelLeftClose,
@@ -30,6 +31,7 @@ import { Button } from "@/components/ui/button";
 import CommandPalette from "@/components/common/CommandPalette";
 import ShellSkeleton from "@/components/layout/ShellSkeleton";
 import ThemeToggle from "@/components/common/ThemeToggle";
+import { useInstallApp } from "@/hooks/use-install-app";
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -70,6 +72,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   const sessionQuery = useAuthSession(!publicPath || pathname === "/");
   useTokenRefresh();
   const logoutMutation = useLogout();
+  const { state: installState, install: installApp } = useInstallApp();
   const authStatus = useAuthStore((state) => state.status);
   const user = useAuthStore((state) => state.user);
   const clearAuth = useAuthStore((state) => state.clearAuth);
@@ -340,6 +343,11 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                   </DropdownMenuLabel>
                   <div className="px-1 py-2"><ThemeToggle className="w-full [&>button]:flex-1" /></div>
                   <DropdownMenuSeparator />
+                  {installState === "available" && (
+                    <DropdownMenuItem onClick={() => void installApp()} className="min-h-11 cursor-pointer text-sm font-medium">
+                      <Download className="mr-2 size-4 text-muted" aria-hidden />Install app
+                    </DropdownMenuItem>
+                  )}
                   <DropdownMenuItem asChild className="min-h-11 cursor-pointer text-sm font-medium">
                     <Link href="/settings"><Settings2 className="mr-2 size-4 text-muted" aria-hidden />Settings</Link>
                   </DropdownMenuItem>
@@ -450,6 +458,12 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             </div>
             <div className="mt-4 space-y-3 border-t border-line pt-4">
               <ThemeToggle className="w-full [&>button]:flex-1" />
+              {installState === "available" && (
+                <Button variant="outline" className="w-full" onClick={() => void installApp()}><Download className="size-4" aria-hidden />Install app</Button>
+              )}
+              {installState === "ios" && (
+                <Button variant="outline" className="w-full" asChild><Link href="/settings?tab=app" onClick={() => setMoreOpen(false)}><Download className="size-4" aria-hidden />Add to Home Screen</Link></Button>
+              )}
               <Button variant="outline" className="w-full text-bad" onClick={() => void handleLogout()} loading={logoutMutation.isPending}><LogOut className="size-4" aria-hidden />Sign out</Button>
             </div>
           </div>

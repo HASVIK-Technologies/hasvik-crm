@@ -6,6 +6,7 @@ import { authEventKey, authTabId, rememberLogout, sessionController } from "@/li
 import { usePathname } from "next/navigation";
 import { useEffect, useState } from "react";
 import { toast, Toaster } from "sonner";
+import { registerServiceWorker } from "@/lib/pwa/install";
 
 export default function AppProviders({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -22,6 +23,10 @@ export default function AppProviders({ children }: { children: React.ReactNode }
         },
       }),
   );
+
+  useEffect(() => {
+    registerServiceWorker();
+  }, []);
 
   const pathname = usePathname();
   const status = useAuthStore((state) => state.status);
