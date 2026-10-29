@@ -28,6 +28,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { Button } from "@/components/ui/button";
 import CommandPalette from "@/components/common/CommandPalette";
+import ShellSkeleton from "@/components/layout/ShellSkeleton";
 import ThemeToggle from "@/components/common/ThemeToggle";
 import {
   DropdownMenu,
@@ -180,7 +181,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
   if (loggingOut) return <FullScreenMessage>Signing you out…</FullScreenMessage>;
   if (pathname === "/" && ((authStatus === "loading" && !restoreBlocked) || (authStatus === "authenticated" && user))) {
-    return <FullScreenMessage>Opening your workspace…</FullScreenMessage>;
+    return <ShellSkeleton />;
   }
 
   if (publicPath) {
@@ -188,7 +189,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
   }
 
   if (authStatus !== "authenticated" || sessionQuery.isPending) {
-    return <FullScreenMessage>Opening your workspace…</FullScreenMessage>;
+    return <ShellSkeleton />;
   }
 
   if (routeBlocked) {

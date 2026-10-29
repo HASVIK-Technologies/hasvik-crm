@@ -37,6 +37,7 @@ import {
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import DetailsPageLayout from "@/components/layout/DetailsPageLayout";
+import { relativeDay } from "@/lib/analytics/relative";
 import Breadcrumb from "@/components/common/Breadcrumb";
 import RecordLink from "@/components/common/RecordLink";
 import { formatLeadStatus } from "@/lib/business/form-options";
@@ -192,10 +193,6 @@ export default function BusinessDetails() {
               label: business.assignedToId ? "Reassign owner" : "Assign owner",
               icon: <UserRoundCog className="size-4" />,
               onSelect: () => setIsAssignmentOpen(true),
-            },
-            {
-              label: "Add Follow Up",
-              onSelect: () => openFollowUpModal(String(business?.id)),
             },
             {
               label: "Deactivate",
@@ -399,6 +396,10 @@ export default function BusinessDetails() {
                           -
                         </p>
                       )}
+                      {!isInactive && (() => {
+                        const due = relativeDay(nextFollowUp?.scheduledAt ?? business?.nextFollowupDate, new Date());
+                        return due ? <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${due.tone === "bad" ? "bg-bad-soft text-bad" : due.tone === "warn" ? "bg-warn-soft text-warn" : "bg-surface text-ink-soft"}`}>{due.label}</span> : null;
+                      })()}
                     </div>
                   </div>
                 </div>

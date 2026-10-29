@@ -135,10 +135,10 @@ export default function BusinessDetailsFollowups({
   };
 
   if (isLoading) {
-    return <div className="p-6 text-muted">Loading follow-ups...</div>;
+    return <div role="status" aria-label="Loading follow-ups" className="space-y-3 p-4"><div className="skeleton h-6 w-40" /><div className="skeleton h-16" /><div className="skeleton h-16" /></div>;
   }
   if (isError) {
-    return <div className="p-6 text-bad">Failed to load follow-ups.</div>;
+    return <div role="alert" className="rounded-2xl bg-bad-soft p-5 text-sm text-bad">We couldn&apos;t load the follow-ups. Refresh the page to try again.</div>;
   }
 
   return (
@@ -150,7 +150,21 @@ export default function BusinessDetailsFollowups({
             Review scheduled touchpoints, notes, and assigned owners.
           </p>
         </div>
-        <div className="overflow-x-auto">
+        <ul className="divide-y divide-line md:hidden">
+          {followUps.length === 0 && <li className="px-5 py-8 text-center text-sm text-muted">No follow-ups yet. Use “Add follow-up” to schedule the next call or visit.</li>}
+          {followUps.map((item) => (
+            <li key={item.id}>
+              <Link href={`/follow-ups/${item.id}`} className="flex min-h-16 items-center gap-3 px-5 py-3 transition-colors active:bg-surface-2">
+                <span className="min-w-0 flex-1">
+                  <span className="block text-base font-semibold text-ink">{formatScheduledAt(item.scheduledAt)}</span>
+                  <span className="mt-0.5 block text-sm text-muted">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
+                </span>
+                <StatusBadge status={item.status} className="shrink-0" />
+              </Link>
+            </li>
+          ))}
+        </ul>
+        <div className="hidden overflow-x-auto md:block">
           <Table className="w-full min-w-190 text-left">
             <TableHeader>
               <TableRow className="hover:bg-transparent">
