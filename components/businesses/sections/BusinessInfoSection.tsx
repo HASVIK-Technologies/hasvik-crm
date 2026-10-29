@@ -152,7 +152,7 @@ export default function BusinessInfoSection({
         render={({ field, fieldState }) => (
           <FormLeadStatusSelect
             id={`${idPrefix}status`}
-            label="Status"
+            label="Stage"
             value={field.value}
             onChange={field.onChange}
             required

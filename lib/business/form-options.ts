@@ -67,7 +67,7 @@ export const STATE_OPTIONS = [
 // /businesses - sending anything else is rejected with a 400. Labels are
 // just the friendly text shown in the dropdown.
 export const STATUS_OPTIONS = [
-  { value: "NEW", label: "New Lead" },
+  { value: "NEW", label: "New lead" },
   { value: "CONTACTED", label: "Contacted" },
   { value: "PROPOSAL_AND_NEGOTIATION", label: "Proposal & Negotiation" },
   { value: "INTERESTED", label: "Interested" },

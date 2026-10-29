@@ -19,7 +19,7 @@ interface CategoryAutocompleteProps {
   invalid?: boolean;
 }
 
-export default function CategoryAutocomplete({ value = "", label = "", onChange, placeholder = "All Categories", className, id, formLabel, required, invalid }: CategoryAutocompleteProps) {
+export default function CategoryAutocomplete({ value = "", label = "", onChange, placeholder = "All categories", className, id, formLabel, required, invalid }: CategoryAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

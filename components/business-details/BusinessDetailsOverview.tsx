@@ -33,11 +33,11 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
 
   return (
     <div className="border border-line bg-surface p-5 shadow-card sm:p-6 rounded-2xl">
-      <h3 className="mb-6 text-lg font-bold tracking-tight text-ink">Business Information</h3>
+      <h3 className="mb-6 text-lg font-bold tracking-tight text-ink">Business information</h3>
       <div className="space-y-5">
         <div className="flex items-start gap-3 text-sm">
           <Building2 className="w-5 h-5 text-muted shrink-0" />
-          <div className="w-32 shrink-0 text-muted">Business Name</div>
+          <div className="w-32 shrink-0 text-muted">Business name</div>
           <div className="min-w-0 flex-1 truncate text-ink-soft font-medium" title={business.name || businessData.businessInfo.name}>{business.name || businessData.businessInfo.name}</div>
         </div>
         <div className="flex items-start gap-3 text-sm">
@@ -62,7 +62,7 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
         </div>
         <div className="flex items-center gap-3 text-sm">
           <Target className="w-5 h-5 text-muted shrink-0" />
-          <div className="w-32 shrink-0 text-muted">Lead Status</div>
+          <div className="w-32 shrink-0 text-muted">Stage</div>
           {leadStatusDisplay && leadStatusDisplay !== "-" ? (
             <StatusBadge
               status={rawLeadStatus || leadStatusDisplay}

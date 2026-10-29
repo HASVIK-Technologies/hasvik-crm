@@ -210,7 +210,7 @@ function BusinessesContent() {
 
   const day = (iso?: string) => (iso ? new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", day: "numeric", month: "short", year: "numeric" }).format(new Date(iso)) : "any date");
   const chips: FilterChip[] = [];
-  if (status && status !== "All Status") chips.push({ key: "status", label: "Stage: " + (STAGE_LABELS[status] ?? status), onRemove: () => setStatus("") });
+  if (status && status !== "All statuses") chips.push({ key: "status", label: "Stage: " + (STAGE_LABELS[status] ?? status), onRemove: () => setStatus("") });
   if (isActive === true) chips.push({ key: "active", label: "Active only", onRemove: () => setIsActive(undefined) });
   if (viewFilter.owner) chips.push({ key: "owner", label: "Owner: " + (viewFilter.owner === "none" ? "Unassigned" : owners.find((o) => o.id === viewFilter.owner)?.name ?? "selected user"), onRemove: () => patchViewFilter({ owner: undefined }) });
   if (viewFilter.createdFrom || viewFilter.createdTo) chips.push({ key: "created", label: "Added " + day(viewFilter.createdFrom) + " to " + day(viewFilter.createdTo), onRemove: () => patchViewFilter({ createdFrom: undefined, createdTo: undefined }) });
@@ -223,8 +223,8 @@ function BusinessesContent() {
   // Active filters detection (only dropdown filters, since search bar has its own 'X' clear button)
   const hasActiveFilters = Boolean(
     categoryId ||
-      (city && city !== "All Cities") ||
-      (status && status !== "All Status") ||
+      (city && city !== "All cities") ||
+      (status && status !== "All statuses") ||
       isActive !== undefined ||
       clientMode,
   );
@@ -265,13 +265,13 @@ function BusinessesContent() {
       showFilters={showFilters}
       onToggleFilters={toggleFilters}
       onResetFilters={resetEverything}
-      activeFilterCount={chips.length + (categoryId ? 1 : 0) + (city && city !== "All Cities" ? 1 : 0)}
+      activeFilterCount={chips.length + (categoryId ? 1 : 0) + (city && city !== "All cities" ? 1 : 0)}
       resultCount={totalCount}
       viewSwitcher={<BusinessViewToggle value={view} onChange={setView} />}
       actions={
         <Actions
           primary={{
-            label: "Add Business",
+            label: "Add business",
             href: "/businesses/form",
             icon: <Plus className="size-4" />,
           }}

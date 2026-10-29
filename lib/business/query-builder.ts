@@ -46,11 +46,11 @@ export function buildBusinessListParams(
     params.categoryId = filters.categoryId.trim();
   }
 
-  if (filters.city && filters.city.trim() && filters.city !== "All Cities") {
+  if (filters.city && filters.city.trim() && filters.city !== "All cities") {
     params.city = filters.city.trim();
   }
 
-  if (filters.status && filters.status.trim() && filters.status !== "All Status") {
+  if (filters.status && filters.status.trim() && filters.status !== "All statuses") {
     params.status = filters.status.trim();
   }
 
@@ -78,11 +78,11 @@ export function buildBusinessKpiParams(
     params.categoryId = filters.categoryId.trim();
   }
 
-  if (filters.city && filters.city.trim() && filters.city !== "All Cities") {
+  if (filters.city && filters.city.trim() && filters.city !== "All cities") {
     params.city = filters.city.trim();
   }
 
-  if (filters.status && filters.status.trim() && filters.status !== "All Status") {
+  if (filters.status && filters.status.trim() && filters.status !== "All statuses") {
     params.status = filters.status.trim();
   }
 
@@ -124,11 +124,11 @@ export function filtersToSearchParams(
     }
   }
 
-  if (filters.city && filters.city.trim() && filters.city !== "All Cities") {
+  if (filters.city && filters.city.trim() && filters.city !== "All cities") {
     sp.set("city", filters.city.trim());
   }
 
-  if (filters.status && filters.status.trim() && filters.status !== "All Status") {
+  if (filters.status && filters.status.trim() && filters.status !== "All statuses") {
     sp.set("status", filters.status.trim());
   }
 

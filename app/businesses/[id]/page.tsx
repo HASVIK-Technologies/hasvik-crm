@@ -168,28 +168,28 @@ export default function BusinessDetails() {
         <Breadcrumb
           items={[
             { label: "Businesses", href: "/businesses" },
-            { label: "Business Details" },
+            { label: "Business details" },
           ]}
         />
       }
       actions={
         <Actions
           primary={isInactive ? {
-            label: "Activate Business",
+            label: "Activate business",
             onSelect: () => openDeactivateModal(String(business?.id)),
           } : {
-            label: "Add Follow-up",
+            label: "Add follow-up",
             icon: <Plus className="size-4" />,
             onSelect: () => openFollowUpModal(String(business?.id)),
           }}
           secondary={isInactive ? [] : [
             {
-              label: "Edit Business",
+              label: "Edit business",
               icon: <Edit2 className="size-4" />,
               href: `/businesses/form/${business.id}`,
             },
             {
-              label: business.assignedToId ? "Reassign Owner" : "Assign Owner",
+              label: business.assignedToId ? "Reassign owner" : "Assign owner",
               icon: <UserRoundCog className="size-4" />,
               onSelect: () => setIsAssignmentOpen(true),
             },

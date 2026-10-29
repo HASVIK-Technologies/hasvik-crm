@@ -10,7 +10,7 @@ export default function BusinessFormPage() {
         <Breadcrumb
           items={[
             { label: "Businesses", href: "/businesses" },
-            { label: "Add Business" },
+            { label: "Add business" },
           ]}
         />
       }

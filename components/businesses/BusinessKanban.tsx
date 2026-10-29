@@ -95,7 +95,7 @@ export default function BusinessKanban({
   const [canScrollRight, setCanScrollRight] = useState(false);
   const [mobileStage, setMobileStage] = useState(STATUS_OPTIONS[0].value);
   const [assignmentBusiness, setAssignmentBusiness] = useState<BusinessItem | null>(null);
-  const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
+  const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest first";
   const grouped = useMemo(
     () =>
       Object.fromEntries(
@@ -164,13 +164,13 @@ export default function BusinessKanban({
           <DropdownMenuTrigger asChild>
             <OutlinedButton size="sm" className="shrink-0">
               <ArrowDownUp className="size-4" />
-              <span className="hidden sm:inline">{isLatest ? "Latest First" : "Oldest First"}</span>
+              <span className="hidden sm:inline">{isLatest ? "Latest first" : "Oldest first"}</span>
               <ChevronDown className="size-3.5" />
             </OutlinedButton>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="w-40 bg-surface">
-            <DropdownMenuItem onSelect={() => onSortOrderChange("-createdAt")} className={cn("text-xs", isLatest && "font-semibold text-brand-strong")}>Latest First</DropdownMenuItem>
-            <DropdownMenuItem onSelect={() => onSortOrderChange("+createdAt")} className={cn("text-xs", !isLatest && "font-semibold text-brand-strong")}>Oldest First</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onSortOrderChange("-createdAt")} className={cn("text-xs", isLatest && "font-semibold text-brand-strong")}>Latest first</DropdownMenuItem>
+            <DropdownMenuItem onSelect={() => onSortOrderChange("+createdAt")} className={cn("text-xs", !isLatest && "font-semibold text-brand-strong")}>Oldest first</DropdownMenuItem>
           </DropdownMenuContent>
         </DropdownMenu>
       </div>

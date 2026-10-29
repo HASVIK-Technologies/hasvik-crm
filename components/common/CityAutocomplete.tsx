@@ -18,7 +18,7 @@ interface CityAutocompleteProps {
   invalid?: boolean;
 }
 
-export default function CityAutocomplete({ value = "", onChange, placeholder = "All Cities", className, id, formLabel, required, invalid }: CityAutocompleteProps) {
+export default function CityAutocomplete({ value = "", onChange, placeholder = "All cities", className, id, formLabel, required, invalid }: CityAutocompleteProps) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
   const [debouncedSearch, setDebouncedSearch] = useState("");

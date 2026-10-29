@@ -227,7 +227,7 @@ export default function BusinessDetailsFollowups({
                               className="cursor-pointer gap-2 p-2 text-xs font-medium text-ink-soft"
                             >
                               <Link href={`/follow-ups/${item.id}`} className="flex items-center gap-2">
-                                <Eye className="size-3.5" /> <span>View Details</span>
+                                <Eye className="size-3.5" /> <span>View details</span>
                               </Link>
                             </DropdownMenuItem>
                             {canEditFollowUp(item) && (

@@ -68,21 +68,21 @@ const MAX_FORM_STEP_INDEX = 2;
 // Friendly labels used to build the "Please fill in..." summary banner from
 // whatever react-hook-form's `errors` object contains.
 const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
-  businessName: "Business Name",
+  businessName: "Business name",
   category: "Category",
   city: "City",
   state: "State",
   pincode: "Pincode",
   address: "Address",
-  status: "Status",
+  status: "Stage",
   email: "Email",
   website: "Website",
   locationUrl: "Location URL",
-  followUpType: "Follow-up Type",
+  followUpType: "Follow-up type",
   assignTo: "Owner",
-  nextFollowupDate: "Follow-up Date & Time",
-  phoneNumbers: "Phone Number",
-  whatsappNumbers: "WhatsApp Number",
+  nextFollowupDate: "Follow-up date and time",
+  phoneNumbers: "Phone number",
+  whatsappNumbers: "WhatsApp number",
 };
 
 const describeErrors = (errors: FieldErrors<BusinessFormValues>): string[] =>
@@ -255,7 +255,7 @@ export default function BusinessForm({
   businessId,
 }: {
   /** Pass the fetched-and-transformed record here for edit mode; omit for
-   * a fresh "Add Business" form. Whatever is passed in is what "Reset"
+   * a fresh "Add business" form. Whatever is passed in is what "Reset"
    * restores the form to. */
   initialValues?: BusinessFormValues;
   businessId?: string;
@@ -664,7 +664,7 @@ export default function BusinessForm({
   const steps = [
     {
       key: "business",
-      title: "Business Information",
+      title: "Business information",
       render: (idPrefix: string) => <BusinessInfoSection idPrefix={idPrefix} />,
     },
     {
@@ -869,11 +869,11 @@ export default function BusinessForm({
         {isDesktop ? (
           <Card className="overflow-hidden rounded-xl border-line bg-surface shadow-sm">
             <CardContent className="px-4 py-5 sm:px-7 sm:py-6 lg:px-8">
-              <FormSection title="Business Information" first>
+              <FormSection title="Business information" first>
                 <BusinessInfoSection idPrefix="desktop-" />
               </FormSection>
 
-              <FormSection icon={Phone} title="Contact Information">
+              <FormSection icon={Phone} title="Contact information">
                 <ContactInfoSection
                   idPrefix="desktop-"
                   phoneArray={phoneArray}
@@ -884,7 +884,7 @@ export default function BusinessForm({
               {SHOW_ADDITIONAL_INFORMATION && (
                 <FormSection
                   icon={FileText}
-                  title="Additional Information"
+                  title="Additional information"
                   optional
                 >
                   <AdditionalInfoSection idPrefix="desktop-" />
@@ -1081,7 +1081,7 @@ export default function BusinessForm({
                   className="w-full sm:w-auto"
                 >
                   <Save className="size-4" />
-                  {isSubmitting ? "Saving..." : "Save Business"}
+                  {isSubmitting ? "Saving..." : "Save business"}
                 </SaveButton>
               </div>
             </div>

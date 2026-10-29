@@ -222,8 +222,8 @@ export default function BusinessTable({
   const visibleColumnCount = visibleTableColumns.length + 2;
   const rowPadding = "py-4.5";
 
-  const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
-  const sortLabel = isLatest ? "Latest First" : "Oldest First";
+  const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest first";
+  const sortLabel = isLatest ? "Latest first" : "Oldest first";
 
   const handleRowClick = (
     event: React.MouseEvent<HTMLElement>,
@@ -472,7 +472,7 @@ export default function BusinessTable({
                                 }}
                                 className="cursor-pointer gap-2 text-xs"
                               >
-                                <Eye className="size-3.5" /> <span>View Details</span>
+                                <Eye className="size-3.5" /> <span>View details</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onClick={(e) => {
@@ -484,14 +484,14 @@ export default function BusinessTable({
                                 }}
                                 className="cursor-pointer gap-2 text-xs"
                               >
-                                <Pencil className="size-3.5" /> <span>Edit Business</span>
+                                <Pencil className="size-3.5" /> <span>Edit business</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onSelect={() => setAssignmentBusiness(item)}
                                 className="cursor-pointer gap-2 text-xs"
                               >
                                 <UserRoundCog className="size-3.5" />
-                                <span>{item.assignedToId ? "Reassign Owner" : "Assign Owner"}</span>
+                                <span>{item.assignedToId ? "Reassign owner" : "Assign owner"}</span>
                               </DropdownMenuItem>
                             </>
                           )}
@@ -520,14 +520,14 @@ export default function BusinessTable({
           <Table className="w-full min-w-max text-left">
             <TableHeader className="text-[13px] font-semibold">
               <TableRow className="border-b border-surface-2 hover:bg-transparent">
-                <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Business Name</TableHead>
+                <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Business name</TableHead>
                 {columnVisible("category") && <TableHead className="px-4 py-4 font-semibold">Category</TableHead>}
                 {columnVisible("city") && <TableHead className="px-4 py-4 font-semibold">City</TableHead>}
                 {columnVisible("responsible") && <TableHead className="min-w-44 px-4 py-4 font-semibold">Owner</TableHead>}
-                {columnVisible("leadStatus") && <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>}
-                {columnVisible("activity") && <TableHead className="px-4 py-4 font-semibold">Status</TableHead>}
-                {columnVisible("lastFollowUp") && <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>}
-                {columnVisible("nextFollowUp") && <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>}
+                {columnVisible("leadStatus") && <TableHead className="px-4 py-4 font-semibold">Stage</TableHead>}
+                {columnVisible("activity") && <TableHead className="px-4 py-4 font-semibold">Active</TableHead>}
+                {columnVisible("lastFollowUp") && <TableHead className="px-4 py-4 font-semibold">Last follow-up</TableHead>}
+                {columnVisible("nextFollowUp") && <TableHead className="px-4 py-4 font-semibold">Next follow-up</TableHead>}
                 <TableHead className="sticky right-0 z-10 min-w-32 bg-surface-2 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -720,7 +720,7 @@ export default function BusinessTable({
                                   }}
                                   className="cursor-pointer gap-2 text-xs"
                                 >
-                                  <Eye className="size-3.5" /> <span>View Details</span>
+                                  <Eye className="size-3.5" /> <span>View details</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onClick={(e) => {
@@ -732,14 +732,14 @@ export default function BusinessTable({
                                   }}
                                   className="cursor-pointer gap-2 text-xs"
                                 >
-                                  <Pencil className="size-3.5" /> <span>Edit Business</span>
+                                  <Pencil className="size-3.5" /> <span>Edit business</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onSelect={() => setAssignmentBusiness(item)}
                                   className="cursor-pointer gap-2 text-xs"
                                 >
                                   <UserRoundCog className="size-3.5" />
-                                  <span>{item.assignedToId ? "Reassign Owner" : "Assign Owner"}</span>
+                                  <span>{item.assignedToId ? "Reassign owner" : "Assign owner"}</span>
                                 </DropdownMenuItem>
                               </>
                             )}

@@ -170,7 +170,7 @@ export default function FollowUpFormDialog({
           <header className="sticky top-0 z-10 mb-5 flex items-start justify-between border-b border-line bg-surface px-5 py-4 sm:px-6 rounded-2xl">
             <div>
               <DialogPrimitive.Title className="text-lg font-bold text-ink">
-                {isEdit ? "Edit follow-up" : "Add Follow-up"}
+                {isEdit ? "Edit follow-up" : "Add follow-up"}
               </DialogPrimitive.Title>
               <DialogPrimitive.Description className="mt-1 text-xs text-muted">
                 {isEdit
@@ -313,7 +313,7 @@ export default function FollowUpFormDialog({
               <SaveButton type="submit" disabled={isPending || readOnly}>
                 {isPending ? (
                   <><Loader2 className="mr-2 size-4 animate-spin" />{isEdit ? "Saving..." : "Adding..."}</>
-                ) : isEdit ? "Save changes" : "Add Follow-up"}
+                ) : isEdit ? "Save changes" : "Add follow-up"}
               </SaveButton>
             </footer>
           </form>}

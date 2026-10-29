@@ -240,7 +240,7 @@ export default function FollowUpTable({
                           <PlainButton size="icon" aria-label="More actions" className="size-8 border border-transparent text-muted hover:bg-surface-2 hover:text-ink"><MoreVertical className="size-4" /></PlainButton>
                         </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                         <DropdownMenuContent align="end" className="w-44 bg-surface" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenuItem asChild className="cursor-pointer gap-2 text-xs"><Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)}><Eye className="size-3.5" /><span>View Details</span></Link></DropdownMenuItem>
+                          <DropdownMenuItem asChild className="cursor-pointer gap-2 text-xs"><Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)}><Eye className="size-3.5" /><span>View details</span></Link></DropdownMenuItem>
                           {canEditFollowUp(item) && (
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
@@ -442,7 +442,7 @@ export default function FollowUpTable({
                                 className="flex w-full items-center gap-2 px-2.5 py-1.5 font-medium text-brand-strong hover:bg-surface-2"
                               >
                                 <Eye className="size-3.5 text-muted" />
-                                <span>View Details</span>
+                                <span>View details</span>
                               </Link>
                             </DropdownMenuItem>
 

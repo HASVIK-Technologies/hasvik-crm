@@ -54,12 +54,12 @@ export default function ResponsiveFilters({ fields, onReset, hasActiveFilters }:
       </PopoverTrigger>
       <PopoverContent align="start" collisionPadding={12} className="max-h-[var(--radix-popover-content-available-height)] w-[min(22rem,calc(100vw-1.5rem))] overflow-y-auto border border-line bg-surface p-4 shadow-xl rounded-2xl">
         <div className="mb-4 flex items-center justify-between border-b border-surface-2 pb-3">
-          <h3 className="text-xs font-bold text-ink">More Filters</h3>
-          {activeMore > 0 && <button type="button" onClick={() => more.forEach((field) => field.reset?.())} className="text-xs text-brand-strong hover:underline">Reset Extra</button>}
+          <h3 className="text-xs font-bold text-ink">More filters</h3>
+          {activeMore > 0 && <button type="button" onClick={() => more.forEach((field) => field.reset?.())} className="text-xs text-brand-strong hover:underline">Reset extra</button>}
         </div>
         <div className="flex flex-col gap-4">{more.map((field) => renderField(field, true))}</div>
       </PopoverContent>
     </Popover>}
-    {onReset && (hasActiveFilters ?? fields.some((field) => field.active)) && <button type="button" data-inline-filter-reset onClick={onReset} className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-sm font-semibold text-ink-soft hover:bg-bad-soft hover:text-bad"><RotateCcw className="size-3.5" />Reset Filters</button>}
+    {onReset && (hasActiveFilters ?? fields.some((field) => field.active)) && <button type="button" data-inline-filter-reset onClick={onReset} className="inline-flex h-10 shrink-0 items-center gap-1.5 rounded-xl border border-line bg-surface px-3 text-sm font-semibold text-ink-soft hover:bg-bad-soft hover:text-bad"><RotateCcw className="size-3.5" />Reset filters</button>}
   </div>;
 }

@@ -91,7 +91,7 @@ export default function BusinessDetailsQuickActions({
                     : "text-ink group-hover:text-bad"
                 }`}
               >
-                {isInactive ? "Activate Business" : "Deactivate Business"}
+                {isInactive ? "Activate business" : "Deactivate business"}
               </p>
               <p className="text-[11px] text-muted">
                 {isInactive

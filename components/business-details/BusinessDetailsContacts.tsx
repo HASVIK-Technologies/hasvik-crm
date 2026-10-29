@@ -35,12 +35,12 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
   return (
     <div className="w-full">
       <div className="border border-line bg-surface p-6 shadow-sm rounded-2xl">
-        <h3 className="mb-6 text-lg font-bold text-ink">Contact Information</h3>
+        <h3 className="mb-6 text-lg font-bold text-ink">Contact information</h3>
 
         <div className="grid grid-cols-1 gap-5">
           {/* Phone Numbers Column */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-ink-soft">Phone Numbers</h4>
+            <h4 className="text-sm font-semibold text-ink-soft">Phone numbers</h4>
             {phones.length === 0 ? (
               <p className="text-sm text-muted">No phone numbers provided.</p>
             ) : (
@@ -76,7 +76,7 @@ export default function BusinessDetailsContacts({ business }: ContactsProps) {
 
           {/* WhatsApp Numbers Column */}
           <div className="space-y-3">
-            <h4 className="text-sm font-semibold text-ink-soft">WhatsApp Numbers</h4>
+            <h4 className="text-sm font-semibold text-ink-soft">WhatsApp numbers</h4>
             {whatsapps.length === 0 ? (
               <p className="text-sm text-muted">No WhatsApp numbers provided.</p>
             ) : (

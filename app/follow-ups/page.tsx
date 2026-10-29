@@ -211,7 +211,7 @@ function FollowupsContent() {
         actions={
           <Actions
             primary={{
-              label: "Add Follow-up",
+              label: "Add follow-up",
               onSelect: () => {
                 setInitialScheduledAt(undefined);
                 setDialogOpen(true);

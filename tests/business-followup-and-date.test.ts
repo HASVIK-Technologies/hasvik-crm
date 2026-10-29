@@ -412,7 +412,7 @@ describe("Business Follow-up & Date Validation", () => {
 
   describe("lead status display labels", () => {
     test("uses the canonical user-friendly label for every backend lead status", () => {
-      assert.strictEqual(getLeadStatusLabel("NEW"), "New Lead");
+      assert.strictEqual(getLeadStatusLabel("NEW"), "New lead");
       assert.strictEqual(getLeadStatusLabel("CONTACTED"), "Contacted");
       assert.strictEqual(
         getLeadStatusLabel("PROPOSAL_AND_NEGOTIATION"),

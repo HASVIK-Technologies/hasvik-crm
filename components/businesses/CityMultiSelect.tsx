@@ -20,7 +20,7 @@ interface CityMultiSelectProps {
 export default function CityMultiSelect({
   selectedCity = "",
   onCitySelect,
-  placeholder = "All Cities",
+  placeholder = "All cities",
   className,
 }: CityMultiSelectProps) {
   const [open, setOpen] = useState(false);
@@ -30,7 +30,7 @@ export default function CityMultiSelect({
     debouncedSearch,
     open,
   );
-  const value = selectedCity === "All Cities" ? "" : selectedCity;
+  const value = selectedCity === "All cities" ? "" : selectedCity;
 
   return (
     <AsyncAutocompleteSelect

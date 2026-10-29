@@ -22,7 +22,7 @@ export default function CategoryMultiSelect({
   selectedCategoryId = "",
   selectedCategoryName = "",
   onCategorySelect,
-  placeholder = "All Categories",
+  placeholder = "All categories",
   className,
 }: CategoryMultiSelectProps) {
   const [open, setOpen] = useState(false);

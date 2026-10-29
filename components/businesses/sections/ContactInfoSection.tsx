@@ -100,8 +100,8 @@ export default function ContactInfoSection({
     <div className="grid grid-cols-1 gap-4 lg:grid-cols-3">
       <div className="rounded-xl border border-line bg-surface-2/40 p-4">
         <NumberListField
-          label="Phone Numbers"
-          addLabel="Add Phone Number"
+          label="Phone numbers"
+          addLabel="Add phone number"
           addIcon={Plus}
           required
           rowKeys={phoneArray.fields.map((f) => f.id)}
@@ -168,8 +168,8 @@ export default function ContactInfoSection({
 
       <div className="rounded-xl border border-line bg-surface-2/40 p-4">
         <NumberListField
-          label="WhatsApp Numbers"
-          addLabel="Add WhatsApp Number"
+          label="WhatsApp numbers"
+          addLabel="Add WhatsApp number"
           addIcon={WhatsAppIcon}
           rowKeys={whatsappArray.fields.map((f) => f.id)}
           onAdd={() => whatsappArray.append({ value: "" })}
