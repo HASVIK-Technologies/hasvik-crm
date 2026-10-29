@@ -1,4 +1,4 @@
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient, type UseMutationResult } from "@tanstack/react-query";
 import axios from "axios";
 import { toast } from "sonner";
 import {
@@ -14,6 +14,7 @@ import {
 } from "@/lib/business/api";
 import { toBusinessItem, toCreateBusinessPayload } from "@/lib/business/mappers";
 import { updateBusiness } from "@/lib/business/store";
+import { STATUS_OPTIONS } from "@/lib/business/form-options";
 import {
   businessQueryKeys,
 } from "@/lib/query/query-keys";
@@ -66,11 +67,13 @@ export function useBusinessesQuery(
   });
 }
 
+type LeadStatusVariables = { id: string | number; status: string; previous?: string; name?: string; undo?: boolean };
+
 export function useUpdateBusinessLeadStatus() {
   const queryClient = useQueryClient();
 
-  return useMutation({
-    mutationFn: ({ id, status }: { id: string | number; status: string }) =>
+  const mutation: UseMutationResult<ApiBusiness, unknown, LeadStatusVariables, { previousStages: { key: readonly unknown[]; stage?: string }[] }> = useMutation({
+    mutationFn: ({ id, status }: LeadStatusVariables) =>
       updateBusinessData(String(id), { status }),
     onMutate: async (variables) => {
       await queryClient.cancelQueries({ queryKey: businessQueryKeys.lists() });
@@ -94,7 +97,14 @@ export function useUpdateBusinessLeadStatus() {
     },
     onSuccess: (_, variables) => {
       useBusinessListStore.getState().highlightBusiness(variables.id);
-      toast.success("Lead stage updated.");
+      const label = STATUS_OPTIONS.find((option) => option.value === variables.status)?.label ?? "the new stage";
+      if (variables.previous && !variables.undo) {
+        toast.success(`${variables.name ?? "Lead"} moved to ${label}.`, {
+          action: { label: "Undo", onClick: () => mutation.mutate({ id: variables.id, status: variables.previous!, undo: true, name: variables.name }) },
+        });
+      } else {
+        toast.success(variables.undo ? "Move undone." : "Lead stage updated.");
+      }
     },
     onError: (error, variables, context) => {
       // Restore only this field, preserving any other records or edits made meanwhile.
@@ -114,6 +124,7 @@ export function useUpdateBusinessLeadStatus() {
     },
     onSettled: () => queryClient.invalidateQueries({ queryKey: businessQueryKeys.all }),
   });
+  return mutation;
 }
 
 export function useAssignBusiness() {

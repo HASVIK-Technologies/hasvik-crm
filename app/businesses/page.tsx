@@ -312,13 +312,9 @@ function BusinessesContent() {
               businesses={businesses}
               totalCount={totalCount}
               isLoading={listLoading}
-              currentPage={1}
-              itemsPerPage={Math.max(limit, totalCount, 1)}
               sortOrder={sortBy}
               onSortOrderChange={setSortBy}
               hasActiveFilters={Boolean(hasActiveFilters || search.trim())}
-              onPageChange={setPage}
-              onItemsPerPageChange={setLimit}
             />
           ) : (
             <BusinessTable
