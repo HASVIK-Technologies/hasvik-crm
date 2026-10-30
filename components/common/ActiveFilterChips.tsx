@@ -15,7 +15,7 @@ export default function ActiveFilterChips({ chips, onClearAll }: { chips: Filter
     <div role="group" aria-label="Active filters" className="fade-up flex flex-wrap items-center gap-2">
       <span className="text-xs font-semibold tracking-wide text-muted uppercase">Filtered by</span>
       {chips.map((chip) => (
-        <span key={chip.key} className="inline-flex min-h-9 items-center gap-1 rounded-full bg-brand-soft py-1 pr-1 pl-3 text-sm font-semibold text-brand-strong">
+        <span key={chip.key} className="inline-flex min-h-9 items-center gap-1 rounded-tag bg-brand-soft py-1 pr-1 pl-3 text-sm font-semibold text-brand-strong">
           {chip.label}
           <button
             type="button"

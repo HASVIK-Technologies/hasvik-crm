@@ -227,14 +227,14 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
         href={item.href}
         aria-current={active ? "page" : undefined}
         className={cn(
-          "group relative flex min-h-11 items-center rounded-xl text-sm font-semibold transition-colors",
+          "group relative flex min-h-11 items-center text-sm font-semibold transition-colors",
           compact ? "justify-center px-0" : "gap-3 px-3.5",
-          active ? "bg-brand-soft text-ink" : "text-ink-soft hover:bg-surface-2 hover:text-ink",
+          active ? "bg-(--sidebar-active) text-white" : "text-(--sidebar-text) hover:bg-(--sidebar-hover) hover:text-white",
         )}
       >
-        {active && !compact && <span aria-hidden className="absolute top-2.5 bottom-2.5 left-0 w-1 rounded-r-full bg-brand" />}
-        <Icon className={cn("size-5 shrink-0", active && "text-brand-strong")} strokeWidth={active ? 2.4 : 2} aria-hidden />
+        <Icon className={cn("size-5 shrink-0", active ? "text-(--sidebar-active-icon)" : "text-(--sidebar-icon) group-hover:text-white")} strokeWidth={active ? 2.4 : 2} aria-hidden />
         {compact ? <span className="sr-only">{item.label}</span> : <span className="truncate">{item.label}</span>}
+        {active && !compact && <span aria-hidden className="ml-auto size-1.5 shrink-0 rounded-full bg-(--sidebar-active-icon)" />}
       </Link>
     );
     return compact ? (
@@ -250,7 +250,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
       <a href="#main" className="sr-only z-100 rounded-lg bg-btn px-4 py-2 text-white focus:not-sr-only focus:fixed focus:top-3 focus:left-3">Skip to content</a>
 
       {/* Desktop sidebar */}
-      <aside id="app-sidebar" className={cn("fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-line bg-surface transition-[width] duration-200 lg:flex", sidebarCollapsed ? "w-19" : "w-64")}>
+      <aside id="app-sidebar" className={cn("fixed inset-y-0 left-0 z-30 hidden flex-col border-r border-(--sidebar-border) bg-(--sidebar-bg) text-white transition-[width] duration-200 lg:flex", sidebarCollapsed ? "w-19" : "w-64")}>
         {/* The sidebar toggle lives in the sidebar itself: at the end of the logo row when open, under the logo when
             collapsed. Always visible and never covered; Ctrl/Cmd+B does the same. */}
         <div className={cn("flex shrink-0", sidebarCollapsed ? "flex-col items-center gap-2 py-3" : "h-16 items-center justify-between pr-3 pl-5")}>
@@ -258,7 +258,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             {sidebarCollapsed ? (
               <Image src="/hasvik-icon.png" alt="HASVIK" width={40} height={40} priority className="size-9" />
             ) : (
-              <Image src="/hasvik-logo.png" alt="HASVIK" width={512} height={171} priority className="h-10 w-auto dark:rounded-lg dark:bg-white dark:px-2" />
+              <Image src="/logo.png" alt="HASVIK" width={364} height={124} priority className="h-11 w-auto drop-shadow-[0_3px_5px_rgba(0,0,0,0.2)]" />
             )}
           </Link>
           <Tooltip>
@@ -270,7 +270,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                 aria-expanded={!sidebarCollapsed}
                 aria-controls="app-sidebar"
                 aria-keyshortcuts="Control+B"
-                className="grid size-9 place-items-center rounded-lg text-muted transition-colors hover:bg-surface-2 hover:text-ink"
+                className="grid size-9 place-items-center text-(--sidebar-icon) transition-colors hover:bg-(--sidebar-hover) hover:text-white"
               >
                 {sidebarCollapsed ? <PanelLeftOpen className="size-5" aria-hidden /> : <PanelLeftClose className="size-5" aria-hidden />}
               </button>
@@ -278,19 +278,19 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             <TooltipContent side="right">{sidebarCollapsed ? "Expand sidebar" : "Collapse sidebar"} (Ctrl+B)</TooltipContent>
           </Tooltip>
         </div>
-        <div aria-hidden className="brand-bar h-0.5 shrink-0 opacity-70" />
+        <div aria-hidden className="h-px shrink-0 bg-white/10" />
         <nav aria-label="Main navigation" className="flex min-h-0 flex-1 flex-col overflow-y-auto px-3 py-3">
           {(["sell", "insights", "admin"] as const).map((group) => {
             const groupItems = items.filter((item) => item.group === group);
             if (!groupItems.length) return null;
             return (
               <div key={group} role="group" aria-label={NAV_GROUP_LABELS[group]} className="mb-1">
-                {sidebarCollapsed ? <div aria-hidden className="mx-3 my-2 h-px bg-line first:hidden" /> : <p className="px-3.5 pt-3 pb-1.5 text-xs font-semibold tracking-wide text-muted">{NAV_GROUP_LABELS[group]}</p>}
+                {sidebarCollapsed ? <div aria-hidden className="mx-3 my-2 h-px bg-white/10 first:hidden" /> : <p className="px-3.5 pt-3 pb-1.5 text-xs font-bold tracking-[0.14em] text-(--sidebar-label) uppercase">{NAV_GROUP_LABELS[group]}</p>}
                 <div className="space-y-1">{groupItems.map((item) => navLink(item, sidebarCollapsed))}</div>
               </div>
             );
           })}
-          <div className="mt-auto space-y-1 border-t border-line pt-3">{items.filter((item) => item.group === "settings").map((item) => navLink(item, sidebarCollapsed))}</div>
+          <div className="mt-auto space-y-1 border-t border-white/10 pt-3">{items.filter((item) => item.group === "settings").map((item) => navLink(item, sidebarCollapsed))}</div>
         </nav>
       </aside>
 
@@ -302,7 +302,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
               <Link href="/dashboard" aria-label="HASVIK CRM home" className="lg:hidden">
                 <Image src="/hasvik-icon.png" alt="HASVIK" width={40} height={40} className="size-9" />
               </Link>
-              <p className="truncate text-base font-bold tracking-tight text-ink sm:text-lg" aria-live="polite">{pageTitle(pathname)}</p>
+              <p className="truncate text-base font-bold tracking-tight text-title sm:text-xl" aria-live="polite">{pageTitle(pathname)}</p>
             </div>
 
             <div className="flex items-center gap-2">
@@ -335,9 +335,9 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
                     <p className="truncate text-sm font-bold text-ink">{displayName}</p>
                     <p className="mt-0.5 truncate text-xs text-muted">{user?.email}</p>
                     <div className="mt-2 flex flex-wrap gap-1.5">
-                      <span className="inline-flex items-center gap-1 rounded-full bg-brand-soft px-2 py-1 text-xs font-semibold text-brand-strong"><ShieldCheck className="size-3" aria-hidden />{displayRole}</span>
+                      <span className="inline-flex items-center gap-1 rounded-tag bg-brand-soft px-2 py-1 text-xs font-semibold text-brand-strong"><ShieldCheck className="size-3" aria-hidden />{displayRole}</span>
                       {currentTenantName && !hasvikAdmin && (
-                        <span className="inline-flex max-w-full items-center gap-1 rounded-full bg-surface px-2 py-1 text-xs font-semibold text-ink-soft ring-1 ring-line"><Building2 className="size-3 shrink-0" aria-hidden /><span className="truncate">{currentTenantName}</span></span>
+                        <span className="inline-flex max-w-full items-center gap-1 rounded-tag bg-surface px-2 py-1 text-xs font-semibold text-ink-soft ring-1 ring-line"><Building2 className="size-3 shrink-0" aria-hidden /><span className="truncate">{currentTenantName}</span></span>
                       )}
                     </div>
                   </DropdownMenuLabel>
@@ -423,7 +423,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
             return (
               <li key={item.href} className="flex-1">
                 <Link href={item.href} aria-current={active ? "page" : undefined} className={cn("flex min-h-14 flex-col items-center justify-center gap-0.5 text-xs font-semibold transition-colors", active ? "text-brand-strong" : "text-muted")}>
-                  <span className={cn("grid h-7 w-12 place-items-center rounded-full transition-colors", active && "bg-brand-soft")}><Icon className="size-5" aria-hidden /></span>
+                  <span className={cn("grid h-7 w-12 place-items-center transition-colors", active && "bg-brand-soft")}><Icon className="size-5" aria-hidden /></span>
                   {item.label}
                 </Link>
               </li>
@@ -431,7 +431,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           })}
           <li className="flex-1">
             <button type="button" onClick={() => setMoreOpen(true)} aria-haspopup="dialog" className={cn("flex min-h-14 w-full flex-col items-center justify-center gap-0.5 text-xs font-semibold transition-colors", moreActive ? "text-brand-strong" : "text-muted")}>
-              <span className={cn("grid h-7 w-12 place-items-center rounded-full", moreActive && "bg-brand-soft")}><MoreHorizontal className="size-5" aria-hidden /></span>
+              <span className={cn("grid h-7 w-12 place-items-center", moreActive && "bg-brand-soft")}><MoreHorizontal className="size-5" aria-hidden /></span>
               More
             </button>
           </li>

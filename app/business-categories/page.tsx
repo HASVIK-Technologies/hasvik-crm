@@ -230,7 +230,7 @@ export default function BusinessCategoriesPage() {
                       <div className="min-w-0">
                         <p className="truncate text-sm font-bold text-ink">{category.name}</p>
                         <p className="mt-1 text-xs leading-5 text-muted">{category.description || "No description provided."}</p>
-                        <span className={`mt-2 inline-flex w-fit rounded-full px-2.5 py-1 text-xs font-bold ${active ? "bg-ok-soft text-ok" : "bg-surface-2 text-muted"}`}>{active ? "Active" : "Inactive"}</span>
+                        <span className={`mt-2 inline-flex w-fit rounded-tag px-2.5 py-1 text-xs font-bold ${active ? "bg-ok-soft text-ok" : "bg-surface-2 text-muted"}`}>{active ? "Active" : "Inactive"}</span>
                       </div>
                     </div>
                     <ManagementRowActions

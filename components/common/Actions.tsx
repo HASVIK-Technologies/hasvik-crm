@@ -97,7 +97,7 @@ function ActionButton({ action }: { action: ActionItem }) {
 
 /** Phone only: the primary action floats above the bottom tab bar, in easy thumb reach. */
 function FloatingAction({ action }: { action: ActionItem }) {
-  const className = "fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-20 inline-flex h-14 items-center gap-2 rounded-full bg-btn px-5 text-base font-semibold text-white shadow-float transition-transform active:scale-95 lg:hidden";
+  const className = "fixed right-4 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] z-20 inline-flex h-14 items-center gap-2 bg-btn px-5 text-base font-semibold text-white shadow-float transition-transform active:scale-95 lg:hidden";
   const content = (
     <>
       <span className="[&_svg]:size-5">{action.icon}</span>

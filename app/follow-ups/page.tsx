@@ -268,7 +268,7 @@ function FollowupsContent() {
                     className={`inline-flex min-h-11 shrink-0 items-center gap-1.5 border-b-2 px-4 text-sm font-semibold capitalize transition-colors ${filters.tab === tab ? "border-brand text-brand-strong" : "border-transparent text-muted hover:text-ink"}`}
                   >
                     {tab}
-                    {tab === "overdue" && kpiData.overdue > 0 && <span className="rounded-full bg-bad-soft px-1.5 text-xs text-bad tabular">{kpiData.overdue}</span>}
+                    {tab === "overdue" && kpiData.overdue > 0 && <span className="rounded-tag bg-bad-soft px-1.5 text-xs text-bad tabular">{kpiData.overdue}</span>}
                   </button>
                 ))}
               </div>

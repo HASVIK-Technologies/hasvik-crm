@@ -108,7 +108,7 @@ export default function ListPageLayout({
               >
                 <Filter className="size-4" />
                 <span>Filters</span>
-                {activeFilterCount > 0 && <span className="grid min-w-5 place-items-center rounded-full bg-btn px-1.5 text-xs font-semibold text-white tabular">{activeFilterCount}</span>}
+                {activeFilterCount > 0 && <span className="grid min-w-5 place-items-center rounded-tag bg-btn px-1.5 text-xs font-semibold text-white tabular">{activeFilterCount}</span>}
               </OutlinedButton>
             )}
             {actions}

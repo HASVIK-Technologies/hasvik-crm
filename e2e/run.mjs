@@ -233,9 +233,24 @@ if (size === "desktop") {
     await settle(page, 1500);
     await page.keyboard.press("Control+k");
     await page.getByRole("dialog", { name: /Search pages/ }).waitFor();
-    await page.keyboard.type("forec");
+    await page.keyboard.type("subscr");
     await page.keyboard.press("Enter");
-    await page.waitForURL((u) => u.pathname === "/forecast");
+    await page.waitForURL((u) => u.pathname === "/subscriptions");
+  });
+
+  await t.step("Reports, Forecast and Audit logs are hidden from navigation and search for now", async () => {
+    await page.goto(`${BASE}/dashboard`);
+    await settle(page, 1500);
+    const nav = page.getByRole("navigation", { name: "Main navigation" });
+    for (const label of ["Reports", "Forecast", "Audit logs"]) {
+      if (await nav.getByRole("link", { name: label, exact: true }).count()) throw new Error(`${label} is still in the sidebar`);
+    }
+    await page.keyboard.press("Control+k");
+    await page.getByRole("dialog", { name: /Search pages/ }).waitFor();
+    await page.keyboard.type("forecast");
+    await settle(page, 600);
+    if (await page.getByRole("option", { name: /^Forecast/ }).count()) throw new Error("Forecast still appears in search");
+    await page.keyboard.press("Escape");
   });
 }
 

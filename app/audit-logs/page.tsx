@@ -76,7 +76,7 @@ export default function AuditLogsPage() {
                     <span className="mt-0.5 block text-xs text-muted">{name} · {formatDateTime(log.createdAt)}</span>
                   </span>
                   <span className="flex shrink-0 flex-col items-end gap-1">
-                    <span className={cn("rounded-full px-2.5 py-0.5 text-xs font-semibold", TONE[log.action] ?? "bg-surface-2 text-ink-soft")}>{label(log.action)}</span>
+                    <span className={cn("rounded-tag px-2.5 py-0.5 text-xs font-semibold", TONE[log.action] ?? "bg-surface-2 text-ink-soft")}>{label(log.action)}</span>
                     {log.entityType && <span className="text-xs text-muted">{label(log.entityType)}</span>}
                   </span>
                 </>

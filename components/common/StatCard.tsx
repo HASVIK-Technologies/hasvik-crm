@@ -9,6 +9,10 @@ const TONE_ICON: Record<StatTone, string> = {
   bad: "bg-bad-soft text-bad", brand: "bg-brand-soft text-brand-strong",
 };
 const TONE_TEXT: Record<StatTone, string> = { default: "text-ink", ok: "text-ok", warn: "text-warn", bad: "text-bad", brand: "text-brand-strong" };
+/** Solid cards (main-branch dashboard look): the whole card is the tone colour, with white text. */
+const TONE_SOLID: Record<StatTone, string> = {
+  default: "bg-(--solid-default)", ok: "bg-(--solid-ok)", warn: "bg-(--solid-warn)", bad: "bg-(--solid-bad)", brand: "bg-(--solid-brand)",
+};
 
 export interface StatDelta {
   /** Percentage change against the previous period, or null when it cannot be computed. */
@@ -34,6 +38,8 @@ export interface StatCardProps {
   loading?: boolean;
   /** Raw count behind `value`; 0 renders the card plain (not clickable). */
   count?: number;
+  /** Filled with the tone colour instead of a white card. */
+  solid?: boolean;
 }
 
 function Delta({ delta }: { delta: StatDelta }) {
@@ -52,27 +58,29 @@ function Delta({ delta }: { delta: StatDelta }) {
 }
 
 /** KPI card. A tap target when it has an href/onClick and a non-zero count; plain otherwise. */
-export default function StatCard({ label, value, hint, tone = "default", icon: Icon, href, onClick, active, delta, loading, count }: StatCardProps) {
+export default function StatCard({ label, value, hint, tone = "default", icon: Icon, href, onClick, active, delta, loading, count, solid = false }: StatCardProps) {
   const numeric = count ?? (typeof value === "number" ? value : Number(value));
   const interactive = Boolean(href || onClick) && !(Number.isFinite(numeric) && numeric === 0) && !loading;
   const body = (
     <div
       className={cn(
-        "h-full min-w-0 rounded-2xl border border-line bg-surface p-4 shadow-card transition-all",
-        interactive && "duration-150 hover:-translate-y-1 hover:border-brand hover:bg-brand-soft/40 hover:shadow-pop group-active:translate-y-0 group-active:scale-[0.98]",
+        "h-full min-w-0 rounded-2xl border p-4 shadow-card transition-all",
+        solid ? cn("border-transparent text-white", TONE_SOLID[tone]) : "border-line bg-surface",
+        interactive && "duration-150 hover:-translate-y-1 hover:shadow-pop group-active:translate-y-0 group-active:scale-[0.98]",
+        interactive && (solid ? "hover:brightness-110" : "hover:border-brand hover:bg-brand-soft/40"),
         active && "border-brand ring-2 ring-brand/30",
       )}
     >
       <div className="flex items-start justify-between gap-2">
-        <p className="text-xs font-semibold tracking-wide text-muted uppercase">{label}</p>
-        {Icon && <span className={cn("grid size-8 shrink-0 place-items-center rounded-lg", TONE_ICON[tone])}><Icon className="size-4" aria-hidden /></span>}
+        <p className={cn("text-xs font-semibold tracking-wide uppercase", solid ? "text-white" : "text-muted")}>{label}</p>
+        {Icon && <span className={cn("grid size-8 shrink-0 place-items-center rounded-lg", solid ? "bg-white/15 text-white" : TONE_ICON[tone])}><Icon className="size-4" aria-hidden /></span>}
       </div>
       {loading ? (
         <div aria-hidden className="skeleton mt-3 h-8 w-20" />
       ) : (
-        <p className={cn("mt-2 text-[clamp(1.4rem,1.8vw,1.9rem)] leading-tight font-bold tabular wrap-anywhere", TONE_TEXT[tone])}>{value}</p>
+        <p className={cn("mt-2 text-[clamp(1.4rem,1.8vw,1.9rem)] leading-tight font-bold tabular wrap-anywhere", solid ? "text-white" : TONE_TEXT[tone])}>{value}</p>
       )}
-      {!loading && hint && <p className="mt-1.5 text-xs text-muted">{hint}</p>}
+      {!loading && hint && <p className={cn("mt-1.5 text-xs", solid ? "text-white" : "text-muted")}>{hint}</p>}
       {!loading && delta && <Delta delta={delta} />}
     </div>
   );

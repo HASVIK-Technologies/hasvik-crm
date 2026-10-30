@@ -31,7 +31,7 @@ export default function DateRangeControl({ preset, custom, onChange, className }
             aria-checked={preset === value}
             onClick={() => (value === "custom" ? onChange("custom", from && to ? { from, to } : undefined) : onChange(value))}
             className={cn(
-              "inline-flex min-h-11 shrink-0 items-center rounded-full border px-4 text-sm font-semibold transition-colors sm:min-h-10",
+              "inline-flex min-h-11 shrink-0 items-center border px-4 text-sm font-semibold transition-colors sm:min-h-10",
               preset === value ? "border-brand bg-brand-soft text-brand-strong" : "border-line bg-surface text-ink-soft hover:border-brand/50",
             )}
           >

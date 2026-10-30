@@ -61,7 +61,7 @@ export default function LoginForm() {
     : "";
 
   return (
-    <div className="grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
+    <div className="login-theme grid min-h-dvh lg:grid-cols-[1.05fr_1fr]">
       <aside className="hero-surface relative hidden overflow-hidden p-12 text-white lg:flex lg:flex-col lg:justify-between">
         <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-white/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 size-112 rounded-full bg-brand/20 blur-3xl" />

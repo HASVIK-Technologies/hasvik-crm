@@ -58,7 +58,7 @@ export default function ForecastView() {
     <div className="space-y-5">
       <PageHeader
         title="Forecast"
-        badge={<span className="rounded-full bg-warn-soft px-2.5 py-0.5 text-xs font-semibold text-warn">Estimate</span>}
+        badge={<span className="rounded-tag bg-warn-soft px-2.5 py-0.5 text-xs font-semibold text-warn">Estimate</span>}
         description="A decision aid built from your own lead history. It shows lead counts, not revenue, because leads carry no deal value in this system."
         actions={
         <div className="grid w-full grid-cols-2 gap-3 sm:w-auto">

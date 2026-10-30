@@ -1,5 +1,6 @@
 "use client";
 
+import { isNavigable } from "@/lib/navigation/items";
 import Link from "next/link";
 import { useMemo, useState } from "react";
 import {
@@ -215,7 +216,7 @@ export default function WorkspaceDashboard({ user }: { user: AuthUser }) {
             ) : <SectionEmpty title="No activity yet" hint="New leads and completed follow-ups will be listed here." />}
           </DashboardSection>
 
-          <ForecastTile loading={loading} forecast={forecast} />
+          {isNavigable("/forecast") && <ForecastTile loading={loading} forecast={forecast} />}
         </div>
       </div>
     </div>

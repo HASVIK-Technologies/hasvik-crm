@@ -549,7 +549,7 @@ export default function BusinessTable({
                       <div className="h-3.5 w-24 rounded bg-surface-2 animate-pulse" />
                     </TableCell>}
                     {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-6 w-16 rounded-full bg-surface-2 animate-pulse" />
+                      <div className="h-6 w-16 rounded-tag bg-surface-2 animate-pulse" />
                     </TableCell>}
                     {columnVisible("activity") && <TableCell className={cn("px-4", rowPadding)}>
                       <div className="h-3.5 w-24 rounded bg-surface-2 animate-pulse" />

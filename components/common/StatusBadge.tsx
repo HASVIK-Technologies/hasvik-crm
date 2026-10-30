@@ -42,7 +42,7 @@ export function StatusBadge({
     <Badge
       variant="outline"
       className={cn(
-        "rounded-xl border px-2.5 py-1 text-xs font-semibold leading-none shadow-card hover:bg-inherit",
+        "rounded-tag border px-2.5 py-1 text-xs font-semibold leading-none shadow-card hover:bg-inherit",
         statusStyles[normalizedStatus] ?? "bg-surface-2 text-ink-soft",
         className,
       )}

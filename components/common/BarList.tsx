@@ -34,8 +34,8 @@ export default function BarList({ rows, max, className, ariaLabel }: { rows: Bar
               <span className="min-w-0 truncate font-medium text-ink">{row.label}</span>
               <span className="shrink-0 font-semibold text-ink-soft tabular">{row.valueLabel ?? row.value}</span>
             </span>
-            <span className="mt-1.5 block h-2.5 overflow-hidden rounded-full bg-surface-2 ring-1 ring-line ring-inset">
-              <span className={cn("block h-full rounded-full transition-[width] duration-500", FILL[row.tone ?? "brand-strong"])} style={{ width: `${width}%` }} />
+            <span className="mt-1.5 block h-2.5 overflow-hidden rounded-tag bg-surface-2 ring-1 ring-line ring-inset">
+              <span className={cn("block h-full rounded-tag transition-[width] duration-500", FILL[row.tone ?? "brand-strong"])} style={{ width: `${width}%` }} />
             </span>
           </>
         );

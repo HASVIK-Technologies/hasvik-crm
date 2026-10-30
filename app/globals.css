@@ -5,20 +5,116 @@
 @custom-variant dark (&:is(.dark *, .dark));
 
 /*
-  HASVIK design tokens (shared with HASVIK People).
-  Palette from the brand guide: HASVIK Blue #0876D1, Tech Cyan #08A9E6, HASVIK Green #20B83F, Growth Green #63D329, white.
-  Semantic tokens only: components never use raw hex. Light is the default; `html.dark` swaps the palette.
+  HASVIK design tokens. The app uses the main-branch look: square corners, a navy sidebar, green primary actions and
+  blue form submits on a plain light canvas. Semantic tokens only: components never use raw hex. Light is the
+  default; `html.dark` swaps the palette.
 */
 :root {
-  --brand: #08a9e6;              /* Tech Cyan: highlights, focus, active indicators */
-  --brand-strong: #0669b9;       /* HASVIK Blue, darkened for text: 5.1:1 on the soft tint, 5.9:1 on white */
+  --brand: #1499d6;              /* Tech Cyan: highlights, focus, active indicators */
+  --brand-strong: #0767b9;       /* HASVIK Blue for links and text: 5.8:1 on white, 5:1 on the green tint */
+  --brand-soft: #eaf4fc;
+  --btn: #128438;                /* primary actions (Add, Refresh, Save...): HASVIK Green, darkened so white text reads at 4.8:1 */
+  --btn-hover: #117a35;
+  --submit: #0870c9;             /* form submits are blue, as on main */
+  --submit-hover: #0667b8;
+  --accent: #18a849;
+  --accent-strong: #117a35;
+  --accent-soft: #e8f6ec;
+  --growth: #57c84d;
+  --ink: #0f172a;
+  --ink-soft: #475569;
+  --muted: #5b6a7e;
+  --line: #dfe7ef;
+  --surface: #ffffff;
+  --surface-2: #f8fafc;
+  --canvas: #f6f8fb;
+  --title: #102b46;              /* page titles, as on main */
+  --ok: #117a35;     --ok-soft: #e1f6e7;
+  --warn: #a15207;   --warn-soft: #fef3c7;
+  --bad: #b91c1c;    --bad-soft: #fee2e2;
+  --info: #0870c9;   --info-soft: #eaf4fc;
+  --shadow-sm: 0 1px 2px rgba(15, 23, 42, 0.05);
+  --shadow-md: 0 4px 12px rgba(15, 23, 42, 0.08);
+  --shadow-lg: 0 16px 40px rgba(15, 23, 42, 0.14);
+  --ring: rgba(8, 112, 201, 0.35);
+  --hero: linear-gradient(125deg, #0b3a66 0%, #0870c9 60%, #1499d6 120%);
+  --brand-gradient: linear-gradient(90deg, #0870c9, #1499d6 55%, #18a849);
+  /* Square corners everywhere; tags, chips and status pills keep a small rounding (rounded-tag). */
+  --radius: 0rem;
+  --tag-radius: 4px;
+  /* Solid KPI cards keep these dark fills in both themes so white text always reads. */
+  --solid-brand: #0767b9;
+  --solid-default: #2c5577;
+  --solid-ok: #117a35;
+  --solid-warn: #a15207;
+  --solid-bad: #b91c1c;
+  /* Navy sidebar from main. */
+  --sidebar-bg: #102b46;
+  --sidebar-border: #1d4465;
+  --sidebar-text: #c4d5e3;
+  --sidebar-icon: #9fb9cd;
+  --sidebar-label: #8eabc2;
+  --sidebar-hover: rgba(255, 255, 255, 0.09);
+  --sidebar-active: #1b6d77;
+  --sidebar-active-icon: #77e4cc;
+  /* One motion scale for the whole app (see also prefers-reduced-motion below). */
+  --motion-fast: 120ms;
+  --motion-base: 200ms;
+  --motion-slow: 400ms;
+  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+html.dark {
+  color-scheme: dark;
+  --brand: #3dbdf2;
+  --brand-strong: #5bc3f4;
+  --brand-soft: rgba(8, 169, 230, 0.16);
+  --btn: #128438;
+  --btn-hover: #159a41;
+  --submit: #0a74c9;
+  --submit-hover: #0b82e0;
+  --accent: #3ccf5c;
+  --accent-strong: #5fdc7b;
+  --accent-soft: rgba(32, 184, 63, 0.16);
+  --growth: #7be045;
+  --ink: #e8f0f8;
+  --ink-soft: #bccadb;
+  --muted: #8da1b8;
+  --line: #1d3045;
+  --surface: #0e1a28;
+  --surface-2: #0a1521;
+  --canvas: #07111a;
+  --title: #e8f0f8;
+  --ok: #5fdc7b;     --ok-soft: rgba(60, 207, 92, 0.15);
+  --warn: #fbbf24;   --warn-soft: rgba(251, 191, 36, 0.14);
+  --bad: #f87171;    --bad-soft: rgba(248, 113, 113, 0.15);
+  --info: #5bc3f4;   --info-soft: rgba(8, 169, 230, 0.16);
+  --shadow-sm: 0 1px 2px rgba(0, 0, 0, 0.4);
+  --shadow-md: 0 6px 18px rgba(0, 0, 0, 0.35);
+  --shadow-lg: 0 20px 60px rgba(0, 0, 0, 0.55);
+  --ring: rgba(61, 189, 242, 0.45);
+  --hero: linear-gradient(125deg, #04284a 0%, #0a5a9f 58%, #0b8fc9 125%);
+  --brand-gradient: linear-gradient(90deg, #0b7fd9, #3dbdf2 55%, #3ccf5c);
+  --sidebar-bg: #0b1f33;
+  --sidebar-border: #16324e;
+}
+
+/*
+  The sign-in page keeps its own look (rounded card, cyan-blue palette) and is not affected by the app theme above.
+  These are the values the whole app used before it moved to the main-branch look.
+*/
+.login-theme {
+  --brand: #08a9e6;
+  --brand-strong: #0669b9;
   --brand-soft: #e7f4fd;
-  --btn: #0876d1;                /* primary button fill: white text 4.9:1 */
+  --btn: #0876d1;
   --btn-hover: #0665b5;
-  --accent: #20b83f;             /* HASVIK Green: growth, success, secondary brand */
-  --accent-strong: #11772a;      /* green text: 4.6:1 on the soft tint */
+  --submit: #0876d1;
+  --submit-hover: #0665b5;
+  --accent: #20b83f;
+  --accent-strong: #11772a;
   --accent-soft: #e4f7e9;
-  --growth: #63d329;             /* Growth Green: swoosh highlights only */
+  --growth: #63d329;
   --ink: #0a1f33;
   --ink-soft: #3f536a;
   --muted: #5a6d83;
@@ -37,20 +133,21 @@
   --hero: linear-gradient(125deg, #054a86 0%, #0876d1 55%, #08a9e6 118%);
   --brand-gradient: linear-gradient(90deg, #0876d1, #08a9e6 55%, #20b83f);
   --radius: 0.75rem;
-  /* One motion scale for the whole app (see also prefers-reduced-motion below). */
-  --motion-fast: 120ms;
-  --motion-base: 200ms;
-  --motion-slow: 400ms;
-  --ease-out: cubic-bezier(0.22, 1, 0.36, 1);
+  color: var(--ink);
+  background-color: var(--canvas);
+  background-image:
+    radial-gradient(900px 420px at 88% -140px, rgb(8 169 230 / 0.12), transparent 70%),
+    radial-gradient(620px 340px at -8% 0, rgb(32 184 63 / 0.06), transparent 70%);
+  background-attachment: fixed;
 }
-
-html.dark {
-  color-scheme: dark;
+html.dark .login-theme {
   --brand: #3dbdf2;
   --brand-strong: #5bc3f4;
   --brand-soft: rgba(8, 169, 230, 0.16);
   --btn: #0a74c9;
   --btn-hover: #0b82e0;
+  --submit: #0a74c9;
+  --submit-hover: #0b82e0;
   --accent: #3ccf5c;
   --accent-strong: #5fdc7b;
   --accent-soft: rgba(32, 184, 63, 0.16);
@@ -73,6 +170,7 @@ html.dark {
   --hero: linear-gradient(125deg, #04284a 0%, #0a5a9f 58%, #0b8fc9 125%);
   --brand-gradient: linear-gradient(90deg, #0b7fd9, #3dbdf2 55%, #3ccf5c);
 }
+.login-theme :focus-visible { border-radius: 8px; }
 
 @theme inline {
   --color-brand: var(--brand);
@@ -80,6 +178,9 @@ html.dark {
   --color-brand-soft: var(--brand-soft);
   --color-btn: var(--btn);
   --color-btn-hover: var(--btn-hover);
+  --color-submit: var(--submit);
+  --color-submit-hover: var(--submit-hover);
+  --color-title: var(--title);
   --color-accent: var(--accent);
   --color-accent-strong: var(--accent-strong);
   --color-accent-soft: var(--accent-soft);
@@ -133,6 +234,7 @@ html.dark {
   --radius-2xl: calc(var(--radius) * 1.8);
   --radius-3xl: calc(var(--radius) * 2.2);
   --radius-4xl: calc(var(--radius) * 2.6);
+  --radius-tag: var(--tag-radius);
 }
 
 html { color-scheme: light; }
@@ -141,10 +243,6 @@ html { color-scheme: light; }
   * { @apply border-line; }
   body {
     background: var(--canvas);
-    background-image:
-      radial-gradient(900px 420px at 88% -140px, rgb(8 169 230 / 0.12), transparent 70%),
-      radial-gradient(620px 340px at -8% 0, rgb(32 184 63 / 0.06), transparent 70%);
-    background-attachment: fixed;
     color: var(--ink);
     font-family: var(--font-geist-sans), system-ui, sans-serif;
     -webkit-tap-highlight-color: transparent;
@@ -153,9 +251,23 @@ html { color-scheme: light; }
   :focus-visible {
     outline: 3px solid var(--ring);
     outline-offset: 2px;
-    border-radius: 8px;
   }
   button:not(:disabled), [role="button"]:not([aria-disabled="true"]), summary { cursor: pointer; }
+}
+
+/* As on main: form submits are blue, distinct from the green primary actions. Unlayered so it wins over the
+   button utilities. Outline/ghost/destructive keep their own look; the sign-in page keeps its own button. */
+/* Dark mode: sonner's rich error toasts are a little too dim on the dark surface. */
+html.dark [data-sonner-toast][data-type="error"] { color: var(--bad); }
+
+button[type="submit"][data-variant="default"]:not(.login-theme *) {
+  background-color: var(--submit);
+  border-color: var(--submit);
+  color: #fff;
+}
+button[type="submit"][data-variant="default"]:not(.login-theme *):hover {
+  background-color: var(--submit-hover);
+  border-color: var(--submit-hover);
 }
 
 .tabular { font-variant-numeric: tabular-nums; }
@@ -194,7 +306,6 @@ html { color-scheme: light; }
   background: linear-gradient(90deg, var(--line) 25%, var(--surface-2) 37%, var(--line) 63%);
   background-size: 200% 100%;
   animation: shimmer 1.4s linear infinite;
-  border-radius: 10px;
 }
 
 @media (prefers-reduced-motion: reduce) {

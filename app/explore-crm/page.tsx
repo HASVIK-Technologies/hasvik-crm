@@ -79,7 +79,7 @@ export default function ExploreCrmPage() {
       <section className="relative isolate mx-auto grid max-w-7xl items-center gap-12 px-5 py-16 sm:px-8 sm:py-24 lg:grid-cols-[1.04fr_0.96fr] lg:py-28">
         <div className="pointer-events-none absolute -left-48 top-8 -z-10 size-112 rounded-full bg-brand/10 blur-3xl" />
         <div>
-          <p className="mb-5 inline-flex items-center gap-2 rounded-full border border-brand/40 bg-surface px-3.5 py-2 text-xs font-bold uppercase tracking-[0.13em] text-brand-strong shadow-sm">
+          <p className="mb-5 inline-flex items-center gap-2 rounded-tag border border-brand/40 bg-surface px-3.5 py-2 text-xs font-bold uppercase tracking-[0.13em] text-brand-strong shadow-sm">
             <span className="size-2 rounded-full bg-ok" />
             B2B sales, with a better next step
           </p>
@@ -131,7 +131,7 @@ export default function ExploreCrmPage() {
                 <p className="text-xs font-semibold text-muted">YOUR SALES WORKSPACE</p>
                 <p className="mt-1 text-sm font-bold text-ink">Pipeline overview</p>
               </div>
-              <span className="rounded-full bg-ok-soft px-3 py-1.5 text-xs font-semibold text-ok">
+              <span className="rounded-tag bg-ok-soft px-3 py-1.5 text-xs font-semibold text-ok">
                 This week
               </span>
             </div>
@@ -278,7 +278,7 @@ export default function ExploreCrmPage() {
                   }`}
                 >
                   {index === 0 && plans.length > 1 && (
-                    <span className="absolute -top-3 left-6 rounded-full bg-btn px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
+                    <span className="absolute -top-3 left-6 rounded-tag bg-btn px-3 py-1 text-xs font-bold uppercase tracking-wide text-white">
                       Start here
                     </span>
                   )}
@@ -287,7 +287,7 @@ export default function ExploreCrmPage() {
                       <h3 className="text-lg font-bold text-ink">{plan.name}</h3>
                       {plan.description && <p className="mt-1 text-xs leading-5 text-muted">{plan.description}</p>}
                     </div>
-                    <span className="rounded-full bg-brand-soft px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-brand-strong">
+                    <span className="rounded-tag bg-brand-soft px-2.5 py-1 text-xs font-bold uppercase tracking-wide text-brand-strong">
                       {plan.billingCycle.toLowerCase()}
                     </span>
                   </div>

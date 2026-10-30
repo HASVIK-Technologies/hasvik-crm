@@ -969,7 +969,7 @@ export default function BusinessForm({
                       {index < steps.length - 1 && (
                         <div
                           className={cn(
-                            "mx-2 h-0.5 flex-1 rounded-full transition-colors",
+                            "mx-2 h-0.5 flex-1 transition-colors",
                             isCompleted ? "bg-ok" : "bg-line",
                           )}
                         />

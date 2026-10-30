@@ -94,7 +94,7 @@ function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: stri
             <MessageSquareText className="size-5 text-brand-strong" />
             <h2 className="text-base font-bold text-ink">Notes</h2>
             {notesPage && (
-              <span className="rounded-full bg-btn/10 px-2 py-0.5 text-xs font-semibold text-brand-strong">
+              <span className="rounded-tag bg-btn/10 px-2 py-0.5 text-xs font-semibold text-brand-strong">
                 {notesPage.total}
               </span>
             )}

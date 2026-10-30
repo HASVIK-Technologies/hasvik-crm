@@ -32,6 +32,8 @@ export interface NavItem {
   /** Extra words the command palette matches on. */
   keywords?: string;
   visible?: (user: Pick<AuthUser, "role"> | null | undefined) => boolean;
+  /** Left out of the sidebar, tab bar and search for now. The page still opens from a direct link. */
+  hidden?: boolean;
 }
 
 const admins = (user: Pick<AuthUser, "role"> | null | undefined) => isSuperAdmin(user) || isTenantAdmin(user);
@@ -41,18 +43,23 @@ export const navigation: NavItem[] = [
   { group: "sell", label: "Dashboard", href: "/dashboard", icon: LayoutDashboard, primary: true, keywords: "home overview" },
   { group: "sell", label: "Businesses", href: "/businesses", icon: Building2, primary: true, keywords: "leads kanban pipeline companies" },
   { group: "sell", label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2, primary: true, keywords: "tasks calls meetings calendar" },
-  { group: "insights", label: "Reports", href: "/reports", icon: BarChart3, primary: true, keywords: "analytics export csv" },
-  { group: "insights", label: "Forecast", href: "/forecast", icon: TrendingUp, keywords: "predict trend win rate" },
+  { group: "insights", label: "Reports", href: "/reports", icon: BarChart3, primary: true, keywords: "analytics export csv", hidden: true },
+  { group: "insights", label: "Forecast", href: "/forecast", icon: TrendingUp, keywords: "predict trend win rate", hidden: true },
   { group: "admin", label: "Users", href: "/users", icon: Users, keywords: "team people roles", visible: admins },
   { group: "admin", label: "Business categories", href: "/business-categories", icon: FolderKanban, keywords: "industries", visible: admins },
   { group: "admin", label: "Tenant management", href: "/tenant-management", icon: Landmark, keywords: "workspaces organisations", visible: admins },
   { group: "admin", label: "Subscriptions", href: "/subscriptions", icon: CreditCard, keywords: "plans billing", visible: admins },
-  { group: "admin", label: "Audit logs", href: "/audit-logs", icon: History, keywords: "activity history changes", visible: reviewers },
+  { group: "admin", label: "Audit logs", href: "/audit-logs", icon: History, keywords: "activity history changes", visible: reviewers, hidden: true },
   { group: "settings", label: "Settings", href: "/settings", icon: Settings2, keywords: "profile password theme appearance dark" },
 ];
 
 export function visibleNavigation(user: Pick<AuthUser, "role"> | null | undefined): NavItem[] {
-  return navigation.filter((item) => !item.visible || item.visible(user));
+  return navigation.filter((item) => !item.hidden && (!item.visible || item.visible(user)));
+}
+
+/** False for pages that are hidden from navigation for now, so other screens can drop their links too. */
+export function isNavigable(href: string) {
+  return !navigation.some((item) => item.href === href && item.hidden);
 }
 
 export function isActivePath(pathname: string, href: string) {

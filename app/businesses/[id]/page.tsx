@@ -398,7 +398,7 @@ export default function BusinessDetails() {
                       )}
                       {!isInactive && (() => {
                         const due = relativeDay(nextFollowUp?.scheduledAt ?? business?.nextFollowupDate, new Date());
-                        return due ? <span className={`rounded-full px-2.5 py-0.5 text-sm font-semibold ${due.tone === "bad" ? "bg-bad-soft text-bad" : due.tone === "warn" ? "bg-warn-soft text-warn" : "bg-surface text-ink-soft"}`}>{due.label}</span> : null;
+                        return due ? <span className={`rounded-tag px-2.5 py-0.5 text-sm font-semibold ${due.tone === "bad" ? "bg-bad-soft text-bad" : due.tone === "warn" ? "bg-warn-soft text-warn" : "bg-surface text-ink-soft"}`}>{due.label}</span> : null;
                       })()}
                     </div>
                   </div>

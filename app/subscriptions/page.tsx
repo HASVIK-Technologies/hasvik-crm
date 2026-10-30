@@ -173,11 +173,11 @@ function PlanCard({
       )}
       <div className="flex flex-1 flex-col p-5 sm:p-6">
         <div className="mb-4 flex items-center justify-between gap-3">
-          <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-brand-strong">
+          <span className="inline-flex items-center gap-1.5 rounded-tag bg-surface-2 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-brand-strong">
             <Gem className="size-3" aria-hidden="true" />
             {cycleLabels[plan.billingCycle] ?? plan.billingCycle}
           </span>
-          <span className="rounded-full bg-surface-2 px-2 py-1 text-xs font-semibold text-muted">
+          <span className="rounded-tag bg-surface-2 px-2 py-1 text-xs font-semibold text-muted">
             {plan.code}
           </span>
         </div>
@@ -679,7 +679,7 @@ function SubscriptionsPageContent() {
             </div>
           ) : (
             <div className="flex justify-end">
-              <span className="inline-flex w-fit max-w-full items-center rounded-full border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-soft">
+              <span className="inline-flex w-fit max-w-full items-center rounded-tag border border-line bg-surface px-3 py-1.5 text-xs font-semibold text-ink-soft">
                 <Building2 className="mr-1.5 size-3.5 shrink-0 text-muted" aria-hidden="true" />
                 <span className="truncate">{ownTenantName ?? user?.fullName ?? "My workspace"}</span>
               </span>
@@ -867,7 +867,7 @@ function SubscriptionsPageContent() {
               <DialogPrimitive.Content className="fixed left-1/2 top-1/2 z-50 max-h-[92vh] w-[calc(100%-2rem)] max-w-xl -translate-x-1/2 -translate-y-1/2 overflow-y-auto rounded-2xl border border-line bg-surface p-5 shadow-2xl outline-none sm:p-7">
                 <div className="mb-6 flex items-start justify-between gap-4">
                   <div>
-                    <span className="inline-flex items-center gap-1.5 rounded-full bg-surface-2 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-brand-strong">
+                    <span className="inline-flex items-center gap-1.5 rounded-tag bg-surface-2 px-2.5 py-1 text-xs font-semibold uppercase tracking-wide text-brand-strong">
                       <CreditCard className="size-3" />
                       Plan request
                     </span>

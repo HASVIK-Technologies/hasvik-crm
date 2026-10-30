@@ -190,13 +190,13 @@ export default function BusinessKanban({
                 aria-selected={active}
                 onClick={(event) => { setMobileStage(stage.value); event.currentTarget.scrollIntoView({ behavior: "smooth", inline: "center", block: "nearest" }); }}
                 className={cn(
-                  "inline-flex h-11 shrink-0 snap-center items-center gap-2 rounded-full border px-4 text-sm font-semibold transition-colors",
+                  "inline-flex h-11 shrink-0 snap-center items-center gap-2 border px-4 text-sm font-semibold transition-colors",
                   active ? "border-brand bg-brand-soft text-brand-strong" : "border-line bg-surface text-ink-soft",
                 )}
               >
                 <span aria-hidden className={cn("size-2.5 rounded-full", getLeadStatusVisual(stage.value).dot)} />
                 {stage.label}
-                {isLoading ? <span aria-hidden className="skeleton h-4 w-5" /> : <span className={cn("grid min-w-6 place-items-center rounded-full px-1.5 text-xs tabular", active ? "bg-btn text-white" : "bg-surface-2 text-ink-soft")}>{count}</span>}
+                {isLoading ? <span aria-hidden className="skeleton h-4 w-5" /> : <span className={cn("grid min-w-6 place-items-center rounded-tag px-1.5 text-xs tabular", active ? "bg-btn text-white" : "bg-surface-2 text-ink-soft")}>{count}</span>}
               </button>
             );
           })}
@@ -269,7 +269,7 @@ export default function BusinessKanban({
                   <button type="button" onClick={() => setOpened((current) => ({ ...current, [stage.value]: true }))} className="flex h-full min-h-32 flex-col items-center gap-3 rounded-2xl px-2 py-4 text-sm font-semibold text-ink-soft hover:bg-surface" aria-label={`Open ${stage.label}, ${items.length} businesses`}>
                     <span aria-hidden className={cn("size-2.5 rounded-full", visual.dot)} />
                     <span className="[writing-mode:vertical-rl]">{stage.label}</span>
-                    {isLoading ? <span aria-hidden className="skeleton h-5 w-6" /> : <span className="grid min-w-6 place-items-center rounded-full bg-surface px-1.5 text-xs tabular">{items.length}</span>}
+                    {isLoading ? <span aria-hidden className="skeleton h-5 w-6" /> : <span className="grid min-w-6 place-items-center rounded-tag bg-surface px-1.5 text-xs tabular">{items.length}</span>}
                     <ChevronRight className="mt-auto size-4 text-muted" aria-hidden />
                   </button>
                 ) : (
@@ -280,7 +280,7 @@ export default function BusinessKanban({
                         <span className="truncate">{stage.label}</span>
                       </h3>
                       <div className="flex items-center gap-1">
-                        {isLoading ? <span aria-hidden className="skeleton h-6 w-8" /> : <span className="grid min-w-7 place-items-center rounded-full bg-surface px-2 py-0.5 text-sm font-semibold text-ink-soft tabular">{items.length}</span>}
+                        {isLoading ? <span aria-hidden className="skeleton h-6 w-8" /> : <span className="grid min-w-7 place-items-center rounded-tag bg-surface px-2 py-0.5 text-sm font-semibold text-ink-soft tabular">{items.length}</span>}
                         {closed && <button type="button" onClick={() => setOpened((current) => ({ ...current, [stage.value]: false }))} aria-label={`Fold ${stage.label}`} className="grid size-8 place-items-center rounded-lg text-muted hover:bg-surface"><ChevronDown className="size-4 -rotate-90" aria-hidden /></button>}
                       </div>
                     </header>
