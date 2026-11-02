@@ -203,6 +203,7 @@ export const FOLLOW_UP_TYPE_OPTIONS = [
   { value: "MEETING", label: "Meeting" },
   { value: "EMAIL", label: "Email" },
   { value: "WHATSAPP", label: "WhatsApp" },
+  { value: "VISIT", label: "Visit" },
 ];
 
 export function formatFollowUpType(type?: string | null): string {
@@ -211,6 +212,7 @@ export function formatFollowUpType(type?: string | null): string {
   if (!trimmed || trimmed === "-") return "-";
 
   const upper = trimmed.toUpperCase();
+  if (upper === "OTHER") return "Visit";
   const option = FOLLOW_UP_TYPE_OPTIONS.find(
     (opt) => opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
   );

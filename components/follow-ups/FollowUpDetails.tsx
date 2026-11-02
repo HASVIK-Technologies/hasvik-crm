@@ -12,8 +12,9 @@ import { isFollowUpReadOnly } from "@/lib/follow-ups/actions";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import BusinessDetailsContacts from "@/components/business-details/BusinessDetailsContacts";
 import { FollowUpNotes } from "@/components/follow-ups/FollowUpNotes";
+import FollowUpHistory from "@/components/follow-ups/FollowUpHistory";
+import FollowUpTypeLabel from "@/components/common/FollowUpTypeLabel";
 import { useBusinessQuery } from "@/hooks/use-businesses";
-import { formatFollowUpType } from "@/lib/business/form-options";
 import type { FollowUpItem } from "@/types/follow-up";
 
 function dateTime(value: string) {
@@ -56,7 +57,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
                 <h1 id="follow-up-heading" className="break-words text-lg font-bold tracking-tight text-ink sm:text-2xl [overflow-wrap:anywhere]">{businessName}</h1>
                 <StatusBadge status={followUp.status} />
               </div>
-              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted sm:text-sm"><CalendarClock className="size-4 shrink-0 text-muted" /><span>{formatFollowUpType(followUp.type)} follow-up</span>{city && <><span aria-hidden="true">?</span><span>{city}</span></>}</p>
+              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-muted sm:text-sm"><CalendarClock className="size-4 shrink-0 text-muted" /><span><FollowUpTypeLabel type={followUp.type} /> follow-up</span>{city && <><span aria-hidden="true">?</span><span>{city}</span></>}</p>
               {followUp.businessId && <RecordLink href={`/businesses/${followUp.businessId}`} className="mt-2 inline-block text-xs font-semibold">View business details</RecordLink>}
             </div>
           </div>
@@ -73,7 +74,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
           </SummaryItem>
           <SummaryItem icon={<UserRound className="size-4" />} label="Owner">{followUp.assignedToName || "Unassigned"}</SummaryItem>
           <SummaryItem icon={<Bell className="size-4" />} label="Reminder">{reminder}</SummaryItem>
-          <SummaryItem icon={<FileText className="size-4" />} label="Follow-up type">{formatFollowUpType(followUp.type)}</SummaryItem>
+          <SummaryItem icon={<FileText className="size-4" />} label="Follow-up type"><FollowUpTypeLabel type={followUp.type} /></SummaryItem>
         </dl>
       </section>
 
@@ -81,6 +82,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
         <div className="min-w-0 space-y-6">
           <div className="[&>section]:rounded-xl [&>section]:border-line [&>section]:shadow-card"><FollowUpNotes key={followUp.id} followUpId={followUp.id} readOnly={!businessData || isInactive || isFollowUpReadOnly(followUp)} /></div>
           <EntityActivity entityType="FOLLOWUP" entityId={followUp.id} />
+          <FollowUpHistory key={followUp.id} followUp={followUp} />
         </div>
         <aside aria-label="Follow-up reference information" className="min-w-0 space-y-6">
           <BusinessDetailsContacts business={{ ...contactBusiness, isActive: isInactive || isFollowUpReadOnly(followUp) ? false : contactBusiness.isActive }} />

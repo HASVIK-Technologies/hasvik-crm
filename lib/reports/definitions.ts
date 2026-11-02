@@ -215,8 +215,8 @@ export function buildReport(slug: ReportSlug, ctx: ReportContext): ReportResult 
           { label: "Meetings", value: rows.reduce((s, r) => s + r.meetings, 0), count: rows.reduce((s, r) => s + r.meetings, 0), href: followUpsHref({ status: "COMPLETED", type: "MEETING", fromDate: range.from, toDate: range.to, ...(filters.owner && filters.owner !== UNASSIGNED ? { assignedTo: filters.owner } : {}) }) },
         ],
         chart: { kind: "bars", ariaLabel: "Completed activities by owner", rows: rows.map((r) => ({ key: r.ownerId, label: r.ownerName, value: r.total, valueLabel: `${r.total} (${r.calls} calls, ${r.meetings} meetings, ${r.messages} messages)` })) },
-        columns: [{ key: "owner", label: "Owner" }, { key: "calls", label: "Calls", numeric: true }, { key: "meetings", label: "Meetings", numeric: true }, { key: "messages", label: "Messages", numeric: true }, { key: "other", label: "Other", numeric: true }, { key: "total", label: "Total", numeric: true }],
-        rows: rows.map((r) => ({ owner: r.ownerName, calls: r.calls, meetings: r.meetings, messages: r.messages, other: r.other, total: r.total })),
+        columns: [{ key: "owner", label: "Owner" }, { key: "calls", label: "Calls", numeric: true }, { key: "meetings", label: "Meetings", numeric: true }, { key: "messages", label: "Messages", numeric: true }, { key: "visits", label: "Visits", numeric: true }, { key: "total", label: "Total", numeric: true }],
+        rows: rows.map((r) => ({ owner: r.ownerName, calls: r.calls, meetings: r.meetings, messages: r.messages, visits: r.visits, total: r.total })),
         note: "Counts follow-ups marked Completed whose scheduled date falls in the period. Messages are WhatsApp and email.",
       };
     }

@@ -1,6 +1,7 @@
 "use client";
 
 import SelectField from "@/components/common/SelectField";
+import FollowUpTypeLabel from "@/components/common/FollowUpTypeLabel";
 import {
   CheckCircle2,
   ChevronLeft,
@@ -43,7 +44,6 @@ import PrimaryButton from "@/components/common/PrimaryButton";
 import RecordLink from "@/components/common/RecordLink";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
-import { formatFollowUpType } from "@/lib/business/form-options";
 import { useState } from "react";
 import { useFollowUpHighlight } from "@/hooks/use-follow-up-highlight";
 import {
@@ -197,7 +197,7 @@ export default function FollowUpTable({
                       <p className="mt-0.5 text-xs text-muted">{item.businessCity || "-"}{item.businessPhone ? ` • ${item.businessPhone}` : ""}</p>
                       <p className="mt-2 text-xs font-medium text-ink-soft">{formatDate(item.scheduledAt)} at {formatTime(item.scheduledAt)}</p>
                       <p className="mt-1 text-xs text-muted">
-                        {formatFollowUpType(item.type)} · {item.assignedToName}
+                        <FollowUpTypeLabel type={item.type} /> · {item.assignedToName}
                         {item.reminder ? ` · 🔔 ${item.reminder}` : ""}
                       </p>
                     </div>
@@ -381,7 +381,7 @@ export default function FollowUpTable({
                       {formatTime(item.scheduledAt)}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-xs font-medium text-ink-soft">
-                      {formatFollowUpType(item.type)}
+                      <FollowUpTypeLabel type={item.type} />
                     </TableCell>
                     <TableCell className="px-4 py-4">
                       <StatusBadge

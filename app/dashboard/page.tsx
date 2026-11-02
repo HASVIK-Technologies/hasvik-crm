@@ -1,7 +1,9 @@
 "use client";
 
-import { useState } from "react";
+import { Suspense, useState } from "react";
+import { useSearchParams } from "next/navigation";
 import PageContainer from "@/components/layout/PageContainer";
+import DashboardViewSwitcher from "@/components/dashboard/DashboardViewSwitcher";
 import PlatformDashboard from "@/components/dashboard/PlatformDashboard";
 import WorkspaceDashboard from "@/components/dashboard/WorkspaceDashboard";
 import { dashboardConfig } from "@/lib/dashboard/model";
@@ -9,8 +11,17 @@ import { useAuthStore } from "@/store/auth-store";
 import { isSuperAdmin } from "@/types/auth";
 
 export default function HomeDashboard() {
+  return (
+    <Suspense fallback={null}>
+      <DashboardContent />
+    </Suspense>
+  );
+}
+
+function DashboardContent() {
   const user = useAuthStore((state) => state.user);
   const [now] = useState(() => new Date());
+  const searchParams = useSearchParams();
 
   if (!user) return null;
   if (!dashboardConfig(user.role)) {
@@ -23,15 +34,19 @@ export default function HomeDashboard() {
     );
   }
 
+  const superAdmin = isSuperAdmin(user);
+  const adminView = superAdmin && searchParams.get("view") === "admin";
+  const viewSwitcher = superAdmin
+    ? <DashboardViewSwitcher activeView={adminView ? "admin" : "platform"} />
+    : undefined;
+
   return (
-    <PageContainer className="space-y-8">
-      <WorkspaceDashboard user={user} />
-      {isSuperAdmin(user) && (
-        <section aria-labelledby="platform-heading" className="space-y-4">
-          <h2 id="platform-heading" className="text-lg font-bold tracking-tight text-ink">Platform</h2>
-          <PlatformDashboard user={user} now={now} />
-        </section>
-      )}
+    <PageContainer>
+      {adminView
+        ? <WorkspaceDashboard user={user} viewSwitcher={viewSwitcher} />
+        : superAdmin
+          ? <PlatformDashboard user={user} now={now} viewSwitcher={viewSwitcher} />
+          : <WorkspaceDashboard user={user} />}
     </PageContainer>
   );
 }

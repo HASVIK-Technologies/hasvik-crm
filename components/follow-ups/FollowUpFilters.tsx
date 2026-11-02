@@ -6,6 +6,7 @@ import FollowUpStatusSelect from "@/components/follow-ups/FollowUpStatusSelect";
 import FollowUpAutocomplete from "@/components/follow-ups/FollowUpAutocomplete";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import FollowUpDateRange from "@/components/follow-ups/FollowUpDateRange";
+import { FOLLOW_UP_TYPE_OPTIONS } from "@/lib/business/form-options";
 import type {
   FollowUpFilters as Filters,
   FollowUpOption,
@@ -33,7 +34,7 @@ export default function FollowUpFilters({ filters, setFilter, reset, view }: Pro
     { key: "business", label: "Business", active: Boolean(filters.businessId), reset: () => setOption("business"), control: <FollowUpAutocomplete kind="business" value={filters.businessId} label={filters.businessName} onChange={(option) => setOption("business", option)} placeholder="All businesses" /> },
     { key: "assignee", label: "Team member", active: Boolean(filters.assignedTo), reset: () => setOption("user"), control: <AssigneeAutocomplete value={filters.assignedTo} label={filters.assignedToName} onChange={(option) => setOption("user", option)} placeholder="All team members" /> },
     { key: "status", label: "Status", active: Boolean(filters.status), reset: () => setFilter("status", ""), control: <FollowUpStatusSelect value={filters.status} onChange={(value) => setFilter("status", value)} /> },
-    { key: "type", label: "Type", active: Boolean(filters.type), reset: () => setFilter("type", ""), control: <SelectField ariaLabel="Follow-up type" value={filters.type || "ALL"} onChange={(value) => setFilter("type", value === "ALL" ? "" : value)} options={[{ value: "ALL", label: "All types" }, { value: "CALL", label: "Call" }, { value: "MEETING", label: "Meeting" }, { value: "EMAIL", label: "Email" }, { value: "WHATSAPP", label: "WhatsApp" }, { value: "OTHER", label: "Other" }]} /> },
+    { key: "type", label: "Type", active: Boolean(filters.type), reset: () => setFilter("type", ""), control: <SelectField ariaLabel="Follow-up type" value={filters.type || "ALL"} onChange={(value) => setFilter("type", value === "ALL" ? "" : value)} options={[{ value: "ALL", label: "All types" }, ...FOLLOW_UP_TYPE_OPTIONS]} /> },
   ];
   if (usesDateRange) fields.push({ key: "dates", label: "Date range", active: Boolean(filters.fromDate || filters.toDate), reset: () => { setFilter("fromDate", ""); setFilter("toDate", ""); }, control: <>
     <FollowUpDateRange from={filters.fromDate} to={filters.toDate} onChange={(from, to) => { setFilter("tab", "all"); setFilter("fromDate", from); setFilter("toDate", to); }} />

@@ -240,7 +240,7 @@ export default function BusinessKanban({
           aria-label="Pipeline board. Use the arrow keys to scroll sideways."
           tabIndex={0}
           onScroll={(event) => { setKanbanScrollLeft(event.currentTarget.scrollLeft); updateFade(); }}
-          className="flex h-[calc(100dvh-19rem)] min-h-[30rem] snap-x gap-3 overflow-x-auto bg-surface-2/60 p-3 md:p-4"
+          className="flex h-[calc(100dvh-6rem)] min-h-120 snap-x gap-3 overflow-x-auto bg-surface-2/60 p-3 md:p-4"
         >
           {STATUS_OPTIONS.map((stage) => {
             const items = grouped[stage.value] ?? [];

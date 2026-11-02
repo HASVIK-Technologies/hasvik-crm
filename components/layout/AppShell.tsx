@@ -360,7 +360,7 @@ export default function AppShell({ children }: { children: React.ReactNode }) {
           </div>
         </header>
 
-        <main id="main" className="min-h-[calc(100dvh-3.5rem)] px-4 pt-4 pb-28 sm:px-6 sm:pt-6 lg:pb-10">
+        <main id="main" className="min-h-[calc(100dvh-2rem)] px-4 pt-4 pb-28 sm:px-6 sm:pt-6 lg:pb-6">
           <div className="mx-auto w-full max-w-400">
             {subscriptionAccessPending ? (
               <div role="status" className="space-y-4" aria-label="Checking workspace subscription">

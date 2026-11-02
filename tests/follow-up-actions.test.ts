@@ -8,7 +8,7 @@ import {
 } from "../lib/follow-ups/actions.ts";
 import { formatFollowUpType } from "../lib/business/form-options.ts";
 import { formatFollowUpStatus } from "../lib/follow-ups/status.ts";
-import type { FollowUpItem } from "../types/follow-up.ts";
+import { normalizeFollowUpType, toApiFollowUpType, type FollowUpItem } from "../types/follow-up.ts";
 
 function makeFollowUp(status: string): FollowUpItem {
   return {
@@ -89,6 +89,16 @@ describe("Follow-up Action Rules", () => {
     test("maps EMAIL to Email", () => {
       assert.strictEqual(formatFollowUpType("EMAIL"), "Email");
       assert.strictEqual(formatFollowUpType("email"), "Email");
+    });
+
+    test("maps Visit follow-ups and the legacy backend OTHER value to Visit", () => {
+      assert.strictEqual(normalizeFollowUpType("OTHER"), "VISIT");
+      assert.strictEqual(normalizeFollowUpType("VISIT"), "VISIT");
+      assert.strictEqual(toApiFollowUpType("VISIT"), "OTHER");
+      assert.strictEqual(formatFollowUpType("VISIT"), "Visit");
+      assert.strictEqual(formatFollowUpType("visit"), "Visit");
+      assert.strictEqual(formatFollowUpType("OTHER"), "Visit");
+      assert.strictEqual(formatFollowUpType("other"), "Visit");
     });
 
     test("handles empty/null/fallback values gracefully", () => {

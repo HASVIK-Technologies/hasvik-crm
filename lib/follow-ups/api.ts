@@ -12,6 +12,7 @@ import type {
   UpdateFollowUpPayload,
   UpdateFollowUpStatusPayload,
 } from "@/types/follow-up";
+import { normalizeFollowUpType, toApiFollowUpType } from "@/types/follow-up";
 import { formatFollowUpStatus } from "@/lib/follow-ups/status";
 
 export type FollowUpStatusOption = Record<string, string>;
@@ -199,7 +200,21 @@ function extractMeetingLink(value: Record<string, unknown>) {
 }
 
 export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
+  const creator = value.createdBy && typeof value.createdBy === "object"
+    ? value.createdBy as Record<string, unknown> : undefined;
+  const creatorName = creator
+    ? creator.fullName ?? creator.name ?? ([creator.firstName, creator.lastName].filter(Boolean).join(" ") || creator.email)
+    : undefined;
   const business = (value.business ?? (typeof value.businessId === "object" ? value.businessId : {}) ?? {}) as Record<string, unknown>;
+  const businessLocation =
+    business.location && typeof business.location === "object"
+      ? business.location as Record<string, unknown>
+      : undefined;
+  const businessLocationUrl =
+    business.locationUrl ??
+    (typeof business.location === "string" ? business.location : businessLocation?.url) ??
+    value.businessLocationUrl ??
+    value.locationUrl;
   const assignee = (value.assignee ?? value.assignedTo ?? {}) as Record<
     string,
     unknown
@@ -263,6 +278,7 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
     businessPhoneNumbers: phoneNumbers.length ? phoneNumbers : callingNumber ? [{ number: callingNumber }] : [],
     businessWhatsappNumbers: whatsappNumbers.length ? whatsappNumbers : whatsappNumber ? [{ number: whatsappNumber }] : [],
     businessEmail: email,
+    businessLocationUrl: typeof businessLocationUrl === "string" ? businessLocationUrl : undefined,
     meetingLink: extractMeetingLink(value),
     assignedToId:
       assignee._id || assignee.id
@@ -277,10 +293,12 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
         (typeof value.assignedTo === "string" ? value.assignedTo : null) ??
         "Unassigned",
     ),
-    type: String(value.type ?? "CALL"),
+    type: normalizeFollowUpType(String(value.type ?? "CALL")),
     status: String(value.status ?? "SCHEDULED"),
     scheduledAt: String(value.scheduledAt ?? value.followUpDate ?? ""),
     notes: parseNotes(rawNotes),
+    createdByName: creatorName || value.createdByName ? String(creatorName || value.createdByName) : undefined,
+    createdAt: typeof value.createdAt === "string" ? value.createdAt : undefined,
     reminder: formattedReminder,
     reminderInMinutes: rawMinutes,
   };
@@ -300,7 +318,7 @@ export async function getFollowUps(
   if (filters.businessId) params.businessId = filters.businessId;
   if (filters.assignedTo) params.assignedTo = filters.assignedTo;
   if (filters.status) params.status = filters.status;
-  if (filters.type) params.type = filters.type;
+  if (filters.type) params.type = toApiFollowUpType(filters.type);
   if (filters.fromDate) params.fromDate = filters.fromDate;
   if (filters.toDate) params.toDate = filters.toDate;
   if (filters.isCalendarView !== undefined) {
@@ -354,7 +372,7 @@ export async function createFollowUp(payload: CreateFollowUpPayload) {
   const body: Record<string, unknown> = {
     businessId: payload.businessId,
     assignedTo: payload.assignedTo,
-    type: payload.type,
+    type: toApiFollowUpType(payload.type),
     scheduledAt: payload.scheduledAt,
   };
 
@@ -393,7 +411,7 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
   const body: Record<string, unknown> = {};
   if (payload.businessId) body.businessId = payload.businessId;
   if (payload.assignedTo) body.assignedTo = payload.assignedTo;
-  if (payload.type) body.type = payload.type;
+  if (payload.type) body.type = toApiFollowUpType(payload.type);
   if (payload.scheduledAt) body.scheduledAt = payload.scheduledAt;
   if (reminderMinutes !== undefined) {
     body.reminderInMinutes = reminderMinutes;
@@ -428,7 +446,7 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
     item.reminder = payload.reminder;
   }
   if (payload.type) {
-    item.type = payload.type;
+    item.type = normalizeFollowUpType(payload.type);
   }
   if (payload.scheduledAt) {
     item.scheduledAt = payload.scheduledAt;
@@ -491,7 +509,7 @@ export async function getFollowUpKpis(
   if (params?.businessId) queryParams.businessId = params.businessId;
   if (params?.assignedTo) queryParams.assignedTo = params.assignedTo;
   if (params?.status) queryParams.status = params.status;
-  if (params?.type) queryParams.type = params.type;
+  if (params?.type) queryParams.type = toApiFollowUpType(params.type);
   if (params?.fromDate) queryParams.fromDate = params.fromDate;
   if (params?.toDate) queryParams.toDate = params.toDate;
 

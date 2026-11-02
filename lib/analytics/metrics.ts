@@ -161,7 +161,7 @@ export interface ActivityOwnerRow {
   calls: number;
   meetings: number;
   messages: number;
-  other: number;
+  visits: number;
   total: number;
 }
 
@@ -171,11 +171,11 @@ export function activityByOwner(activities: ActivityRecord[], range: Pick<DateRa
   for (const activity of activities) {
     if (activity.status !== "COMPLETED" || !inRange(activity.scheduledAt, range.from, range.to)) continue;
     const id = activity.ownerId || UNASSIGNED;
-    const row = rows.get(id) ?? { ownerId: id, ownerName: activity.ownerName || "Unassigned", calls: 0, meetings: 0, messages: 0, other: 0, total: 0 };
+    const row = rows.get(id) ?? { ownerId: id, ownerName: activity.ownerName || "Unassigned", calls: 0, meetings: 0, messages: 0, visits: 0, total: 0 };
     if (activity.type === "CALL") row.calls++;
     else if (activity.type === "MEETING") row.meetings++;
     else if (activity.type === "WHATSAPP" || activity.type === "EMAIL") row.messages++;
-    else row.other++;
+    else if (activity.type === "VISIT") row.visits++;
     row.total++;
     rows.set(id, row);
   }

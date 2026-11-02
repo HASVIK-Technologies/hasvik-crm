@@ -1,5 +1,17 @@
-export type FollowUpType = "CALL" | "MEETING" | "EMAIL" | "WHATSAPP" | "OTHER";
+export type FollowUpType = "CALL" | "MEETING" | "EMAIL" | "WHATSAPP" | "VISIT";
+export type ApiFollowUpType = Exclude<FollowUpType, "VISIT"> | "OTHER";
 export type FollowUpStatus = "SCHEDULED" | "COMPLETED" | "CANCELLED" | "OVERDUE";
+
+export function normalizeFollowUpType(type: string): string {
+  const normalized = type.trim().toUpperCase();
+  return normalized === "OTHER" ? "VISIT" : normalized;
+}
+
+export function toApiFollowUpType(type: FollowUpType): ApiFollowUpType;
+export function toApiFollowUpType(type: string): string;
+export function toApiFollowUpType(type: string): string {
+  return normalizeFollowUpType(type) === "VISIT" ? "OTHER" : type;
+}
 
 export const FOLLOW_UP_REMINDER_OPTIONS = [
   "10 minutes",
@@ -31,6 +43,7 @@ export interface FollowUpItem {
   businessPhoneNumbers?: Array<{ number?: string; name?: string; type?: string; isPrimary?: boolean }>;
   businessWhatsappNumbers?: Array<{ number?: string; name?: string; type?: string; isPrimary?: boolean }>;
   businessEmail?: string;
+  businessLocationUrl?: string;
   meetingLink?: string;
   assignedToId?: string;
   assignedToName: string;
@@ -38,6 +51,8 @@ export interface FollowUpItem {
   status: FollowUpStatus | string;
   scheduledAt: string;
   notes?: string;
+  createdByName?: string;
+  createdAt?: string;
   reminder?: string;
   reminderInMinutes?: number;
 }

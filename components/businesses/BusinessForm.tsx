@@ -52,7 +52,7 @@ import {
 } from "@/lib/business/form-types";
 import { normalizeHttpUrl } from "@/lib/business/url-validation";
 import { toBusinessUpdatePayload } from "@/lib/business/update-payload";
-import type { FollowUpType } from "@/types/follow-up";
+import { normalizeFollowUpType, type FollowUpType } from "@/types/follow-up";
 import { toDateTimeLocalValue } from "@/lib/forms/date-time";
 import { useAuthStore } from "@/store/auth-store";
 import { useBusinessListStore } from "@/store/business-list-store";
@@ -480,7 +480,9 @@ export default function BusinessForm({
           description: data.description || "",
           leadSource: data.leadSource || "",
           scheduleFollowUp: false,
-          followUpType: (data.followUp?.type as FollowUpType) || "",
+          followUpType: data.followUp?.type
+            ? normalizeFollowUpType(data.followUp.type) as FollowUpType
+            : "",
           assignTo: assignedToId || "",
           assignToName: assignedToName || "",
           nextFollowupDate: toDateTimeLocalValue(

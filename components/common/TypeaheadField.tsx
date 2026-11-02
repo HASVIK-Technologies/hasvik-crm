@@ -1,6 +1,6 @@
 "use client";
 
-import { useState } from "react";
+import { useRef, useState } from "react";
 import type { LucideIcon } from "lucide-react";
 import {
   Combobox,
@@ -75,6 +75,8 @@ export default function TypeaheadField({
 }) {
   // `draft` is what the user is typing; null means "show the selected label".
   const [draft, setDraft] = useState<string | null>(null);
+  const [portalContainer, setPortalContainer] = useState<HTMLElement | null>(null);
+  const fieldRef = useRef<HTMLDivElement>(null);
   const selected = options.find((option) => option.value === value);
   const selectedLabel = selected?.label ?? valueLabel ?? (allowCustom ? value : "");
   const query = fold(draft ?? "");
@@ -83,22 +85,26 @@ export default function TypeaheadField({
     : options.filter((option) => fold(option.label).includes(query) || fold(option.hint ?? "").includes(query));
   const typed = (draft ?? "").trim();
   const showCustom = allowCustom && typed.length > 0 && !visible.some((option) => fold(option.label) === fold(typed));
-  const items = [...visible.map((option) => option.label), ...(showCustom ? [CUSTOM + typed] : [])];
+  const items = [
+    ...visible.map((option) => option.value),
+    ...(showCustom ? [CUSTOM + typed] : []),
+  ];
 
-  const pick = (label: string | null) => {
+  const pick = (itemValue: string | null) => {
     setDraft(null);
     onQueryChange?.("");
-    if (!label) return onChange("", "");
-    if (label.startsWith(CUSTOM)) {
-      const text = label.slice(CUSTOM.length);
+    if (!itemValue) return onChange("", "");
+    if (itemValue.startsWith(CUSTOM)) {
+      const text = itemValue.slice(CUSTOM.length);
       return onChange(text, text);
     }
-    const option = visible.find((item) => item.label === label) ?? options.find((item) => item.label === label);
+    const option = visible.find((item) => item.value === itemValue)
+      ?? options.find((item) => item.value === itemValue);
     if (option) onChange(option.value, option.label);
   };
 
   return (
-    <div className={cn("w-full", className)}>
+    <div ref={fieldRef} className={cn("w-full", className)}>
       {label && (
         <FieldLabel htmlFor={id} required={required} invalid={invalid}>
           {label}
@@ -107,18 +113,33 @@ export default function TypeaheadField({
       <Combobox
         items={items}
         filter={null}
-        value={selectedLabel || null}
+        value={value || null}
+        itemToStringLabel={(itemValue) =>
+          options.find((item) => item.value === itemValue)?.label ??
+          (itemValue.startsWith(CUSTOM) ? `Use “${itemValue.slice(CUSTOM.length)}”` : "")
+        }
         inputValue={draft ?? selectedLabel}
         disabled={disabled}
         openOnInputClick
         onValueChange={(next) => pick((next as string | null) ?? null)}
-        onInputValueChange={(next) => {
+        onInputValueChange={(next, { reason }) => {
+          if (reason === "item-press") return;
           setDraft(next);
           onQueryChange?.(next);
         }}
-        onOpenChange={(open) => {
+        onOpenChange={(open, { reason }) => {
           onOpenChange?.(open);
-          if (open) return;
+          if (open) {
+            if (!portalContainer) {
+              const dialog = fieldRef.current?.closest('[role="dialog"]');
+              if (dialog instanceof HTMLElement) setPortalContainer(dialog);
+            }
+            return;
+          }
+          if (reason === "item-press") {
+            setDraft(null);
+            return;
+          }
           // Leaving the field: keep free text for fields that allow it, otherwise go back to the chosen value.
           if (allowCustom && draft !== null && draft.trim() !== selectedLabel) {
             const text = draft.trim();
@@ -142,11 +163,11 @@ export default function TypeaheadField({
             showClear={clearable && Boolean(value) && !disabled}
           />
         </div>
-        <ComboboxContent className="rounded-xl">
+        <ComboboxContent container={portalContainer} className="rounded-xl">
           <ComboboxList>
             {loading && <p role="status" className="px-3 py-2 text-sm text-muted">Searching…</p>}
             {!loading && <ComboboxEmpty>{emptyText}</ComboboxEmpty>}
-            {items.map((item) => {
+            {items.map((item, index) => {
               if (item.startsWith(CUSTOM)) {
                 return (
                   <ComboboxItem key={item} value={item} className="min-h-11 px-2.5 text-sm">
@@ -154,12 +175,18 @@ export default function TypeaheadField({
                   </ComboboxItem>
                 );
               }
-              const option = visible.find((entry) => entry.label === item);
+              const option = visible.find((entry) => entry.value === item);
               return (
-                <ComboboxItem key={item} value={item} className="min-h-11 px-2.5 text-sm">
+                <ComboboxItem
+                  key={`${item}:${index}`}
+                  value={item}
+                  className="min-h-11 px-2.5 text-sm"
+                >
                   <span className="min-w-0">
-                    <span className="block truncate">{item}</span>
-                    {option?.hint && <span className="block truncate text-xs text-muted">{option.hint}</span>}
+                    <span className="block truncate">{option?.label}</span>
+                    {option?.hint && (
+                      <span className="block truncate text-xs text-muted">{option.hint}</span>
+                    )}
                   </span>
                 </ComboboxItem>
               );

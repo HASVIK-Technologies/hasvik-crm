@@ -1,4 +1,5 @@
 import type { FollowUpType } from "@/types/follow-up";
+import { toApiFollowUpType } from "../../types/follow-up.ts";
 import type { FollowUpPayload } from "@/types/business-api";
 import { fromDateTimeLocalValue } from "../forms/date-time.ts";
 
@@ -107,7 +108,7 @@ export function toFollowUpPayload(
 
   return {
     assignedTo: values.assignTo,
-    type: values.followUpType,
+    type: toApiFollowUpType(values.followUpType),
     scheduledAt,
     ...(values.reminder
       ? { reminderInMinutes: Number(values.reminder) }

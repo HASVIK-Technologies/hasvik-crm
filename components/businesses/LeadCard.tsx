@@ -76,12 +76,12 @@ export default function LeadCard({ business, highlighted, pending, draggable, on
           <RecordLink
             href={`/businesses/${business.id}`}
             onClick={(event) => { event.stopPropagation(); onTouched(); }}
-            className="line-clamp-2 text-base leading-snug font-semibold text-ink hover:text-brand-strong"
+            className="line-clamp-2 text-sm leading-snug font-semibold text-ink hover:text-brand-strong"
             title={business.name}
           >
             {business.name}
           </RecordLink>
-          {place && <p className="mt-0.5 truncate text-sm text-muted">{place}</p>}
+          {place && <p className="mt-0.5 truncate text-xs text-muted">{place}</p>}
         </div>
         <DropdownMenu>
           <DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}>
@@ -116,15 +116,15 @@ export default function LeadCard({ business, highlighted, pending, draggable, on
 
       <div className="mt-3 flex flex-wrap items-center gap-2">
         {business.owner ? (
-          <span className="inline-flex max-w-full items-center gap-1.5 rounded-tag bg-surface-2 py-1 pr-2.5 pl-1 text-sm text-ink-soft">
+          <span className="inline-flex max-w-full items-center gap-1.5 rounded-tag bg-surface-2 py-1 pr-2.5 pl-1 text-xs text-ink-soft">
             <span aria-hidden className="grid size-6 shrink-0 place-items-center rounded-full bg-btn text-xs font-bold text-white">{business.owner.split(/\s+/).map((part) => part[0]).join("").slice(0, 2).toUpperCase()}</span>
             <span className="truncate">{business.owner}</span>
           </span>
         ) : (
-          <span className="inline-flex items-center rounded-tag bg-warn-soft px-2.5 py-1 text-sm font-semibold text-warn">Unassigned</span>
+          <span className="inline-flex items-center rounded-tag bg-warn-soft px-2.5 py-1 text-xs font-semibold text-warn">Unassigned</span>
         )}
         {next && (
-          <span className={cn("inline-flex items-center gap-1.5 rounded-tag px-2.5 py-1 text-sm font-semibold", TONE[next.tone])} title={business.nextFollowUp}>
+          <span className={cn("inline-flex items-center gap-1.5 rounded-tag px-2.5 py-1 text-xs font-semibold", TONE[next.tone])} title={business.nextFollowUp}>
             <CalendarClock className="size-4 shrink-0" aria-hidden />
             {next.label}
           </span>

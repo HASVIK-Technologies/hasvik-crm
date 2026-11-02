@@ -45,7 +45,7 @@ import {
 import { useModalStore } from "@/store/business-modal-store";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
-import { formatFollowUpType } from "@/lib/business/form-options";
+import FollowUpTypeLabel from "@/components/common/FollowUpTypeLabel";
 import { useState } from "react";
 
 interface BusinessDetailsFollowupsProps {
@@ -157,7 +157,7 @@ export default function BusinessDetailsFollowups({
               <Link href={`/follow-ups/${item.id}`} className="flex min-h-16 items-center gap-3 px-5 py-3 transition-colors active:bg-surface-2">
                 <span className="min-w-0 flex-1">
                   <span className="block text-base font-semibold text-ink">{formatScheduledAt(item.scheduledAt)}</span>
-                  <span className="mt-0.5 block text-sm text-muted">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
+                  <span className="mt-0.5 block text-sm text-muted"><FollowUpTypeLabel type={item.type} /> · {item.assignedToName || "Unassigned"}</span>
                 </span>
                 <StatusBadge status={item.status} className="shrink-0" />
               </Link>
@@ -191,7 +191,7 @@ export default function BusinessDetailsFollowups({
                     </TableCell>
                     <TableCell>
                       <span className="inline-flex border border-line bg-surface-2 px-2 py-1 text-xs font-medium text-ink-soft">
-                        {formatFollowUpType(item.type)}
+                        <FollowUpTypeLabel type={item.type} />
                       </span>
                     </TableCell>
                     <TableCell>

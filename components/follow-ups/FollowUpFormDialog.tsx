@@ -29,6 +29,7 @@ import {
 import { minutesToReminder, parseReminderToMinutes } from "@/lib/follow-ups/api";
 import {
   FOLLOW_UP_REMINDER_OPTIONS,
+  normalizeFollowUpType,
   type FollowUpItem,
   type FollowUpOption,
   type FollowUpType,
@@ -72,7 +73,7 @@ function getDefaultValues(
         ? { id: followUp.assignedToId, label: followUp.assignedToName }
         : null,
       scheduledAt: toDateTimeLocalValue(followUp.scheduledAt),
-      type: (followUp.type as FollowUpType) || "CALL",
+      type: (normalizeFollowUpType(followUp.type) as FollowUpType) || "CALL",
       reminder: followUp.reminder ?? minutesToReminder(followUp.reminderInMinutes) ?? "",
     };
   }

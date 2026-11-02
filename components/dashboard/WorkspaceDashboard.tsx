@@ -2,12 +2,13 @@
 
 import { isNavigable } from "@/lib/navigation/items";
 import Link from "next/link";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import {
   AlarmClockOff,
   CalendarCheck2,
   CalendarClock,
   CheckCircle2,
+  Filter,
   Hourglass,
   Mail,
   MessageCircle,
@@ -27,7 +28,10 @@ import DateRangeControl from "@/components/common/DateRangeControl";
 import KpiCards, { type KpiItem } from "@/components/common/KpiCards";
 import { Button } from "@/components/ui/button";
 import DashboardSection, { SectionEmpty } from "@/components/dashboard/DashboardSection";
-import { useActivitiesData, useLeadsData } from "@/hooks/use-analytics";
+import type { ReactNode } from "react";
+import DashboardHeader from "@/components/dashboard/DashboardHeader";
+import BottomSheet from "@/components/common/BottomSheet";
+import { useActivitiesData, useDashboardCompletedActivities, useLeadsData } from "@/hooks/use-analytics";
 import { useDateRange } from "@/hooks/use-date-range";
 import { daysBetween, formatDateTime, formatMonth, greeting } from "@/lib/analytics/format";
 import { followUpsHref, leadsHref } from "@/lib/analytics/lead-filters";
@@ -52,19 +56,28 @@ function roleScopeDefault(role: string): Scope {
   return ["SALES", "USER"].includes(role.trim().toUpperCase()) ? "mine" : "team";
 }
 
-export default function WorkspaceDashboard({ user }: { user: AuthUser }) {
+export default function WorkspaceDashboard({ user, viewSwitcher }: { user: AuthUser; viewSwitcher?: ReactNode }) {
   const { range, preset, custom, choose } = useDateRange("30d");
   const [scope, setScope] = useState<Scope>(() => roleScopeDefault(user.role));
+  const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const leadsQuery = useLeadsData();
   const activitiesQuery = useActivitiesData();
   const storeUser = useAuthStore((state) => state.user) ?? user;
   const now = useMemo(() => new Date(), []);
   const mine = scope === "mine";
   const ownerId = mine ? storeUser.userId : undefined;
+  const completedActivitiesQuery = useDashboardCompletedActivities(range, ownerId);
+
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeDrawer = () => { if (desktop.matches) setFilterDrawerOpen(false); };
+    desktop.addEventListener("change", closeDrawer);
+    return () => desktop.removeEventListener("change", closeDrawer);
+  }, []);
 
   const loading = leadsQuery.isPending || activitiesQuery.isPending;
   const failed = leadsQuery.isError || activitiesQuery.isError;
-  const retry = () => { void leadsQuery.refetch(); void activitiesQuery.refetch(); };
+  const retry = () => { void leadsQuery.refetch(); void activitiesQuery.refetch(); void completedActivitiesQuery.refetch(); };
 
   const data = useMemo(() => {
     const allLeads = (leadsQuery.data ?? []).filter((lead) => lead.isActive);
@@ -73,7 +86,6 @@ export default function WorkspaceDashboard({ user }: { user: AuthUser }) {
     const today = zonedDay(now);
     const todayFrom = new Date(startOfDay(today)).toISOString();
     const todayTo = new Date(endOfDay(today)).toISOString();
-    const completedIn = (from: string, to: string) => activities.filter((a) => a.status === "COMPLETED" && inRange(a.scheduledAt, from, to));
     const overdue = activities.filter((a) => a.status === "OVERDUE").sort((a, b) => Date.parse(a.scheduledAt) - Date.parse(b.scheduledAt));
     const stale = staleLeads(leads, STALE_DAYS, now);
     const unassigned = allLeads.filter((lead) => !lead.ownerId);
@@ -84,12 +96,12 @@ export default function WorkspaceDashboard({ user }: { user: AuthUser }) {
       newBefore: createdIn(leads, range.previous.from, range.previous.to).length,
       wonNow: wonIn(leads, range.from, range.to),
       wonBefore: wonIn(leads, range.previous.from, range.previous.to).length,
-      doneNow: completedIn(range.from, range.to).length,
-      doneBefore: completedIn(range.previous.from, range.previous.to).length,
     };
   }, [leadsQuery.data, activitiesQuery.data, ownerId, range, now]);
 
   const forecast = useMemo(() => buildForecast(leadsQuery.data ?? [], { now, ownerId }), [leadsQuery.data, now, ownerId]);
+  const doneNow = completedActivitiesQuery.data?.current.length ?? 0;
+  const doneBefore = completedActivitiesQuery.data?.previous.length ?? 0;
 
   const assigned = mine ? { assignedTo: storeUser.userId, assignedToName: storeUser.fullName || storeUser.email } : {};
   const followUps = (filter: Parameters<typeof followUpsHref>[0]) => {
@@ -103,7 +115,7 @@ export default function WorkspaceDashboard({ user }: { user: AuthUser }) {
   const kpis: KpiItem[] = [
     { label: "New leads", value: data.newNow, count: data.newNow, icon: PlusCircle, tone: "blue", hint: range.label, href: leadsHref({ createdFrom: range.from, createdTo: range.to, isActive: true, ...owner }), delta: { percent: percentChange(data.newNow, data.newBefore), label: range.compareLabel } },
     { label: "Won", value: data.wonNow.length, count: data.wonNow.length, icon: Trophy, tone: "green", hint: range.label, href: leadsHref({ status: "WON", updatedFrom: range.from, updatedTo: range.to, isActive: true, ...owner }), delta: { percent: percentChange(data.wonNow.length, data.wonBefore), label: range.compareLabel } },
-    { label: "Follow-ups done", value: data.doneNow, count: data.doneNow, icon: CheckCircle2, tone: "green", hint: range.label, href: followUps({ status: "COMPLETED", fromDate: range.from, toDate: range.to }), delta: { percent: percentChange(data.doneNow, data.doneBefore), label: range.compareLabel } },
+    { label: "Follow-ups done", value: doneNow, count: doneNow, icon: CheckCircle2, tone: "green", hint: range.label, href: followUps({ status: "COMPLETED", fromDate: range.from, toDate: range.to }), delta: { percent: percentChange(doneNow, doneBefore), label: range.compareLabel } },
     { label: "Overdue follow-ups", value: data.overdue.length, count: data.overdue.length, icon: AlarmClockOff, tone: "red", hint: "Needs action now", href: followUps({ status: "OVERDUE" }) },
     { label: `Stale leads (${STALE_DAYS}+ days)`, value: data.stale.length, count: data.stale.length, icon: Hourglass, tone: "amber", hint: "No activity recently", href: leadsHref({ staleDays: STALE_DAYS, isActive: true, ...owner }) },
     ...(mine ? [] : [{ label: "Unassigned leads", value: data.unassigned.length, count: data.unassigned.length, icon: UserX, tone: "slate" as const, hint: "Nobody owns these yet", href: leadsHref({ owner: "none", isActive: true }) }]),
@@ -117,61 +129,98 @@ export default function WorkspaceDashboard({ user }: { user: AuthUser }) {
   const leaderboard = byOwner(data.wonNow).filter((row) => row.won > 0).slice(0, 5);
   const recent = recentEvents(data.leads, data.activities).slice(0, 6);
 
+  const scopeControl = (
+    <div role="group" aria-label="Whose numbers" className="inline-flex w-fit shrink-0 gap-1 rounded-lg border border-line bg-surface-2 p-1">
+      {(["mine", "team"] as const).map((value) => (
+        <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)}
+          className={cn("min-h-8 rounded-md px-3 text-xs font-semibold transition-colors", scope === value ? "bg-surface text-brand-strong shadow-card" : "text-ink-soft hover:bg-surface hover:text-ink")}>
+          {value === "mine" ? "My numbers" : "Whole team"}
+        </button>
+      ))}
+    </div>
+  );
+
+  const todayHref = followUps({ fromDate: data.todayFrom, toDate: data.todayTo });
+
   return (
     <div className="space-y-5">
-      <section aria-label="Today at a glance" className="hero-surface fade-up relative overflow-hidden rounded-3xl p-5 text-white shadow-float sm:p-7">
-        <div aria-hidden className="pointer-events-none absolute -top-20 -right-16 size-64 rounded-full bg-white/10 blur-3xl" />
-        <div className="relative flex flex-wrap items-start justify-between gap-4">
-          <div className="min-w-0">
-            <p className="text-sm font-medium text-white/80">{new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "long", day: "numeric", month: "long" }).format(now)}</p>
-            <h1 className="mt-1 text-2xl font-bold tracking-tight sm:text-[1.9rem]">{greeting(now)}, {(storeUser.fullName || "there").split(" ")[0]}</h1>
-            <p className="mt-2 max-w-md text-sm leading-relaxed text-white/90">
-              {loading
-                ? "Getting your day ready…"
-                : data.todays.length || data.overdue.length
-                  ? `You have ${data.todays.length} follow-up${data.todays.length === 1 ? "" : "s"} today${data.overdue.length ? ` and ${data.overdue.length} waiting from earlier` : ""}.`
-                  : "Nothing is due today. A good moment to reach out to a new lead."}
-            </p>
-          </div>
-          <div role="group" aria-label="Whose numbers" className="inline-flex gap-1 rounded-xl bg-white/15 p-1 ring-1 ring-white/25 backdrop-blur ring-inset">
-            {(["mine", "team"] as const).map((value) => (
-              <button key={value} type="button" aria-pressed={scope === value} onClick={() => setScope(value)}
-                className={cn("min-h-10 rounded-lg px-3.5 text-sm font-semibold transition-all", scope === value ? "bg-white text-btn shadow-card" : "text-white hover:bg-white/10")}>
-                {value === "mine" ? "My numbers" : "Whole team"}
-              </button>
-            ))}
-          </div>
+      <DashboardHeader
+        title={`${greeting(now)}, ${(storeUser.fullName || "there").split(" ")[0]}`}
+        description={loading
+          ? "Loading today’s activity"
+          : data.todays.length || data.overdue.length
+            ? `${new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "short", day: "numeric", month: "short" }).format(now)} · ${data.todays.length} today${data.overdue.length ? ` · ${data.overdue.length} overdue` : ""}`
+            : `${new Intl.DateTimeFormat("en-IN", { timeZone: "Asia/Kolkata", weekday: "short", day: "numeric", month: "short" }).format(now)} · Nothing due today`}
+        viewSwitcher={viewSwitcher}
+      />
+
+      <section aria-label="Dashboard filters and actions" className="flex flex-col gap-2 rounded-xl border border-line bg-surface p-2 shadow-card sm:flex-row sm:items-center sm:justify-between">
+        <div className="hidden min-w-0 flex-col gap-2 lg:flex xl:flex-row xl:items-center">
+          {scopeControl}
+          <DateRangeControl key={`${custom.from}:${custom.to}`} preset={preset} custom={custom} onChange={choose} customPresentation="dialog" compact className="space-y-0" />
         </div>
-        <div className="relative mt-5 flex flex-wrap gap-2">
-          <Link href={followUps({ fromDate: data.todayFrom, toDate: data.todayTo })} className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white px-4 text-sm font-semibold text-btn shadow-card transition-transform hover:-translate-y-0.5 active:scale-[0.98]">
-            <CalendarCheck2 className="size-4" aria-hidden />See today&apos;s follow-ups
+        <div className="flex shrink-0 items-center justify-between gap-1 sm:justify-end">
+          <button type="button" onClick={() => setFilterDrawerOpen(true)} aria-expanded={filterDrawerOpen} aria-label={`Open dashboard filters. ${scope === "mine" ? "My numbers" : "Whole team"}, ${range.label}.`} className="inline-flex min-h-9 items-center gap-2 rounded-lg border border-line bg-surface-2 px-3 text-sm font-semibold text-ink-soft hover:bg-brand-soft hover:text-brand-strong lg:hidden">
+            <Filter className="size-4" aria-hidden />
+            <span>Filters</span>
+            <span className="text-xs font-medium text-muted">{range.label}</span>
+          </button>
+          <Link href={todayHref} aria-label="Today's follow-ups" title="Today's follow-ups" className="hidden min-h-9 items-center justify-center gap-2 rounded-lg px-3 text-sm font-semibold text-brand-strong transition-colors hover:bg-brand-soft xl:inline-flex">
+            <CalendarCheck2 className="size-4" aria-hidden />Today&apos;s follow-ups
           </Link>
-          <Link href="/businesses/form" className="inline-flex min-h-11 items-center gap-2 rounded-xl bg-white/15 px-4 text-sm font-semibold text-white ring-1 ring-white/30 transition-colors ring-inset hover:bg-white/25">
-            <PlusCircle className="size-4" aria-hidden />Add a business
-          </Link>
-          <button type="button" onClick={retry} aria-label="Refresh dashboard" className="inline-flex min-h-11 items-center gap-2 rounded-xl px-3 text-sm font-semibold text-white/90 hover:bg-white/10">
-            <RefreshCw className={cn("size-4", (leadsQuery.isFetching || activitiesQuery.isFetching) && "animate-spin")} aria-hidden /><span className="hidden sm:inline">Refresh</span>
+          <button type="button" onClick={retry} aria-label="Refresh dashboard" title="Refresh dashboard" className="inline-flex size-9 items-center justify-center rounded-lg border border-line bg-surface text-ink-soft hover:bg-surface-2 hover:text-ink">
+            <RefreshCw className={cn("size-4", (leadsQuery.isFetching || activitiesQuery.isFetching || completedActivitiesQuery.isFetching) && "animate-spin")} aria-hidden />
           </button>
         </div>
+        <BottomSheet
+          open={filterDrawerOpen}
+          onOpenChange={setFilterDrawerOpen}
+          title="Dashboard filters"
+          description="Changes update the dashboard as soon as you select them."
+          footer={<Button variant="outline" className="w-full" onClick={() => setFilterDrawerOpen(false)}>Done</Button>}
+          className="lg:hidden"
+        >
+          <div className="space-y-6">
+            <section aria-labelledby="mobile-scope-heading" className="space-y-2">
+              <h2 id="mobile-scope-heading" className="text-sm font-semibold text-ink">Show numbers for</h2>
+              {scopeControl}
+            </section>
+            <section aria-labelledby="mobile-range-heading" className="space-y-2">
+              <h2 id="mobile-range-heading" className="text-sm font-semibold text-ink">Date range</h2>
+              <DateRangeControl key={`${custom.from}:${custom.to}`} preset={preset} custom={custom} onChange={choose} compact className="space-y-3" />
+            </section>
+          </div>
+        </BottomSheet>
       </section>
 
-      <DateRangeControl preset={preset} custom={custom} onChange={choose} />
-
-      {failed ? (
-        <div role="alert" className="flex flex-wrap items-center gap-3 rounded-2xl border border-warn/30 bg-warn-soft p-4 text-sm text-warn">
-          <span className="flex-1">We couldn&apos;t load your numbers. Check your connection and try again.</span>
-          <Button variant="outline" onClick={retry}>Try again</Button>
+      <section aria-labelledby="metrics-heading" className="space-y-3">
+        <div>
+          <h2 id="metrics-heading" className="text-base font-bold tracking-tight text-ink">Key metrics</h2>
         </div>
-      ) : (
-        <KpiCards items={kpis} loading={loading} />
-      )}
+        {failed || completedActivitiesQuery.isError ? (
+          <div role="alert" className="flex flex-wrap items-center gap-3 rounded-2xl border border-warn/30 bg-warn-soft p-4 text-sm text-warn">
+            <span className="flex-1">We couldn&apos;t load your numbers. Check your connection and try again.</span>
+            <Button variant="outline" onClick={retry}>Try again</Button>
+          </div>
+        ) : (
+          <KpiCards items={kpis} loading={loading || completedActivitiesQuery.isPending} className="gap-4" />
+        )}
+      </section>
 
-      <div className="grid gap-5 lg:grid-cols-[1.35fr_1fr]">
-        <div className="space-y-5">
-          <DashboardSection title="Pipeline" description="Active leads by stage. Tap a stage to open those leads." href={leadsHref({ isActive: true, ...owner })} loading={loading} error={failed} onRetry={retry}>
-            {data.leads.length ? <BarList ariaLabel="Active leads by stage" rows={stageRows} /> : <SectionEmpty title="No leads yet" hint="Add your first business and it will appear here, stage by stage." />}
-          </DashboardSection>
+      <div className="grid items-stretch gap-4 lg:grid-cols-12 lg:gap-5">
+        <DashboardSection className="lg:col-span-6" title="Pipeline" description="Active leads by stage. Tap a stage to open those leads." href={leadsHref({ isActive: true, ...owner })} loading={loading} error={failed} onRetry={retry}>
+          {data.leads.length ? <BarList ariaLabel="Active leads by stage" rows={stageRows} /> : <SectionEmpty title="No leads yet" hint="Add your first business and it will appear here, stage by stage." />}
+        </DashboardSection>
 
+        <DashboardSection className="lg:col-span-6" title="Today" description="Follow-ups scheduled for today." href={followUps({ fromDate: data.todayFrom, toDate: data.todayTo })} loading={loading} error={failed} onRetry={retry}>
+          {data.todays.length ? (
+            <ul className="divide-y divide-line">
+              {data.todays.slice(0, 5).map((a) => <ActivityRow key={a.id} activity={a} />)}
+            </ul>
+          ) : <SectionEmpty title="Nothing scheduled today" hint="Follow-ups you schedule for today will show up here." />}
+        </DashboardSection>
+
+        <div className="min-w-0 lg:col-span-7">
           <ChartFrame
             title="New leads over time"
             description={range.label}
@@ -179,45 +228,35 @@ export default function WorkspaceDashboard({ user }: { user: AuthUser }) {
           >
             {loading ? <div className="skeleton h-48" /> : <ColumnChart ariaLabel="New leads over time" points={created} unit="new leads" />}
           </ChartFrame>
-
-          <DashboardSection title="Needs attention" description="The quickest wins to clear first." loading={loading} error={failed} onRetry={retry}>
-            <AttentionList overdue={data.overdue} stale={data.stale} unassigned={mine ? [] : data.unassigned} now={now} />
-          </DashboardSection>
         </div>
 
-        <div className="space-y-5">
-          <DashboardSection title="Today" description="Follow-ups scheduled for today." href={followUps({ fromDate: data.todayFrom, toDate: data.todayTo })} loading={loading} error={failed} onRetry={retry}>
-            {data.todays.length ? (
-              <ul className="divide-y divide-line">
-                {data.todays.slice(0, 5).map((a) => <ActivityRow key={a.id} activity={a} />)}
-              </ul>
-            ) : <SectionEmpty title="Nothing scheduled today" hint="Follow-ups you schedule for today will show up here." />}
-          </DashboardSection>
+        <DashboardSection className="lg:col-span-5" title="Needs attention" description="The quickest wins to clear first." loading={loading} error={failed} onRetry={retry}>
+          <AttentionList overdue={data.overdue} stale={data.stale} unassigned={mine ? [] : data.unassigned} now={now} />
+        </DashboardSection>
 
-          <DashboardSection title="Top owners" description={`Leads won, ${range.label.toLowerCase()}.`} loading={loading} error={failed} onRetry={retry}>
-            {leaderboard.length ? (
-              <BarList ariaLabel="Leads won by owner" rows={leaderboard.map((row) => ({ key: row.ownerId, label: row.ownerName, value: row.won, tone: "accent", href: leadsHref({ status: "WON", updatedFrom: range.from, updatedTo: range.to, isActive: true, owner: row.ownerId }) }))} />
-            ) : <SectionEmpty title="No wins in this period" hint="When leads are marked Won, the people who closed them are ranked here." />}
-          </DashboardSection>
+        <DashboardSection className="lg:col-span-5" title="Top owners" description={`Leads won, ${range.label.toLowerCase()}.`} loading={loading} error={failed} onRetry={retry}>
+          {leaderboard.length ? (
+            <BarList ariaLabel="Leads won by owner" rows={leaderboard.map((row) => ({ key: row.ownerId, label: row.ownerName, value: row.won, tone: "accent", href: leadsHref({ status: "WON", updatedFrom: range.from, updatedTo: range.to, isActive: true, owner: row.ownerId }) }))} />
+          ) : <SectionEmpty title="No wins in this period" hint="When leads are marked Won, the people who closed them are ranked here." />}
+        </DashboardSection>
 
-          <DashboardSection title="Recent activity" loading={loading} error={failed} onRetry={retry}>
-            {recent.length ? (
-              <ul className="space-y-3">
-                {recent.map((event) => (
-                  <li key={event.key} className="flex items-start gap-3 text-sm">
-                    <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-surface-2 text-brand-strong"><event.icon className="size-4" aria-hidden /></span>
-                    <span className="min-w-0 flex-1">
-                      <Link href={event.href} className="block truncate font-semibold text-ink hover:text-brand-strong">{event.title}</Link>
-                      <span className="block text-xs text-muted">{event.detail} · {formatDateTime(event.at)}</span>
-                    </span>
-                  </li>
-                ))}
-              </ul>
-            ) : <SectionEmpty title="No activity yet" hint="New leads and completed follow-ups will be listed here." />}
-          </DashboardSection>
+        <DashboardSection className="lg:col-span-7" title="Recent activity" loading={loading} error={failed} onRetry={retry}>
+          {recent.length ? (
+            <ul className="space-y-3">
+              {recent.map((event) => (
+                <li key={event.key} className="flex items-start gap-3 text-sm">
+                  <span className="mt-0.5 grid size-8 shrink-0 place-items-center rounded-lg bg-surface-2 text-brand-strong"><event.icon className="size-4" aria-hidden /></span>
+                  <span className="min-w-0 flex-1">
+                    <Link href={event.href} className="block truncate font-semibold text-ink hover:text-brand-strong">{event.title}</Link>
+                    <span className="block text-xs text-muted">{event.detail} · {formatDateTime(event.at)}</span>
+                  </span>
+                </li>
+              ))}
+            </ul>
+          ) : <SectionEmpty title="No activity yet" hint="New leads and completed follow-ups will be listed here." />}
+        </DashboardSection>
 
-          {isNavigable("/forecast") && <ForecastTile loading={loading} forecast={forecast} />}
-        </div>
+        {isNavigable("/forecast") && <div className="lg:col-span-12"><ForecastTile loading={loading} forecast={forecast} /></div>}
       </div>
     </div>
   );
@@ -311,4 +350,3 @@ function recentEvents(leads: LeadRecord[], activities: ActivityRecord[]) {
   for (const a of activities) if (a.status === "COMPLETED" && a.completedAt) events.push({ key: `a-${a.id}`, title: a.businessName || "Business", detail: `${a.type.charAt(0)}${a.type.slice(1).toLowerCase()} completed · ${a.ownerName || "Unassigned"}`, at: a.completedAt, href: `/follow-ups/${encodeURIComponent(a.id)}`, icon: CalendarCheck2 });
   return events.sort((a, b) => Date.parse(b.at) - Date.parse(a.at));
 }
-

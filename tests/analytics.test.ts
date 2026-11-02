@@ -100,10 +100,10 @@ test("activity volume counts completed work per owner inside the range", () => {
     id, businessId: "b", businessName: "B", ownerId, ownerName: ownerId === "u1" ? "Asha" : "Ravi", type, status, scheduledAt: completedAt, completedAt, createdAt: completedAt,
   });
   const rows = activityByOwner(
-    [act("1", "CALL", "COMPLETED", "2026-10-10T00:00:00Z"), act("2", "MEETING", "COMPLETED", "2026-10-11T00:00:00Z"), act("3", "WHATSAPP", "COMPLETED", "2026-10-12T00:00:00Z", "u2"), act("4", "CALL", "SCHEDULED", "2026-10-12T00:00:00Z"), act("5", "CALL", "COMPLETED", "2026-08-12T00:00:00Z")],
+    [act("1", "CALL", "COMPLETED", "2026-10-10T00:00:00Z"), act("2", "MEETING", "COMPLETED", "2026-10-11T00:00:00Z"), act("3", "WHATSAPP", "COMPLETED", "2026-10-12T00:00:00Z", "u2"), act("4", "CALL", "SCHEDULED", "2026-10-12T00:00:00Z"), act("5", "CALL", "COMPLETED", "2026-08-12T00:00:00Z"), act("6", "VISIT", "COMPLETED", "2026-10-13T00:00:00Z")],
     { from: "2026-10-01T00:00:00Z", to: "2026-10-31T00:00:00Z" },
   );
-  assert.deepEqual(rows.map((r) => [r.ownerName, r.calls, r.meetings, r.messages, r.total]), [["Asha", 1, 1, 0, 2], ["Ravi", 0, 0, 1, 1]]);
+  assert.deepEqual(rows.map((r) => [r.ownerName, r.calls, r.meetings, r.messages, r.visits, r.total]), [["Asha", 1, 1, 0, 1, 3], ["Ravi", 0, 0, 1, 0, 1]]);
 });
 
 test("countsOverTime buckets by day for short ranges and by month for long ones", () => {

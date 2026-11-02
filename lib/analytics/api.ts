@@ -1,7 +1,10 @@
 import { apiClient } from "@/lib/api/api-client";
 import type { ActivityRecord, LeadRecord } from "@/lib/analytics/types";
+import type { FollowUpQueryFilters } from "@/types/follow-up";
+import { normalizeFollowUpType } from "@/types/follow-up";
 
 type Raw = Record<string, unknown>;
+export type AnalyticsActivityFilters = Partial<Pick<FollowUpQueryFilters, "assignedTo" | "status" | "fromDate" | "toDate">>;
 
 const rec = (value: unknown): Raw => (value && typeof value === "object" ? (value as Raw) : {});
 const text = (value: unknown): string => (typeof value === "string" ? value : "");
@@ -37,7 +40,7 @@ export function toActivity(value: unknown): ActivityRecord {
     businessName: text(business.name),
     ownerId: text(assignee._id ?? assignee.id),
     ownerName: text(assignee.fullName ?? assignee.name),
-    type: text(raw.type).toUpperCase(),
+    type: normalizeFollowUpType(text(raw.type)),
     status: text(raw.status).toUpperCase(),
     scheduledAt: text(raw.scheduledAt),
     completedAt: text(raw.completedAt) || undefined,
@@ -52,11 +55,11 @@ const MAX_PAGES = 50;
  * Reads every page of a list endpoint. The backend returns the whole collection for large `limit` values today,
  * but the loop keeps working if it starts honouring page sizes.
  */
-async function fetchAll(path: string, signal?: AbortSignal): Promise<unknown[]> {
+async function fetchAll(path: string, signal?: AbortSignal, filters: Record<string, string> = {}): Promise<unknown[]> {
   const rows: unknown[] = [];
   let total = Infinity;
   for (let page = 1; page <= MAX_PAGES && rows.length < total; page++) {
-    const response = await apiClient.get<{ data?: unknown[]; total?: number }>(path, { params: { page, limit: PAGE }, signal });
+    const response = await apiClient.get<{ data?: unknown[]; total?: number }>(path, { params: { ...filters, page, limit: PAGE }, signal });
     const batch = Array.isArray(response.data?.data) ? response.data.data : [];
     total = typeof response.data?.total === "number" ? response.data.total : rows.length + batch.length;
     const known = new Set(rows.map((row) => text(rec(row)._id)));
@@ -71,6 +74,7 @@ export async function fetchAllLeads(signal?: AbortSignal): Promise<LeadRecord[]>
   return (await fetchAll("/businesses", signal)).map(toLead);
 }
 
-export async function fetchAllActivities(signal?: AbortSignal): Promise<ActivityRecord[]> {
-  return (await fetchAll("/follow-ups", signal)).map(toActivity);
+export async function fetchAllActivities(signal?: AbortSignal, filters: AnalyticsActivityFilters = {}): Promise<ActivityRecord[]> {
+  const params = Object.fromEntries(Object.entries(filters).filter((entry): entry is [string, string] => Boolean(entry[1])));
+  return (await fetchAll("/follow-ups", signal, params)).map(toActivity);
 }

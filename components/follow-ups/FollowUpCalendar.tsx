@@ -15,10 +15,10 @@ import { DropdownMenu, DropdownMenuContent, DropdownMenuItem, DropdownMenuTrigge
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from "@/components/ui/tooltip";
 import { useFollowUpHighlight } from "@/hooks/use-follow-up-highlight";
 import { canCancelFollowUp, canCompleteFollowUp, canCreateNextFollowUp, canEditFollowUp } from "@/lib/follow-ups/actions";
-import { formatFollowUpType } from "@/lib/business/form-options";
 import { cn } from "@/lib/utils";
 import type { FollowUpItem } from "@/types/follow-up";
 import FollowUpCommunicationActions from "@/components/follow-ups/FollowUpCommunicationActions";
+import FollowUpTypeLabel from "@/components/common/FollowUpTypeLabel";
 
 const EVENT_TONE: Record<string, string> = {
   SCHEDULED: "border-brand bg-brand-soft/70",
@@ -249,7 +249,7 @@ export default function FollowUpCalendar({
                           <div className="flex items-start gap-1">
                             <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
                               <span className="block truncate text-xs font-bold text-ink" title={item.businessName}>{timeLabel(item.scheduledAt)} · {item.businessName}</span>
-                              <span className="mt-0.5 block truncate text-xs text-muted">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
+                              <span className="mt-0.5 block truncate text-xs text-muted"><FollowUpTypeLabel type={item.type} /> · {item.assignedToName || "Unassigned"}</span>
                             </button>
                             <DropdownMenu>
                               <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-6 text-muted"><MoreVertical className="size-3.5" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
@@ -328,7 +328,7 @@ export default function FollowUpCalendar({
                         <div className="w-14 shrink-0 pt-0.5 text-xs font-bold text-brand-strong">{timeLabel(item.scheduledAt)}</div>
                         <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
                           <span className="block truncate text-sm font-bold text-ink" title={item.businessName}>{item.businessName}</span>
-                          <span className="mt-0.5 block truncate text-xs text-muted">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
+                          <span className="mt-0.5 block truncate text-xs text-muted"><FollowUpTypeLabel type={item.type} /> · {item.assignedToName || "Unassigned"}</span>
                           <StatusBadge status={item.status} className="mt-2" />
                         </button>
                         <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>
@@ -388,7 +388,7 @@ export default function FollowUpCalendar({
                   <div className="w-16 shrink-0 pt-0.5 text-xs font-bold text-ink-soft">{timeLabel(item.scheduledAt)}</div>
                   <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
                     <span className="block truncate text-sm font-bold text-ink hover:text-brand-strong" title={item.businessName}>{item.businessName}</span>
-                    <span className="mt-1 block text-xs text-muted">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
+                    <span className="mt-1 block text-xs text-muted"><FollowUpTypeLabel type={item.type} /> · {item.assignedToName || "Unassigned"}</span>
                     <StatusBadge status={item.status} className="mt-2" />
                   </button>
                   <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>

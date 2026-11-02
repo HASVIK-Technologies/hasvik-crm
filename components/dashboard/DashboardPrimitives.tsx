@@ -1,13 +1,14 @@
 "use client";
 
 import Link from "next/link";
-import { ArrowRight, CalendarClock, CheckCircle2, CircleAlert, Mail, MessageCircle, Phone, Video, type LucideIcon } from "lucide-react";
+import { ArrowRight, CalendarClock, CheckCircle2, CircleAlert, Mail, MapPin, MessageCircle, Phone, Video, type LucideIcon } from "lucide-react";
 import { createContext, useContext, type ReactNode } from "react";
 import type { FollowUpItem, FollowUpQueryFilters } from "@/types/follow-up";
 import { dashboardDateLabel, dashboardPreview } from "@/lib/dashboard/model";
 import { useFollowUpListStore } from "@/store/follow-up-list-store";
 import { useAuthStore } from "@/store/auth-store";
 import { cn } from "@/lib/utils";
+import FollowUpTypeLabel from "@/components/common/FollowUpTypeLabel";
 import { getSubscriptionStatusVisual } from "@/lib/subscriptions/status";
 import type { SubscriptionStatus } from "@/types/subscription";
 
@@ -104,10 +105,10 @@ export function FollowUpQueue({ items, shared, emptyMessage, total }: {
   return <>
     <div className={cn("divide-y", colored ? "divide-white/15" : "divide-surface-2")}>
       {rows.map((item) => {
-        const Icon = ({ CALL: Phone, EMAIL: Mail, WHATSAPP: MessageCircle, MEETING: Video })[item.type] ?? CalendarClock;
+        const Icon = ({ CALL: Phone, EMAIL: Mail, WHATSAPP: MessageCircle, MEETING: Video, VISIT: MapPin })[item.type] ?? CalendarClock;
         return <Link key={item.id} href={`/follow-ups/${encodeURIComponent(item.id)}`} className={cn("group -mx-2 flex items-start gap-3 rounded-xl px-2 py-3 transition-colors first:pt-0 last:pb-0 focus-visible:outline-2", colored ? "hover:bg-surface/5 focus-visible:outline-white" : "hover:bg-brand-soft/50 focus-visible:outline-brand")}>
           <span className={cn("mt-0.5 flex size-9 shrink-0 items-center justify-center rounded-xl ring-1 ring-inset", item.status === "OVERDUE" ? "bg-bad-soft text-bad ring-bad-soft" : typeStyles[item.type] ?? "bg-surface-2 text-muted ring-line")}><Icon className="size-4" /></span>
-          <span className="min-w-0 flex-1"><span className={cn("block truncate text-sm font-semibold", colored ? "text-white" : "text-ink group-hover:text-brand-strong")}>{item.businessName || "Business follow-up"}</span><span className={cn("mt-1 block text-xs leading-relaxed", colored ? "text-white" : "text-muted")}><span className="capitalize">{item.type.toLowerCase().replaceAll("_", " ")}</span> · {dashboardDateLabel(item.scheduledAt, true)}{item.businessCity && <span className="block truncate">{item.businessCity}</span>}{shared && <span className="block truncate">Assigned to {item.assignedToName || "Unassigned"}</span>}{item.notes && <span className="mt-1 line-clamp-1">{item.notes}</span>}</span></span>
+          <span className="min-w-0 flex-1"><span className={cn("block truncate text-sm font-semibold", colored ? "text-white" : "text-ink group-hover:text-brand-strong")}>{item.businessName || "Business follow-up"}</span><span className={cn("mt-1 block text-xs leading-relaxed", colored ? "text-white" : "text-muted")}><FollowUpTypeLabel type={item.type} /> · {dashboardDateLabel(item.scheduledAt, true)}{item.businessCity && <span className="block truncate">{item.businessCity}</span>}{shared && <span className="block truncate">Assigned to {item.assignedToName || "Unassigned"}</span>}{item.notes && <span className="mt-1 line-clamp-1">{item.notes}</span>}</span></span>
           <span className={cn("mt-0.5 shrink-0 rounded-tag px-2 py-1 text-xs font-semibold capitalize", statusStyles[item.status] ?? "bg-surface-2 text-ink-soft")}>{item.status.toLowerCase()}</span>
         </Link>;
       })}

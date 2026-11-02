@@ -1,5 +1,5 @@
 import type { BusinessItem } from "@/types/business";
-import type { FollowUpType } from "@/types/follow-up";
+import type { ApiFollowUpType, FollowUpType } from "@/types/follow-up";
 
 export type PhoneNumber = {
   number?: string;
@@ -220,7 +220,7 @@ export type BusinessesResult = {
 
 export type FollowUpPayload = {
   assignedTo: string;
-  type: FollowUpType;
+  type: ApiFollowUpType;
   scheduledAt: string;
   reminderInMinutes?: number;
 };

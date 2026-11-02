@@ -23,6 +23,7 @@ import {
 import { parseReminderToMinutes } from "@/lib/follow-ups/api";
 import {
   FOLLOW_UP_REMINDER_OPTIONS,
+  normalizeFollowUpType,
   type FollowUpItem,
   type FollowUpOption,
   type FollowUpType,
@@ -51,12 +52,11 @@ const followUpTypes: FollowUpType[] = [
   "MEETING",
   "EMAIL",
   "WHATSAPP",
-  "OTHER",
+  "VISIT",
 ];
 
-function normalizeFollowUpType(type: string): FollowUpType {
-  const normalizedType = type.trim().toUpperCase().replace(/[\s-]+/g, "_");
-
+function getFollowUpType(type: string): FollowUpType {
+  const normalizedType = normalizeFollowUpType(type).replace(/[\s-]+/g, "_");
   return followUpTypes.includes(normalizedType as FollowUpType)
     ? (normalizedType as FollowUpType)
     : "CALL";
@@ -82,7 +82,7 @@ function NextFollowUpForm({
         ? { id: followUp.assignedToId, label: followUp.assignedToName }
         : null,
       scheduledAt: "",
-      type: normalizeFollowUpType(followUp.type),
+      type: getFollowUpType(followUp.type),
       reminder: "",
     },
     mode: "onChange",
