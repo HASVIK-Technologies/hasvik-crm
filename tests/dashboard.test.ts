@@ -24,6 +24,8 @@ test("dashboard roles have explicit personal and workspace scopes", () => {
   }
   assert.equal(dashboardConfig("UNKNOWN"), null);
   assert.equal(dashboardConfig("constructor"), null);
+  assert.equal(dashboardConfig("SALES")?.title, "My sales desk");
+  assert.equal(dashboardConfig("SALES")?.description, "Start with overdue customers, then work through today's conversations.");
 });
 
 test("dashboard date windows use the client timezone across UTC midnight and year boundaries", () => {

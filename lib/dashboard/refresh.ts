@@ -1,4 +1,5 @@
 export const DASHBOARD_REFRESH_INTERVAL = 60_000;
+export type DashboardRefreshMode = "manual" | "auto";
 
 // Polling is controlled by the page, so manual mode has no implicit refetches.
 export const dashboardQueryPolicy = {
@@ -13,6 +14,6 @@ export function isDashboardQuery(query: { meta?: Record<string, unknown> }) {
   return query.meta?.dashboard === true;
 }
 
-export function shouldAutoRefreshDashboard(mode: "manual" | "auto", visible: boolean, online: boolean, fetching: boolean) {
+export function shouldAutoRefreshDashboard(mode: DashboardRefreshMode, visible: boolean, online: boolean, fetching: boolean) {
   return mode === "auto" && visible && online && !fetching;
 }

@@ -1,6 +1,6 @@
 "use client";
 
-import { useMemo, useState } from "react";
+import { Suspense, useMemo, useState } from "react";
 import { ChartNoAxesCombined, Filter, Plus } from "lucide-react";
 import { toast } from "sonner";
 import Actions from "@/components/common/Actions";
@@ -34,6 +34,7 @@ import type {
   FollowUpQueryFilters,
 } from "@/types/follow-up";
 import FollowUpViewToggle from "@/components/follow-ups/FollowUpViewToggle";
+import { useFollowUpUrlFilters } from "@/hooks/use-follow-up-url-filters";
 
 function dayBoundary(offset: number, end = false) {
   const date = new Date();
@@ -54,7 +55,8 @@ function calendarGridBoundary(month: string, end = false) {
   return date.toISOString();
 }
 
-export default function FollowupsPage() {
+function FollowupsContent() {
+  useFollowUpUrlFilters();
   const [dialogOpen, setDialogOpen] = useState(false);
   const [initialScheduledAt, setInitialScheduledAt] = useState<string>();
   const [editFollowUp, setEditFollowUp] = useState<FollowUpItem>();
@@ -344,5 +346,13 @@ export default function FollowupsPage() {
         />
       )}
     </>
+  );
+}
+
+export default function FollowupsPage() {
+  return (
+    <Suspense fallback={<div className="h-64 w-full animate-pulse bg-slate-100" role="status">Loading follow-ups...</div>}>
+      <FollowupsContent />
+    </Suspense>
   );
 }

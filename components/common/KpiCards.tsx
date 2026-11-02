@@ -1,13 +1,26 @@
+import Link from "next/link";
+import { ArrowDownRight, ArrowUpRight, Minus } from "lucide-react";
 import type { LucideIcon } from "lucide-react";
 import { cn } from "@/lib/utils";
 
 export type KpiTone = "blue" | "cyan" | "green" | "amber" | "red" | "violet" | "slate";
+
+export interface KpiDelta {
+  percent: number | null;
+  label: string;
+  invert?: boolean;
+}
 
 export interface KpiItem {
   label: string;
   value: React.ReactNode;
   icon: LucideIcon;
   tone?: KpiTone;
+  hint?: string;
+  href?: string;
+  active?: boolean;
+  delta?: KpiDelta;
+  count?: number;
 }
 
 const toneStyles: Record<KpiTone, string> = {
@@ -64,54 +77,89 @@ export default function KpiCards({
   items: KpiItem[];
   loading?: boolean;
   className?: string;
-  variant?: "default" | "brand" | "tinted" | "solid";
+  variant?: "default" | "dashboard" | "brand" | "tinted" | "solid";
 }) {
   const branded = variant === "brand" || variant === "solid";
   return (
     <section
       aria-label="Key performance indicators"
       className={cn(
-        "grid grid-cols-2 gap-2 sm:gap-3 xl:grid-cols-[repeat(auto-fit,minmax(210px,1fr))]",
+        "grid grid-cols-2 gap-2 sm:gap-3",
+        "xl:grid-cols-[repeat(auto-fit,minmax(210px,1fr))]",
         className,
       )}
     >
-      {items.map(({ label, value, icon: Icon, tone = "blue" }) => (
-        <article
-          key={label}
-          className={cn(
-            "relative isolate flex min-h-20 items-center gap-2.5 overflow-hidden border px-3 py-3 sm:gap-4 sm:px-5 sm:py-4",
-            variant === "solid"
-              ? cn("border-l-4 text-white shadow-[0_2px_8px_rgba(15,38,61,0.1)] [&_[aria-label=Loading]]:bg-white/20", solidStyles[tone])
-              : branded
-              ? cn("min-h-28 rounded-none text-white shadow-[0_4px_14px_rgba(15,38,61,0.12)] sm:min-h-32 [&_[aria-label=Loading]]:bg-white/20", brandStyles[tone])
-              : variant === "tinted"
-                ? cn("border-l-[3px] bg-linear-to-r shadow-[0_1px_2px_rgba(15,23,42,0.035)]", tintedStyles[tone])
-                : "border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.035)]",
-          )}
-        >
-          {variant === "brand" && <span aria-hidden="true" className="pointer-events-none absolute -right-9 -top-12 -z-10 size-36 rounded-full border border-white/5 bg-white/3" />}
-          <span
+      {items.map(({ label, value, icon: Icon, tone = "blue", hint, href, active, delta, count }) => {
+        const numericCount = count ?? (typeof value === "number" ? value : Number.NaN);
+        const interactive = Boolean(href) && numericCount !== 0 && !loading;
+        const card = (
+          <article
             className={cn(
-              "flex size-9 shrink-0 items-center justify-center sm:size-11",
-              branded ? cn("bg-white/10 ring-1 ring-inset ring-white/15", brandIconStyles[tone]) : toneStyles[tone],
+              "relative isolate flex min-h-20 items-center gap-2.5 overflow-hidden border px-3 py-3 sm:gap-4 sm:px-5 sm:py-4",
+              variant === "dashboard" && "h-full items-start rounded-none py-2.5 sm:py-3",
+              variant === "solid"
+                ? cn("border-l-4 text-white shadow-[0_2px_8px_rgba(15,38,61,0.1)] [&_[aria-label=Loading]]:bg-white/20", solidStyles[tone])
+                : branded
+                  ? cn("min-h-28 rounded-none text-white shadow-[0_4px_14px_rgba(15,38,61,0.12)] sm:min-h-32 [&_[aria-label=Loading]]:bg-white/20", brandStyles[tone])
+                  : variant === "dashboard"
+                    ? "border-line bg-white shadow-card"
+                    : variant === "tinted"
+                      ? cn("border-l-[3px] bg-linear-to-r shadow-[0_1px_2px_rgba(15,23,42,0.035)]", tintedStyles[tone])
+                      : "border-slate-200 bg-white shadow-[0_1px_2px_rgba(15,23,42,0.035)]",
+              active && "ring-2 ring-brand-blue/40",
             )}
           >
-            <Icon className="size-5" strokeWidth={1.9} />
-          </span>
-          <span className="min-w-0">
-            {loading ? (
-              <span className={cn("mb-1.5 block h-7 w-14 animate-pulse", branded ? "bg-white/20" : "bg-slate-100")} />
-            ) : (
-              <span className={cn("block text-xl font-bold tracking-tight sm:text-2xl", branded ? "text-white" : "text-slate-900", variant === "brand" && "sm:text-3xl")}>
-                {value}
-              </span>
-            )}
-            <span className={cn("mt-0.5 block text-[10px] font-medium leading-tight sm:text-xs", branded ? "text-white" : "text-slate-500")}>
-              {label}
+            {variant === "brand" && <span aria-hidden="true" className="pointer-events-none absolute -right-9 -top-12 -z-10 size-36 rounded-full border border-white/5 bg-white/3" />}
+            <span className={cn("flex size-9 shrink-0 items-center justify-center sm:size-11", branded ? cn("bg-white/10 ring-1 ring-inset ring-white/15", brandIconStyles[tone]) : toneStyles[tone])}>
+              <Icon className="size-5" strokeWidth={1.9} />
             </span>
-          </span>
-        </article>
-      ))}
+            <span className="min-w-0">
+              {loading ? (
+                <span className={cn("mb-1.5 block h-7 w-14 animate-pulse", branded ? "bg-white/20" : "bg-slate-100")} />
+              ) : (
+                <span className={cn("block text-xl font-bold tracking-tight sm:text-2xl", branded ? "text-white" : variant === "dashboard" ? "text-ink" : "text-slate-900", variant === "brand" && "sm:text-3xl")}>
+                  {value}
+                </span>
+              )}
+              <span className={cn("mt-0.5 block text-[10px] font-medium leading-tight sm:text-xs", branded ? "text-white" : variant === "dashboard" ? "text-ink-soft" : "text-slate-500")}>
+                {label}
+              </span>
+              {!loading && hint && <span className={cn("mt-1 block text-xs", branded ? "text-white/90" : variant === "dashboard" ? "text-ink-soft" : "text-slate-500")}>{hint}</span>}
+              {!loading && delta && (
+                <KpiDeltaLabel delta={delta} branded={branded} />
+              )}
+            </span>
+          </article>
+        );
+        const wrapper = "block h-full w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue";
+
+        return (
+          <div key={label} className="min-w-0">
+            {interactive && href ? (
+              <Link href={href} className={wrapper}>{card}</Link>
+            ) : card}
+          </div>
+        );
+      })}
     </section>
+  );
+}
+
+function KpiDeltaLabel({ delta, branded }: { delta: KpiDelta; branded: boolean }) {
+  const { percent, label, invert = false } = delta;
+  if (percent === null) {
+    return <span className={cn("mt-1 block text-xs", branded ? "text-white/90" : "text-slate-500")}>{label}: no earlier data</span>;
+  }
+
+  const unchanged = percent === 0;
+  const increased = percent > 0;
+  const improved = !unchanged && increased !== invert;
+  const Icon = unchanged ? Minus : increased ? ArrowUpRight : ArrowDownRight;
+  return (
+    <span className={cn("mt-1 flex flex-wrap items-center gap-1 text-xs tabular-nums", branded ? "text-white/90" : unchanged ? "text-slate-500" : improved ? "text-emerald-700" : "text-rose-700")}>
+      <Icon className="size-3.5 shrink-0" aria-hidden />
+      <span className="font-semibold">{unchanged ? "No change" : `${increased ? "Up" : "Down"} ${Math.abs(percent)}%`}</span>
+      <span>{label}</span>
+    </span>
   );
 }

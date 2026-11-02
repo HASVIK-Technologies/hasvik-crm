@@ -1,6 +1,6 @@
 # Dashboard endpoint changes
 
-Checked against the deployed [Swagger specification](https://crm-backend-three-phi.vercel.app/swagger-json) on 25 October 2026. Routes below include the `/api` prefix used by the backend.
+Checked against the deployed [Swagger UI](https://hasvik-crm-backend-prod.vercel.app/swagger). Routes below include the `/api` prefix used by the backend.
 
 Dashboard record previews now display at most five entries. Tenant and follow-up previews request `page=1&limit=5`. Count-only requests still fetch one record and read the server total. Full totals and status summaries must be computed before pagination.
 
