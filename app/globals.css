@@ -134,18 +134,10 @@
     font-feature-settings: "cv02", "cv03", "cv04", "cv11";
   }
 
-  /* Hasvik uses a crisp, square visual language across controls and surfaces. */
-  button,
-  input,
-  textarea,
-  select,
-  [role="button"],
-  [data-slot="button"],
-  [data-slot="input"],
-  [data-slot="textarea"],
-  [data-slot="select-trigger"],
-  [data-slot="select-content"],
-  [data-slot="card"] {
+  /* Hasvik uses a crisp, square visual language across controls and surfaces. The sign-in page (.login-look)
+     is the one exception and keeps its own rounded look. */
+  :where(button, input, textarea, select, [role="button"], [data-slot="button"], [data-slot="input"],
+    [data-slot="textarea"], [data-slot="select-trigger"], [data-slot="select-content"], [data-slot="card"]):not(.login-look *) {
     border-radius: 0 !important;
   }
 
@@ -154,15 +146,15 @@
   }
 
   /* Form confirmations are intentionally blue, distinct from green primary actions. */
-  button[type="submit"]:not([data-variant="outline"]),
-  input[type="submit"] {
+  button[type="submit"]:not([data-variant="outline"], .login-look *),
+  input[type="submit"]:not(.login-look *) {
     background-color: var(--brand-blue) !important;
     border-color: var(--brand-blue) !important;
     color: #ffffff !important;
   }
 
-  button[type="submit"]:not([data-variant="outline"]):hover,
-  input[type="submit"]:hover {
+  button[type="submit"]:not([data-variant="outline"], .login-look *):hover,
+  input[type="submit"]:not(.login-look *):hover {
     background-color: #0667b8 !important;
     border-color: #0667b8 !important;
   }
