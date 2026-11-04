@@ -44,7 +44,7 @@ import {
 
 const navigation = [
   { label: "Dashboard", href: "/dashboard", icon: LayoutDashboard },
-  { label: "Businesses", href: "/businesses", icon: Building2 },
+  { label: "Leads", href: "/businesses", icon: Building2 },
   { label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2 },
   { label: "User management", href: "/users", icon: Users },
   { label: "Business categories", href: "/business-categories", icon: FolderKanban },
@@ -75,7 +75,7 @@ const pageDetails: Record<string, { title: string }> = {
     title: "Dashboard",
   },
   "/businesses": {
-    title: "All Businesses",
+    title: "All Leads",
   },
 };
 
@@ -124,13 +124,13 @@ function getPageDetails(pathname: string) {
   if (pathname === "/businesses/form" || pathname.startsWith("/businesses/form/")) {
     const isEdit = pathname.startsWith("/businesses/form/");
     return {
-      title: isEdit ? "Edit Business" : "Add Business",
+      title: isEdit ? "Edit Lead" : "Add Lead",
     };
   }
 
   if (pathname.startsWith("/businesses/") && !pathname.startsWith("/businesses/form")) {
     return {
-      title: "Business Details",
+      title: "Lead Details",
     };
   }
 

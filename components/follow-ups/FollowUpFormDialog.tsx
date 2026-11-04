@@ -115,7 +115,7 @@ export default function FollowUpFormDialog({
   }, [mode, open, initialBusiness, initialScheduledAt, followUp, reset]);
 
   const submit = async (values: FormValues) => {
-    if (readOnly) { toast.error("Select an active business before saving a follow-up."); return; }
+    if (readOnly) { toast.error("Select an active lead before saving a follow-up."); return; }
     const scheduledAt = fromDateTimeLocalValue(values.scheduledAt);
     const business = mode === "edit"
       ? followUp && { id: followUp.businessId, label: followUp.businessName }
@@ -175,7 +175,7 @@ export default function FollowUpFormDialog({
               <DialogPrimitive.Description className="mt-1 text-xs text-[#64748b]">
                 {isEdit
                   ? "Update the schedule, assignee, and reminder."
-                  : "Schedule the next touchpoint for a business."}
+                  : "Schedule the next touchpoint for a lead."}
               </DialogPrimitive.Description>
             </div>
             <DialogPrimitive.Close asChild>
@@ -188,11 +188,11 @@ export default function FollowUpFormDialog({
               </button>
             </DialogPrimitive.Close>
           </header>
-          {inactiveSelection && <p role="status" className="mx-5 mb-4 border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">This business is inactive. Activate it from business details before making changes.</p>}
+          {inactiveSelection && <p role="status" className="mx-5 mb-4 border border-amber-200 bg-amber-50 p-3 text-xs text-amber-900">This lead is inactive. Activate it from lead details before making changes.</p>}
           {!inactiveSelection && <form onSubmit={handleSubmit(submit)} noValidate className="space-y-5 px-5 sm:px-6">
             <div>
               <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-                Business {!isEdit && !initialBusiness && <span className="text-red-500">*</span>}
+                Lead {!isEdit && !initialBusiness && <span className="text-red-500">*</span>}
               </label>
               {isEdit || initialBusiness ? (
                 <div className="relative">
@@ -209,14 +209,14 @@ export default function FollowUpFormDialog({
                   <Controller
                     control={control}
                     name="business"
-                    rules={{ validate: (value) => Boolean(value?.id) || "Business is required." }}
+                    rules={{ validate: (value) => Boolean(value?.id) || "Lead is required." }}
                     render={({ field }) => (
                       <FollowUpAutocomplete
                         kind="business"
                         value={field.value?.id}
                         label={field.value?.label}
                         onChange={(option) => field.onChange(option ?? null)}
-                        placeholder="Select business"
+                        placeholder="Select lead"
                         invalid={Boolean(errors.business)}
                       />
                     )}

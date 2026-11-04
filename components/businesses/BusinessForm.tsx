@@ -55,6 +55,7 @@ import { normalizeHttpUrl } from "@/lib/business/url-validation";
 import { toBusinessUpdatePayload } from "@/lib/business/update-payload";
 import type { FollowUpType } from "@/types/follow-up";
 import { toDateTimeLocalValue } from "@/lib/forms/date-time";
+import { hasBusinessProfileFields } from "@/lib/business/lead-type";
 import { useAuthStore } from "@/store/auth-store";
 import { useBusinessListStore } from "@/store/business-list-store";
 
@@ -68,7 +69,7 @@ const MAX_FORM_STEP_INDEX = 2;
 // Friendly labels used to build the "Please fill in..." summary banner from
 // whatever react-hook-form's `errors` object contains.
 const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
-  businessName: "Business Name",
+  businessName: "Name",
   category: "Category",
   city: "City",
   state: "State",
@@ -126,7 +127,7 @@ function OptionalFollowUp({ idPrefix }: { idPrefix: string }) {
         render={({ field }) => (
           <label className="flex cursor-pointer items-start gap-3 px-4 py-3.5">
             <Checkbox checked={field.value} onCheckedChange={(checked) => field.onChange(checked === true)} className="mt-0.5 rounded-none" />
-            <span><span className="block text-sm font-semibold text-slate-900">Schedule the first follow-up</span><span className="mt-0.5 block text-xs text-slate-500">Optional. You can add this later from the business details page.</span></span>
+            <span><span className="block text-sm font-semibold text-slate-900">Schedule the first follow-up</span><span className="mt-0.5 block text-xs text-slate-500">Optional. You can add this later from the lead details page.</span></span>
           </label>
         )}
       />
@@ -389,7 +390,7 @@ export default function BusinessForm({
       .then((data) => {
         if (!isMounted) return;
         if (!data || !data._id) {
-          setLoadError(`Business with ID #${targetId} not found.`);
+          setLoadError(`Lead with ID #${targetId} not found.`);
           setIsLoadingBusiness(false);
           return;
         }
@@ -503,7 +504,7 @@ export default function BusinessForm({
       .catch((err: unknown) => {
         if (!isMounted) return;
         setLoadError(
-          `Unable to load business details: ${
+          `Unable to load lead details: ${
             err instanceof Error ? err.message : "Not found"
           }`,
         );
@@ -663,7 +664,7 @@ export default function BusinessForm({
   const steps = [
     {
       key: "business",
-      title: "Business Information",
+      title: "Lead Information",
       render: (idPrefix: string) => <BusinessInfoSection idPrefix={idPrefix} />,
     },
     {
@@ -718,22 +719,26 @@ export default function BusinessForm({
     setSubmitError(null);
     setIsSubmitting(true);
 
+    // Website and description only exist for businesses; an individual's save leaves them out entirely, so nothing
+    // already stored is changed or cleared.
+    const businessProfile = hasBusinessProfileFields(values.categoryName)
+      ? {
+          website: isEditMode ? normalizeHttpUrl(values.website) || null : normalizeHttpUrl(values.website) || undefined,
+          description: isEditMode ? values.description : values.description || undefined,
+        }
+      : {};
+
     const payload: Record<string, unknown> = {
       name: values.businessName.trim(),
       status: values.status || "Active",
       email: isEditMode
         ? values.email.trim() || null
         : values.email.trim() || undefined,
-      website: isEditMode
-        ? normalizeHttpUrl(values.website) || null
-        : normalizeHttpUrl(values.website) || undefined,
+      ...businessProfile,
       address: values.address.trim() || undefined,
       city: values.city.trim() || undefined,
       state: values.state.trim() || undefined,
       pincode: values.pincode.trim() || undefined,
-      description: isEditMode
-        ? values.description
-        : values.description || undefined,
       phoneNumbers: values.phoneNumbers
         .filter((p) => p.value.trim())
         .map((p, idx) => ({ number: p.value.trim(), isPrimary: idx === 0 })),
@@ -800,7 +805,7 @@ export default function BusinessForm({
       setSubmitError(
         err instanceof Error
           ? err.message
-          : "Failed to save business. Please try again.",
+          : "Failed to save lead. Please try again.",
       );
     } finally {
       setIsSubmitting(false);
@@ -822,7 +827,7 @@ export default function BusinessForm({
         <div className="flex flex-col items-center justify-center gap-3">
           <Loader2 className="size-8 animate-spin text-primary" />
           <p className="text-sm font-medium text-[#64748b]">
-            Loading business details...
+            Loading lead details...
           </p>
         </div>
       </Card>
@@ -837,7 +842,7 @@ export default function BusinessForm({
             <AlertCircle className="size-6" />
           </div>
           <h3 className="text-base font-bold text-[#0f172a]">
-            Business Not Found
+            Lead Not Found
           </h3>
           <p className="text-sm text-[#64748b]">{loadError}</p>
           <OutlinedButton
@@ -845,7 +850,7 @@ export default function BusinessForm({
             onClick={() => router.push("/businesses")}
             className="mt-3 gap-2"
           >
-            <ArrowLeft className="size-4" /> Back to Businesses
+            <ArrowLeft className="size-4" /> Back to Leads
           </OutlinedButton>
         </div>
       </Card>
@@ -868,7 +873,7 @@ export default function BusinessForm({
         {isDesktop ? (
           <Card className="overflow-hidden rounded-none border-slate-200 bg-white shadow-sm">
             <CardContent className="px-4 py-5 sm:px-7 sm:py-6 lg:px-8">
-              <FormSection title="Business Information" first>
+              <FormSection title="Lead Information" first>
                 <BusinessInfoSection idPrefix="desktop-" />
               </FormSection>
 
@@ -880,7 +885,7 @@ export default function BusinessForm({
                 />
               </FormSection>
 
-              {SHOW_ADDITIONAL_INFORMATION && (
+              {SHOW_ADDITIONAL_INFORMATION && hasBusinessProfileFields(watchedValues.categoryName) && (
                 <FormSection
                   icon={FileText}
                   title="Additional Information"
@@ -904,7 +909,7 @@ export default function BusinessForm({
                     onClick={handleBackToBusinesses}
                     className="w-full sm:w-auto"
                   >
-                    Back to Business
+                    Back to Leads
                   </OutlinedButton>
 
                   <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
@@ -997,7 +1002,7 @@ export default function BusinessForm({
                     }
                     className="w-full sm:w-auto"
                   >
-                    {currentStep === 0 ? "Back to Business" : "Back"}
+                    {currentStep === 0 ? "Back to Leads" : "Back"}
                   </OutlinedButton>
 
                   {isLastStep ? (
@@ -1059,7 +1064,7 @@ export default function BusinessForm({
                 onClick={handleBackToBusinesses}
                 className="w-full sm:w-auto"
               >
-                Back to Business
+                Back to Leads
               </OutlinedButton>
               <div className="flex flex-col-reverse items-stretch gap-3 sm:flex-row sm:items-center">
                 <OutlinedButton
@@ -1080,7 +1085,7 @@ export default function BusinessForm({
                   className="w-full sm:w-auto"
                 >
                   <Save className="size-4" />
-                  {isSubmitting ? "Saving..." : "Save Business"}
+                  {isSubmitting ? "Saving..." : "Save Lead"}
                 </SaveButton>
               </div>
             </div>
@@ -1090,7 +1095,7 @@ export default function BusinessForm({
       <ManagementConfirmDialog
         open={isDiscardDialogOpen}
         title="Discard changes?"
-        description="You have unsaved changes to this business. If you leave now, those changes will be discarded."
+        description="You have unsaved changes to this lead. If you leave now, those changes will be discarded."
         confirmLabel="Discard changes"
         onCancel={cancelDiscardChanges}
         onConfirm={discardChangesAndLeave}

@@ -16,8 +16,8 @@ export default async function EditBusinessPage({ params }: EditBusinessPageProps
       breadcrumb={
         <Breadcrumb
           items={[
-            { label: "Businesses", href: "/businesses" },
-            { label: "Edit Business" },
+            { label: "Leads", href: "/businesses" },
+            { label: "Edit Lead" },
           ]}
         />
       }

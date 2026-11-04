@@ -16,13 +16,13 @@ test("one timeline event describes every saved change with readable names and st
   ]);
 });
 
-test("updates describe assignment, activation and business name", () => {
+test("updates describe assignment, activation and lead name", () => {
   assert.deepEqual(getActivityMessages("UPDATE", [
     { field: "assignedTo", label: "Assigned to", value: "Abhishek Gupta" },
     { field: "isActive", label: "Active", value: "No" },
     { field: "name", label: "Business name", value: "ABC Furniture" },
-  ]), ["Assigned to Abhishek Gupta", "Business deactivated", "Business name changed to ABC Furniture"]);
-  assert.deepEqual(getActivityMessages("UPDATE", [{ field: "isActive", label: "Active", value: "Yes" }]), ["Business activated"]);
+  ]), ["Assigned to Abhishek Gupta", "Lead deactivated", "Lead name changed to ABC Furniture"]);
+  assert.deepEqual(getActivityMessages("UPDATE", [{ field: "isActive", label: "Active", value: "Yes" }]), ["Lead activated"]);
 });
 
 test("clears, missing values and unresolved IDs have useful fallbacks", () => {
@@ -31,7 +31,7 @@ test("clears, missing values and unresolved IDs have useful fallbacks", () => {
     { field: "email", label: "Email", value: "Not set" },
     { field: "assignedTo", label: "Assigned to", value: "6acce8d66133771d62ca1e2e" },
     { field: "status", label: "Lead status", value: "Value unavailable" },
-  ]), ["Business unassigned", "Email cleared", "Business assignment updated", "Lead status updated"]);
+  ]), ["Lead unassigned", "Email cleared", "Lead assignment updated", "Lead status updated"]);
 });
 
 test("creation keeps its original event title", () => {

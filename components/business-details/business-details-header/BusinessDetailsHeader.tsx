@@ -79,7 +79,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
               href={locationData.mapLink || "#"}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="View business location on Google Maps"
+              aria-label="View lead location on Google Maps"
               title="Open in Maps"
               onClick={(e) => openGoogleMapsOnce(e, locationData.mapLink)}
             >

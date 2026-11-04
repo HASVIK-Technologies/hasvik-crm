@@ -26,13 +26,13 @@ export default function BusinessStats({
 
   const cards: KpiItem[] = [
     {
-      label: "Total Businesses",
+      label: "Total Leads",
       value: total,
       icon: Building2,
       tone: "blue",
     },
     {
-      label: "Active Businesses",
+      label: "Active Leads",
       value: active,
       icon: Store,
       tone: "green",

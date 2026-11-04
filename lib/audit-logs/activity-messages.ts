@@ -1,6 +1,6 @@
 type SavedField = { field: string; label: string; value: string };
 
-export function getActivityMessages(action: string, fields: SavedField[], entityLabel = "Business"): string[] {
+export function getActivityMessages(action: string, fields: SavedField[], entityLabel = "Lead"): string[] {
   if (!["UPDATE", "ASSIGN", "STATUS_CHANGE"].includes(action)) return [];
   return fields.map(({ field, label, value }) => {
     if (value === "Value unavailable" || value === "Details unavailable") return `${label} updated`;
@@ -14,7 +14,7 @@ export function getActivityMessages(action: string, fields: SavedField[], entity
     }
     if (field === "name") return cleared ? `${entityLabel} name cleared` : `${entityLabel} name changed to ${value}`;
     if (field === "status") {
-      const statusLabel = entityLabel === "Business" ? "Lead status" : `${entityLabel} status`;
+      const statusLabel = entityLabel === "Lead" ? "Lead status" : `${entityLabel} status`;
       return cleared ? `${statusLabel} cleared` : `${statusLabel} changed to ${value}`;
     }
     if (field === "categoryId" || field === "category") {

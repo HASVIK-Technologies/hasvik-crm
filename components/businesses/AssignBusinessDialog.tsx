@@ -79,7 +79,7 @@ export default function AssignBusinessDialog({
                   Assign responsible person
                 </DialogPrimitive.Title>
                 <DialogPrimitive.Description className="mt-1 truncate text-xs text-slate-500">
-                  Choose who will own and manage {business?.name || "this business"}.
+                  Choose who will own and manage {business?.name || "this lead"}.
                 </DialogPrimitive.Description>
               </div>
             </div>
@@ -114,7 +114,7 @@ export default function AssignBusinessDialog({
                 </p>
               ) : (
                 <p className="mt-2 text-xs leading-5 text-slate-500">
-                  This person will be shown as the business owner across the list, pipeline, and details views.
+                  This person will be shown as the lead owner across the list, pipeline, and details views.
                 </p>
               )}
             </div>

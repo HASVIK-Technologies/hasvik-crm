@@ -280,7 +280,7 @@ export default function BusinessTable({
         <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] p-3 md:p-4 sm:flex-row sm:items-center sm:justify-between">
           <div className="flex items-center gap-2.5">
             <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
-              Businesses <span className="font-medium text-[#64748b]">({displayCount})</span>
+              Leads <span className="font-medium text-[#64748b]">({displayCount})</span>
             </h2>
           </div>
 
@@ -356,9 +356,9 @@ export default function BusinessTable({
               <div className="flex size-12 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
                 <Building2 className="size-6 text-[#94a3b8]" />
               </div>
-              <h3 className="text-base font-semibold text-[#0f172a]">No businesses found</h3>
+              <h3 className="text-base font-semibold text-[#0f172a]">No leads found</h3>
               <p className="mt-1 text-xs text-[#64748b] max-w-xs">
-                No businesses match your current search and filter criteria. Try clearing some filters.
+                No leads match your current search and filter criteria. Try clearing some filters.
               </p>
               {onClearFilters && (
                 <button
@@ -484,7 +484,7 @@ export default function BusinessTable({
                                 }}
                                 className="cursor-pointer gap-2 text-xs"
                               >
-                                <Pencil className="size-3.5" /> <span>Edit Business</span>
+                                <Pencil className="size-3.5" /> <span>Edit Lead</span>
                               </DropdownMenuItem>
                               <DropdownMenuItem
                                 onSelect={() => setAssignmentBusiness(item)}
@@ -520,7 +520,7 @@ export default function BusinessTable({
           <Table className="w-full min-w-max text-left">
             <TableHeader className="text-[13px] font-semibold">
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
-                <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Business Name</TableHead>
+                <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Lead Name</TableHead>
                 {columnVisible("category") && <TableHead className="px-4 py-4 font-semibold">Category</TableHead>}
                 {columnVisible("city") && <TableHead className="px-4 py-4 font-semibold">City</TableHead>}
                 {columnVisible("responsible") && <TableHead className="min-w-44 px-4 py-4 font-semibold">Responsible Person</TableHead>}
@@ -581,9 +581,9 @@ export default function BusinessTable({
                       <div className="flex size-14 items-center justify-center rounded-2xl bg-[#f1f5f9] text-[#64748b] mb-3">
                         <Building2 className="size-7 text-[#94a3b8]" />
                       </div>
-                      <h3 className="text-base font-semibold text-[#0f172a]">No businesses found</h3>
+                      <h3 className="text-base font-semibold text-[#0f172a]">No leads found</h3>
                       <p className="mt-1 text-sm text-[#64748b] max-w-sm">
-                        No businesses match your current search and filter criteria. Try clearing some filters or searching for something else.
+                        No leads match your current search and filter criteria. Try clearing some filters or searching for something else.
                       </p>
                       {onClearFilters && (
                         <button
@@ -732,7 +732,7 @@ export default function BusinessTable({
                                   }}
                                   className="cursor-pointer gap-2 text-xs"
                                 >
-                                  <Pencil className="size-3.5" /> <span>Edit Business</span>
+                                  <Pencil className="size-3.5" /> <span>Edit Lead</span>
                                 </DropdownMenuItem>
                                 <DropdownMenuItem
                                   onSelect={() => setAssignmentBusiness(item)}

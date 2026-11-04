@@ -217,7 +217,7 @@ function BusinessesContent() {
     <SearchWithSuggestions
       searchTerm={search}
       onSearchTermChange={setSearch}
-      placeholder="Search by business name or phone number..."
+      placeholder="Search by name or phone number..."
     />
   );
 
@@ -239,7 +239,7 @@ function BusinessesContent() {
 
   return (
     <ListPageLayout
-      breadcrumb={<Breadcrumb items={[{ label: "Businesses" }]} />}
+      breadcrumb={<Breadcrumb items={[{ label: "Leads" }]} />}
       customSearch={searchControl}
       filters={filterControls}
       showStats={showStats}
@@ -251,7 +251,7 @@ function BusinessesContent() {
       actions={
         <Actions
           primary={{
-            label: "Add Business",
+            label: "Add Lead",
             href: "/businesses/form",
             icon: <Plus className="size-4" />,
           }}
@@ -275,7 +275,7 @@ function BusinessesContent() {
       content={
         listError ? (
           <div role="alert" className="rounded-2xl border border-red-200 bg-red-50 p-12 text-center text-sm text-red-700">
-            Unable to load businesses or dashboard filters from the API.
+            Unable to load leads or dashboard filters from the API.
             <button
               type="button"
               onClick={retryList}
@@ -334,7 +334,7 @@ export default function BusinessesPage() {
     <Suspense
       fallback={
         <div className="flex h-64 items-center justify-center text-sm text-[#64748b]">
-          Loading businesses...
+          Loading leads...
         </div>
       }
     >

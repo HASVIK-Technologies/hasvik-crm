@@ -9,8 +9,8 @@ export default function BusinessFormPage() {
       breadcrumb={
         <Breadcrumb
           items={[
-            { label: "Businesses", href: "/businesses" },
-            { label: "Add Business" },
+            { label: "Leads", href: "/businesses" },
+            { label: "Add Lead" },
           ]}
         />
       }

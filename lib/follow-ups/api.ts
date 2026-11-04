@@ -252,7 +252,7 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
     tenantIsActive: typeof value.tenantIsActive === "boolean" ? value.tenantIsActive : undefined,
     businessId: String(typeof value.businessId === "string" ? value.businessId : business._id ?? business.id ?? ""),
     businessName: String(
-      value.businessName ?? business.name ?? "Unknown business",
+      value.businessName ?? business.name ?? "Unknown lead",
     ),
     businessCity: (value.businessCity || business.city)
       ? String(value.businessCity || business.city)
@@ -533,8 +533,8 @@ export async function getFollowUp(id: string, signal?: AbortSignal) {
 }
 
 async function assertBusinessActive(id: string) {
-  if (!id) throw new Error("A business is required to change follow-ups.");
-  if (isRecordInactive(await getBusinessRaw(id))) throw new Error("This business is inactive. Activate it before changing follow-ups.");
+  if (!id) throw new Error("A lead is required to change follow-ups.");
+  if (isRecordInactive(await getBusinessRaw(id))) throw new Error("This lead is inactive. Activate it before changing follow-ups.");
 }
 
 export async function assertFollowUpWritable(id: string) {

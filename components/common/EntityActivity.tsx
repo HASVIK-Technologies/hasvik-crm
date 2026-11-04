@@ -7,11 +7,11 @@ import type { AuditEntityType } from "@/types/audit-log";
 import { getActivityMessages } from "@/lib/audit-logs/activity-messages";
 
 const actionDetails: Record<string, { label: string; icon: typeof Activity; tone: string }> = {
-  CREATE: { label: "Business created", icon: Plus, tone: "bg-emerald-50 text-emerald-700" },
-  UPDATE: { label: "Business updated", icon: Edit3, tone: "bg-blue-50 text-blue-700" },
-  DELETE: { label: "Business deleted", icon: Activity, tone: "bg-rose-50 text-rose-700" },
-  APPROVE: { label: "Business approved", icon: CheckCircle2, tone: "bg-emerald-50 text-emerald-700" },
-  REJECT: { label: "Business rejected", icon: Activity, tone: "bg-rose-50 text-rose-700" },
+  CREATE: { label: "Lead created", icon: Plus, tone: "bg-emerald-50 text-emerald-700" },
+  UPDATE: { label: "Lead updated", icon: Edit3, tone: "bg-blue-50 text-blue-700" },
+  DELETE: { label: "Lead deleted", icon: Activity, tone: "bg-rose-50 text-rose-700" },
+  APPROVE: { label: "Lead approved", icon: CheckCircle2, tone: "bg-emerald-50 text-emerald-700" },
+  REJECT: { label: "Lead rejected", icon: Activity, tone: "bg-rose-50 text-rose-700" },
   ASSIGN: { label: "Owner assigned", icon: UserRoundCog, tone: "bg-violet-50 text-violet-700" },
   NOTE: { label: "Note added", icon: MessageSquareText, tone: "bg-amber-50 text-amber-700" },
   STATUS_CHANGE: { label: "Lead status changed", icon: RefreshCw, tone: "bg-cyan-50 text-cyan-700" },
@@ -28,11 +28,13 @@ function formatTime(value?: string) {
 }
 
 const entityLabels: Record<AuditEntityType, string> = {
-  BUSINESS: "Business", FOLLOWUP: "Follow-up", CATEGORY: "Category",
+  BUSINESS: "Lead", FOLLOWUP: "Follow-up", CATEGORY: "Category",
   SUBSCRIPTION: "Subscription", USER: "User", TENANT: "Tenant",
 };
 
-export default function EntityActivity({ entityType, entityId }: { entityType: AuditEntityType; entityId: string }) {
+const NO_FIELDS: readonly string[] = [];
+
+export default function EntityActivity({ entityType, entityId, hiddenFields = NO_FIELDS }: { entityType: AuditEntityType; entityId: string; /** Saved-field names to leave out of the timeline. */ hiddenFields?: readonly string[] }) {
   const entityLabel = entityLabels[entityType];
   const { data, isLoading, isError, refetch, isFetching } = useEntityAuditLogsQuery(entityType, entityId);
   const logs = [...(data?.logs ?? [])].sort((a, b) =>
@@ -67,9 +69,9 @@ export default function EntityActivity({ entityType, entityId }: { entityType: A
         <ol aria-label={`${entityLabel} activity timeline`} className="px-5 py-5 sm:px-6">
           {logs.map((log) => {
             const detail = actionDetails[log.action] ?? { label: log.action.replaceAll("_", " ").toLowerCase().replace(/^\w/, (letter) => letter.toUpperCase()), icon: Activity, tone: "bg-slate-100 text-slate-700" };
-            const eventLabel = detail.label.replaceAll("Business", entityLabel).replace("Lead status", entityType === "BUSINESS" ? "Lead status" : `${entityLabel} status`);
+            const eventLabel = detail.label.replaceAll("Lead", entityLabel).replace("Lead status", entityType === "BUSINESS" ? "Lead status" : `${entityLabel} status`);
             const Icon = detail.icon;
-            const fields = getSavedFields(log).map((field) => ({
+            const fields = getSavedFields(log).filter((field) => !hiddenFields.includes(field.field)).map((field) => ({
               ...field,
               label: field.field === "status" && entityType !== "BUSINESS" ? "Status" : field.label,
               value: ["scheduledAt", "completedAt", "startDate", "endDate", "expiresAt"].includes(field.field) && !Number.isNaN(Date.parse(field.value)) ? formatTime(field.value) : field.value,

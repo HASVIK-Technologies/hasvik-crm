@@ -132,7 +132,7 @@ function NextFollowUpForm({
         </DialogPrimitive.Close>
       </header>
 
-      {readOnly && <p className="px-5 pb-5 text-xs text-slate-500">An active business is required to schedule another follow-up.</p>}
+      {readOnly && <p className="px-5 pb-5 text-xs text-slate-500">An active lead is required to schedule another follow-up.</p>}
       {!readOnly && <form
         onSubmit={handleSubmit(submit)}
         noValidate
@@ -140,7 +140,7 @@ function NextFollowUpForm({
       >
         <div>
           <label className="mb-1.5 block text-xs font-semibold text-[#475569]">
-            Business
+            Lead
           </label>
           <div className="relative">
             <Search className="pointer-events-none absolute left-3 top-3 size-4 text-[#94a3b8]" />
@@ -148,7 +148,7 @@ function NextFollowUpForm({
               readOnly
               tabIndex={-1}
               value={followUp.businessName}
-              title="Business name is prefilled from the completed follow-up"
+              title="Lead name is prefilled from the completed follow-up"
               className="h-10 w-full cursor-not-allowed border-[#e2e8f0] bg-[#f8fafc] pl-9 text-xs font-medium text-[#0f172a] select-none focus-visible:ring-0"
             />
           </div>

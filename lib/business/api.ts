@@ -62,7 +62,7 @@ async function updateBusinessRequest(
   payload: Record<string, unknown>,
 ): Promise<ApiBusiness> {
   if (!canUpdateRecord(await getBusinessRaw(String(id)), payload)) {
-    throw new Error("This business is inactive. Activate it before editing.");
+    throw new Error("This lead is inactive. Activate it before editing.");
   }
   const response = await apiClient.patch<ApiBusiness>(`/businesses/${id}`, payload);
   return response.data;

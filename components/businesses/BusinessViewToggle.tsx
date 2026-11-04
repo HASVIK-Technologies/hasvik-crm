@@ -18,7 +18,7 @@ export default function BusinessViewToggle({
     <div
       className="inline-flex h-9 border border-slate-200 bg-slate-50 p-0.5"
       role="group"
-      aria-label="Business view"
+      aria-label="Lead view"
     >
       {([
         { value: "table" as const, label: "Table view", icon: List },

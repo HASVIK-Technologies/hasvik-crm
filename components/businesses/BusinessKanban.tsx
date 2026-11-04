@@ -272,7 +272,7 @@ export default function BusinessKanban({
             Array.from({ length: 3 }, (_, index) => <div key={index} className="h-40 animate-pulse bg-white" />)
           ) : (grouped[mobileStage] ?? []).length === 0 ? (
             <div className="border border-dashed border-slate-300 bg-white px-4 py-12 text-center">
-              <p className="text-sm font-semibold text-slate-700">{hasActiveFilters ? "No matching businesses" : "No businesses from this page"}</p>
+              <p className="text-sm font-semibold text-slate-700">{hasActiveFilters ? "No matching leads" : "No leads from this page"}</p>
               <p className="mt-1 text-xs text-slate-500">{hasActiveFilters ? "Adjust the active filters or choose another stage." : "Choose another stage or page to continue reviewing the pipeline."}</p>
             </div>
           ) : (
@@ -305,9 +305,9 @@ export default function BusinessKanban({
                     <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}><PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-8 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                     <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(event) => event.stopPropagation()}>
                       <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
-                      {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
+                      {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit lead</DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
-                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-emerald-700"><Power className="size-4" />Activate business</DropdownMenuItem>}
+                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-emerald-700"><Power className="size-4" />Activate lead</DropdownMenuItem>}
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
@@ -376,7 +376,7 @@ export default function BusinessKanban({
                   {isLoading ? (
                     Array.from({ length: 2 }, (_, index) => <div key={index} className="h-32 animate-pulse bg-white" />)
                   ) : items.length === 0 ? (
-                    <div className="border border-dashed border-slate-300 bg-white/60 px-3 py-8 text-center text-xs text-slate-500">{hasActiveFilters ? "No businesses match the active filters" : "No businesses from this page"}</div>
+                    <div className="border border-dashed border-slate-300 bg-white/60 px-3 py-8 text-center text-xs text-slate-500">{hasActiveFilters ? "No leads match the active filters" : "No leads from this page"}</div>
                   ) : (
                     items.map((business) => (
                       <article
@@ -430,9 +430,9 @@ export default function BusinessKanban({
                             </Tooltip>
                             <DropdownMenuContent align="end" className="w-40 bg-white" onClick={(event) => event.stopPropagation()}>
                               <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
-                              {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
+                              {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit lead</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
-                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-emerald-700"><Power className="size-4" />Activate business</DropdownMenuItem>}
+                              {business.status === "Inactive" && <DropdownMenuItem disabled={activationMutation.isPending} onSelect={() => setActivatingBusiness(business)} className="gap-2 text-emerald-700"><Power className="size-4" />Activate lead</DropdownMenuItem>}
                             </DropdownMenuContent>
                           </DropdownMenu>
                         </div>
@@ -456,7 +456,7 @@ export default function BusinessKanban({
       </div>
 
       <ListPagination total={totalCount} page={currentPage} limit={itemsPerPage} onPageChange={onPageChange} onLimitChange={onItemsPerPageChange} />
-      <ManagementConfirmDialog open={Boolean(activatingBusiness)} title="Activate business?" description={`Activate ${activatingBusiness?.name ?? "this business"} to allow changes.`} confirmLabel="Activate business" destructive={false} pending={activationMutation.isPending} onCancel={() => setActivatingBusiness(null)} onConfirm={() => { if (activatingBusiness) activationMutation.mutate({ id: activatingBusiness.id, status: "Active" }, { onSuccess: () => setActivatingBusiness(null) }); }} />
+      <ManagementConfirmDialog open={Boolean(activatingBusiness)} title="Activate lead?" description={`Activate ${activatingBusiness?.name ?? "this lead"} to allow changes.`} confirmLabel="Activate lead" destructive={false} pending={activationMutation.isPending} onCancel={() => setActivatingBusiness(null)} onConfirm={() => { if (activatingBusiness) activationMutation.mutate({ id: activatingBusiness.id, status: "Active" }, { onSuccess: () => setActivatingBusiness(null) }); }} />
       <AssignBusinessDialog
         business={assignmentBusiness}
         open={assignmentBusiness !== null}

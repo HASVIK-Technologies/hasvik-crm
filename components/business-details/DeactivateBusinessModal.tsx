@@ -43,7 +43,7 @@ export function DeactivateBusinessModal({ businessName, businessStatus, business
           {isInactive ? <CheckCircle className="h-6 w-6 text-brand-green-strong" /> : <Slash className="h-6 w-6 text-red-600" />}
         </div>
         
-        <h3 className="text-lg font-bold text-slate-900 mb-2">{actionText} Business</h3>
+        <h3 className="text-lg font-bold text-slate-900 mb-2">{actionText} Lead</h3>
         <p className="text-sm text-slate-500 mb-6">
           Are you sure you want to {actionText.toLowerCase()} <span className="font-semibold text-slate-700">{businessName}</span>?
         </p>

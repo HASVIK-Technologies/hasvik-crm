@@ -115,7 +115,7 @@ export default function BusinessDetails() {
   if (isError) {
     return (
       <div className="mx-auto max-w-6xl py-12 text-center text-sm text-red-600">
-        Unable to load this business. Please try again.
+        Unable to load this lead. Please try again.
       </div>
     );
   }
@@ -123,7 +123,7 @@ export default function BusinessDetails() {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]">
-        Loading business details...
+        Loading lead details...
       </div>
     );
   }
@@ -135,14 +135,14 @@ export default function BusinessDetails() {
           <AlertCircle className="size-7" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-[#334155]">
-          Business not found
+          Lead not found
         </h1>
         <p className="mt-2 max-w-sm text-sm leading-6 text-[#64748b]">
-          The business with ID #{rawId} does not exist or has been removed.
+          The lead with ID #{rawId} does not exist or has been removed.
         </p>
         <OutlinedButton asChild className="mt-6 gap-2">
           <Link href="/businesses">
-            <ArrowLeft className="size-4" /> Back to Businesses
+            <ArrowLeft className="size-4" /> Back to Leads
           </Link>
         </OutlinedButton>
       </div>
@@ -167,15 +167,15 @@ export default function BusinessDetails() {
       breadcrumb={
         <Breadcrumb
           items={[
-            { label: "Businesses", href: "/businesses" },
-            { label: "Business Details" },
+            { label: "Leads", href: "/businesses" },
+            { label: "Lead Details" },
           ]}
         />
       }
       actions={
         <Actions
           primary={isInactive ? {
-            label: "Activate Business",
+            label: "Activate Lead",
             onSelect: () => openDeactivateModal(String(business?.id)),
           } : {
             label: "Add Follow-up",
@@ -184,7 +184,7 @@ export default function BusinessDetails() {
           }}
           secondary={isInactive ? [] : [
             {
-              label: "Edit Business",
+              label: "Edit Lead",
               icon: <Edit2 className="size-4" />,
               href: `/businesses/form/${business.id}`,
             },
@@ -251,8 +251,8 @@ export default function BusinessDetails() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <OutlinedButton
-                        aria-label="Call business"
-                        title="Call business"
+                        aria-label="Call lead"
+                        title="Call lead"
                         className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                       >
                         <Phone className="h-4 w-4" />
@@ -279,7 +279,7 @@ export default function BusinessDetails() {
                 ) : headerPhones.length === 1 ? (
                   <OutlinedButton
                     asChild
-                    aria-label="Call business"
+                    aria-label="Call lead"
                     className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                   >
                     <a href={`tel:${cleanNumber(headerPhones[0].number)}`}>
@@ -293,8 +293,8 @@ export default function BusinessDetails() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <OutlinedButton
-                        aria-label="Message business on WhatsApp"
-                        title="Message business on WhatsApp"
+                        aria-label="Message lead on WhatsApp"
+                        title="Message lead on WhatsApp"
                         className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                       >
                         <WhatsAppIcon className="h-4 w-4" />
@@ -323,7 +323,7 @@ export default function BusinessDetails() {
                 ) : headerWhatsapps.length === 1 ? (
                   <OutlinedButton
                     asChild
-                    aria-label="Message business on WhatsApp"
+                    aria-label="Message lead on WhatsApp"
                     className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                   >
                     <a
@@ -341,8 +341,8 @@ export default function BusinessDetails() {
                 {locationData.isAvailable ? (
                   <OutlinedButton
                     asChild
-                    aria-label="View business location on Google Maps"
-                    title="View business location on Google Maps"
+                    aria-label="View lead location on Google Maps"
+                    title="View lead location on Google Maps"
                     className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10 cursor-pointer"
                   >
                     <a
@@ -432,7 +432,7 @@ export default function BusinessDetails() {
                 businessId={String(business.id)}
                 readOnly={isInactive}
               />
-              <BusinessDetailsActivity businessId={String(business.id)} />
+              <BusinessDetailsActivity businessId={String(business.id)} categoryName={business.category} />
             </div>
 
             <aside className="space-y-6 xl:sticky xl:top-28">
@@ -445,7 +445,7 @@ export default function BusinessDetails() {
             </aside>
           </section>
           {/* New Follow-up Modal */}
-          <AddFollowUpModal businessName={business?.name || "Business"} />
+          <AddFollowUpModal businessName={business?.name || "Lead"} />
           {/* Deactivate Business Modal */}
           <DeactivateBusinessModal
             businessName={business?.name || ""}

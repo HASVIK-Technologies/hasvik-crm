@@ -36,7 +36,7 @@ export default function FollowUpFilters({ filters, setFilter, reset, view }: Pro
   };
   const usesDateRange = view === "table";
   const fields: ResponsiveFilter[] = [
-    { key: "business", label: "Business", active: Boolean(filters.businessId), reset: () => setOption("business"), control: <FollowUpAutocomplete kind="business" value={filters.businessId} label={filters.businessName} onChange={(option) => setOption("business", option)} placeholder="All Businesses" /> },
+    { key: "business", label: "Lead", active: Boolean(filters.businessId), reset: () => setOption("business"), control: <FollowUpAutocomplete kind="business" value={filters.businessId} label={filters.businessName} onChange={(option) => setOption("business", option)} placeholder="All Leads" /> },
     { key: "assignee", label: "Team member", active: Boolean(filters.assignedTo), reset: () => setOption("user"), control: <AssigneeAutocomplete value={filters.assignedTo} label={filters.assignedToName} onChange={(option) => setOption("user", option)} placeholder="All Team Members" /> },
     { key: "status", label: "Status", active: Boolean(filters.status), reset: () => setFilter("status", ""), control: <FollowUpStatusSelect value={filters.status} onChange={(value) => setFilter("status", value)} /> },
     { key: "type", label: "Type", active: Boolean(filters.type), reset: () => setFilter("type", ""), control: <Select value={filters.type || "ALL"} onValueChange={(value) => setFilter("type", value === "ALL" ? "" : value)}>

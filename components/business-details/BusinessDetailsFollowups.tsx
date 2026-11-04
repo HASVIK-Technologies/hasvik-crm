@@ -303,7 +303,7 @@ export default function BusinessDetailsFollowups({
 
       <CancelFollowUpDialog
         open={Boolean(cancellingFollowUp)}
-        businessName={cancellingFollowUp?.businessName || "this business"}
+        businessName={cancellingFollowUp?.businessName || "this lead"}
         loading={cancelMutation.isPending}
         onOpenChange={(open) => { if (!open) setCancellingFollowUp(null); }}
         onConfirm={() => void cancelFollowUp()}

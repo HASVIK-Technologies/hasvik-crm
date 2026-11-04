@@ -290,7 +290,7 @@ export default function FollowUpTable({
             <TableHeader>
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
                 <TableHead className="py-4 pl-6 pr-4 font-semibold">
-                  Business / Contact
+                  Lead / Contact
                 </TableHead>
                 <TableHead className="px-4 py-4 font-semibold">
                   Follow-up Date

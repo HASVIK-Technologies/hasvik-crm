@@ -14,6 +14,7 @@ import FieldLabel from "@/components/businesses/FieldLabel";
 import NumberListField from "@/components/businesses/NumberListField";
 import { cn } from "@/lib/utils";
 import { isValidOptionalEmail } from "@/lib/business/url-validation";
+import { getLeadKind } from "@/lib/business/lead-type";
 import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function ContactInfoSection({
@@ -38,6 +39,7 @@ export default function ContactInfoSection({
   } = useFormContext<BusinessFormValues>();
 
   const watchedPhoneNumbers = useWatch({ control, name: "phoneNumbers" });
+  const leadKind = getLeadKind(useWatch({ control, name: "categoryName" }));
   const watchedWhatsappNumbers = useWatch({ control, name: "whatsappNumbers" });
 
   const validateNumber = (
@@ -228,7 +230,7 @@ export default function ContactInfoSection({
             {errors.email.message}
           </p>
         )}
-        <p className="mt-1.5 text-xs text-[#8a9eaa]">Business email address</p>
+        <p className="mt-1.5 text-xs text-[#8a9eaa]">{leadKind === "business" ? "Business email address" : "Email address"}</p>
       </div>
     </div>
   );
