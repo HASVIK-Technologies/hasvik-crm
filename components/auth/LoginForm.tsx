@@ -29,7 +29,22 @@ const POINTS = [
 
 // The product this sign-in page belongs to. Other HASVIK apps (e.g. an HR portal) reuse this layout with their own
 // name, so people can tell at a glance, even on a phone, which app they are signing in to.
-const PRODUCT = { name: "LEADS", fullName: "HASVIK LEADS", tagline: "Your sales pipeline and follow-ups, in one place." };
+const PRODUCT = { name: "LEADS", tagline: "Your sales pipeline and follow-ups, in one place." };
+
+/** Brand lockup on the blue: the H icon on a white tile, then HASVIK over the product name. Same on phone and desktop. */
+function ProductLockup() {
+  return (
+    <div className="inline-flex items-center gap-3.5 text-white">
+      <span className="grid size-14 shrink-0 place-items-center rounded-[1.05rem] bg-white shadow-[0_10px_24px_rgba(4,40,74,0.35)]">
+        <Image src="/hasvik-icon.png" alt="" width={512} height={512} priority className="size-11" />
+      </span>
+      <span className="text-left leading-none">
+        <span className="block text-sm font-semibold tracking-[0.28em] text-white/90">HASVIK</span>
+        <span className="mt-1.5 block text-[2rem] font-extrabold tracking-[0.06em]">{PRODUCT.name}</span>
+      </span>
+    </div>
+  );
+}
 
 // The sign-in page's own look: rounded card, blue gradient panel, light canvas. The `login-look` class is the
 // exemption in globals.css that lets its inputs and buttons stay rounded while the rest of the app stays square.
@@ -83,17 +98,11 @@ export default function LoginForm() {
         <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 size-[28rem] rounded-full bg-[#08a9e6]/20 blur-3xl" />
 
         <div className="relative">
-          <span className="inline-block rounded-[1.35rem] bg-white px-5 py-3 shadow-lg">
-            <Image src="/logo.png" alt="HASVIK" width={364} height={124} priority className="h-12 w-auto" />
-          </span>
+          <ProductLockup />
         </div>
 
         <div className="relative max-w-lg">
-          <p className="inline-flex items-center gap-2 rounded-[4px] bg-white/15 px-3 py-1.5 text-sm font-bold tracking-[0.16em] text-white ring-1 ring-white/25 ring-inset">
-            <span aria-hidden className="size-2 rounded-full bg-[#63d329] shadow-[0_0_10px_rgba(99,211,41,0.8)]" />
-            {PRODUCT.fullName}
-          </p>
-          <h2 className="mt-5 text-4xl leading-tight font-bold tracking-tight xl:text-5xl">Turn every connection into growth.</h2>
+          <h2 className="text-4xl leading-tight font-bold tracking-tight xl:text-5xl">Turn every connection into growth.</h2>
           <ul className="mt-10 space-y-5">
             {POINTS.map((point) => (
               <li key={point.title} className="flex gap-4">
@@ -117,15 +126,7 @@ export default function LoginForm() {
       <main className="relative flex min-h-dvh flex-col items-center justify-center px-5 py-10">
         <div className="w-full max-w-[27.5rem]">
           <div className="mb-7 text-center text-white lg:hidden">
-            <div className="inline-flex items-center gap-3.5">
-              <span className="grid size-14 shrink-0 place-items-center rounded-[1.05rem] bg-white shadow-[0_10px_24px_rgba(4,40,74,0.35)]">
-                <Image src="/hasvik-icon.png" alt="" width={512} height={512} priority className="size-11" />
-              </span>
-              <span className="text-left leading-none">
-                <span className="block text-sm font-semibold tracking-[0.28em] text-white/90">HASVIK</span>
-                <span className="mt-1.5 block text-[2rem] font-extrabold tracking-[0.06em]">{PRODUCT.name}</span>
-              </span>
-            </div>
+            <ProductLockup />
             <p className="mt-4 text-sm text-white">{PRODUCT.tagline}</p>
           </div>
           <div className="animate-in rounded-[1.65rem] border border-transparent bg-white p-7 shadow-[0_24px_60px_rgba(4,40,74,0.4)] duration-500 lg:border-[#e1e9f2] lg:shadow-[0_20px_56px_rgba(10,31,51,0.14)] fade-in-0 slide-in-from-bottom-2 motion-reduce:animate-none sm:p-9">
