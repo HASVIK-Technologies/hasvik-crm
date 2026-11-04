@@ -27,6 +27,10 @@ const POINTS = [
   { icon: ShieldCheck, title: "Private and secure", text: "Everyone sees only what they should, and every change is recorded." },
 ];
 
+// The product this sign-in page belongs to. Other HASVIK apps (e.g. an HR portal) reuse this layout with their own
+// name, so people can tell at a glance, even on a phone, which app they are signing in to.
+const PRODUCT = { name: "LEADS", fullName: "HASVIK LEADS", tagline: "Leads, follow-ups and your sales pipeline." };
+
 // The sign-in page's own look: rounded card, blue gradient panel, light canvas. The `login-look` class is the
 // exemption in globals.css that lets its inputs and buttons stay rounded while the rest of the app stays square.
 export default function LoginForm() {
@@ -70,7 +74,10 @@ export default function LoginForm() {
     "h-11 rounded-[1.05rem] border-[#e1e9f2] bg-white text-base text-[#0a1f33] shadow-[0_1px_2px_rgba(10,31,51,0.05)] placeholder:text-[#5a6d83] hover:border-[#5a6d83] focus-visible:border-[#0669b9] focus-visible:ring-4 focus-visible:ring-[rgba(8,169,230,0.4)] sm:h-10 sm:text-sm";
 
   return (
-    <div className="login-look grid min-h-dvh bg-[#f0f5fa] bg-[radial-gradient(900px_420px_at_88%_-140px,rgb(8_169_230/0.12),transparent_70%),radial-gradient(620px_340px_at_-8%_0,rgb(32_184_63/0.06),transparent_70%)] bg-fixed text-[#0a1f33] lg:grid-cols-[1.05fr_1fr]">
+    <div className="login-look relative isolate grid min-h-dvh overflow-hidden bg-[linear-gradient(165deg,#043a6b_0%,#0767b9_55%,#0876d1_100%)] text-[#0a1f33] lg:grid-cols-[1.05fr_1fr] lg:bg-[#f0f5fa] lg:bg-[radial-gradient(900px_420px_at_88%_-140px,rgb(8_169_230/0.12),transparent_70%),radial-gradient(620px_340px_at_-8%_0,rgb(32_184_63/0.06),transparent_70%)] lg:bg-fixed">
+      {/* Phone-only glows: cyan at the top, the logo's green swoosh at the bottom. */}
+      <div aria-hidden className="pointer-events-none absolute -top-32 -right-24 -z-10 size-96 rounded-full bg-[#08a9e6]/30 blur-3xl lg:hidden" />
+      <div aria-hidden className="pointer-events-none absolute -bottom-40 -left-24 -z-10 h-80 w-[36rem] -rotate-6 rounded-full bg-[#63d329]/25 blur-3xl lg:hidden" />
       <aside className="relative isolate hidden overflow-hidden bg-[linear-gradient(125deg,#054a86_0%,#0876d1_55%,#08a9e6_118%)] p-12 text-white after:pointer-events-none after:absolute after:right-[-10%] after:bottom-[-45%] after:left-[30%] after:-z-10 after:h-[70%] after:-rotate-6 after:bg-[radial-gradient(60%_100%_at_70%_100%,rgb(99_211_41/0.38),transparent_70%)] after:content-[''] lg:flex lg:flex-col lg:justify-between">
         <div aria-hidden className="pointer-events-none absolute -top-24 -right-24 size-96 rounded-full bg-white/10 blur-3xl" />
         <div aria-hidden className="pointer-events-none absolute -bottom-32 -left-20 size-[28rem] rounded-full bg-[#08a9e6]/20 blur-3xl" />
@@ -82,8 +89,11 @@ export default function LoginForm() {
         </div>
 
         <div className="relative max-w-lg">
-          <p className="text-sm font-semibold tracking-[0.18em] text-white/80 uppercase">HASVIK CRM</p>
-          <h2 className="mt-3 text-4xl leading-tight font-bold tracking-tight xl:text-5xl">Turn every connection into growth.</h2>
+          <p className="inline-flex items-center gap-2 rounded-[4px] bg-white/15 px-3 py-1.5 text-sm font-bold tracking-[0.16em] text-white ring-1 ring-white/25 ring-inset">
+            <span aria-hidden className="size-2 rounded-full bg-[#63d329] shadow-[0_0_10px_rgba(99,211,41,0.8)]" />
+            {PRODUCT.fullName}
+          </p>
+          <h2 className="mt-5 text-4xl leading-tight font-bold tracking-tight xl:text-5xl">Turn every connection into growth.</h2>
           <ul className="mt-10 space-y-5">
             {POINTS.map((point) => (
               <li key={point.title} className="flex gap-4">
@@ -106,14 +116,21 @@ export default function LoginForm() {
 
       <main className="relative flex min-h-dvh flex-col items-center justify-center px-5 py-10">
         <div className="w-full max-w-[27.5rem]">
-          <div className="mb-8 flex justify-center lg:hidden">
-            <span className="rounded-[1.35rem] bg-white px-5 py-3 shadow-[0_6px_18px_rgba(10,31,51,0.07)] ring-1 ring-[#e1e9f2]">
-              <Image src="/logo.png" alt="HASVIK" width={364} height={124} priority className="h-12 w-auto" />
-            </span>
+          <div className="mb-7 text-center text-white lg:hidden">
+            <div className="inline-flex items-center gap-3.5">
+              <span className="grid size-14 shrink-0 place-items-center rounded-[1.05rem] bg-white shadow-[0_10px_24px_rgba(4,40,74,0.35)]">
+                <Image src="/hasvik-icon.png" alt="" width={512} height={512} priority className="size-11" />
+              </span>
+              <span className="text-left leading-none">
+                <span className="block text-sm font-semibold tracking-[0.28em] text-white/90">HASVIK</span>
+                <span className="mt-1.5 block text-[2rem] font-extrabold tracking-[0.06em]">{PRODUCT.name}</span>
+              </span>
+            </div>
+            <p className="mt-4 text-sm text-white">{PRODUCT.tagline}</p>
           </div>
-          <div className="animate-in rounded-[1.65rem] border border-[#e1e9f2] bg-white p-7 shadow-[0_20px_56px_rgba(10,31,51,0.14)] duration-500 fade-in-0 slide-in-from-bottom-2 motion-reduce:animate-none sm:p-9">
+          <div className="animate-in rounded-[1.65rem] border border-transparent bg-white p-7 shadow-[0_24px_60px_rgba(4,40,74,0.4)] duration-500 lg:border-[#e1e9f2] lg:shadow-[0_20px_56px_rgba(10,31,51,0.14)] fade-in-0 slide-in-from-bottom-2 motion-reduce:animate-none sm:p-9">
             <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
-            <p className="mt-1.5 text-sm leading-relaxed text-[#5a6d83]">Sign in to your HASVIK CRM workspace.</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-[#5a6d83]">Sign in to <span className="font-semibold text-[#0a1f33]">{PRODUCT.fullName}</span>.</p>
 
             <form className="mt-7 space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate suppressHydrationWarning>
               <div className="space-y-1.5">
@@ -184,11 +201,11 @@ export default function LoginForm() {
             </form>
           </div>
 
-          <p className="mt-6 text-center text-xs text-[#5a6d83]">
+          <p className="mt-6 text-center text-xs text-white lg:text-[#5a6d83]">
             New to HASVIK?{" "}
-            <Link href="/explore-crm" className="font-semibold text-[#0669b9] hover:underline">Explore the CRM</Link>
+            <Link href="/explore-crm" className="font-semibold whitespace-nowrap text-white underline underline-offset-2 lg:text-[#0669b9] lg:no-underline lg:hover:underline">Explore {PRODUCT.fullName}</Link>
             {" · "}
-            <Link href="/tenant" className="font-semibold text-[#0669b9] hover:underline">Create a workspace</Link>
+            <Link href="/tenant" className="font-semibold whitespace-nowrap text-white underline underline-offset-2 lg:text-[#0669b9] lg:no-underline lg:hover:underline">Create a workspace</Link>
           </p>
         </div>
       </main>
