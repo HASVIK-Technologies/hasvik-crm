@@ -29,7 +29,7 @@ const POINTS = [
 
 // The product this sign-in page belongs to. Other HASVIK apps (e.g. an HR portal) reuse this layout with their own
 // name, so people can tell at a glance, even on a phone, which app they are signing in to.
-const PRODUCT = { name: "LEADS", fullName: "HASVIK LEADS", tagline: "Leads, follow-ups and your sales pipeline." };
+const PRODUCT = { name: "LEADS", fullName: "HASVIK LEADS", tagline: "Your sales pipeline and follow-ups, in one place." };
 
 // The sign-in page's own look: rounded card, blue gradient panel, light canvas. The `login-look` class is the
 // exemption in globals.css that lets its inputs and buttons stay rounded while the rest of the app stays square.
@@ -130,7 +130,7 @@ export default function LoginForm() {
           </div>
           <div className="animate-in rounded-[1.65rem] border border-transparent bg-white p-7 shadow-[0_24px_60px_rgba(4,40,74,0.4)] duration-500 lg:border-[#e1e9f2] lg:shadow-[0_20px_56px_rgba(10,31,51,0.14)] fade-in-0 slide-in-from-bottom-2 motion-reduce:animate-none sm:p-9">
             <h1 className="text-2xl font-bold tracking-tight">Welcome back</h1>
-            <p className="mt-1.5 text-sm leading-relaxed text-[#5a6d83]">Sign in to <span className="font-semibold text-[#0a1f33]">{PRODUCT.fullName}</span>.</p>
+            <p className="mt-1.5 text-sm leading-relaxed text-[#5a6d83]">Sign in to your workspace to continue.</p>
 
             <form className="mt-7 space-y-5" onSubmit={handleSubmit(onSubmit)} noValidate suppressHydrationWarning>
               <div className="space-y-1.5">
@@ -202,8 +202,8 @@ export default function LoginForm() {
           </div>
 
           <p className="mt-6 text-center text-xs text-white lg:text-[#5a6d83]">
-            New to HASVIK?{" "}
-            <Link href="/explore-crm" className="font-semibold whitespace-nowrap text-white underline underline-offset-2 lg:text-[#0669b9] lg:no-underline lg:hover:underline">Explore {PRODUCT.fullName}</Link>
+            New here?{" "}
+            <Link href="/explore-crm" className="font-semibold whitespace-nowrap text-white underline underline-offset-2 lg:text-[#0669b9] lg:no-underline lg:hover:underline">Take a tour</Link>
             {" · "}
             <Link href="/tenant" className="font-semibold whitespace-nowrap text-white underline underline-offset-2 lg:text-[#0669b9] lg:no-underline lg:hover:underline">Create a workspace</Link>
           </p>
