@@ -3,6 +3,12 @@
 @import "shadcn/tailwind.css";
 
 @custom-variant dark (&:is(.dark *));
+/* Short phone screens (e.g. 360x700): lets the sign-in page tighten its spacing so the form still fits. */
+@custom-variant short {
+  @media (max-height: 760px) and (max-width: 1023px) {
+    @slot;
+  }
+}
 
 @theme inline {
   --color-brand-blue: var(--brand-blue);
