@@ -12,6 +12,7 @@ import { isFollowUpReadOnly } from "@/lib/follow-ups/actions";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import BusinessDetailsContacts from "@/components/business-details/BusinessDetailsContacts";
 import { FollowUpNotes } from "@/components/follow-ups/FollowUpNotes";
+import PreviousFollowUpsHistory from "@/components/follow-ups/PreviousFollowUpsHistory";
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import { formatFollowUpType } from "@/lib/business/form-options";
 import type { FollowUpItem } from "@/types/follow-up";
@@ -80,6 +81,13 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
       <section aria-label="Follow-up workspace" className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-6">
           <div className="[&>section]:rounded-none [&>section]:border-[#e4ecf2] [&>section]:shadow-[0_4px_20px_rgba(20,40,60,0.03)]"><FollowUpNotes key={followUp.id} followUpId={followUp.id} readOnly={!businessData || isInactive || isFollowUpReadOnly(followUp)} /></div>
+          <PreviousFollowUpsHistory
+            businessId={followUp.businessId}
+            currentFollowUpId={followUp.id}
+            currentScheduledAt={followUp.scheduledAt}
+            business={businessData}
+            readOnly={!businessData || isInactive || isFollowUpReadOnly(followUp)}
+          />
           <EntityActivity entityType="FOLLOWUP" entityId={followUp.id} />
         </div>
         <aside aria-label="Follow-up reference information" className="min-w-0 space-y-6">
