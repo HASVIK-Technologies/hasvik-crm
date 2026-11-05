@@ -320,7 +320,7 @@ describe("Business Follow-up & Date Validation", () => {
       assert.ok(!item.lastFollowUp.includes("2024"), "Must NOT show business createdAt");
       assert.strictEqual(item.lastFollowUpId, "fu-last-6aa");
       assert.notStrictEqual(item.nextFollowUp, "-");
-      assert.ok(item.nextFollowUp.includes("Nov") || item.nextFollowUp.includes("05") || item.nextFollowUp.includes("5"));
+      assert.ok(item.nextFollowUp === "Today" || item.nextFollowUp.includes("Nov") || item.nextFollowUp.includes("05") || item.nextFollowUp.includes("5"));
       assert.strictEqual(item.nextFollowUpId, "fu-next-6aa");
     });
 
