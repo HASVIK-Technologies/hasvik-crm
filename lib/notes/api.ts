@@ -178,3 +178,27 @@ export async function createFollowUpNote(
   }
   return parseNote(payload);
 }
+
+export async function updateFollowUpNote(
+  noteId: string,
+  content: string,
+): Promise<FollowUpNote> {
+  let response;
+  try {
+    response = await apiClient.patch(`/notes/${noteId}`, { content });
+  } catch {
+    response = await apiClient.put(`/notes/${noteId}`, { content });
+  }
+
+  let payload: unknown = response.data;
+  for (let depth = 0; depth < 4 && isRecord(payload); depth += 1) {
+    const wrapped = payload.note ?? payload.data;
+    if (wrapped === undefined) break;
+    payload = wrapped;
+  }
+  return parseNote(payload);
+}
+
+export async function deleteFollowUpNote(noteId: string): Promise<void> {
+  await apiClient.delete(`/notes/${noteId}`);
+}
