@@ -1,6 +1,7 @@
 import { test, describe } from "node:test";
 import assert from "node:assert";
 import { selectPreviousFollowUps } from "../lib/follow-ups/history.ts";
+import { getDummyConversations } from "../lib/follow-ups/dummy-conversations.ts";
 import type { FollowUpItem } from "../types/follow-up.ts";
 
 function createMockFollowUp(id: string, date: string, status = "COMPLETED", notes = ""): FollowUpItem {
@@ -89,5 +90,21 @@ describe("selectPreviousFollowUps", () => {
     assert.strictEqual(result.length, 2);
     assert.strictEqual(result[0].id, "fu-future-2");
     assert.strictEqual(result[1].id, "fu-future-1");
+  });
+});
+
+describe("getDummyConversations", () => {
+  test("returns exactly 10 dummy conversations with rich notes", () => {
+    const dummy = getDummyConversations("Test Enterprise", "test-biz-id");
+    assert.strictEqual(dummy.length, 10);
+    for (const item of dummy) {
+      assert.strictEqual(item.businessName, "Test Enterprise");
+      assert.strictEqual(item.businessId, "test-biz-id");
+      assert.ok(item.notes && item.notes.length > 10, "Each dummy conversation must have descriptive notes");
+      assert.ok(item.assignedToName, "Each dummy conversation must have an assigned representative");
+      assert.ok(item.type, "Each dummy conversation must have a type");
+      assert.ok(item.status, "Each dummy conversation must have a status");
+      assert.ok(!Number.isNaN(Date.parse(item.scheduledAt)), "Each dummy conversation must have a valid scheduled date");
+    }
   });
 });

@@ -3,6 +3,7 @@
 import { useMemo, useState } from "react";
 import {
   CalendarClock,
+  Eye,
   History,
   Mail,
   MessageSquare,
@@ -10,11 +11,13 @@ import {
   MessagesSquare,
   Phone,
   RefreshCw,
+  Sparkles,
   Video,
 } from "lucide-react";
 import { useBusinessFollowUpsQuery } from "@/hooks/use-business-get-follow-ups";
 import { toFollowUpItem } from "@/lib/follow-ups/api";
 import { selectPreviousFollowUps } from "@/lib/follow-ups/history";
+import { getDummyConversations } from "@/lib/follow-ups/dummy-conversations";
 import { formatFollowUpType } from "@/lib/business/form-options";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
@@ -88,6 +91,9 @@ export default function PreviousFollowUpsHistory({
   const [selectedNotesFollowUp, setSelectedNotesFollowUp] =
     useState<FollowUpItem | null>(null);
 
+  // Default to showing 10 dummy conversations for inspection/testing
+  const [showSampleData, setShowSampleData] = useState<boolean>(true);
+
   const fallbackFollowUps = useMemo(() => {
     if (!business || typeof business !== "object") return [];
     const list: unknown[] = [];
@@ -131,6 +137,14 @@ export default function PreviousFollowUpsHistory({
     });
   }, [allFollowUps, currentFollowUpId, currentScheduledAt]);
 
+  const dummyConversations = useMemo(() => {
+    const name = business?.name || "Acme Technologies";
+    return getDummyConversations(name, businessId || "dummy-biz");
+  }, [business?.name, businessId]);
+
+  const isUsingDummy = showSampleData || previousFollowUps.length === 0;
+  const itemsToDisplay = isUsingDummy ? dummyConversations : previousFollowUps;
+
   const otherCount = useMemo(() => {
     return allFollowUps.filter((item) => item.id && item.id !== currentFollowUpId).length;
   }, [allFollowUps, currentFollowUpId]);
@@ -141,9 +155,9 @@ export default function PreviousFollowUpsHistory({
         aria-labelledby="previous-follow-ups-heading"
         className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_4px_20px_rgba(20,40,60,0.03)]"
       >
-        <div className="flex items-start justify-between gap-4 border-b border-slate-100 px-5 py-4 sm:px-6">
+        <div className="flex flex-col justify-between gap-3 border-b border-slate-100 px-5 py-4 sm:flex-row sm:items-center sm:px-6">
           <div>
-            <div className="flex items-center gap-2">
+            <div className="flex flex-wrap items-center gap-2">
               <History className="size-5 text-primary" />
               <h2
                 id="previous-follow-ups-heading"
@@ -151,31 +165,64 @@ export default function PreviousFollowUpsHistory({
               >
                 Previous Follow-up Conversations
               </h2>
-              {previousFollowUps.length > 0 && (
+              {itemsToDisplay.length > 0 && (
                 <span className="rounded-full bg-primary/10 px-2.5 py-0.5 text-xs font-semibold text-primary">
-                  {previousFollowUps.length}
+                  {itemsToDisplay.length}
+                </span>
+              )}
+              {isUsingDummy && (
+                <span className="inline-flex items-center gap-1 rounded-full border border-amber-300 bg-amber-50 px-2 py-0.5 text-[11px] font-semibold text-amber-800">
+                  <Sparkles className="size-3 text-amber-600" />
+                  Sample 10 Preview
                 </span>
               )}
             </div>
             <p className="mt-1 text-xs leading-5 text-slate-500">
-              Review the previous 10 follow-up conversations and touchpoints for this business.
+              {isUsingDummy
+                ? "Displaying 10 sample follow-up conversations for UI verification."
+                : "Review the previous 10 follow-up conversations and touchpoints for this business."}
             </p>
           </div>
-          <button
-            type="button"
-            onClick={() => void refetch()}
-            disabled={isFetching}
-            className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
-            aria-label="Refresh previous follow-ups"
-            title="Refresh previous follow-ups"
-          >
-            <RefreshCw
-              className={`size-4 ${isFetching ? "animate-spin" : ""}`}
-            />
-          </button>
+
+          <div className="flex items-center gap-2 self-end sm:self-auto">
+            {previousFollowUps.length > 0 && (
+              <Button
+                type="button"
+                variant="outline"
+                size="sm"
+                onClick={() => setShowSampleData((prev) => !prev)}
+                className="h-8 gap-1.5 text-xs text-slate-700"
+              >
+                {showSampleData ? (
+                  <>
+                    <Eye className="size-3.5 text-primary" />
+                    <span>Show Live Data ({previousFollowUps.length})</span>
+                  </>
+                ) : (
+                  <>
+                    <Sparkles className="size-3.5 text-amber-600" />
+                    <span>Show Sample 10</span>
+                  </>
+                )}
+              </Button>
+            )}
+
+            <button
+              type="button"
+              onClick={() => void refetch()}
+              disabled={isFetching}
+              className="inline-flex size-8 shrink-0 items-center justify-center rounded-lg text-slate-500 transition hover:bg-slate-100 hover:text-slate-800 disabled:opacity-50"
+              aria-label="Refresh previous follow-ups"
+              title="Refresh previous follow-ups"
+            >
+              <RefreshCw
+                className={`size-4 ${isFetching ? "animate-spin" : ""}`}
+              />
+            </button>
+          </div>
         </div>
 
-        {isLoading ? (
+        {isLoading && !isUsingDummy ? (
           <div className="space-y-4 p-5 sm:p-6">
             {Array.from({ length: 3 }, (_, index) => (
               <div
@@ -184,7 +231,7 @@ export default function PreviousFollowUpsHistory({
               />
             ))}
           </div>
-        ) : isError ? (
+        ) : isError && !isUsingDummy ? (
           <div className="p-8 text-center">
             <p className="text-sm font-semibold text-slate-700">
               Unable to load previous follow-up history.
@@ -197,7 +244,7 @@ export default function PreviousFollowUpsHistory({
               Try again
             </button>
           </div>
-        ) : previousFollowUps.length === 0 ? (
+        ) : itemsToDisplay.length === 0 ? (
           <div className="flex flex-col items-center px-6 py-12 text-center">
             <span className="flex size-12 items-center justify-center rounded-full bg-slate-100 text-slate-400">
               <MessagesSquare className="size-6" />
@@ -214,7 +261,7 @@ export default function PreviousFollowUpsHistory({
             aria-label="Previous follow-up conversation history timeline"
             className="space-y-4 p-5 sm:p-6"
           >
-            {previousFollowUps.map((item, index) => {
+            {itemsToDisplay.map((item, index) => {
               const visual = getTypeVisual(item.type);
               const Icon = visual.icon;
               const hasNotes = Boolean(item.notes && item.notes.trim());
@@ -267,7 +314,7 @@ export default function PreviousFollowUpsHistory({
                         <MessageSquareText className="size-3.5 text-primary" />
                         <span>Notes thread</span>
                       </Button>
-                      {item.id && (
+                      {item.id && !item.id.startsWith("dummy-") && (
                         <RecordLink
                           href={`/follow-ups/${item.id}`}
                           className="text-xs font-semibold"
@@ -308,14 +355,16 @@ export default function PreviousFollowUpsHistory({
           </ol>
         )}
 
-        {previousFollowUps.length > 0 && (
+        {itemsToDisplay.length > 0 && (
           <footer className="flex flex-wrap items-center justify-between gap-2 border-t border-slate-100 bg-slate-50/50 px-5 py-3 text-xs text-slate-500 sm:px-6">
             <span>
-              Showing {previousFollowUps.length}{" "}
-              {previousFollowUps.length === 1 ? "follow-up" : "follow-ups"}{" "}
-              (previous up to 10).
+              {isUsingDummy
+                ? "Previewing 10 sample conversations (demonstration data)."
+                : `Showing ${itemsToDisplay.length} ${
+                    itemsToDisplay.length === 1 ? "follow-up" : "follow-ups"
+                  } (previous up to 10).`}
             </span>
-            {businessId && otherCount > previousFollowUps.length && (
+            {businessId && otherCount > itemsToDisplay.length && !isUsingDummy && (
               <RecordLink
                 href={`/businesses/${businessId}`}
                 className="font-semibold text-primary hover:underline"
