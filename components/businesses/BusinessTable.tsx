@@ -16,14 +16,13 @@ import {
   UserRound,
   UserRoundCog,
 } from "lucide-react";
-import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PlainButton from "@/components/common/PlainButton";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import RecordLink from "@/components/common/RecordLink";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { ActivityStateText } from "@/components/common/ActivityStateText";
-import { PhoneActionMenu } from "@/components/common/ContactActionMenu";
+import { PhoneActionMenu, WhatsAppActionMenu } from "@/components/common/ContactActionMenu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
@@ -56,8 +55,7 @@ import {
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
-import { getLeadStatusLabel } from "@/lib/business/form-options";
-import { getWhatsAppNumbers, formatWhatsAppUrl } from "@/lib/business/mappers";
+import { getLeadStatusLabel, STATUS_OPTIONS } from "@/lib/business/form-options";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 import { useBusinessHighlight } from "@/hooks/use-business-highlight";
 import AssignBusinessDialog from "./AssignBusinessDialog";
@@ -89,99 +87,15 @@ function formatDisplayString(val: unknown, fallback: string = "-"): string {
   return String(val);
 }
 
-function RowWhatsAppButton({
-  item,
-  size = "md",
-  onAction,
-}: {
-  item: BusinessItem;
-  size?: "sm" | "md";
-  onAction?: () => void;
-}) {
-  const whatsappNumbers = getWhatsAppNumbers(item);
-  const buttonSizeClass = size === "sm" ? "size-7" : "size-8.5";
-  const iconSizeClass = size === "sm" ? "size-4" : "size-4.5";
-
-  if (whatsappNumbers.length === 0) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            disabled
-            onClick={(e) => e.stopPropagation()}
-            aria-label={`No WhatsApp or phone numbers for ${item.name}`}
-            className={cn(
-              "flex items-center justify-center border border-transparent text-slate-400 opacity-40 cursor-not-allowed",
-              buttonSizeClass,
-            )}
-          >
-            <WhatsAppIcon className={iconSizeClass} />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>No numbers available</TooltipContent>
-      </Tooltip>
-    );
-  }
-
-  return (
-    <DropdownMenu>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              aria-label={`WhatsApp numbers for ${item.name}`}
-              className={cn(
-                "flex items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus:outline-none focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20",
-                buttonSizeClass,
-              )}
-            >
-              <WhatsAppIcon className={iconSizeClass} />
-            </button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
-        <TooltipContent>WhatsApp {item.name}</TooltipContent>
-      </Tooltip>
-      <DropdownMenuContent
-        align="end"
-        className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-[#e4ecf2] bg-white p-1.5 shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="px-2.5 py-1.5 text-[11px] font-semibold text-[#64748b]">
-          WhatsApp / Phone Numbers
-        </div>
-        <div className="flex flex-col gap-0.5">
-          {whatsappNumbers.map((entry, idx) => (
-            <DropdownMenuItem
-              key={`${entry.number}-${idx}`}
-              asChild
-              className="cursor-pointer rounded-lg p-0"
-            >
-              <a
-                href={formatWhatsAppUrl(entry.number)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                onPointerDown={onAction}
-                className="flex w-full items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-[#f8fafc]"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <WhatsAppIcon className="size-3.5 shrink-0 text-brand-green-strong" />
-                  <span className="font-semibold text-[#0f172a] truncate">
-                    {entry.number}
-                  </span>
-                </div>
-                <span className="shrink-0 rounded bg-[#f1f5f9] px-1.5 py-0.5 text-[10px] font-medium text-[#64748b]">
-                  {entry.label}
-                </span>
-              </a>
-            </DropdownMenuItem>
-          ))}
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+export function formatLeadStatusWithStatusOptions(status?: string | null): string {
+  if (!status || status === "-") return "-";
+  const trimmed = status.trim();
+  const upper = trimmed.toUpperCase();
+  const option = STATUS_OPTIONS.find(
+    (opt) => opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
   );
+  if (option) return option.label;
+  return getLeadStatusLabel(status);
 }
 
 interface BusinessTableProps {
@@ -407,8 +321,8 @@ export default function BusinessTable({
                       </p>
                       <div className="mt-1 flex items-center gap-1.5 text-xs text-[#64748b]">
                         <span>Lead status:</span>
-                        {getLeadStatusLabel(item.leadStatus) !== "-" ? (
-                          <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-[10px]" />
+                        {formatLeadStatusWithStatusOptions(item.leadStatus) !== "-" ? (
+                          <StatusBadge status={item.leadStatus || formatLeadStatusWithStatusOptions(item.leadStatus)} label={formatLeadStatusWithStatusOptions(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-[10px]" />
                         ) : (
                           <span className="text-[#94a3b8]">-</span>
                         )}
@@ -429,10 +343,30 @@ export default function BusinessTable({
                     </div>
 
                     {/* Follow-up text */}
-                    <div className="text-[11px] font-medium text-[#64748b]">
-                      {item.nextFollowUpType !== "none" ? (
-                        item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-slate-600">{item.nextFollowUp}</span>
-                      ) : <span>-</span>}
+                    <div className="flex flex-col items-end gap-0.5 text-[11px] font-medium text-[#64748b]">
+                      {item.nextFollowUp && item.nextFollowUp !== "-" && item.nextFollowUpType !== "none" ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] text-slate-400">Next:</span>
+                          {item.status === "Active" && item.nextFollowUpId ? (
+                            <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink>
+                          ) : (
+                            <span className="font-medium text-slate-700">{item.nextFollowUp}</span>
+                          )}
+                        </div>
+                      ) : null}
+                      {item.lastFollowUp && item.lastFollowUp !== "-" ? (
+                        <div className="flex items-center gap-1">
+                          <span className="text-[10px] text-slate-400">Last:</span>
+                          {item.status === "Active" && item.lastFollowUpId ? (
+                            <RecordLink href={`/follow-ups/${item.lastFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.lastFollowUp}</RecordLink>
+                          ) : (
+                            <span className="text-slate-600">{item.lastFollowUp}</span>
+                          )}
+                        </div>
+                      ) : null}
+                      {(!item.nextFollowUp || item.nextFollowUp === "-" || item.nextFollowUpType === "none") && (!item.lastFollowUp || item.lastFollowUp === "-") ? (
+                        <span className="text-[#94a3b8]">-</span>
+                      ) : null}
                     </div>
 
                     {/* Action Icons (Phone + WhatsApp + More) */}
@@ -440,7 +374,7 @@ export default function BusinessTable({
                       {item.status === "Active" && <>
                       <PhoneActionMenu numbers={item.phoneNumbers} fallback={item.phone} className="size-7" onAction={() => highlightBusiness(item.id)} />
 
-                      <RowWhatsAppButton item={item} size="sm" onAction={() => highlightBusiness(item.id)} />
+                      <WhatsAppActionMenu numbers={item.whatsappNumbers} fallback={item.alternatePhone || item.phone} className="size-7" onAction={() => highlightBusiness(item.id)} />
                       </>}
 
                       <DropdownMenu>
@@ -653,8 +587,8 @@ export default function BusinessTable({
 
                     {/* Lead Status */}
                     {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
-                      {getLeadStatusLabel(item.leadStatus) !== "-" ? (
-                        <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={getLeadStatusLabel(item.leadStatus)} />
+                      {formatLeadStatusWithStatusOptions(item.leadStatus) !== "-" ? (
+                        <StatusBadge status={item.leadStatus || formatLeadStatusWithStatusOptions(item.leadStatus)} label={formatLeadStatusWithStatusOptions(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={formatLeadStatusWithStatusOptions(item.leadStatus)} />
                       ) : (
                         <span className="text-[#94a3b8]">-</span>
                       )}
@@ -665,13 +599,25 @@ export default function BusinessTable({
 
                     {/* Last Follow-up */}
                     {columnVisible("lastFollowUp") && <TableCell className={cn("px-4 text-sm", rowPadding)}>
-                      {item.status === "Active" && item.lastFollowUpId ? <RecordLink href={`/follow-ups/${item.lastFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.lastFollowUp}</RecordLink> : item.lastFollowUp}
+                      {item.lastFollowUp && item.lastFollowUp !== "-" ? (
+                        item.status === "Active" && item.lastFollowUpId ? (
+                          <RecordLink href={`/follow-ups/${item.lastFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.lastFollowUp}</RecordLink>
+                        ) : (
+                          <span className="font-medium text-slate-700">{item.lastFollowUp}</span>
+                        )
+                      ) : (
+                        <span className="text-[#94a3b8]">-</span>
+                      )}
                     </TableCell>}
 
                     {/* Next Follow-up */}
                     {columnVisible("nextFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
-                      {item.nextFollowUpType !== "none" ? (
-                        item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-slate-700">{item.nextFollowUp}</span>
+                      {item.nextFollowUp && item.nextFollowUp !== "-" && item.nextFollowUpType !== "none" ? (
+                        item.status === "Active" && item.nextFollowUpId ? (
+                          <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink>
+                        ) : (
+                          <span className="font-medium text-slate-700">{item.nextFollowUp}</span>
+                        )
                       ) : (
                         <span className="text-[#94a3b8]">-</span>
                       )}
@@ -688,7 +634,7 @@ export default function BusinessTable({
                         <PhoneActionMenu numbers={item.phoneNumbers} fallback={item.phone} onAction={() => highlightBusiness(item.id)} />
 
                         {/* WhatsApp / Message */}
-                        <RowWhatsAppButton item={item} size="md" onAction={() => highlightBusiness(item.id)} />
+                        <WhatsAppActionMenu numbers={item.whatsappNumbers} fallback={item.alternatePhone || item.phone} onAction={() => highlightBusiness(item.id)} />
                         </>}
 
                         {/* 3 Dots Menu */}

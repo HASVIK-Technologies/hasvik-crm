@@ -38,21 +38,36 @@ function extractDateFromFollowUpEntry(entry: unknown): string | undefined {
     const trimmed = entry.trim();
     return trimmed && trimmed !== "-" ? trimmed : undefined;
   }
+  if (typeof entry === "number" && !Number.isNaN(entry) && entry > 0) {
+    return new Date(entry).toISOString();
+  }
   if (entry instanceof Date && !Number.isNaN(entry.getTime())) {
     return entry.toISOString();
   }
   if (typeof entry === "object") {
     const obj = entry as Record<string, unknown>;
     const raw =
+      obj.completedAt ??
       obj.scheduledAt ??
       obj.nextFollowupDate ??
       obj.nextFollowUpDate ??
+      obj.nextFollowUpDateTime ??
+      obj.nextFollowupDateTime ??
       obj.followUpDate ??
+      obj.followupDate ??
+      obj.scheduledDate ??
+      obj.scheduledDateTime ??
       obj.date ??
-      obj.completedAt;
+      obj.dateTime ??
+      obj.datetime ??
+      obj.dateStr ??
+      obj.timestamp;
     if (typeof raw === "string") {
       const trimmed = raw.trim();
       return trimmed && trimmed !== "-" ? trimmed : undefined;
+    }
+    if (typeof raw === "number" && !Number.isNaN(raw) && raw > 0) {
+      return new Date(raw).toISOString();
     }
     if (raw instanceof Date && !Number.isNaN(raw.getTime())) {
       return raw.toISOString();
@@ -68,12 +83,17 @@ export function extractNextFollowUpDate(
 
   const candidates = [
     b.nextFollowups,
+    b.nextFollowUps,
     b.nextFollowup,
     b.nextFollowUp,
     b.nextFollowupDate,
     b.nextFollowUpDate,
     b.nextFollowUpDateTime,
     b.nextFollowupDateTime,
+    b.upcomingFollowUps,
+    b.upcomingFollowups,
+    b.upcomingFollowUp,
+    b.upcomingFollowup,
   ];
 
   for (const candidate of candidates) {
@@ -95,8 +115,15 @@ export function extractNextFollowUpDate(
 
       const listToSearch = pendingItems.length > 0 ? pendingItems : candidate;
 
-      let earliestTime = Infinity;
-      let earliestDateStr: string | undefined;
+      let earliestFutureTime = Infinity;
+      let earliestFutureDateStr: string | undefined;
+      let earliestPastTime = Infinity;
+      let earliestPastDateStr: string | undefined;
+      let fallbackDateStr: string | undefined;
+
+      const todayStart = new Date();
+      todayStart.setHours(0, 0, 0, 0);
+      const todayStartTime = todayStart.getTime();
 
       for (const item of listToSearch) {
         const rawDate = extractDateFromFollowUpEntry(item);
@@ -104,17 +131,26 @@ export function extractNextFollowUpDate(
           const cleaned = rawDate.replace(/\s+at\s+/i, " ");
           const time = new Date(cleaned).getTime();
           if (!Number.isNaN(time)) {
-            if (time < earliestTime) {
-              earliestTime = time;
-              earliestDateStr = rawDate;
+            if (time >= todayStartTime) {
+              if (time < earliestFutureTime) {
+                earliestFutureTime = time;
+                earliestFutureDateStr = rawDate;
+              }
+            } else {
+              if (time < earliestPastTime) {
+                earliestPastTime = time;
+                earliestPastDateStr = rawDate;
+              }
             }
-          } else if (!earliestDateStr) {
-            earliestDateStr = rawDate;
+          } else if (!fallbackDateStr) {
+            fallbackDateStr = rawDate;
           }
         }
       }
 
-      if (earliestDateStr) return earliestDateStr;
+      if (earliestFutureDateStr) return earliestFutureDateStr;
+      if (earliestPastDateStr) return earliestPastDateStr;
+      if (fallbackDateStr) return fallbackDateStr;
     }
 
     // 3. Single object
@@ -180,7 +216,7 @@ export function extractLatestCompletedFollowUpDate(
   if (followUpList.length > 0) {
     const completedItems = followUpList.filter((item) => {
       const status = String(item.status || "").toUpperCase();
-      return status === "COMPLETED" || item.isCompleted === true;
+      return status === "COMPLETED" || status === "DONE" || item.isCompleted === true;
     });
 
     if (completedItems.length > 0) {
@@ -188,14 +224,9 @@ export function extractLatestCompletedFollowUpDate(
       let latestDateStr: string | undefined;
 
       for (const item of completedItems) {
-        const rawDate =
-          item.completedAt ??
-          item.followUpDate ??
-          item.date ??
-          item.scheduledAt;
-
+        const rawDate = extractDateFromFollowUpEntry(item);
         if (rawDate) {
-          const cleaned = typeof rawDate === "string" ? rawDate.replace(/\s+at\s+/i, " ") : rawDate;
+          const cleaned = rawDate.replace(/\s+at\s+/i, " ");
           const time = new Date(cleaned).getTime();
           if (!Number.isNaN(time) && time > latestTime) {
             latestTime = time;
@@ -216,10 +247,8 @@ export function extractLatestCompletedFollowUpDate(
   if (business.followUp) {
     const fu = business.followUp as Record<string, unknown>;
     const status = String(fu.status || "").toUpperCase();
-    if (status === "COMPLETED" || fu.isCompleted === true) {
-      const rawDate = (fu.completedAt ?? fu.followUpDate ?? fu.date ?? fu.scheduledAt) as
-        | string
-        | undefined;
+    if (status === "COMPLETED" || status === "DONE" || fu.isCompleted === true) {
+      const rawDate = extractDateFromFollowUpEntry(fu);
       if (rawDate) {
         return formatFollowUpDate(rawDate);
       }
@@ -249,6 +278,7 @@ export function extractLatestCompletedFollowUpDate(
     b.lastFollowup,
     b.lastFollowUp,
     b.lastFollowups,
+    b.lastFollowUps,
   ];
 
   for (const candidate of lastFollowUpCandidates) {
@@ -265,32 +295,19 @@ export function extractLatestCompletedFollowUpDate(
         const status = String((item as Record<string, unknown>).status || "").toUpperCase();
         return (
           status === "COMPLETED" ||
+          status === "DONE" ||
           (item as Record<string, unknown>).isCompleted === true ||
           Boolean((item as Record<string, unknown>).completedAt)
         );
       });
 
+      const listToProcess = completedCandidateItems.length > 0 ? completedCandidateItems : candidate;
       let latestTime = -Infinity;
       let latestDateStr: string | undefined;
 
-      for (const item of completedCandidateItems) {
+      for (const item of listToProcess) {
         if (!item) continue;
-        let rawDate: string | undefined;
-        if (typeof item === "string") {
-          rawDate = item.trim();
-        } else if (typeof item === "object") {
-          const obj = item as Record<string, unknown>;
-          const d =
-            obj.completedAt ??
-            obj.followUpDate ??
-            obj.date ??
-            obj.scheduledAt;
-          if (typeof d === "string") rawDate = d.trim();
-          else if (d instanceof Date && !Number.isNaN(d.getTime())) {
-            rawDate = d.toISOString();
-          }
-        }
-
+        const rawDate = extractDateFromFollowUpEntry(item);
         if (rawDate && rawDate !== "-") {
           const cleaned = rawDate.replace(/\s+at\s+/i, " ");
           const time = new Date(cleaned).getTime();
@@ -311,26 +328,20 @@ export function extractLatestCompletedFollowUpDate(
       const status = String(obj.status || "").toUpperCase();
       const isCompleted =
         status === "COMPLETED" ||
+        status === "DONE" ||
         obj.isCompleted === true ||
         Boolean(obj.completedAt);
 
-      if (status && status !== "COMPLETED" && !obj.completedAt && !obj.isCompleted) {
-        continue;
-      }
-
-      const rawDate =
-        obj.completedAt ??
-        obj.followUpDate ??
-        obj.date ??
-        (isCompleted || !status ? obj.scheduledAt : undefined);
-
+      const rawDate = extractDateFromFollowUpEntry(obj);
       if (rawDate) {
-        if (typeof rawDate === "string") {
-          const val = rawDate.trim();
-          if (val && val !== "-") return formatFollowUpDate(val);
-        } else if (rawDate instanceof Date && !Number.isNaN(rawDate.getTime())) {
-          return formatFollowUpDate(rawDate);
+        const cleaned = rawDate.replace(/\s+at\s+/i, " ");
+        const time = new Date(cleaned).getTime();
+        const isFuture = !Number.isNaN(time) && time > Date.now();
+        // Ignore non-completed follow-ups scheduled in the future in lastFollowup (test 219)
+        if (status === "SCHEDULED" && isFuture && !isCompleted) {
+          continue;
         }
+        return formatFollowUpDate(rawDate);
       }
     }
   }
@@ -352,7 +363,7 @@ export function extractLatestCompletedFollowUpDate(
     }
   }
 
-  // 6. Missing follow-up data: gracefully return "-"; NEVER substitute creation date.
+  // 6. Missing follow-up data: gracefully return "-"; NEVER substitute business creation date.
   return "-";
 }
 
@@ -411,8 +422,10 @@ export function parseFollowUp(dateStr?: string): {
 function getFollowUpId(value: unknown): string | undefined {
   if (!value || typeof value !== "object") return undefined;
   const record = value as Record<string, unknown>;
-  const id = record._id ?? record.id;
-  return typeof id === "string" && id.trim() ? id : undefined;
+  const id = record._id ?? record.id ?? record.followUpId ?? record.followupId;
+  if (typeof id === "string" && id.trim()) return id.trim();
+  if (typeof id === "number") return String(id);
+  return undefined;
 }
 
 function selectFollowUpId(
@@ -426,7 +439,7 @@ function selectFollowUpId(
     const status = String(record.status ?? "").toUpperCase();
     return mode === "next"
       ? status !== "COMPLETED" && status !== "CANCELLED"
-      : status === "COMPLETED" || record.isCompleted === true || Boolean(record.completedAt);
+      : !status || status === "COMPLETED" || status === "DONE" || record.isCompleted === true || Boolean(record.completedAt);
   });
 
   eligible.sort((left, right) => {
@@ -444,42 +457,55 @@ function selectFollowUpId(
 
 function extractFollowUpIds(business: ApiBusiness) {
   const record = business as Record<string, unknown>;
-  const explicitLastFollowUpId = [
-    record.lastFollowup,
-    record.lastFollowUp,
-    record.lastFollowups,
-  ]
-    .flatMap((value) => Array.isArray(value) ? value : [value])
-    .find((value) => {
-      if (!value || typeof value !== "object" || !getFollowUpId(value)) return false;
-      const status = String((value as Record<string, unknown>).status ?? "").toUpperCase();
-      return !status || status === "COMPLETED";
-    });
 
   return {
     nextFollowUpId: selectFollowUpId(
-      [record.nextFollowups, record.nextFollowup, record.nextFollowUp, record.followUps],
+      [
+        record.nextFollowups,
+        record.nextFollowUps,
+        record.nextFollowup,
+        record.nextFollowUp,
+        record.upcomingFollowUps,
+        record.upcomingFollowups,
+        record.followUps,
+      ],
       "next",
     ),
-    lastFollowUpId: getFollowUpId(explicitLastFollowUpId) ?? selectFollowUpId(
-      [record.completedFollowUps, record.completedFollowups, record.lastFollowup, record.lastFollowUp, record.lastFollowups, record.followUps],
+    lastFollowUpId: selectFollowUpId(
+      [
+        record.completedFollowUps,
+        record.completedFollowups,
+        record.lastFollowup,
+        record.lastFollowUp,
+        record.lastFollowups,
+        record.lastFollowUps,
+        record.followUps,
+      ],
       "last",
     ),
   };
 }
 
 export function toBusinessItem(business: ApiBusiness): BusinessItem {
-  const initials = business.name
+  const unwrapped =
+    business && typeof business === "object" && "data" in business && (business as { data?: unknown }).data && typeof (business as { data?: unknown }).data === "object" && ("_id" in ((business as { data: Record<string, unknown> }).data) || "name" in ((business as { data: Record<string, unknown> }).data))
+      ? ((business as { data: ApiBusiness }).data)
+      : business && typeof business === "object" && "business" in business && (business as { business?: unknown }).business && typeof (business as { business?: unknown }).business === "object" && ("_id" in ((business as { business: Record<string, unknown> }).business) || "name" in ((business as { business: Record<string, unknown> }).business))
+        ? ((business as { business: ApiBusiness }).business)
+        : business;
+  const b = unwrapped ?? ({} as ApiBusiness);
+
+  const initials = (b.name || "")
     .split(" ")
     .filter(Boolean)
     .map((word) => word[0])
     .slice(0, 2)
     .join("")
     .toUpperCase();
-  const nextDateRaw = extractNextFollowUpDate(business);
+  const nextDateRaw = extractNextFollowUpDate(b);
   const followUpInfo = parseFollowUp(nextDateRaw);
-  const followUpIds = extractFollowUpIds(business);
-  const rawCategory = business.category;
+  const followUpIds = extractFollowUpIds(b);
+  const rawCategory = b.category;
   const categoryName =
     rawCategory && typeof rawCategory === "object"
       ? rawCategory.name
@@ -487,8 +513,8 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
   const category =
     typeof categoryName === "string" && categoryName
       ? categoryName
-      : business.categoryId || "Uncategorized";
-  const rawAssignee = business.assignee ?? business.assignedTo;
+      : b.categoryId || "Uncategorized";
+  const rawAssignee = b.assignee ?? b.assignedTo;
   const assignedToId =
     rawAssignee && typeof rawAssignee === "object"
       ? String(rawAssignee._id ?? rawAssignee.id ?? "")
@@ -501,44 +527,50 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
       : "";
 
   return {
-    id: business._id,
-    name: business.name,
-    phone: getPrimaryNumber(business.phoneNumbers),
+    id: b._id,
+    name: b.name,
+    phone: getPrimaryNumber(b.phoneNumbers),
     initials: initials || "NB",
     avatarBg: "bg-[#e0eafe]",
     avatarTextColor: "text-[#2e90fa]",
     category,
-    city: business.city ?? "-",
-    state: business.state ?? "-",
-    leadStatus: business.status ?? "-",
-    status: business.isActive === false ? "Inactive" : "Active",
-    isActive: business.isActive,
-    lastFollowUp: extractLatestCompletedFollowUpDate(business),
+    city: b.city ?? "-",
+    state: b.state ?? "-",
+    leadStatus: b.status ?? "-",
+    status: b.isActive === false ? "Inactive" : "Active",
+    isActive: b.isActive,
+    lastFollowUp: extractLatestCompletedFollowUpDate(b),
     lastFollowUpId: followUpIds.lastFollowUpId,
     nextFollowUp: followUpInfo.nextFollowUp,
     nextFollowUpId: followUpIds.nextFollowUpId,
     nextFollowUpType: followUpInfo.nextFollowUpType,
-    nextFollowupDate: nextDateRaw ?? business.nextFollowupDate,
-    reminder: business.reminder,
-    description: business.description,
-    notes: business.notes,
+    nextFollowupDate: nextDateRaw ?? b.nextFollowupDate,
+    nextFollowups: (b as Record<string, unknown>).nextFollowups ?? (b as Record<string, unknown>).nextFollowUps,
+    nextFollowup: (b as Record<string, unknown>).nextFollowup ?? (b as Record<string, unknown>).nextFollowUp,
+    lastFollowup: (b as Record<string, unknown>).lastFollowup ?? (b as Record<string, unknown>).lastFollowUp,
+    lastFollowups: (b as Record<string, unknown>).lastFollowups ?? (b as Record<string, unknown>).lastFollowUps,
+    followUps: b.followUps,
+    completedFollowUps: b.completedFollowUps,
+    reminder: b.reminder,
+    description: b.description,
+    notes: b.notes,
     owner: assignedToName || undefined,
-    address: business.address,
-    email: business.email,
-    website: business.website,
-    leadSource: business.leadSource,
-    businessType: business.businessType,
+    address: b.address,
+    email: b.email,
+    website: b.website,
+    leadSource: b.leadSource,
+    businessType: b.businessType,
     assignedToId: assignedToId || undefined,
     assignedToName: assignedToName || undefined,
     assignedTo: assignedToName || undefined,
-    alternatePhone: getPrimaryNumber(business.whatsappNumbers),
-    phoneNumbers: business.phoneNumbers,
-    whatsappNumbers: business.whatsappNumbers,
-    location: business.location,
+    alternatePhone: getPrimaryNumber(b.whatsappNumbers),
+    phoneNumbers: b.phoneNumbers,
+    whatsappNumbers: b.whatsappNumbers,
+    location: b.location,
     locationUrl:
-      (typeof business.location === "object" ? business.location?.url : undefined) ||
-      (typeof business.location === "string" ? business.location : undefined) ||
-      business.locationUrl ||
+      (typeof b.location === "object" ? b.location?.url : undefined) ||
+      (typeof b.location === "string" ? b.location : undefined) ||
+      b.locationUrl ||
       "",
   };
 }

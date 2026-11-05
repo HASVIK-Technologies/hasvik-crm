@@ -28,9 +28,14 @@ export default function FormLeadStatusSelect({
   invalid,
 }: FormLeadStatusSelectProps) {
   const { data: statuses = {} } = useBusinessStatuses();
-  const statusKeys = Object.keys(statuses).length > 0
-    ? Object.keys(statuses)
-    : STATUS_OPTIONS.map((option) => option.value);
+  const rawKeys = Array.isArray(statuses)
+    ? statuses
+    : Object.keys(statuses).length > 0
+      ? Object.keys(statuses)
+      : STATUS_OPTIONS.map((option) => option.value);
+
+  const statusKeys = rawKeys.filter((k) => isNaN(Number(k)));
+  const effectiveKeys = statusKeys.length > 0 ? statusKeys : STATUS_OPTIONS.map((opt) => opt.value);
 
   return (
     <div>
@@ -45,7 +50,7 @@ export default function FormLeadStatusSelect({
           </span>
         </SelectTrigger>
         <SelectContent>
-          {statusKeys.map((status) => (
+          {effectiveKeys.map((status) => (
             <SelectItem key={status} value={status}>
               <span className="flex items-center gap-2">
                 <span className={`size-2 shrink-0 ${getLeadStatusVisual(status).dot}`} />
