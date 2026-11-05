@@ -1,19 +1,7 @@
 "use client";
 
-import React, { useState } from "react";
-import { Filter, RotateCcw, Activity } from "lucide-react";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import {
-  Popover,
-  PopoverContent,
-  PopoverTrigger,
-} from "@/components/ui/popover";
+import ResponsiveFilters from "@/components/common/ResponsiveFilters";
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import CategoryAutocomplete from "@/components/common/CategoryAutocomplete";
 import CityAutocomplete from "@/components/common/CityAutocomplete";
 import LeadStatusSelect from "@/components/common/LeadStatusSelect";
@@ -41,169 +29,14 @@ interface BusinessFiltersProps {
   hasActiveFilters?: boolean;
 }
 
-export default function BusinessFilters({
-  selectedCategoryId = "",
-  selectedCategoryName = "",
-  onCategorySelect,
-  selectedStatus = "",
-  onStatusChange,
-  selectedCity = "",
-  onCityChange,
-  isActive,
-  onIsActiveChange,
-  onResetFilters,
-  hasActiveFilters = false,
-}: BusinessFiltersProps) {
-  const [moreFiltersOpen, setMoreFiltersOpen] = useState(false);
-
-  const isMoreFiltersActive = typeof isActive === "boolean";
-  const extraFiltersCount = isMoreFiltersActive ? 1 : 0;
-
-  const activeInactiveValue =
-    isActive === true ? "active" : isActive === false ? "inactive" : "all";
-
-  const handleActiveInactiveChange = (val: string) => {
-    if (val === "active") {
-      onIsActiveChange?.(true);
-    } else if (val === "inactive") {
-      onIsActiveChange?.(false);
-    } else {
-      onIsActiveChange?.(undefined);
-    }
-  };
-
-  return (
-    <div
-      data-filter-controls
-      className="flex flex-wrap items-center gap-2.5 sm:gap-3 w-full xl:flex-nowrap"
-    >
-      {/* 1. Category Filter (Debounced server autocomplete) */}
-      <div className="w-full sm:w-48 lg:w-44 xl:w-48 shrink-0">
-        <CategoryAutocomplete
-          value={selectedCategoryId}
-          label={selectedCategoryName}
-          onChange={onCategorySelect}
-          placeholder="All Categories"
-        />
-      </div>
-
-      {/* 2. Leads Filter (Server-side GET /api/businesses/status) */}
-      <div className="w-full sm:w-40 lg:w-36 xl:w-40 shrink-0">
-        <LeadStatusSelect value={selectedStatus} onChange={onStatusChange} />
-      </div>
-
-      {/* 3. City Filter (Debounced Server Autocomplete: GET /api/businesses/city/autocomplete?search=<city>) */}
-      <div className="w-full sm:w-40 lg:w-40 xl:w-44 shrink-0">
-        <CityAutocomplete
-          value={selectedCity}
-          onChange={onCityChange}
-          placeholder="All Cities"
-        />
-      </div>
-
-      {/* More Filters Popover */}
-      <div className="hidden lg:block">
-      <Popover open={moreFiltersOpen} onOpenChange={setMoreFiltersOpen}>
-        <PopoverTrigger asChild>
-          <button
-            type="button"
-            className={`inline-flex h-10 items-center justify-center gap-2 border px-3.5 text-xs font-semibold shadow-[0_1px_2px_rgba(15,23,42,0.05)] transition-colors shrink-0 ${
-              isMoreFiltersActive
-                ? "border-brand-blue bg-blue-50 text-brand-blue"
-                : "border-slate-300 bg-white text-slate-700 hover:border-slate-400 hover:bg-slate-50"
-            }`}
-          >
-            <Filter className="size-3.5 text-[#64748b]" />
-            <span>More Filters</span>
-            {extraFiltersCount > 0 && (
-              <span className="flex size-4.5 items-center justify-center rounded-full bg-primary text-[10px] font-bold text-primary-foreground">
-                {extraFiltersCount}
-              </span>
-            )}
-          </button>
-        </PopoverTrigger>
-        <PopoverContent
-          align="start"
-          className="z-50 w-80 space-y-4 border border-slate-200 bg-white p-4 shadow-xl"
-        >
-          <div className="flex items-center justify-between border-b border-[#f1f5f9] pb-2.5">
-            <div className="flex items-center gap-1.5">
-              <Filter className="size-4 text-primary" />
-              <h4 className="text-xs font-bold text-[#0f172a]">More Filters</h4>
-            </div>
-            {isMoreFiltersActive && (
-              <button
-                type="button"
-                onClick={() => onIsActiveChange?.(undefined)}
-                className="text-[11px] font-medium text-primary hover:underline"
-              >
-                Reset Extra
-              </button>
-            )}
-          </div>
-
-          {/* Active / inactive business filter */}
-          <div>
-            <label className="mb-1.5 flex items-center gap-1.5 text-xs font-semibold text-[#475569]">
-              <Activity className="size-3.5 text-[#94a3b8]" />
-              Status
-            </label>
-            <Select
-              value={activeInactiveValue}
-              onValueChange={handleActiveInactiveChange}
-            >
-              <SelectTrigger className="w-full h-9 rounded-lg bg-[#f8fafc] border-[#e2e8f0] text-xs font-medium text-[#334155]">
-                <SelectValue placeholder="All Status">
-                  {activeInactiveValue === "active"
-                    ? "Active"
-                    : activeInactiveValue === "inactive"
-                      ? "Inactive"
-                      : "All Status"}
-                </SelectValue>
-              </SelectTrigger>
-              <SelectContent className="bg-white z-50">
-                <SelectItem value="all" className="text-xs font-medium">
-                  All Status
-                </SelectItem>
-                <SelectItem value="active" className="text-xs">
-                  Active
-                </SelectItem>
-                <SelectItem value="inactive" className="text-xs">
-                  Inactive
-                </SelectItem>
-              </SelectContent>
-            </Select>
-          </div>
-        </PopoverContent>
-      </Popover>
-      </div>
-
-      <div className="w-full sm:w-40 shrink-0 lg:hidden">
-        <Select value={activeInactiveValue} onValueChange={handleActiveInactiveChange}>
-          <SelectTrigger className="w-full h-10 rounded-xl bg-white border-[#e2e8f0] text-xs font-medium text-[#334155]">
-            <SelectValue placeholder="All Status" />
-          </SelectTrigger>
-          <SelectContent className="bg-white z-50">
-            <SelectItem value="all" className="text-xs">All Status</SelectItem>
-            <SelectItem value="active" className="text-xs">Active</SelectItem>
-            <SelectItem value="inactive" className="text-xs">Inactive</SelectItem>
-          </SelectContent>
-        </Select>
-      </div>
-
-      {/* 4. Reset Filters Button */}
-      {hasActiveFilters && onResetFilters && (
-        <button
-          type="button"
-          onClick={onResetFilters}
-          data-inline-filter-reset
-          className="inline-flex h-10 items-center gap-1.5 border border-slate-300 bg-white px-3 text-xs font-semibold text-slate-600 shadow-[0_1px_2px_rgba(15,23,42,0.04)] transition-colors shrink-0 hover:border-rose-300 hover:bg-rose-50 hover:text-rose-700"
-          title="Reset all filters"
-        >
-          <RotateCcw className="size-3" />
-          <span>Reset Filters</span>
-        </button>
-      )}
-    </div>
-  );
+export default function BusinessFilters({ selectedCategoryId = "", selectedCategoryName = "", onCategorySelect, selectedStatus = "", onStatusChange, selectedCity = "", onCityChange, isActive, onIsActiveChange, onResetFilters, hasActiveFilters = false }: BusinessFiltersProps) {
+  return <ResponsiveFilters onReset={onResetFilters} hasActiveFilters={hasActiveFilters} fields={[
+    { key: "category", label: "Category", active: Boolean(selectedCategoryId), reset: () => onCategorySelect?.("", ""), control: <CategoryAutocomplete value={selectedCategoryId} label={selectedCategoryName} onChange={onCategorySelect} placeholder="All Categories" /> },
+    { key: "lead-status", label: "Lead status", active: Boolean(selectedStatus), reset: () => onStatusChange?.(""), control: <LeadStatusSelect value={selectedStatus} onChange={onStatusChange} /> },
+    { key: "city", label: "City", active: Boolean(selectedCity), reset: () => onCityChange?.(""), control: <CityAutocomplete value={selectedCity} onChange={onCityChange} placeholder="All Cities" /> },
+    { key: "activity", label: "Activity status", active: isActive !== undefined, reset: () => onIsActiveChange?.(undefined), control: <Select value={isActive === undefined ? "ALL" : isActive ? "ACTIVE" : "INACTIVE"} onValueChange={(value) => onIsActiveChange?.(value === "ALL" ? undefined : value === "ACTIVE")}>
+      <SelectTrigger className="w-full bg-white text-xs"><SelectValue /></SelectTrigger>
+      <SelectContent className="bg-white"><SelectItem value="ALL">All Status</SelectItem><SelectItem value="ACTIVE">Active</SelectItem><SelectItem value="INACTIVE">Inactive</SelectItem></SelectContent>
+    </Select> },
+  ]} />;
 }

@@ -1,6 +1,20 @@
 import { test } from "node:test";
 import assert from "node:assert/strict";
 import { getActivityMessages } from "../lib/audit-logs/activity-messages.ts";
+import { getSavedFields } from "../lib/audit-logs/saved-fields.ts";
+
+test("one timeline event describes every saved change with readable names and status", () => {
+  const fields = getSavedFields({ id: "multi-field", action: "UPDATE", changes: {
+    changedFields: ["assignedTo", "status", "email"],
+    newData: { status: "PROPOSAL_AND_NEGOTIATION", email: null },
+    assignedTo: { oldValue: null, newValue: { fullName: "Hasvik Admin" } },
+  } });
+  assert.deepEqual(getActivityMessages("UPDATE", fields), [
+    "Assigned to Hasvik Admin",
+    "Lead status changed to Proposal and negotiation",
+    "Email cleared",
+  ]);
+});
 
 test("updates describe assignment, activation and business name", () => {
   assert.deepEqual(getActivityMessages("UPDATE", [

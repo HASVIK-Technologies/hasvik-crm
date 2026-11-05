@@ -1,5 +1,11 @@
 export type UserRole = "ADMIN" | "MANAGER" | "SALES" | "USER";
 
+export interface UserKpis {
+  total: number;
+  active: number;
+  inactive: number;
+}
+
 export interface UserRecord {
   _id?: string;
   id?: string;

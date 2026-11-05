@@ -3,12 +3,15 @@ import { getTenant } from "@/lib/tenants/api";
 import { getBusinessRaw } from "@/lib/business/api";
 import { getSubscriptionTenantId } from "@/lib/subscriptions/access";
 import { isRecordInactive } from "@/lib/records/activity";
+import { collectSubscriptionPages, readSubscriptionsPage, subscriptionListParams, type SubscriptionCollectionResponse } from "@/lib/subscriptions/pagination";
 import type {
   CreateSubscriptionPayload,
   RenewSubscriptionPayload,
   Subscription,
   SubscriptionPlan,
   SubscriptionStatus,
+  SubscriptionQueryParams,
+  SubscriptionsPage,
 } from "@/types/subscription";
 
 type CollectionPayload<T> = T[] | { data: T[] };
@@ -41,11 +44,14 @@ export async function getSubscriptionPlans(
 export async function getSubscriptions(
   signal?: AbortSignal,
 ): Promise<Subscription[]> {
-  const response =
-    await apiClient.get<CollectionPayload<Subscription>>("/subscriptions", {
-      signal,
-    });
-  return readCollection(response.data);
+  return collectSubscriptionPages((params) => getSubscriptionsPage(params, signal));
+}
+
+export async function getSubscriptionsPage(params: SubscriptionQueryParams, signal?: AbortSignal): Promise<SubscriptionsPage> {
+  const response = await apiClient.get<SubscriptionCollectionResponse>("/subscriptions", {
+    params: subscriptionListParams(params), signal,
+  });
+  return readSubscriptionsPage(response.data);
 }
 
 export async function createSubscription(
@@ -88,7 +94,7 @@ export async function renewSubscription(
 }
 
 async function assertSubscriptionWritable(id: string) {
-  const response = await apiClient.get<Subscription | { data: Subscription }>(`/subscriptions/${id}`);
+  const response = await apiClient.get<Subscription | { data: Subscription }>(`/subscriptions/${encodeURIComponent(id)}`);
   const subscription = unwrap(response.data);
   const tenantId = getSubscriptionTenantId(subscription);
   if (tenantId && !(await getTenant(tenantId)).isActive) throw new Error("Activate this tenant before changing its subscriptions.");

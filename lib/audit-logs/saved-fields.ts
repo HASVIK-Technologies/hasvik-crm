@@ -37,7 +37,11 @@ export function getSavedFields(log: AuditLogItem) {
     : Object.keys(snapshot);
   return [...new Set(fields)].filter((field) => field in fieldLabels).map((field) => ({
     field, label: fieldLabels[field],
-    value: Object.hasOwn(snapshot, field) ? formatValue(savedValue(snapshot[field])) : "Value unavailable",
+    value: Object.hasOwn(snapshot, field)
+      ? formatValue(savedValue(snapshot[field]))
+      : Object.hasOwn(changes, field)
+        ? formatValue(savedValue(changes[field]))
+        : "Value unavailable",
   }));
 }
 

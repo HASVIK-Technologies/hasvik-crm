@@ -1,10 +1,11 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Filter, X } from "lucide-react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import OutlinedButton from "../common/OutlinedButton";
 import SearchInput from "../common/SearchInput";
+import { FilterDisplayContext } from "@/components/common/ResponsiveFilters";
 import PageContainer from "./PageContainer";
 
 interface LayoutProps {
@@ -49,6 +50,12 @@ export default function ListPageLayout({
   const [internalShowFilters, setInternalShowFilters] = useState(true);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
   const showFilters = controlledShowFilters ?? internalShowFilters;
+  useEffect(() => {
+    const desktop = window.matchMedia("(min-width: 1024px)");
+    const closeDrawer = () => { if (desktop.matches) setFilterDrawerOpen(false); };
+    desktop.addEventListener("change", closeDrawer);
+    return () => desktop.removeEventListener("change", closeDrawer);
+  }, []);
 
   const handleFilterToggle = () => {
     if (window.matchMedia("(max-width: 1023px)").matches) {
@@ -80,9 +87,9 @@ export default function ListPageLayout({
     <PageContainer className={`flex flex-col gap-4 sm:gap-6 lg:gap-7 ${className ?? ""}`}>
       <section className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
         {breadcrumb}
-        <div className="flex w-full items-center justify-between gap-2 sm:w-auto sm:justify-end">
+        <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
           {viewSwitcher && <div className="shrink-0">{viewSwitcher}</div>}
-          <div className="flex shrink-0 items-center gap-2">
+          <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             {filters && (
               <OutlinedButton
                 className="gap-2 lg:hidden"
@@ -102,9 +109,9 @@ export default function ListPageLayout({
       <div className="w-full lg:hidden">{search}</div>
       {showFilters && (filters || search) && (
         <div className="hidden grow border border-slate-200 bg-white p-3 shadow-[0_1px_2px_rgba(15,23,42,0.03)] lg:flex overflow-visible">
-          <div className="flex w-full items-center gap-3">
-            {search && <div className="w-full shrink-0 lg:w-80 xl:w-96">{search}</div>}
-            {filters && <div className="min-w-0 flex-1">{filters}</div>}
+          <div className="flex w-full min-w-0 flex-wrap items-center gap-3">
+            {search && <div className="w-full shrink-0 lg:w-60 xl:w-72">{search}</div>}
+            {filters && <div className="min-w-0 flex-1"><FilterDisplayContext value="inline">{!filterDrawerOpen && filters}</FilterDisplayContext></div>}
           </div>
         </div>
       )}
@@ -133,8 +140,9 @@ export default function ListPageLayout({
                   <X className="size-5" />
                 </DialogPrimitive.Close>
               </div>
+              <DialogPrimitive.Description className="sr-only">Filter the list. Changes update results automatically.</DialogPrimitive.Description>
               <div className="min-h-0 flex-1 overflow-y-auto px-5 py-5">
-                {filters}
+                <FilterDisplayContext value="drawer">{filters}</FilterDisplayContext>
               </div>
               <div className="grid shrink-0 grid-cols-2 gap-3 border-t border-slate-200 bg-white p-4 shadow-[0_-6px_18px_rgba(15,23,42,0.05)]">
                 <button
