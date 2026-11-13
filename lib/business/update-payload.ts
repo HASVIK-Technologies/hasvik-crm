@@ -15,6 +15,7 @@ function editableValues(values: BusinessFormValues): Record<string, unknown> {
     description: values.description,
     location: { url: normalizeHttpUrl(values.locationUrl) },
     assignedTo: values.assignTo || null,
+    tagIds: values.tagIds ?? [],
     phoneNumbers: values.phoneNumbers.filter((item) => item.value.trim())
       .map((item, index) => ({ number: item.value.trim(), isPrimary: index === 0 })),
     whatsappNumbers: values.whatsappNumbers.filter((item) => item.value.trim())

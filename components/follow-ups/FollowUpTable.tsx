@@ -45,6 +45,7 @@ import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
 import { formatFollowUpType } from "@/lib/business/form-options";
 import { useState } from "react";
 import { useFollowUpHighlight } from "@/hooks/use-follow-up-highlight";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 import {
   canCancelFollowUp,
   canCompleteFollowUp,
@@ -303,6 +304,7 @@ export default function FollowUpTable({
                 <TableHead className="px-4 py-4 font-semibold">
                   Assigned To
                 </TableHead>
+                <TableHead className="min-w-40 px-4 py-4 font-semibold">Tags</TableHead>
                 <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">
                   Actions
                 </TableHead>
@@ -324,7 +326,7 @@ export default function FollowUpTable({
                         </div>
                       </div>
                     </TableCell>
-                    {Array.from({ length: 6 }).map((__, cellIndex) => (
+                    {Array.from({ length: 7 }).map((__, cellIndex) => (
                       <TableCell key={cellIndex} className="px-4 py-4">
                         <div className="h-3.5 w-20 animate-pulse rounded bg-[#f1f5f9]" />
                       </TableCell>
@@ -334,7 +336,7 @@ export default function FollowUpTable({
               ) : items.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={7}
+                    colSpan={8}
                     className="py-16 text-center text-sm text-[#64748b]"
                   >
                     No follow-ups match your current search and filter criteria.
@@ -396,6 +398,7 @@ export default function FollowUpTable({
                     <TableCell className="px-4 py-4 text-xs text-[#475569]">
                       {item.assignedToName}
                     </TableCell>
+                    <TableCell className="whitespace-nowrap px-4 py-4" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></TableCell>
                     <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />

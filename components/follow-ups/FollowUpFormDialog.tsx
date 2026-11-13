@@ -18,6 +18,7 @@ import FollowUpAutocomplete from "@/components/follow-ups/FollowUpAutocomplete";
 import SaveButton from "@/components/common/SaveButton";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import TagSelectionField from "@/components/tags/TagSelectionField";
 import { useCreateFollowUp, useUpdateFollowUp } from "@/hooks/use-follow-ups";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import {
@@ -49,6 +50,7 @@ interface FormValues {
   scheduledAt: string;
   type: FollowUpType | "";
   reminder: string;
+  tagIds: string[];
 }
 
 const emptyValues: FormValues = {
@@ -57,6 +59,7 @@ const emptyValues: FormValues = {
   scheduledAt: "",
   type: "",
   reminder: "",
+  tagIds: [],
 };
 
 function getDefaultValues(
@@ -74,6 +77,7 @@ function getDefaultValues(
       scheduledAt: toDateTimeLocalValue(followUp.scheduledAt),
       type: (followUp.type as FollowUpType) || "CALL",
       reminder: followUp.reminder ?? minutesToReminder(followUp.reminderInMinutes) ?? "",
+      tagIds: followUp.tagIds?.length ? followUp.tagIds : followUp.tags?.map((tag) => tag.id) ?? [],
     };
   }
   return {
@@ -99,6 +103,7 @@ export default function FollowUpFormDialog({
     control,
     handleSubmit,
     reset,
+    setValue,
     formState: { errors, isSubmitting },
   } = useForm<FormValues>({
     defaultValues: getDefaultValues(mode, initialBusiness, followUp, initialScheduledAt),
@@ -106,6 +111,7 @@ export default function FollowUpFormDialog({
   });
 
   const selectedBusiness = useWatch({ control, name: "business" });
+  const selectedTagIds = useWatch({ control, name: "tagIds" }) ?? [];
   const businessQuery = useBusinessQuery(open ? followUp?.businessId ?? initialBusiness?.id ?? selectedBusiness?.id : undefined);
   const inactiveSelection = isRecordInactive(businessQuery.data) || Boolean(followUp && isFollowUpReadOnly(followUp));
   const readOnly = !businessQuery.data || inactiveSelection;
@@ -139,7 +145,9 @@ export default function FollowUpFormDialog({
           scheduledAt: followUp.scheduledAt,
           reminderInMinutes: followUp.reminderInMinutes ?? parseReminderToMinutes(followUp.reminder) ?? 0,
         });
-        if (Object.keys(updates).length) await updateMutation.mutateAsync({ id: followUp.id, ...updates, highlightScheduledAt: scheduledAt });
+        const originalTagIds = followUp.tagIds?.length ? followUp.tagIds : (followUp.tags ?? []).map((tag) => tag.id);
+        const tagsChanged = JSON.stringify([...values.tagIds].sort()) !== JSON.stringify([...originalTagIds].sort());
+        if (Object.keys(updates).length || tagsChanged) await updateMutation.mutateAsync({ id: followUp.id, ...updates, tagIds: tagsChanged ? values.tagIds : undefined, highlightScheduledAt: scheduledAt });
         toast.success("Follow-up updated successfully.");
       } else {
         await createMutation.mutateAsync({
@@ -148,6 +156,7 @@ export default function FollowUpFormDialog({
           type: values.type,
           scheduledAt,
           reminder: values.reminder || undefined,
+          tagIds: values.tagIds,
         });
         toast.success("Follow-up created successfully.");
       }
@@ -268,6 +277,7 @@ export default function FollowUpFormDialog({
                 {errors.assignee && <p role="alert" className="mt-1 text-xs text-red-600">{errors.assignee.message}</p>}
               </div>
             </div>
+            <div><label className="mb-1.5 block text-xs font-semibold text-[#475569]">Tags <span className="font-normal text-slate-400">(optional)</span></label><TagSelectionField entity="FOLLOW_UP" value={selectedTagIds} onChange={(tagIds) => setValue("tagIds", tagIds, { shouldDirty: true })} /></div>
             <div className="grid grid-cols-1 gap-5 sm:grid-cols-2">
               <div>
                 <label className="mb-1.5 block text-xs font-semibold text-[#475569]">

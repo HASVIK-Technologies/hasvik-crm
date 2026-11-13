@@ -63,6 +63,7 @@ import {
   useBusinessListStore,
   type BusinessTableColumn,
 } from "@/store/business-list-store";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 
 const TABLE_COLUMN_OPTIONS: Array<{ value: BusinessTableColumn; label: string }> = [
   { value: "category", label: "Category" },
@@ -458,6 +459,7 @@ export default function BusinessTable({
                 {columnVisible("category") && <TableHead className="px-4 py-4 font-semibold">Category</TableHead>}
                 {columnVisible("city") && <TableHead className="px-4 py-4 font-semibold">City</TableHead>}
                 {columnVisible("responsible") && <TableHead className="min-w-44 px-4 py-4 font-semibold">Responsible Person</TableHead>}
+                <TableHead className="min-w-40 px-4 py-4 font-semibold">Tags</TableHead>
                 {columnVisible("leadStatus") && <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>}
                 {columnVisible("activity") && <TableHead className="px-4 py-4 font-semibold">Status</TableHead>}
                 {columnVisible("lastFollowUp") && <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>}
@@ -584,6 +586,7 @@ export default function BusinessTable({
                         </span>
                       </div>
                     </TableCell>}
+                    <TableCell className={cn("whitespace-nowrap px-4", rowPadding)}><TagAssignmentPicker entity="BUSINESS" entityId={String(item.id)} tags={item.tags} /></TableCell>
 
                     {/* Lead Status */}
                     {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>

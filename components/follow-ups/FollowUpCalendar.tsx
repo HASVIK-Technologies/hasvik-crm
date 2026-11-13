@@ -19,6 +19,7 @@ import { formatFollowUpType } from "@/lib/business/form-options";
 import { cn } from "@/lib/utils";
 import type { FollowUpItem } from "@/types/follow-up";
 import FollowUpCommunicationActions from "@/components/follow-ups/FollowUpCommunicationActions";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -256,6 +257,7 @@ export default function FollowUpCalendar({
                             </DropdownMenu>
                           </div>
                           <div className="mt-1.5 flex items-center justify-between gap-1"><StatusBadge status={item.status} className="px-1.5 py-0 text-[9px]" /><FollowUpCommunicationActions item={item} className="size-6" onAction={() => highlightFollowUp(item.id)} /></div>
+                          <div className="mt-1" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
                         </div>
                       ))}
                       {dayItems.length > 3 && (
@@ -323,6 +325,7 @@ export default function FollowUpCalendar({
                           <span className="block truncate text-sm font-bold text-slate-900" title={item.businessName}>{item.businessName}</span>
                           <span className="mt-0.5 block truncate text-[11px] text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                           <StatusBadge status={item.status} className="mt-2" />
+                          <div className="mt-2" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
                         </button>
                         <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>
                           <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
@@ -383,6 +386,7 @@ export default function FollowUpCalendar({
                     <span className="block truncate text-sm font-bold text-slate-900 hover:text-brand-blue" title={item.businessName}>{item.businessName}</span>
                     <span className="mt-1 block text-xs text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                     <StatusBadge status={item.status} className="mt-2" />
+                    <div className="mt-2" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
                   </button>
                   <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>
                     <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>

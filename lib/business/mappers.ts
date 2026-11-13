@@ -1,4 +1,5 @@
 import type { BusinessItem } from "@/types/business";
+import { normalizeAssignedTags } from "@/types/tag";
 import type {
   ApiBusiness,
   CreateBusinessPayload,
@@ -528,6 +529,7 @@ export function toBusinessItem(business: ApiBusiness): BusinessItem {
 
   return {
     id: b._id,
+    tags: normalizeAssignedTags((b as Record<string, unknown>).tags),
     name: b.name,
     phone: getPrimaryNumber(b.phoneNumbers),
     initials: initials || "NB",
@@ -694,6 +696,7 @@ export function toCreateBusinessPayload(
     city: values.city,
     state: values.state.trim(),
     pincode: values.pincode.trim(),
+    ...(values.tagIds?.length ? { tagIds: values.tagIds } : {}),
   };
 
   if (values.email.trim()) payload.email = values.email.trim();

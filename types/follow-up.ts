@@ -18,6 +18,8 @@ export interface FollowUpOption {
 }
 
 export interface FollowUpItem {
+  tags?: import("@/types/tag").AssignedTag[];
+  tagIds?: string[];
   isActive?: boolean;
   businessIsActive?: boolean;
   tenantIsActive?: boolean;
@@ -96,6 +98,7 @@ export interface CreateFollowUpPayload {
   notes?: string;
   reminder?: string;
   reminderInMinutes?: number;
+  tagIds?: string[];
 }
 
 export interface UpdateFollowUpPayload {
@@ -111,6 +114,7 @@ export interface UpdateFollowUpPayload {
   notes?: string;
   reminder?: string;
   reminderInMinutes?: number;
+  tagIds?: string[];
 }
 
 export interface UpdateFollowUpStatusPayload {

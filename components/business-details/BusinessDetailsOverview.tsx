@@ -6,6 +6,7 @@ import { ActivityStateText } from "@/components/common/ActivityStateText";
 import { normalizeHttpUrl } from "@/lib/business/url-validation";
 import { useBusinessStatuses } from "@/hooks/use-filter-options";
 import { formatLeadStatus } from "@/lib/business/form-options";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 
 interface OverviewProps {
   business: any;
@@ -44,6 +45,11 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
           <Tags className="w-5 h-5 text-slate-400 shrink-0" />
           <div className="w-32 shrink-0 text-slate-500">Category</div>
           <div className="text-slate-700 font-medium">{business.category || businessData.businessInfo.category}</div>
+        </div>
+        <div className="flex items-start gap-3 text-sm">
+          <Tags className="w-5 h-5 text-slate-400 shrink-0" />
+          <div className="w-32 shrink-0 text-slate-500">Tags</div>
+          <TagAssignmentPicker entity="BUSINESS" entityId={String(business.id ?? business._id ?? "")} tags={business.tags ?? []} />
         </div>
         <div className="flex items-start gap-3 text-sm">
           <MapPin className="w-5 h-5 text-slate-400 shrink-0" />

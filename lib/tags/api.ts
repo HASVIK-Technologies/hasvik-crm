@@ -3,6 +3,7 @@ import type {
   TagEntity,
   TagEntityDisplay,
   TagItem,
+  TagAutocompleteQuery,
   TagListQuery,
   TagListResult,
   TagPayload,
@@ -137,7 +138,7 @@ export async function getTags(
       }
     }
 
-    if (list && list.length > 0) {
+    if (list) {
       const items = list.map(parseTag);
       return {
         items,
@@ -167,6 +168,30 @@ export async function getTags(
     limit,
     totalPages: Math.max(1, Math.ceil(total / limit)),
   };
+}
+
+export async function getTagAutocomplete(
+  query: TagAutocompleteQuery,
+  signal?: AbortSignal,
+): Promise<TagItem[]> {
+  const response = await apiClient.get("/tags/autocomplete", {
+    params: {
+      search: query.search?.trim() ?? "",
+      entityType: query.entityType,
+      limit: query.limit ?? 100,
+    },
+    signal,
+  });
+  const body = response.data as unknown;
+  const payload = isRecord(body) && body.data !== undefined ? body.data : body;
+  const rows = Array.isArray(payload)
+    ? payload
+    : isRecord(payload) && Array.isArray(payload.items)
+      ? payload.items
+      : isRecord(payload) && Array.isArray(payload.data)
+        ? payload.data
+        : [];
+  return rows.map(parseTag);
 }
 
 export async function createTag(payload: TagPayload): Promise<TagItem> {

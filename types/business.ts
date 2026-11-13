@@ -1,5 +1,6 @@
 export interface BusinessItem {
   id: number | string;
+  tags?: import("@/types/tag").AssignedTag[];
   name: string;
   phone: string;
   initials: string;

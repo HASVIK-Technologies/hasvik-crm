@@ -25,6 +25,7 @@ import { useUpdateBusinessLeadStatus, useUpdateBusinessStatus } from "@/hooks/us
 import { useBusinessHighlight } from "@/hooks/use-business-highlight";
 import { useBusinessListStore } from "@/store/business-list-store";
 import AssignBusinessDialog from "./AssignBusinessDialog";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 
 export default function BusinessKanban({
   businesses,
@@ -312,6 +313,7 @@ export default function BusinessKanban({
                   </DropdownMenu>
                 </div>
                 <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+                  <div onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} /></div>
                   {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
                   <div className={cn("flex min-w-0 items-center gap-2", business.owner ? "" : "font-semibold text-amber-700")}><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
                   {business.lastFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
@@ -438,6 +440,7 @@ export default function BusinessKanban({
                         </div>
 
                         <div className="mt-3 space-y-2 border-t border-slate-100 pt-2.5 text-xs text-slate-600">
+                          <div onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onDragStart={(event) => { event.preventDefault(); event.stopPropagation(); }}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} /></div>
                           {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
                           <div className={cn("flex items-center gap-2", business.owner ? "" : "text-slate-400")}><UserRound className="size-3.5 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
                           {business.lastFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}

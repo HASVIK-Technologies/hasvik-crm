@@ -16,6 +16,8 @@ export type ApiBusinessAssignee = {
 export type ApiBusiness = {
   _id: string;
   name: string;
+  tags?: unknown[];
+  tagIds?: string[];
   categoryId?: string | null;
   businessType?: string;
   location?: { url?: string } | null;
@@ -244,4 +246,5 @@ export type CreateBusinessPayload = {
   leadSource?: string;
   followUp?: FollowUpPayload;
   location?: { url?: string } | null;
+  tagIds?: string[];
 };

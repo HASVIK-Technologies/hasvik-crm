@@ -31,6 +31,7 @@ export type BusinessFormValues = {
   assignToName?: string;
   nextFollowupDate: string;
   reminder: string;
+  tagIds: string[];
 };
 
 export const defaultBusinessFormValues: BusinessFormValues = {
@@ -54,6 +55,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   assignToName: "",
   nextFollowupDate: "",
   reminder: "",
+  tagIds: [],
   addAnother: false,
 };
 

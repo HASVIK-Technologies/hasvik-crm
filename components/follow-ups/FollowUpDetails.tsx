@@ -15,6 +15,8 @@ import FollowUpConversationTimeline from "@/components/follow-ups/FollowUpConver
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import { formatFollowUpType } from "@/lib/business/form-options";
 import type { FollowUpItem } from "@/types/follow-up";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
+import { Tags } from "lucide-react";
 
 function dateTime(value: string) {
   const date = new Date(value);
@@ -74,6 +76,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
           <SummaryItem icon={<UserRound className="size-4" />} label="Assigned to">{followUp.assignedToName || "Unassigned"}</SummaryItem>
           <SummaryItem icon={<Bell className="size-4" />} label="Reminder">{reminder}</SummaryItem>
           <SummaryItem icon={<FileText className="size-4" />} label="Follow-up type">{formatFollowUpType(followUp.type)}</SummaryItem>
+          <SummaryItem icon={<Tags className="size-4" />} label="Tags"><TagAssignmentPicker entity="FOLLOW_UP" entityId={followUp.id} tags={followUp.tags ?? []} tagIds={followUp.tagIds} /></SummaryItem>
         </dl>
       </section>
 

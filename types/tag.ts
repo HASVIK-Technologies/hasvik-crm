@@ -14,6 +14,20 @@ export interface TagItem {
   updatedAt?: string;
 }
 
+export type AssignedTag = Pick<TagItem, "id" | "name" | "color">;
+
+export function normalizeAssignedTags(value: unknown): AssignedTag[] {
+  if (!Array.isArray(value)) return [];
+  return value.flatMap((item) => {
+    if (!item || typeof item !== "object") return [];
+    const raw = item as Record<string, unknown>;
+    const id = String(raw.id ?? raw._id ?? raw.tagId ?? "");
+    const name = String(raw.name ?? "");
+    const color = String(raw.color ?? "");
+    return id && name && color ? [{ id, name, color }] : [];
+  });
+}
+
 export interface TagPayload {
   name: string;
   color: string;
@@ -36,5 +50,11 @@ export interface TagListResult {
   page: number;
   limit: number;
   totalPages: number;
+}
+
+export interface TagAutocompleteQuery {
+  search?: string;
+  entityType: "BUSINESS" | "FOLLOWUP";
+  limit?: number;
 }
 
