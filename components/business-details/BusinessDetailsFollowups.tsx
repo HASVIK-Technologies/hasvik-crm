@@ -46,11 +46,13 @@ import { useModalStore } from "@/store/business-modal-store";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
 import { formatFollowUpType } from "@/lib/business/form-options";
-import { useState } from "react";
+import { toFollowUpItem } from "@/lib/follow-ups/api";
+import React, { useState } from "react";
 
 interface BusinessDetailsFollowupsProps {
   businessId?: string;
   readOnly?: boolean;
+  business?: any;
 }
 
 function formatScheduledAt(value: string) {
@@ -67,6 +69,7 @@ function formatScheduledAt(value: string) {
 export default function BusinessDetailsFollowups({
   businessId: propBusinessId,
   readOnly = false,
+  business,
 }: BusinessDetailsFollowupsProps = {}) {
   const params = useParams<{ id?: string | string[] }>();
   const router = useRouter();
@@ -81,6 +84,43 @@ export default function BusinessDetailsFollowups({
   const [notesFollowUp, setNotesFollowUp] = useState<FollowUpItem | null>(null);
   const cancelMutation = useCancelFollowUp();
   const completeMutation = useCompleteFollowUp();
+
+  const fallbackFollowUps = React.useMemo(() => {
+    if (!business || typeof business !== "object") return [];
+    const list: unknown[] = [];
+    const add = (v: unknown) => {
+      if (!v) return;
+      if (Array.isArray(v)) list.push(...v);
+      else if (typeof v === "object") list.push(v);
+    };
+    add(business.nextFollowups);
+    add(business.nextFollowUps);
+    add(business.nextFollowup);
+    add(business.nextFollowUp);
+    add(business.lastFollowup);
+    add(business.lastFollowUp);
+    add(business.lastFollowups);
+    add(business.lastFollowUps);
+    add(business.followUps);
+    add(business.completedFollowUps);
+
+    const seen = new Set<string>();
+    const items: FollowUpItem[] = [];
+    for (const entry of list) {
+      if (!entry || typeof entry !== "object") continue;
+      const parsed = toFollowUpItem(entry as Record<string, unknown>);
+      const key = parsed.id || `${parsed.scheduledAt}_${parsed.status}`;
+      if (!seen.has(key)) {
+        seen.add(key);
+        items.push(parsed);
+      }
+    }
+    return items.sort(
+      (a, b) => new Date(b.scheduledAt).getTime() - new Date(a.scheduledAt).getTime(),
+    );
+  }, [business]);
+
+  const displayFollowUps = followUps.length > 0 ? followUps : fallbackFollowUps;
 
   const cancelFollowUp = async () => {
     if (!cancellingFollowUp || !canCancelFollowUp(cancellingFollowUp)) return;
@@ -162,7 +202,7 @@ export default function BusinessDetailsFollowups({
               </TableRow>
             </TableHeader>
             <TableBody className="divide-y divide-slate-100 text-sm text-slate-700">
-              {followUps.map((item) => {
+              {displayFollowUps.map((item) => {
                 return (
                   <TableRow
                     key={item.id}
@@ -286,7 +326,7 @@ export default function BusinessDetailsFollowups({
                   </TableRow>
                 );
               })}
-              {followUps.length === 0 && (
+              {displayFollowUps.length === 0 && (
                 <TableRow>
                   <TableCell
                     colSpan={5}

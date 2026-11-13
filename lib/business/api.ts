@@ -46,10 +46,19 @@ export async function getBusinessRaw(
   id: string,
   signal?: AbortSignal,
 ): Promise<ApiBusiness> {
-  const response = await apiClient.get<ApiBusiness>(`/businesses/${id}`, {
+  const response = await apiClient.get<ApiBusiness | { data?: ApiBusiness; business?: ApiBusiness }>(`/businesses/${id}`, {
     signal,
   });
-  return response.data;
+  const body = response.data as { data?: ApiBusiness; business?: ApiBusiness };
+  if (body && typeof body === "object") {
+    if (body.data && typeof body.data === "object" && ("_id" in body.data || "name" in body.data)) {
+      return body.data;
+    }
+    if (body.business && typeof body.business === "object" && ("_id" in body.business || "name" in body.business)) {
+      return body.business;
+    }
+  }
+  return response.data as ApiBusiness;
 }
 
 export async function getCategories(): Promise<ApiCategory[]> {

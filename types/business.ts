@@ -34,6 +34,12 @@ export interface BusinessItem {
   locationUrl?: string;
   phoneNumbers?: PhoneNumberItem[];
   whatsappNumbers?: PhoneNumberItem[];
+  lastFollowup?: unknown;
+  lastFollowups?: unknown;
+  nextFollowup?: unknown;
+  nextFollowups?: unknown;
+  followUps?: unknown[];
+  completedFollowUps?: unknown[];
 }
 
 export interface PhoneNumberItem {
