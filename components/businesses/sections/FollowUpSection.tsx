@@ -21,7 +21,7 @@ export default function FollowUpSection({
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
 
-  const assignToName = useWatch({ control, name: "assignToName" });
+  const followUpAssignToName = useWatch({ control, name: "followUpAssignToName" });
 
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 sm:grid-cols-2 lg:grid-cols-4">
@@ -53,7 +53,7 @@ export default function FollowUpSection({
       {/* 2. Assign To (Assignee) */}
       <Controller
         control={control}
-        name="assignTo"
+        name="followUpAssignTo"
         rules={{ required: "Assignee is required." }}
         render={({ field, fieldState }) => (
           <div>
@@ -62,10 +62,12 @@ export default function FollowUpSection({
             </FieldLabel>
             <AssigneeAutocomplete
               value={field.value}
-              label={assignToName || ""}
+              label={followUpAssignToName || ""}
               onChange={(option) => {
                 field.onChange(option?.id ?? "");
-                setValue("assignToName", option?.label ?? "", { shouldDirty: true });
+                setValue("followUpAssignToName", option?.label ?? "", {
+                  shouldDirty: true,
+                });
               }}
               invalid={Boolean(fieldState.error)}
             />
