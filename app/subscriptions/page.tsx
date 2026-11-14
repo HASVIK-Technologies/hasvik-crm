@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
   ArrowRight,
@@ -207,7 +207,7 @@ function PlanCard({
         {plan.limits && (
           <ul className="mb-5 space-y-2.5 rounded-xl border border-slate-100 p-3.5">
             <LimitLine icon={Users} label="Team members" value={plan.limits.maxUsers} />
-            <LimitLine icon={Building2} label="Businesses" value={plan.limits.maxBusinesses} />
+            <LimitLine icon={Building2} label="Leads / businesses" value={plan.limits.maxBusinesses} />
             <LimitLine icon={CalendarDays} label="Follow-ups" value={plan.limits.maxFollowUps} />
             <LimitLine icon={FileText} label="Notes" value={plan.limits.maxNotes} />
           </ul>
@@ -408,6 +408,7 @@ export default function SubscriptionsPage() {
   } | null>(null);
   const [manualVerificationConfirmed, setManualVerificationConfirmed] =
     useState(false);
+  const freeActivationAttempted = useRef(false);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -439,6 +440,46 @@ export default function SubscriptionsPage() {
     !eligibilityQuery.isPending &&
     !eligibilityQuery.isError &&
     !ownTenantQuery.isError;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const cameFromFreeSignup = new URLSearchParams(window.location.search).get("welcome") === "free";
+    if (
+      !cameFromFreeSignup ||
+      !tenantAdmin ||
+      !createTenantId ||
+      !canChoosePlan ||
+      createMutation.isPending ||
+      freeActivationAttempted.current
+    ) return;
+
+    const freePlan = plans.find((plan) => plan.code.toUpperCase() === "FREE");
+    if (!freePlan || !getPlanId(freePlan)) return;
+
+    freeActivationAttempted.current = true;
+    void createMutation.mutateAsync({
+      tenantId: createTenantId,
+      planId: getPlanId(freePlan),
+      autoRenew: false,
+    }).then((subscription) => {
+      const status = subscription.status?.trim().toUpperCase();
+      setNotice(status === "PENDING"
+        ? "Your Free plan request was submitted and is awaiting HASVIK admin approval."
+        : "Your Free plan has been activated for this workspace.");
+      void eligibilityQuery.refetch();
+      void subscriptionsQuery.refetch();
+    }).catch((error: unknown) => {
+      setOperationError(getApiErrorMessage(error));
+    });
+  }, [
+    canChoosePlan,
+    createMutation,
+    createTenantId,
+    eligibilityQuery,
+    plans,
+    subscriptionsQuery,
+    tenantAdmin,
+  ]);
 
   const visiblePlans = plans;
 

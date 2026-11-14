@@ -1,10 +1,12 @@
 /**
  * Where to send someone right after they sign in.
  *
- * A workspace admin who has just finished signing up (`?welcome=subscription`) goes straight to Subscriptions to pick
- * a plan; everyone else lands on the dashboard. Pure on purpose, so the rule can be tested without a browser.
+ * A workspace admin who has just finished signing up goes to Subscriptions to activate the Free plan;
+ * everyone else lands on the dashboard. Pure on purpose, so the rule can be tested without a browser.
  */
 export function getPostLoginPath(role: string, search: string): string {
-  const returningFromSignup = new URLSearchParams(search).get("welcome") === "subscription";
-  return returningFromSignup && role.trim().toUpperCase() === "ADMIN" ? "/subscriptions" : "/dashboard";
+  const welcome = new URLSearchParams(search).get("welcome");
+  const returningFromSignup = welcome === "subscription" || welcome === "free";
+  if (!returningFromSignup || role.trim().toUpperCase() !== "ADMIN") return "/dashboard";
+  return welcome === "free" ? "/subscriptions?welcome=free" : "/subscriptions";
 }
