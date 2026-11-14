@@ -2,7 +2,7 @@
 
 import type { ReactNode } from "react";
 import { Bell, CalendarClock, FileText, UserRound } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import FollowUpStatusIcon from "@/components/follow-ups/FollowUpStatusIcon";
 import { PhoneActionMenu, WhatsAppActionMenu, EmailAction, MeetingJoinAction } from "@/components/common/ContactActionMenu";
 import BusinessDetailsMap from "@/components/business-details/BusinessDetailsMap";
 import { getLocationData } from "@/lib/business/location";
@@ -40,7 +40,6 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
   };
   const city = businessData?.city || followUp.businessCity;
   const businessName = businessData?.name || followUp.businessName || "Business";
-  const initials = businessName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   const isInactive = businessData?.isActive === false || businessData?.status === "Inactive";
   const locationAvailable = getLocationData(businessData ?? {}).isAvailable;
   const reminder = followUp.reminder || (followUp.reminderInMinutes != null
@@ -52,7 +51,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
       <section aria-labelledby="follow-up-heading" className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
         <div className="flex flex-col justify-between gap-4 border-b border-[#e8eef4] p-4 sm:flex-row sm:items-center sm:p-6 sm:px-7">
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-            <Avatar aria-hidden="true" className="size-13 shrink-0 rounded-xl sm:size-16 sm:rounded-2xl"><AvatarFallback className="bg-primary/10 text-base font-semibold text-primary sm:text-xl">{initials}</AvatarFallback></Avatar>
+            <FollowUpStatusIcon status={followUp.status} className="size-13 rounded-xl sm:size-16 sm:rounded-2xl" />
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <h1 id="follow-up-heading" className="break-words text-lg font-bold tracking-tight text-slate-900 sm:text-2xl [overflow-wrap:anywhere]">{businessName}</h1>

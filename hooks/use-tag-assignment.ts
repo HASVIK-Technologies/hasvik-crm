@@ -39,9 +39,9 @@ export function useAssignTags() {
       const record = data?.business && typeof data.business === "object"
         ? data.business as Record<string, unknown>
         : data;
-      return { entity, entityId, tagIds, record, tags: record?.tags };
+      return { entity, entityId, tagIds, tags: record?.tags };
     },
-    onSuccess: async ({ entity, entityId, tagIds, record, tags }) => {
+    onSuccess: async ({ entity, entityId, tagIds, tags }) => {
       const catalog = queryClient.getQueriesData<{ items?: AssignedTag[] } | AssignedTag[]>({ queryKey: ["tags-management"] }).flatMap(([, data]) => Array.isArray(data) ? data : data?.items ?? []);
       let nextTags = normalizeTags(tags, tagIds, catalog);
       if (entity === "FOLLOW_UP") {
@@ -54,12 +54,11 @@ export function useAssignTags() {
         }
       }
       if (entity === "BUSINESS") {
-        const updatedBusiness = record ? { ...record, tags: nextTags } : { tags: nextTags };
         queryClient.setQueriesData({ queryKey: businessQueryKeys.lists() }, (old: unknown) => {
           const data = old as { businesses?: Array<Record<string, unknown>> } | undefined;
-          return data?.businesses ? { ...data, businesses: data.businesses.map((item) => String(item.id) === entityId ? { ...item, ...updatedBusiness, id: item.id, tags: nextTags } : item) } : old;
+          return data?.businesses ? { ...data, businesses: data.businesses.map((item) => String(item.id) === entityId ? { ...item, tags: nextTags } : item) } : old;
         });
-        queryClient.setQueryData(businessQueryKeys.detail(entityId), (old: unknown) => old && typeof old === "object" ? { ...old, ...updatedBusiness, id: entityId, tags: nextTags } : old);
+        queryClient.setQueryData(businessQueryKeys.detail(entityId), (old: unknown) => old && typeof old === "object" ? { ...old, tags: nextTags } : old);
       } else {
         // The follow-up endpoint returns tag IDs. Resolve them from the already
         // cached autocomplete results while retaining the confirmed response IDs.

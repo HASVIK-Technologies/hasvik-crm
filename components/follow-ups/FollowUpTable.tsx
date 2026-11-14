@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
+import FollowUpStatusIcon from "@/components/follow-ups/FollowUpStatusIcon";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import {
   DropdownMenu,
@@ -74,17 +74,6 @@ function formatTime(value: string) {
     hour: "numeric",
     minute: "2-digit",
   }).format(new Date(value));
-}
-function initials(name: string) {
-  return (
-    name
-      .split(" ")
-      .filter(Boolean)
-      .slice(0, 2)
-      .map((word) => word[0])
-      .join("")
-      .toUpperCase() || "NB"
-  );
 }
 interface FollowUpTableProps {
   items: FollowUpItem[];
@@ -192,9 +181,7 @@ export default function FollowUpTable({
                 >
                   <div className="flex min-w-0 items-start gap-3">
                     <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="shrink-0">
-                      <Avatar className="mt-0.5 hidden size-11 rounded-full bg-primary/10 text-sm font-bold text-primary transition-transform hover:scale-105 sm:flex">
-                        <AvatarFallback className="bg-transparent text-inherit">{initials(item.businessName)}</AvatarFallback>
-                      </Avatar>
+                      <FollowUpStatusIcon status={item.status} className="mt-0.5 hidden size-11 transition-transform hover:scale-105 sm:flex" />
                     </Link>
                     <div className="min-w-0">
                       <RecordLink href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="block max-w-52 truncate text-sm" title={item.businessName}>
@@ -356,11 +343,7 @@ export default function FollowUpTable({
                     <TableCell className="py-4 pl-6 pr-4">
                       <div className="flex items-center gap-3">
                         <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="shrink-0">
-                          <Avatar className="size-10 rounded-full bg-primary/10 text-xs font-bold text-primary transition-transform hover:scale-105">
-                            <AvatarFallback className="bg-transparent text-inherit">
-                              {initials(item.businessName)}
-                            </AvatarFallback>
-                          </Avatar>
+                          <FollowUpStatusIcon status={item.status} className="size-10 transition-transform hover:scale-105" />
                         </Link>
                         <div className="min-w-0">
                           <RecordLink

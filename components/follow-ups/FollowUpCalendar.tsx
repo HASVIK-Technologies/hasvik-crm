@@ -6,7 +6,7 @@ import { useFollowUpListStore } from "@/store/follow-up-list-store";
 import { visibleCalendarItems } from "@/lib/follow-ups/highlight";
 import { useState } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
-import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Eye, MoreVertical, Pencil, Plus, Trash2, X } from "lucide-react";
+import { CalendarDays, CheckCircle2, ChevronLeft, ChevronRight, Clock3, Eye, MoreVertical, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useRouter } from "next/navigation";
 import PlainButton from "@/components/common/PlainButton";
 import OutlinedButton from "@/components/common/OutlinedButton";
@@ -20,6 +20,7 @@ import { cn } from "@/lib/utils";
 import type { FollowUpItem } from "@/types/follow-up";
 import FollowUpCommunicationActions from "@/components/follow-ups/FollowUpCommunicationActions";
 import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
+import FollowUpStatusIcon from "@/components/follow-ups/FollowUpStatusIcon";
 
 const WEEKDAYS = ["Mon", "Tue", "Wed", "Thu", "Fri", "Sat", "Sun"];
 
@@ -242,7 +243,7 @@ export default function FollowUpCalendar({
                         >
                           <div className="flex items-start gap-1">
                             <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
-                              <span className="block truncate text-[11px] font-bold text-slate-800" title={item.businessName}>{timeLabel(item.scheduledAt)} · {item.businessName}</span>
+                              <span className="flex min-w-0 items-center gap-1.5 truncate text-[11px] font-bold text-slate-800" title={item.businessName}><FollowUpStatusIcon status={item.status} className="size-5" /><span className="truncate">{timeLabel(item.scheduledAt)} · {item.businessName}</span></span>
                               <span className="mt-0.5 block truncate text-[10px] text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                             </button>
                             <DropdownMenu>
@@ -320,13 +321,13 @@ export default function FollowUpCalendar({
                       <p className="border border-dashed border-slate-200 px-3 py-4 text-center text-xs text-slate-400">No follow-ups scheduled</p>
                     ) : dayItems.map((item) => (
                       <article key={item.id} data-follow-up-item-id={item.id} className={cn("flex items-start gap-3 border border-slate-200 bg-white p-3", isFollowUpHighlighted(item.id) && "border-brand-blue bg-blue-50 ring-2 ring-brand-blue/20")}>
-                        <div className="w-14 shrink-0 pt-0.5 text-xs font-bold text-brand-blue">{timeLabel(item.scheduledAt)}</div>
+                        <div className="flex w-14 shrink-0 flex-col items-center gap-1 pt-0.5 text-xs font-bold text-brand-blue"><FollowUpStatusIcon status={item.status} className="size-7" />{timeLabel(item.scheduledAt)}</div>
                         <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
                           <span className="block truncate text-sm font-bold text-slate-900" title={item.businessName}>{item.businessName}</span>
                           <span className="mt-0.5 block truncate text-[11px] text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                           <StatusBadge status={item.status} className="mt-2" />
-                          <div className="mt-2" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
                         </button>
+                        <div className="shrink-0 self-center" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
                         <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>
                           <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                           <DropdownMenuContent align="end" className="w-48 bg-white">
@@ -371,7 +372,7 @@ export default function FollowUpCalendar({
                 </DialogPrimitive.Close>
               </div>
             </div>
-            <div className="divide-y divide-slate-100 p-3 sm:p-5">
+            <div className="space-y-2.5 bg-slate-50/60 p-3 sm:space-y-3 sm:p-5">
               {selectedDayItems.length === 0 && (
                 <div className="border border-dashed border-slate-300 bg-slate-50 px-4 py-10 text-center">
                   <CalendarDays className="mx-auto size-6 text-slate-300" />
@@ -380,15 +381,20 @@ export default function FollowUpCalendar({
                 </div>
               )}
               {selectedDayItems.map((item) => (
-                <article key={item.id} data-follow-up-item-id={item.id} className={cn("flex gap-3 px-2 py-4 transition-colors", isFollowUpHighlighted(item.id) && "bg-blue-50 ring-2 ring-inset ring-brand-blue/25")}>
-                  <div className="w-16 shrink-0 pt-0.5 text-xs font-bold text-slate-700">{timeLabel(item.scheduledAt)}</div>
+                <article key={item.id} data-follow-up-item-id={item.id} className={cn("group flex flex-col gap-3 border border-slate-200 border-l-2 border-l-brand-blue bg-white p-3 shadow-[0_1px_3px_rgba(15,23,42,0.04)] transition-colors sm:flex-row sm:items-center sm:gap-4 sm:p-4", isFollowUpHighlighted(item.id) && "border-brand-blue bg-blue-50 ring-2 ring-brand-blue/20")}>
+                  <div className="flex min-w-0 items-center gap-3 sm:w-24 sm:shrink-0 sm:flex-col sm:gap-2.5">
+                    <FollowUpStatusIcon status={item.status} className="size-9 sm:size-10" />
+                    <time dateTime={item.scheduledAt} className="text-xs font-bold text-slate-700">{timeLabel(item.scheduledAt)}</time>
+                  </div>
                   <button type="button" onClick={() => openDetails(item)} className="min-w-0 flex-1 text-left">
                     <span className="block truncate text-sm font-bold text-slate-900 hover:text-brand-blue" title={item.businessName}>{item.businessName}</span>
                     <span className="mt-1 block text-xs text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                     <StatusBadge status={item.status} className="mt-2" />
-                    <div className="mt-2" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
                   </button>
-                  <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>
+                  <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-2 sm:shrink-0 sm:justify-center sm:gap-1 sm:border-0 sm:pt-0" onClick={(event) => event.stopPropagation()}>
+                    <div className="min-w-0"><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
+                    <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
+                    <DropdownMenu>
                     <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                     <DropdownMenuContent align="end" className="w-48 bg-white">
                       <DropdownMenuItem onSelect={() => openDetails(item)} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
@@ -397,7 +403,8 @@ export default function FollowUpCalendar({
                       {canCompleteFollowUp(item) && <DropdownMenuItem onSelect={() => { setSelectedDay(null); highlightFollowUp(item.id); onComplete(item); }} className="gap-2 text-brand-green-strong"><CheckCircle2 className="size-4" />Mark as completed</DropdownMenuItem>}
                       {canCancelFollowUp(item) && <DropdownMenuItem onSelect={() => { setSelectedDay(null); highlightFollowUp(item.id); onCancel(item); }} className="gap-2 text-red-700"><Trash2 className="size-4" />Cancel follow-up</DropdownMenuItem>}
                     </DropdownMenuContent>
-                  </DropdownMenu></div>
+                    </DropdownMenu>
+                  </div>
                 </article>
               ))}
             </div>

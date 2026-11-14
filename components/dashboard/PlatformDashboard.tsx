@@ -3,6 +3,8 @@
 import { CircleAlert, CreditCard, Landmark, ShieldCheck, Users } from "lucide-react";
 import type { ReactNode } from "react";
 import KpiCards from "@/components/common/KpiCards";
+import ChartFrame from "@/components/common/ChartFrame";
+import ColumnChart from "@/components/common/ColumnChart";
 import DashboardHeader from "@/components/dashboard/DashboardHeader";
 import DashboardRefreshControls from "@/components/dashboard/DashboardRefreshControls";
 import { useDashboardRefresh } from "@/hooks/use-dashboard-refresh";
@@ -13,7 +15,7 @@ import type { AuthUser } from "@/types/auth";
 import type { Subscription } from "@/types/subscription";
 import { cn } from "@/lib/utils";
 import { getSubscriptionStatusVisual } from "@/lib/subscriptions/status";
-import { DashboardFacts, DashboardLink, DashboardPanel, EmptyDashboardState, QueryContent, metricValue } from "./DashboardPrimitives";
+import { DashboardLink, DashboardPanel, EmptyDashboardState, QueryContent, metricValue } from "./DashboardPrimitives";
 import { PendingSubscriptionList, WorkspaceDirectoryList } from "./PlatformOverviewLists";
 
 export default function PlatformDashboard({ user, now, viewSwitcher }: { user: AuthUser; now: Date; viewSwitcher?: ReactNode }) {
@@ -23,6 +25,13 @@ export default function PlatformDashboard({ user, now, viewSwitcher }: { user: A
   const users = useDashboardUserCount();
   const subscriptions = useDashboardSubscriptions(user.userId);
   const summary = subscriptionSummary(subscriptions.data ?? [], now);
+  const subscriptionTone = { ACTIVE: "green", PENDING: "amber", EXPIRED: "red", SUSPENDED: "orange" } as const;
+  const subscriptionStatuses = (["ACTIVE", "PENDING", "EXPIRED", "SUSPENDED"] as const).map((status) => ({
+    key: status,
+    label: getSubscriptionStatusVisual(status).label,
+    value: subscriptions.data?.filter((item) => item.status === status).length ?? 0,
+    tone: subscriptionTone[status],
+  }));
   const tenantName = (subscription: Subscription) => {
     const tenant = typeof subscription.tenantId === "object" ? subscription.tenantId : subscription.tenant;
     const id = getSubscriptionTenantId(subscription);
@@ -64,7 +73,11 @@ export default function PlatformDashboard({ user, now, viewSwitcher }: { user: A
             </div>
           </div>
           <p className="mt-4 text-xs leading-relaxed text-ink-soft">Active subscriptions have started and have not reached their end date. Counts represent subscriptions, not unique tenants.</p>
-          <div className="mt-4 border-t border-line pt-4"><p className="mb-2 text-xs font-semibold text-ink">Subscription status breakdown</p><DashboardFacts items={(["PENDING", "EXPIRED", "SUSPENDED"] as const).map((status) => ({ label: getSubscriptionStatusVisual(status).label, value: subscriptions.data?.filter((item) => item.status === status).length ?? 0, status }))} /></div>
+          <div className="mt-4 border-t border-line pt-4">
+            <ChartFrame title="Subscription status" description="Current subscriptions by status." table={{ columns: ["Status", "Subscriptions"], rows: subscriptionStatuses.map((item) => [item.label, item.value]) }}>
+              <ColumnChart ariaLabel="Subscriptions by status" points={subscriptionStatuses} unit="subscriptions" />
+            </ChartFrame>
+          </div>
         </QueryContent>
       </DashboardPanel>
       <DashboardPanel className="lg:col-span-7" title="Active workspace directory" tone="blue" icon={Landmark} description="A preview of active tenants. Manage tenants to view the full directory." action={<DashboardLink href="/tenant-management">Manage tenants</DashboardLink>}>
