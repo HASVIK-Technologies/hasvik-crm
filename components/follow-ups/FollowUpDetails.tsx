@@ -11,12 +11,14 @@ import EntityActivity from "@/components/common/EntityActivity";
 import { isFollowUpReadOnly } from "@/lib/follow-ups/actions";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import BusinessDetailsContacts from "@/components/business-details/BusinessDetailsContacts";
-import FollowUpConversationTimeline from "@/components/follow-ups/FollowUpConversationTimeline";
+import BusinessFollowUpNotesTimeline from "@/components/business-details/BusinessFollowUpNotesTimeline";
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import { formatFollowUpType } from "@/lib/business/form-options";
 import type { FollowUpItem } from "@/types/follow-up";
 import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
-import { Tags } from "lucide-react";
+import { Tag } from "lucide-react";
+import { FollowUpNotes } from "@/components/follow-ups/FollowUpNotes";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function dateTime(value: string) {
   const date = new Date(value);
@@ -75,17 +77,34 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
           <SummaryItem icon={<UserRound className="size-4" />} label="Assigned to">{followUp.assignedToName || "Unassigned"}</SummaryItem>
           <SummaryItem icon={<Bell className="size-4" />} label="Reminder">{reminder}</SummaryItem>
           <SummaryItem icon={<FileText className="size-4" />} label="Follow-up type">{formatFollowUpType(followUp.type)}</SummaryItem>
-          <SummaryItem icon={<Tags className="size-4" />} label="Tags"><TagAssignmentPicker entity="FOLLOW_UP" entityId={followUp.id} tags={followUp.tags ?? []} tagIds={followUp.tagIds} /></SummaryItem>
+          <div className="min-w-0 rounded-xl bg-slate-50/80 p-3.5 sm:col-span-2 lg:col-span-4">
+            <dt className="flex items-center gap-2 text-xs text-slate-500"><span aria-hidden="true" className="text-slate-400"><Tag className="size-4" /></span>Tags</dt>
+            <dd className="mt-3"><TagAssignmentPicker entity="FOLLOW_UP" entityId={followUp.id} tags={followUp.tags ?? []} tagIds={followUp.tagIds} variant="details" /></dd>
+          </div>
         </dl>
       </section>
 
       <section aria-label="Follow-up workspace" className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-6">
-          <FollowUpConversationTimeline
-            followUp={followUp}
-            business={businessData}
-            readOnly={!businessData || isInactive || isFollowUpReadOnly(followUp)}
-          />
+          <Tabs defaultValue="notes" className="min-w-0">
+            <TabsList aria-label="Follow-up notes views" className="w-full justify-start">
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="history">Conversation History</TabsTrigger>
+            </TabsList>
+            <TabsContent value="notes" className="mt-0">
+              <FollowUpNotes
+                followUpId={followUp.id}
+                readOnly={isInactive || isFollowUpReadOnly(followUp)}
+                businessContext={{ businessId: followUp.businessId, scheduledAt: followUp.scheduledAt, status: followUp.status }}
+              />
+            </TabsContent>
+            <TabsContent value="history" className="mt-0">
+              {followUp.businessId && <BusinessFollowUpNotesTimeline
+                businessId={followUp.businessId}
+                activeFollowUp={{ id: followUp.id, scheduledAt: followUp.scheduledAt, status: followUp.status, readOnly: true }}
+              />}
+            </TabsContent>
+          </Tabs>
           <EntityActivity entityType="FOLLOWUP" entityId={followUp.id} />
         </div>
         <aside aria-label="Follow-up reference information" className="min-w-0 space-y-6">

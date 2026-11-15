@@ -229,7 +229,7 @@ export default function BusinessDetailsFollowups({
                     <TableCell className="text-sm text-slate-600">
                       {item.assignedToName || "Unassigned"}
                     </TableCell>
-                    <TableCell className="sticky right-0 bg-white pr-6 group-hover:bg-slate-50" onClick={(e) => e.stopPropagation()}>
+                    <TableCell className="sticky right-0 bg-white pr-6 group-hover:bg-slate-50/80" onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-1" onClick={(e) => e.stopPropagation()}>
                         <Tooltip>
                           <TooltipTrigger asChild>

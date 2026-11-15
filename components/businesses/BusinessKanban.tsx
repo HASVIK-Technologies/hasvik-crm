@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import RecordLink from "@/components/common/RecordLink";
-import { ArrowDownUp, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Eye, MoreVertical, Power, Pencil, UserRound, UserRoundCog } from "lucide-react";
+import { ArrowDownUp, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Eye, MessageSquareText, MoreVertical, Power, Pencil, UserRound, UserRoundCog } from "lucide-react";
 import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
 import ListPagination from "@/components/common/ListPagination";
 import PlainButton from "@/components/common/PlainButton";
@@ -25,6 +25,7 @@ import { useUpdateBusinessLeadStatus, useUpdateBusinessStatus } from "@/hooks/us
 import { useBusinessHighlight } from "@/hooks/use-business-highlight";
 import { useBusinessListStore } from "@/store/business-list-store";
 import AssignBusinessDialog from "./AssignBusinessDialog";
+import BusinessConversationHistoryDrawer from "@/components/business-details/BusinessConversationHistoryDrawer";
 import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 
 export default function BusinessKanban({
@@ -54,6 +55,7 @@ export default function BusinessKanban({
   const mutation = useUpdateBusinessLeadStatus();
   const activationMutation = useUpdateBusinessStatus();
   const [activatingBusiness, setActivatingBusiness] = useState<BusinessItem | null>(null);
+  const [conversationBusiness, setConversationBusiness] = useState<BusinessItem | null>(null);
   const { highlightBusiness, isBusinessHighlighted } = useBusinessHighlight();
   const setKanbanScrollLeft = useBusinessListStore(
     (state) => state.setKanbanScrollLeft,
@@ -305,6 +307,7 @@ export default function BusinessKanban({
                   <DropdownMenu>
                     <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}><PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-8 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                     <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(event) => event.stopPropagation()}>
+                      <DropdownMenuItem onSelect={() => setConversationBusiness(business)} className="gap-2"><MessageSquareText className="size-4" />Conversation history</DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
                       {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
@@ -313,7 +316,7 @@ export default function BusinessKanban({
                   </DropdownMenu>
                 </div>
                 <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
-                  <div onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} /></div>
+                  <div onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} variant="single-summary" /></div>
                   {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
                   <div className={cn("flex min-w-0 items-center gap-2", business.owner ? "" : "font-semibold text-amber-700")}><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
                   {business.lastFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
@@ -431,6 +434,7 @@ export default function BusinessKanban({
                               <TooltipContent>More actions</TooltipContent>
                             </Tooltip>
                             <DropdownMenuContent align="end" className="w-40 bg-white" onClick={(event) => event.stopPropagation()}>
+                              <DropdownMenuItem onSelect={() => setConversationBusiness(business)} className="gap-2"><MessageSquareText className="size-4" />Conversation history</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
                               {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
@@ -440,7 +444,7 @@ export default function BusinessKanban({
                         </div>
 
                         <div className="mt-3 space-y-2 border-t border-slate-100 pt-2.5 text-xs text-slate-600">
-                          <div onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onDragStart={(event) => { event.preventDefault(); event.stopPropagation(); }}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} /></div>
+                          <div onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onDragStart={(event) => { event.preventDefault(); event.stopPropagation(); }}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} variant="single-summary" /></div>
                           {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
                           <div className={cn("flex items-center gap-2", business.owner ? "" : "text-slate-400")}><UserRound className="size-3.5 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
                           {business.lastFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
@@ -466,6 +470,12 @@ export default function BusinessKanban({
         onOpenChange={(open) => {
           if (!open) setAssignmentBusiness(null);
         }}
+      />
+      <BusinessConversationHistoryDrawer
+        businessId={String(conversationBusiness?.id ?? "")}
+        businessName={conversationBusiness?.name ?? "Business"}
+        open={conversationBusiness !== null}
+        onOpenChange={(open) => { if (!open) setConversationBusiness(null); }}
       />
     </div>
   );

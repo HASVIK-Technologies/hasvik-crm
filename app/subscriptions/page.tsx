@@ -341,13 +341,13 @@ function SubscriptionRow({
 
   return <>
     {activity}
-    <TableRow className={`group ${highlighted ? "bg-blue-50/80 ring-2 ring-inset ring-brand-blue/20" : ""}`}>
+    <TableRow className={`group transition-colors hover:bg-[#f8fafc]/80 ${highlighted ? "bg-blue-50/80 ring-2 ring-inset ring-brand-blue/20" : ""}`}>
       <TableCell className="py-4 pl-6 pr-4">{planSummary}</TableCell>
       <TableCell className="max-w-56 px-4 py-4 text-xs font-medium text-slate-600"><p className="truncate" title={tenantName}>{tenantName}</p>{readOnlyMessage}</TableCell>
       <TableCell className="px-4 py-4"><StatusBadge status={status} /></TableCell>
       <TableCell className="px-4 py-4">{term}</TableCell>
       <TableCell className="px-4 py-4 text-xs text-slate-500">{subscription.autoRenew ? "On" : "Off"}</TableCell>
-      <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${highlighted ? "bg-blue-50" : "bg-white group-hover:bg-slate-50"}`}>{actions}</TableCell>
+      <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${highlighted ? "bg-blue-50/80 ring-2 ring-inset ring-brand-blue/20" : "bg-white group-hover:bg-[#f8fafc]/80"}`}>{actions}</TableCell>
     </TableRow>
   </>;
 }

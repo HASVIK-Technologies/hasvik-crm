@@ -15,6 +15,7 @@ import {
   Settings2,
   UserRound,
   UserRoundCog,
+  MessageSquareText,
 } from "lucide-react";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PlainButton from "@/components/common/PlainButton";
@@ -59,6 +60,7 @@ import { getLeadStatusLabel, STATUS_OPTIONS } from "@/lib/business/form-options"
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 import { useBusinessHighlight } from "@/hooks/use-business-highlight";
 import AssignBusinessDialog from "./AssignBusinessDialog";
+import BusinessConversationHistoryDrawer from "@/components/business-details/BusinessConversationHistoryDrawer";
 import {
   useBusinessListStore,
   type BusinessTableColumn,
@@ -129,6 +131,7 @@ export default function BusinessTable({
   const router = useRouter();
   const [statusModalBusiness, setStatusModalBusiness] = useState<BusinessItem | null>(null);
   const [assignmentBusiness, setAssignmentBusiness] = useState<BusinessItem | null>(null);
+  const [conversationBusiness, setConversationBusiness] = useState<BusinessItem | null>(null);
   const updateStatusMutation = useUpdateBusinessStatus();
   const { highlightBusiness, isBusinessHighlighted } = useBusinessHighlight();
   const visibleTableColumns = useBusinessListStore((state) => state.visibleTableColumns);
@@ -395,6 +398,7 @@ export default function BusinessTable({
                           <TooltipContent>More actions</TooltipContent>
                         </Tooltip>
                         <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenuItem onSelect={() => setConversationBusiness(item)} className="cursor-pointer gap-2 text-xs"><MessageSquareText className="size-3.5" /><span>Conversation history</span></DropdownMenuItem>
                           {item.status === "Active" && (
                             <>
                               <DropdownMenuItem
@@ -586,7 +590,7 @@ export default function BusinessTable({
                         </span>
                       </div>
                     </TableCell>}
-                    <TableCell className={cn("whitespace-nowrap px-4", rowPadding)}><TagAssignmentPicker entity="BUSINESS" entityId={String(item.id)} tags={item.tags} /></TableCell>
+                    <TableCell className={cn("px-4", rowPadding)}><TagAssignmentPicker entity="BUSINESS" entityId={String(item.id)} tags={item.tags} variant="single-summary" /></TableCell>
 
                     {/* Lead Status */}
                     {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
@@ -628,7 +632,7 @@ export default function BusinessTable({
 
                     {/* Actions (Call, WhatsApp, 3 dots) */}
                     <TableCell
-                      className={cn("sticky right-0 z-10 pl-4 pr-6 text-right shadow-[-1px_0_0_#f1f5f9] group-hover:bg-slate-50", rowPadding, isBusinessHighlighted(item.id) ? "bg-blue-50" : "bg-white")}
+                      className={cn("sticky right-0 z-10 pl-4 pr-6 text-right shadow-[-1px_0_0_#f1f5f9] group-hover:bg-[#f8fafc]/80", rowPadding, isBusinessHighlighted(item.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white")}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-end gap-2.5">
@@ -657,6 +661,7 @@ export default function BusinessTable({
                             <TooltipContent>More actions</TooltipContent>
                           </Tooltip>
                           <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem onSelect={() => setConversationBusiness(item)} className="cursor-pointer gap-2 text-xs"><MessageSquareText className="size-3.5" /><span>Conversation history</span></DropdownMenuItem>
                             {item.status === "Active" && (
                               <>
                                 <DropdownMenuItem
@@ -815,6 +820,12 @@ export default function BusinessTable({
         onOpenChange={(open) => {
           if (!open) setAssignmentBusiness(null);
         }}
+      />
+      <BusinessConversationHistoryDrawer
+        businessId={String(conversationBusiness?.id ?? "")}
+        businessName={conversationBusiness?.name ?? "Business"}
+        open={conversationBusiness !== null}
+        onOpenChange={(open) => { if (!open) setConversationBusiness(null); }}
       />
     </TooltipProvider>
   );

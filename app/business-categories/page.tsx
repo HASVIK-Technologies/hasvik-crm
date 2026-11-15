@@ -269,7 +269,7 @@ export default function BusinessCategoriesPage() {
                         <TableCell className="px-4 py-4">
                           <span className={`inline-flex rounded-md px-2.5 py-1 text-[10px] font-bold ${active ? "bg-emerald-50 text-emerald-700" : "bg-slate-100 text-slate-500"}`}>{active ? "Active" : "Inactive"}</span>
                         </TableCell>
-                        <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
+                        <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${isItemHighlighted(id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white group-hover:bg-[#f8fafc]/80"}`}>
                           <ManagementRowActions
       readOnly={category.isActive === false}
                             activity={{ entityType: "CATEGORY", entityId: categoryId(category), name: category.name }}

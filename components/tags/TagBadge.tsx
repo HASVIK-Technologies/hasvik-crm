@@ -7,6 +7,7 @@ interface TagBadgeProps {
   name: string;
   color: string;
   className?: string;
+  compact?: boolean;
 }
 
 export function hexToRgba(hex: string, alpha: number): string {
@@ -27,7 +28,7 @@ export function hexToRgba(hex: string, alpha: number): string {
   return `rgba(${r}, ${g}, ${b}, ${alpha})`;
 }
 
-export default function TagBadge({ name, color, className }: TagBadgeProps) {
+export default function TagBadge({ name, color, className, compact = false }: TagBadgeProps) {
   const safeColor = color.startsWith("#") ? color : `#${color}`;
   const backgroundColor = hexToRgba(safeColor, 0.12);
   const borderColor = hexToRgba(safeColor, 0.3);
@@ -35,7 +36,8 @@ export default function TagBadge({ name, color, className }: TagBadgeProps) {
   return (
     <span
       className={cn(
-        "inline-flex items-center gap-1.5 px-2.5 py-1 text-xs font-semibold rounded-full border transition-colors",
+        "inline-flex items-center rounded-full border font-semibold transition-colors",
+        compact ? "gap-1 px-2 py-1 text-[11px] leading-none" : "gap-1.5 px-2.5 py-1 text-xs",
         className,
       )}
       style={{
@@ -44,8 +46,8 @@ export default function TagBadge({ name, color, className }: TagBadgeProps) {
         borderColor,
       }}
     >
-      <Tag className="size-3 shrink-0" style={{ color: safeColor }} />
-      <span>{name}</span>
+      <Tag className={compact ? "size-2.5 shrink-0" : "size-3 shrink-0"} style={{ color: safeColor }} />
+      <span className={compact ? "leading-none" : undefined}>{name}</span>
     </span>
   );
 }

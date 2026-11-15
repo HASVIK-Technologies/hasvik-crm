@@ -24,7 +24,7 @@ export default function TagSelectionField({ entity, value, onChange }: {
   return (
     <div className="space-y-3">
       <div className="flex min-h-8 flex-wrap items-center gap-1.5">
-        {selectedTags.length ? <><TagBadge name={selectedTags[0].name} color={selectedTags[0].color} className="px-2.5 py-1 text-xs" />{selectedTags.length > 1 && <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">+{selectedTags.length - 1}</span>}</> : <span className="text-xs text-slate-400">No tags selected</span>}
+        {selectedTags.length ? <><TagBadge name={selectedTags[0].name} color={selectedTags[0].color} className="px-2.5 py-1 text-xs" />{selectedTags.length > 1 && <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2 py-1 text-[11px] font-semibold text-slate-600">+{selectedTags.length - 1}</span>}</> : <span className="text-xs text-slate-400">No tags selected</span>}
       </div>
       <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search tags..." className="h-9 text-xs" />
       <div className="max-h-44 space-y-1 overflow-y-auto border border-slate-200 p-2">

@@ -55,6 +55,25 @@ export interface FollowUpNote {
   updatedAt: string;
 }
 
+export interface BusinessFollowUpNote {
+  id: string;
+  businessId: string;
+  followUpId: string;
+  scheduledAt: string;
+  status: string;
+  content: string;
+  createdByName: string;
+  createdAt: string;
+}
+
+export interface BusinessFollowUpNotesPage {
+  items: BusinessFollowUpNote[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages?: number;
+}
+
 export interface FollowUpNotesPage {
   items: FollowUpNote[];
   page: number;

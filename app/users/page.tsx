@@ -361,7 +361,7 @@ export default function UsersPage() {
                             {superAdmin && <TableCell className="px-4 py-4">{getUserTenant(user, tenants).name}</TableCell>}
                             <TableCell className="px-4 py-4"><RoleBadge role={user.role} /></TableCell>
                             <TableCell className="px-4 py-4"><ActivityStateText active={!isRecordInactive(user)} />{getUserTenant(user, tenants).isActive === false && <p className="mt-1 text-[10px] text-slate-400">Tenant inactive. Activate the tenant first.</p>}</TableCell>
-                            <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
+                            <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${isItemHighlighted(id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white group-hover:bg-[#f8fafc]/80"}`}>
                               <ManagementRowActions
                                 activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}
                                 editLabel={`Edit ${user.fullName}`}

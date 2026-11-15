@@ -1,7 +1,7 @@
 "use client";
 
 import { useMemo, useState } from "react";
-import { Check, ChevronDown, Tag } from "lucide-react";
+import { ChevronDown, LoaderCircle, Tag } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Checkbox } from "@/components/ui/checkbox";
 import { Input } from "@/components/ui/input";
@@ -11,51 +11,85 @@ import TagBadge from "@/components/tags/TagBadge";
 import { useAssignTags } from "@/hooks/use-tag-assignment";
 import type { AssignedTag, TagEntity } from "@/types/tag";
 
-export default function TagAssignmentPicker({ entity, entityId, tags = [], tagIds = [] }: {
+export default function TagAssignmentPicker({ entity, entityId, tags = [], tagIds = [], variant = "compact" }: {
   entity: TagEntity;
   entityId: string;
   tags?: AssignedTag[];
   tagIds?: string[];
+  variant?: "compact" | "table" | "summary" | "single-summary" | "details";
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
-  const [selected, setSelected] = useState<string[]>(tags.map((tag) => tag.id));
+  const assignedIds = useMemo(() => [...new Set([...tags.map((tag) => tag.id), ...tagIds])], [tags, tagIds]);
+  const [savingTagId, setSavingTagId] = useState<string | null>(null);
   const entityType = entity === "FOLLOW_UP" ? "FOLLOWUP" : "BUSINESS";
   const { data = [], isLoading, isFetching } = useTagAutocompleteQuery({ entityType, search, limit: 100 }, open || Boolean(tagIds.length && !tags.length));
   const mutation = useAssignTags();
-  const available = data;
+  const available = useMemo(() => {
+    const catalog = new Map([...tags, ...data].map((tag) => [tag.id, tag]));
+    const assignedButNotListed = assignedIds.flatMap((id) => {
+      const tag = catalog.get(id);
+      return tag && !data.some((item) => item.id === id) ? [tag] : [];
+    });
+    return [...assignedButNotListed, ...data];
+  }, [tags, data, assignedIds]);
   const selectedTags = useMemo(() => {
     const byId = new Map([...tags, ...available].map((tag) => [tag.id, tag]));
-    return [...new Set([...tags.map((tag) => tag.id), ...tagIds])].flatMap((id) => { const tag = byId.get(id); return tag ? [tag] : []; });
-  }, [tags, tagIds, available]);
-
-  function toggle(id: string) {
-    setSelected((current) => current.includes(id) ? current.filter((item) => item !== id) : [...current, id]);
-  }
-
-  async function apply() {
+    return assignedIds.flatMap((id) => { const tag = byId.get(id); return tag ? [tag] : []; });
+  }, [tags, assignedIds, available]);
+  const visibleTags = variant === "details" ? selectedTags.slice(0, 10) : variant === "table" ? selectedTags.slice(0, 4) : selectedTags.slice(0, 2);
+  const hiddenTagCount = Math.max(0, selectedTags.length - visibleTags.length);
+  const triggerOverflowCount = variant === "single-summary" || variant === "summary" ? Math.max(0, selectedTags.length - 1) : hiddenTagCount;
+  const isCompactStrip = variant === "single-summary" || variant === "summary";
+  async function toggle(id: string) {
+    if (mutation.isPending) return;
+    const nextIds = assignedIds.includes(id)
+      ? assignedIds.filter((assignedId) => assignedId !== id)
+      : [...assignedIds, id];
+    setSavingTagId(id);
     try {
-      await mutation.mutateAsync({ entity, entityId, tagIds: selected });
-      setOpen(false);
+      await mutation.mutateAsync({ entity, entityId, tagIds: nextIds });
     } catch {
-      // Keep the picker open and leave the committed preview unchanged on failure.
+      // Keep the menu open; the committed assignment remains unchanged on failure.
+    } finally {
+      setSavingTagId(null);
     }
   }
 
   return (
-    <div className="flex min-w-0 flex-nowrap items-center gap-1.5 whitespace-nowrap">
-      {selectedTags.length ? <TagBadge name={selectedTags[0].name} color={selectedTags[0].color} className="px-2.5 py-1 text-xs" /> : <span className="text-xs text-slate-400">Empty</span>}
-      {selectedTags.length > 1 && <span className="inline-flex items-center rounded-full border border-slate-200 bg-slate-50 px-2.5 py-1 text-xs font-semibold text-slate-600">+{selectedTags.length - 1}</span>}
-      <Popover open={open} onOpenChange={(nextOpen) => { if (nextOpen) setSelected([...new Set([...tags.map((tag) => tag.id), ...tagIds])]); setOpen(nextOpen); }}>
+    <div className={isCompactStrip ? "inline-flex w-fit min-w-0 max-w-full" : variant === "details" ? "flex min-w-0 flex-wrap items-center gap-2" : variant === "table" ? "flex min-w-0 max-w-64 flex-wrap items-center gap-1" : "flex min-w-0 flex-nowrap items-center gap-1.5 whitespace-nowrap"}>
+      {isCompactStrip ? null : variant === "details" || variant === "table" ? <>
+        {visibleTags.map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} compact={variant === "table"} className={variant === "table" ? "max-w-full" : "px-2 py-1 text-[11px]"} />)}
+        {!selectedTags.length && <span className="text-sm text-slate-500">No tags assigned</span>}
+      </> : selectedTags.length ? <>
+          {visibleTags.map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} className="max-w-28 truncate px-1.5 py-0.5 text-[10px]" />)}
+        </> : <span className="text-xs font-medium text-slate-500">Add tag</span>}
+      <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          <Button type="button" variant="ghost" size="icon" aria-label="Manage tags" className="size-7 text-slate-500 hover:text-primary"><Tag className="size-4" /><ChevronDown className="size-3" /></Button>
+          {isCompactStrip ? <Button type="button" variant="outline" aria-label={`Manage tags${selectedTags.length ? `, ${selectedTags.length} assigned` : ", none assigned"}`} aria-haspopup="dialog" className="h-8 w-fit min-w-0 max-w-full justify-start gap-1.5 rounded-md border-slate-300 bg-white px-2 text-slate-700 shadow-none hover:border-slate-400 hover:bg-slate-50">
+            {selectedTags.length ? <>
+              <span className="flex min-w-0 flex-1 overflow-hidden text-left"><TagBadge name={selectedTags[0].name} color={selectedTags[0].color} compact className="max-w-none shrink-0" /></span>
+              {triggerOverflowCount > 0 && <span title={`Additional tags: ${selectedTags.slice(1).map((tag) => tag.name).join(", ")}`} className="inline-flex shrink-0 items-center rounded-md bg-slate-100 px-1.5 py-1 text-[10px] font-semibold leading-none text-slate-600">+{triggerOverflowCount}</span>}
+              <ChevronDown className="size-3.5 shrink-0 text-slate-500" />
+            </> : <><Tag className="size-3.5 shrink-0 text-slate-500" /><span className="min-w-0 flex-1 truncate text-left text-xs font-medium text-slate-500">Add tag</span><ChevronDown className="size-3.5 shrink-0 text-slate-500" /></>}
+          </Button> : <Button type="button" variant="outline" size="icon-sm" aria-label={`Manage tags${selectedTags.length ? `, ${selectedTags.length} assigned` : ", none assigned"}`} aria-haspopup="dialog" className="border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"><Tag className="size-4" /></Button>}
         </PopoverTrigger>
-        <PopoverContent align="start" className="w-64 p-0">
-          <div className="border-b border-slate-100 p-3"><p className="text-xs font-semibold">Manage Tags</p><Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search tags..." className="mt-2 h-8 text-xs" autoFocus /></div>
-          <div className="max-h-56 overflow-y-auto p-2">
-            {isLoading || isFetching ? <p className="px-2 py-5 text-center text-xs text-slate-500">Loading tags...</p> : available.length ? available.map((tag) => <label key={tag.id} className="flex cursor-pointer items-center gap-2 rounded px-1.5 py-1.5 hover:bg-slate-50"><Checkbox checked={selected.includes(tag.id)} onCheckedChange={() => toggle(tag.id)} /><TagBadge name={tag.name} color={tag.color} /></label>) : <p className="px-2 py-5 text-center text-xs text-slate-500">No tags found</p>}
+        <PopoverContent align="start" side="bottom" className="w-[min(17rem,calc(100vw-2rem))] overflow-hidden p-0">
+          <div className="border-b border-slate-100 p-3">
+            <p className="text-sm font-semibold text-slate-900">Assign tags</p>
+            <Input value={search} onChange={(event) => setSearch(event.target.value)} placeholder="Search tags..." aria-label="Search available tags" className="mt-2 h-8 text-xs" autoFocus />
           </div>
-          <div className="flex items-center justify-between border-t border-slate-100 p-2"><Button variant="ghost" size="sm" className="h-7 px-2 text-xs" onClick={() => setSelected([])}>Clear all</Button><Button size="sm" className="h-7 gap-1 px-2.5 text-xs" disabled={mutation.isPending} onClick={apply}>{mutation.isPending ? "Saving..." : <><Check className="size-3.5" /> Apply</>}</Button></div>
+          <div className="max-h-64 overflow-y-auto p-2">
+            {isLoading && !available.length || isFetching && !available.length ? <p className="px-2 py-5 text-center text-xs text-slate-500">Loading tags...</p> : available.length ? <div className="space-y-0.5">{available.map((tag) => {
+              const checked = assignedIds.includes(tag.id);
+              const saving = savingTagId === tag.id && mutation.isPending;
+              return <label key={tag.id} className={`flex items-center gap-2.5 rounded-md px-2 py-2 ${mutation.isPending ? "cursor-wait opacity-70" : "cursor-pointer hover:bg-slate-50"}`}>
+                <Checkbox checked={checked} disabled={mutation.isPending} onCheckedChange={() => void toggle(tag.id)} />
+                <TagBadge name={tag.name} color={tag.color} className="max-w-full px-2 py-1 text-[11px]" />
+                {saving && <LoaderCircle aria-label="Saving tag" className="ml-auto size-3.5 animate-spin text-slate-400" />}
+              </label>;
+            })}</div> : <p className="px-2 py-5 text-center text-xs text-slate-500">{search ? "No matching tags" : "No tags available"}</p>}
+          </div>
         </PopoverContent>
       </Popover>
     </div>

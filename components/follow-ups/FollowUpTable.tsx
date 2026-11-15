@@ -381,8 +381,8 @@ export default function FollowUpTable({
                     <TableCell className="px-4 py-4 text-xs text-[#475569]">
                       {item.assignedToName}
                     </TableCell>
-                    <TableCell className="whitespace-nowrap px-4 py-4" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></TableCell>
-                    <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50" onClick={(e) => e.stopPropagation()}>
+                    <TableCell className="px-4 py-4" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="single-summary" /></TableCell>
+                    <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${isFollowUpHighlighted(item.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white group-hover:bg-[#f8fafc]/80"}`} onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
                         <Tooltip>

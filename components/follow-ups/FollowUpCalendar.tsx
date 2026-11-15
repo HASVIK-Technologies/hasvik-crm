@@ -258,7 +258,7 @@ export default function FollowUpCalendar({
                             </DropdownMenu>
                           </div>
                           <div className="mt-1.5 flex items-center justify-between gap-1"><StatusBadge status={item.status} className="px-1.5 py-0 text-[9px]" /><FollowUpCommunicationActions item={item} className="size-6" onAction={() => highlightFollowUp(item.id)} /></div>
-                          <div className="mt-1" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
+                          <div className="mt-1" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="single-summary" /></div>
                         </div>
                       ))}
                       {dayItems.length > 3 && (
@@ -327,7 +327,7 @@ export default function FollowUpCalendar({
                           <span className="mt-0.5 block truncate text-[11px] text-slate-500">{formatFollowUpType(item.type)} · {item.assignedToName || "Unassigned"}</span>
                           <StatusBadge status={item.status} className="mt-2" />
                         </button>
-                        <div className="shrink-0 self-center" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
+                        <div className="shrink-0 self-center" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="single-summary" /></div>
                         <div className="flex shrink-0 items-center gap-1" onClick={(event) => event.stopPropagation()}><FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} /><DropdownMenu>
                           <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                           <DropdownMenuContent align="end" className="w-48 bg-white">
@@ -392,7 +392,7 @@ export default function FollowUpCalendar({
                     <StatusBadge status={item.status} className="mt-2" />
                   </button>
                   <div className="flex items-center justify-end gap-2 border-t border-slate-100 pt-2 sm:shrink-0 sm:justify-center sm:gap-1 sm:border-0 sm:pt-0" onClick={(event) => event.stopPropagation()}>
-                    <div className="min-w-0"><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} /></div>
+                    <div className="min-w-0"><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="single-summary" /></div>
                     <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
                     <DropdownMenu>
                     <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
