@@ -137,14 +137,14 @@ export default function KpiCards({
               {loading ? (
                 <span className={cn("mb-1.5 block h-7 w-14 animate-pulse", branded ? "bg-white/20" : "bg-slate-100")} />
               ) : (
-                <span className={cn("block text-xl font-bold tracking-tight sm:text-2xl", branded ? "text-white" : variant === "dashboard" ? "text-ink" : "text-slate-900", variant === "brand" && "sm:text-3xl")}>
+                <span className={cn("block text-xl font-bold tracking-tight sm:text-2xl", branded ? "text-white" : "text-slate-900", variant === "brand" && "sm:text-3xl")}>
                   {value}
                 </span>
               )}
-              <span className={cn("mt-0.5 block text-[10px] font-medium leading-tight sm:text-xs", branded ? "text-white" : variant === "dashboard" ? "text-ink-soft" : "text-slate-500")}>
+              <span className={cn("mt-0.5 block text-[10px] font-medium leading-tight sm:text-xs", branded ? "text-white" : "text-slate-500")}>
                 {label}
               </span>
-              {!loading && hint && <span className={cn("mt-1 block text-xs", branded ? "text-white/90" : variant === "dashboard" ? "text-ink-soft" : "text-slate-500")}>{hint}</span>}
+              {!loading && hint && <span className={cn("mt-1 block text-xs", branded ? "text-white/90" : "text-slate-500")}>{hint}</span>}
               {!loading && delta && (
                 <KpiDeltaLabel delta={delta} branded={branded} />
               )}
