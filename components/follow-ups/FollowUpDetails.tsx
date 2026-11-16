@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { Bell, CalendarClock, FileText, UserRound } from "lucide-react";
-import FollowUpStatusIcon from "@/components/follow-ups/FollowUpStatusIcon";
 import { PhoneActionMenu, WhatsAppActionMenu, EmailAction, MeetingJoinAction } from "@/components/common/ContactActionMenu";
 import BusinessDetailsMap from "@/components/business-details/BusinessDetailsMap";
 import { getLocationData } from "@/lib/business/location";
@@ -53,13 +52,15 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
       <section aria-labelledby="follow-up-heading" className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
         <div className="flex flex-col justify-between gap-4 border-b border-[#e8eef4] p-4 sm:flex-row sm:items-center sm:p-6 sm:px-7">
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-            <FollowUpStatusIcon status={followUp.status} className="size-13 rounded-xl sm:size-16 sm:rounded-2xl" />
+            <span className="flex size-13 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 sm:size-16 sm:rounded-2xl">
+              <CalendarClock className="size-7 sm:size-8" />
+            </span>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <h1 id="follow-up-heading" className="break-words text-lg font-bold tracking-tight text-slate-900 sm:text-2xl [overflow-wrap:anywhere]">{businessName}</h1>
                 <StatusBadge status={followUp.status} />
               </div>
-              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 sm:text-sm"><CalendarClock className="size-4 shrink-0 text-slate-400" /><span>{formatFollowUpType(followUp.type)} follow-up</span>{city && <><span aria-hidden="true">·</span><span>{city}</span></>}</p>
+              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 sm:text-sm"><span>{formatFollowUpType(followUp.type)}</span>{city && <><span aria-hidden="true">·</span><span>{city}</span></>}</p>
               {followUp.businessId && <RecordLink href={`/businesses/${followUp.businessId}`} className="mt-2 inline-block text-xs font-semibold">View business details</RecordLink>}
             </div>
           </div>

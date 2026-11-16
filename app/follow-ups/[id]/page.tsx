@@ -119,10 +119,6 @@ export default function FollowUpDetailsPage() {
           <Breadcrumb
             items={[
               { label: "Follow-ups", href: "/follow-ups" },
-              {
-                label: followUp.businessName,
-                href: `/businesses/${followUp.businessId}`,
-              },
               { label: "Follow-up details" },
             ]}
           />
