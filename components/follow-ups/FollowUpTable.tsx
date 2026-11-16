@@ -1,6 +1,7 @@
-"use client";
+﻿"use client";
 
 import {
+  CalendarClock,
   CheckCircle2,
   ChevronLeft,
   ChevronRight,
@@ -177,33 +178,38 @@ export default function FollowUpTable({
                   aria-label={`Open follow-up details for ${item.businessName}`}
                   onClick={(event) => handleRowClick(event, item.id)}
                   onKeyDown={(event) => handleRowKeyDown(event, item.id)}
-                  className={`flex cursor-pointer items-start justify-between gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:p-4 ${isFollowUpHighlighted(item.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}
+                  className={`grid grid-cols-1 gap-2 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-x-6 md:gap-y-1 md:p-4 ${isFollowUpHighlighted(item.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}
                 >
-                  <div className="flex min-w-0 items-start gap-3">
+                  <div className="flex w-full min-w-0 items-start gap-3 md:col-start-1 md:row-start-1">
                     <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="shrink-0">
-                      <FollowUpStatusIcon status={item.status} className="mt-0.5 hidden size-11 transition-transform hover:scale-105 sm:flex" />
+                      <span className="flex size-11 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 transition-transform hover:scale-105">
+                        <CalendarClock className="size-5" />
+                      </span>
                     </Link>
                     <div className="min-w-0">
                       <RecordLink href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="block max-w-52 truncate text-sm" title={item.businessName}>
                         {item.businessName}
                       </RecordLink>
-                      <p className="mt-0.5 text-xs text-[#64748b]">{item.businessCity || "-"}{item.businessPhone ? ` • ${item.businessPhone}` : ""}</p>
-                      <p className="mt-2 text-xs font-medium text-[#475569]">{formatDate(item.scheduledAt)} at {formatTime(item.scheduledAt)}</p>
+                      <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[#475569]">
+                        <span>{formatDate(item.scheduledAt)} at {formatTime(item.scheduledAt)}</span>
+                      </p>
                       <p className="mt-1 text-xs text-[#64748b]">
-                        {formatFollowUpType(item.type)} · {item.assignedToName}
-                        {item.reminder ? ` · 🔔 ${item.reminder}` : ""}
+                        {formatFollowUpType(item.type)} Â· {item.assignedToName}
+                        {item.reminder ? ` Â· ðŸ”” ${item.reminder}` : ""}
                       </p>
                     </div>
                   </div>
                   <div
-                    className="flex shrink-0 flex-col items-end justify-between self-stretch gap-2.5"
+                    className="order-3 flex w-full items-center justify-between gap-3 md:contents"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <StatusBadge
-                      status={item.status}
-                      className="rounded-md px-2.5 py-0.5 text-[10px]"
-                    />
-                    <div className="flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                    <div className="md:col-start-2 md:row-start-1 md:justify-self-end">
+                      <StatusBadge
+                        status={item.status}
+                        className="rounded-md px-2.5 py-0.5 text-[10px]"
+                      />
+                    </div>
+                    <div className="flex items-center gap-1.5 md:col-start-2 md:row-start-2 md:justify-self-end" onClick={(e) => e.stopPropagation()}>
                       <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -268,6 +274,10 @@ export default function FollowUpTable({
                       </DropdownMenu>
                     </div>
                   </div>
+                  <div className="order-2 flex w-full items-center justify-start gap-3 pl-[3.25rem] md:col-start-1 md:row-start-2" onClick={(event) => event.stopPropagation()}>
+                    <span className="text-[11px] font-medium text-slate-500">Tags</span>
+                    <TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="business-card-summary" />
+                  </div>
                 </div>
               ))}
             </div>
@@ -278,12 +288,8 @@ export default function FollowUpTable({
             <TableHeader>
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
                 <TableHead className="py-4 pl-6 pr-4 font-semibold">
-                  Business / Contact
+                  Business / Scheduled
                 </TableHead>
-                <TableHead className="px-4 py-4 font-semibold">
-                  Follow-up Date
-                </TableHead>
-                <TableHead className="px-4 py-4 font-semibold">Time</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">Type</TableHead>
                 <TableHead className="px-4 py-4 font-semibold">
                   Status
@@ -313,7 +319,7 @@ export default function FollowUpTable({
                         </div>
                       </div>
                     </TableCell>
-                    {Array.from({ length: 7 }).map((__, cellIndex) => (
+                    {Array.from({ length: 5 }).map((__, cellIndex) => (
                       <TableCell key={cellIndex} className="px-4 py-4">
                         <div className="h-3.5 w-20 animate-pulse rounded bg-[#f1f5f9]" />
                       </TableCell>
@@ -323,7 +329,7 @@ export default function FollowUpTable({
               ) : items.length === 0 ? (
                 <TableRow>
                   <TableCell
-                    colSpan={8}
+                    colSpan={6}
                     className="py-16 text-center text-sm text-[#64748b]"
                   >
                     No follow-ups match your current search and filter criteria.
@@ -343,7 +349,9 @@ export default function FollowUpTable({
                     <TableCell className="py-4 pl-6 pr-4">
                       <div className="flex items-center gap-3">
                         <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="shrink-0">
-                          <FollowUpStatusIcon status={item.status} className="size-10 transition-transform hover:scale-105" />
+                          <span className="flex size-10 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 transition-transform hover:scale-105">
+                            <CalendarClock className="size-5" />
+                          </span>
                         </Link>
                         <div className="min-w-0">
                           <RecordLink
@@ -354,20 +362,11 @@ export default function FollowUpTable({
                           >
                             {item.businessName}
                           </RecordLink>
-                          <p className="mt-0.5 text-xs text-[#64748b]">
-                            {item.businessCity || "-"}
-                            {item.businessPhone
-                              ? ` • ${item.businessPhone}`
-                              : ""}
+                          <p className="mt-0.5 text-xs font-medium text-[#475569]">
+                            <span>{formatDate(item.scheduledAt)} at {formatTime(item.scheduledAt)}</span>
                           </p>
                         </div>
                       </div>
-                    </TableCell>
-                    <TableCell className="px-4 py-4 text-xs font-medium text-[#475569]">
-                      {formatDate(item.scheduledAt)}
-                    </TableCell>
-                    <TableCell className="px-4 py-4 text-xs text-[#64748b]">
-                      {formatTime(item.scheduledAt)}
                     </TableCell>
                     <TableCell className="px-4 py-4 text-xs font-medium text-[#475569]">
                       {formatFollowUpType(item.type)}
@@ -381,7 +380,7 @@ export default function FollowUpTable({
                     <TableCell className="px-4 py-4 text-xs text-[#475569]">
                       {item.assignedToName}
                     </TableCell>
-                    <TableCell className="px-4 py-4" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="single-summary" /></TableCell>
+                    <TableCell className="px-4 py-4" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="business-card-summary" /></TableCell>
                     <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${isFollowUpHighlighted(item.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white group-hover:bg-[#f8fafc]/80"}`} onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
                         <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
@@ -505,7 +504,7 @@ export default function FollowUpTable({
       followUpId={notesFollowUp?.id}
       followUpName={
         notesFollowUp
-          ? `${notesFollowUp.businessName} · ${formatDate(notesFollowUp.scheduledAt)}`
+          ? `${notesFollowUp.businessName} Â· ${formatDate(notesFollowUp.scheduledAt)}`
           : ""
       }
       open={Boolean(notesFollowUp)}

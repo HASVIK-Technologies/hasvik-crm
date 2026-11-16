@@ -68,13 +68,10 @@ import {
 import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 
 const TABLE_COLUMN_OPTIONS: Array<{ value: BusinessTableColumn; label: string }> = [
-  { value: "category", label: "Category" },
   { value: "city", label: "City" },
   { value: "responsible", label: "Responsible person" },
   { value: "leadStatus", label: "Lead status" },
   { value: "activity", label: "Activity status" },
-  { value: "lastFollowUp", label: "Last follow-up" },
-  { value: "nextFollowUp", label: "Next follow-up" },
 ];
 
 function formatDisplayString(val: unknown, fallback: string = "-"): string {
@@ -137,7 +134,9 @@ export default function BusinessTable({
   const visibleTableColumns = useBusinessListStore((state) => state.visibleTableColumns);
   const toggleTableColumn = useBusinessListStore((state) => state.toggleTableColumn);
   const columnVisible = (column: BusinessTableColumn) => visibleTableColumns.includes(column);
-  const visibleColumnCount = visibleTableColumns.length + 2;
+  const visibleColumnCount = visibleTableColumns.filter((column) =>
+    ["city", "responsible", "leadStatus", "activity"].includes(column),
+  ).length + 3;
   const rowPadding = "py-4.5";
 
   const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
@@ -297,7 +296,7 @@ export default function BusinessTable({
                   onClick={(event) =>
                     handleRowClick(event, item.id, item.status === "Active")
                   }
-                  className={`flex items-start justify-between gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 md:gap-4 md:p-4 ${
+                   className={`grid grid-cols-1 gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-x-6 md:gap-y-2 md:p-4 ${
                     isBusinessHighlighted(item.id)
                       ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20"
                       : "border-[#eaf0f6]"
@@ -308,7 +307,7 @@ export default function BusinessTable({
                   }`}
                 >
                   {/* Left Side: Avatar + Business Info */}
-                  <div className="flex items-start gap-3 min-w-0">
+                  <div className="flex min-w-0 items-start gap-3 md:col-start-1 md:row-start-1">
                     <Avatar
                       className="hidden size-11 shrink-0 rounded-full bg-primary/10 text-sm font-bold text-primary sm:flex"
                     >
@@ -331,7 +330,6 @@ export default function BusinessTable({
                           <span className="text-[#94a3b8]">-</span>
                         )}
                       </div>
-                      <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
                       <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
                         <UserRound className="size-3.5 shrink-0" />
                         <span className="truncate">{item.assignedToName || "Not assigned"}</span>
@@ -340,41 +338,14 @@ export default function BusinessTable({
                   </div>
 
                   {/* Right Side: Status Badge, Follow-up, Actions */}
-                  <div className="flex flex-col items-end justify-between self-stretch shrink-0 gap-2.5">
+                  <div className="order-3 flex w-full items-center justify-between gap-3 md:contents">
                     {/* Status Badge */}
-                    <div>
+                    <div className="md:col-start-2 md:row-start-1 md:justify-self-end">
                       <ActivityStateText active={item.status === "Active"} />
                     </div>
 
-                    {/* Follow-up text */}
-                    <div className="flex flex-col items-end gap-0.5 text-[11px] font-medium text-[#64748b]">
-                      {item.nextFollowUp && item.nextFollowUp !== "-" && item.nextFollowUpType !== "none" ? (
-                        <div className="flex items-center gap-1">
-                          <span className="text-[10px] text-slate-400">Next:</span>
-                          {item.status === "Active" && item.nextFollowUpId ? (
-                            <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink>
-                          ) : (
-                            <span className="font-medium text-slate-700">{item.nextFollowUp}</span>
-                          )}
-                        </div>
-                      ) : null}
-                      {item.lastFollowUp && item.lastFollowUp !== "-" ? (
-                        <div className="flex items-center gap-1">
-                          <span className="text-[10px] text-slate-400">Last:</span>
-                          {item.status === "Active" && item.lastFollowUpId ? (
-                            <RecordLink href={`/follow-ups/${item.lastFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.lastFollowUp}</RecordLink>
-                          ) : (
-                            <span className="text-slate-600">{item.lastFollowUp}</span>
-                          )}
-                        </div>
-                      ) : null}
-                      {(!item.nextFollowUp || item.nextFollowUp === "-" || item.nextFollowUpType === "none") && (!item.lastFollowUp || item.lastFollowUp === "-") ? (
-                        <span className="text-[#94a3b8]">-</span>
-                      ) : null}
-                    </div>
-
                     {/* Action Icons (Phone + WhatsApp + More) */}
-                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <div className="flex items-center gap-2 md:col-start-2 md:row-start-2 md:justify-self-end" onClick={(e) => e.stopPropagation()}>
                       {item.status === "Active" && <>
                       <PhoneActionMenu numbers={item.phoneNumbers} fallback={item.phone} className="size-7" onAction={() => highlightBusiness(item.id)} />
 
@@ -448,6 +419,10 @@ export default function BusinessTable({
                       </DropdownMenu>
                     </div>
                   </div>
+                  <div className="order-2 flex w-full items-center justify-start gap-3 md:col-start-1 md:row-start-2 sm:pl-[3.5rem]" onClick={(event) => event.stopPropagation()}>
+                    <span className="text-[11px] font-medium text-slate-500">Tags</span>
+                    <TagAssignmentPicker entity="BUSINESS" entityId={String(item.id)} tags={item.tags} variant="business-card-summary" />
+                  </div>
                 </div>
               ))}
             </div>
@@ -459,15 +434,12 @@ export default function BusinessTable({
           <Table className="w-full min-w-max text-left">
             <TableHeader className="text-[13px] font-semibold">
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
-                <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Business Name</TableHead>
-                {columnVisible("category") && <TableHead className="px-4 py-4 font-semibold">Category</TableHead>}
+                <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Business</TableHead>
+                {columnVisible("leadStatus") && <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>}
                 {columnVisible("city") && <TableHead className="px-4 py-4 font-semibold">City</TableHead>}
                 {columnVisible("responsible") && <TableHead className="min-w-44 px-4 py-4 font-semibold">Responsible Person</TableHead>}
                 <TableHead className="min-w-40 px-4 py-4 font-semibold">Tags</TableHead>
-                {columnVisible("leadStatus") && <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>}
                 {columnVisible("activity") && <TableHead className="px-4 py-4 font-semibold">Status</TableHead>}
-                {columnVisible("lastFollowUp") && <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>}
-                {columnVisible("nextFollowUp") && <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>}
                 <TableHead className="sticky right-0 z-10 min-w-32 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -485,8 +457,8 @@ export default function BusinessTable({
                         </div>
                       </div>
                     </TableCell>
-                    {columnVisible("category") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                    {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
+                      <div className="h-6 w-16 rounded-full bg-[#f1f5f9] animate-pulse" />
                     </TableCell>}
                     {columnVisible("city") && <TableCell className={cn("px-4", rowPadding)}>
                       <div className="h-3.5 w-20 rounded bg-[#f1f5f9] animate-pulse" />
@@ -494,17 +466,11 @@ export default function BusinessTable({
                     {columnVisible("responsible") && <TableCell className={cn("px-4", rowPadding)}>
                       <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
                     </TableCell>}
-                    {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-6 w-16 rounded-full bg-[#f1f5f9] animate-pulse" />
-                    </TableCell>}
+                    <TableCell className={cn("px-4", rowPadding)}>
+                      <div className="h-7 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
                     {columnVisible("activity") && <TableCell className={cn("px-4", rowPadding)}>
                       <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
-                    </TableCell>}
-                    {columnVisible("lastFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-28 rounded bg-[#f1f5f9] animate-pulse" />
-                    </TableCell>}
-                    {columnVisible("nextFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-20 rounded bg-[#f1f5f9] animate-pulse" />
                     </TableCell>}
                     <TableCell className={cn("sticky right-0 z-10 bg-white pl-4 pr-6 text-right", rowPadding)}>
                       <div className="flex justify-end gap-2 animate-pulse">
@@ -555,7 +521,7 @@ export default function BusinessTable({
                         : ""
                     }`}
                   >
-                    {/* Business Name + Avatar + Phone */}
+                    {/* Business name and category */}
                     <TableCell className={cn("pl-6 pr-4", rowPadding)}>
                       <div className="flex items-center gap-3.5">
                         <Avatar
@@ -567,14 +533,18 @@ export default function BusinessTable({
                         </Avatar>
                         <div className="min-w-0 max-w-44">
                           <p className="truncate text-sm font-bold text-slate-900" title={item.name}>{item.name}</p>
-                          <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
+                          <p className="mt-0.5 truncate text-xs text-[#64748b]">{formatDisplayString(item.category, "Uncategorized")}</p>
                         </div>
                       </div>
                     </TableCell>
 
-                    {/* Category */}
-                    {columnVisible("category") && <TableCell className={cn("px-4 text-sm", rowPadding)}>
-                      {formatDisplayString(item.category, "Uncategorized")}
+                    {/* Lead Status */}
+                    {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
+                      {formatLeadStatusWithStatusOptions(item.leadStatus) !== "-" ? (
+                        <StatusBadge status={item.leadStatus || formatLeadStatusWithStatusOptions(item.leadStatus)} label={formatLeadStatusWithStatusOptions(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={formatLeadStatusWithStatusOptions(item.leadStatus)} />
+                      ) : (
+                        <span className="text-[#94a3b8]">-</span>
+                      )}
                     </TableCell>}
 
                     {/* City */}
@@ -590,45 +560,10 @@ export default function BusinessTable({
                         </span>
                       </div>
                     </TableCell>}
-                    <TableCell className={cn("px-4", rowPadding)}><TagAssignmentPicker entity="BUSINESS" entityId={String(item.id)} tags={item.tags} variant="single-summary" /></TableCell>
-
-                    {/* Lead Status */}
-                    {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
-                      {formatLeadStatusWithStatusOptions(item.leadStatus) !== "-" ? (
-                        <StatusBadge status={item.leadStatus || formatLeadStatusWithStatusOptions(item.leadStatus)} label={formatLeadStatusWithStatusOptions(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={formatLeadStatusWithStatusOptions(item.leadStatus)} />
-                      ) : (
-                        <span className="text-[#94a3b8]">-</span>
-                      )}
-                    </TableCell>}
+                    <TableCell className={cn("px-4", rowPadding)}><TagAssignmentPicker entity="BUSINESS" entityId={String(item.id)} tags={item.tags} variant="business-card-summary" /></TableCell>
 
                     {/* Status */}
                     {columnVisible("activity") && <TableCell className={cn("px-4", rowPadding)}><ActivityStateText active={item.status === "Active"} /></TableCell>}
-
-                    {/* Last Follow-up */}
-                    {columnVisible("lastFollowUp") && <TableCell className={cn("px-4 text-sm", rowPadding)}>
-                      {item.lastFollowUp && item.lastFollowUp !== "-" ? (
-                        item.status === "Active" && item.lastFollowUpId ? (
-                          <RecordLink href={`/follow-ups/${item.lastFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.lastFollowUp}</RecordLink>
-                        ) : (
-                          <span className="font-medium text-slate-700">{item.lastFollowUp}</span>
-                        )
-                      ) : (
-                        <span className="text-[#94a3b8]">-</span>
-                      )}
-                    </TableCell>}
-
-                    {/* Next Follow-up */}
-                    {columnVisible("nextFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
-                      {item.nextFollowUp && item.nextFollowUp !== "-" && item.nextFollowUpType !== "none" ? (
-                        item.status === "Active" && item.nextFollowUpId ? (
-                          <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink>
-                        ) : (
-                          <span className="font-medium text-slate-700">{item.nextFollowUp}</span>
-                        )
-                      ) : (
-                        <span className="text-[#94a3b8]">-</span>
-                      )}
-                    </TableCell>}
 
                     {/* Actions (Call, WhatsApp, 3 dots) */}
                     <TableCell

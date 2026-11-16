@@ -16,7 +16,7 @@ export default function TagAssignmentPicker({ entity, entityId, tags = [], tagId
   entityId: string;
   tags?: AssignedTag[];
   tagIds?: string[];
-  variant?: "compact" | "table" | "summary" | "single-summary" | "details";
+  variant?: "compact" | "table" | "summary" | "single-summary" | "card-summary" | "business-card-summary" | "calendar-card-summary" | "details";
 }) {
   const [open, setOpen] = useState(false);
   const [search, setSearch] = useState("");
@@ -40,7 +40,7 @@ export default function TagAssignmentPicker({ entity, entityId, tags = [], tagId
   const visibleTags = variant === "details" ? selectedTags.slice(0, 10) : variant === "table" ? selectedTags.slice(0, 4) : selectedTags.slice(0, 2);
   const hiddenTagCount = Math.max(0, selectedTags.length - visibleTags.length);
   const triggerOverflowCount = variant === "single-summary" || variant === "summary" ? Math.max(0, selectedTags.length - 1) : hiddenTagCount;
-  const isCompactStrip = variant === "single-summary" || variant === "summary";
+  const isCompactStrip = variant === "single-summary" || variant === "summary" || variant === "card-summary" || variant === "business-card-summary" || variant === "calendar-card-summary";
   async function toggle(id: string) {
     if (mutation.isPending) return;
     const nextIds = assignedIds.includes(id)
@@ -57,7 +57,7 @@ export default function TagAssignmentPicker({ entity, entityId, tags = [], tagId
   }
 
   return (
-    <div className={isCompactStrip ? "inline-flex w-fit min-w-0 max-w-full" : variant === "details" ? "flex min-w-0 flex-wrap items-center gap-2" : variant === "table" ? "flex min-w-0 max-w-64 flex-wrap items-center gap-1" : "flex min-w-0 flex-nowrap items-center gap-1.5 whitespace-nowrap"}>
+    <div className={isCompactStrip ? "inline-flex min-w-0 max-w-full" : variant === "details" ? "flex min-w-0 flex-wrap items-center gap-2" : variant === "table" ? "flex min-w-0 max-w-64 flex-wrap items-center gap-1" : "flex min-w-0 flex-nowrap items-center gap-1.5 whitespace-nowrap"}>
       {isCompactStrip ? null : variant === "details" || variant === "table" ? <>
         {visibleTags.map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} compact={variant === "table"} className={variant === "table" ? "max-w-full" : "px-2 py-1 text-[11px]"} />)}
         {!selectedTags.length && <span className="text-sm text-slate-500">No tags assigned</span>}
@@ -66,12 +66,28 @@ export default function TagAssignmentPicker({ entity, entityId, tags = [], tagId
         </> : <span className="text-xs font-medium text-slate-500">Add tag</span>}
       <Popover open={open} onOpenChange={setOpen}>
         <PopoverTrigger asChild>
-          {isCompactStrip ? <Button type="button" variant="outline" aria-label={`Manage tags${selectedTags.length ? `, ${selectedTags.length} assigned` : ", none assigned"}`} aria-haspopup="dialog" className="h-8 w-fit min-w-0 max-w-full justify-start gap-1.5 rounded-md border-slate-300 bg-white px-2 text-slate-700 shadow-none hover:border-slate-400 hover:bg-slate-50">
+          {isCompactStrip ? <Button type="button" variant={variant === "card-summary" || variant === "business-card-summary" || variant === "calendar-card-summary" || variant === "single-summary" ? "ghost" : "outline"} aria-label={`Manage tags${selectedTags.length ? `, ${selectedTags.length} assigned` : ", none assigned"}`} aria-haspopup="dialog" className={variant === "card-summary" || variant === "business-card-summary" || variant === "calendar-card-summary" || variant === "single-summary" ? "h-auto w-fit min-w-0 max-w-full justify-start gap-1.5 rounded-md !border-0 bg-transparent px-0 py-1 text-slate-700 shadow-none hover:!border-0 hover:bg-slate-50 focus-visible:ring-2 focus-visible:ring-brand-blue/30" : "h-8 w-fit min-w-0 max-w-full justify-start gap-1.5 rounded-md border-slate-300 bg-white px-2 text-slate-700 shadow-none hover:border-slate-400 hover:bg-slate-50"}>
             {selectedTags.length ? <>
-              <span className="flex min-w-0 flex-1 overflow-hidden text-left"><TagBadge name={selectedTags[0].name} color={selectedTags[0].color} compact className="max-w-none shrink-0" /></span>
-              {triggerOverflowCount > 0 && <span title={`Additional tags: ${selectedTags.slice(1).map((tag) => tag.name).join(", ")}`} className="inline-flex shrink-0 items-center rounded-md bg-slate-100 px-1.5 py-1 text-[10px] font-semibold leading-none text-slate-600">+{triggerOverflowCount}</span>}
+              {variant === "card-summary" ? <>
+                {selectedTags.slice(0, 1).map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} compact className="max-w-none shrink-0 md:hidden" />)}
+                {selectedTags.slice(0, 2).map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} compact className="hidden max-w-none shrink-0 md:inline-flex" />)}
+                {selectedTags.length > 1 && <span title={`Additional tags: ${selectedTags.slice(1).map((tag) => tag.name).join(", ")}`} className="inline-flex shrink-0 items-center rounded-md bg-slate-100 px-1.5 py-1 text-[10px] font-semibold leading-none text-slate-600 md:hidden">+{selectedTags.length - 1}</span>}
+                {selectedTags.length > 2 && <span title={`Additional tags: ${selectedTags.slice(2).map((tag) => tag.name).join(", ")}`} className="hidden shrink-0 items-center rounded-md bg-slate-100 px-1.5 py-1 text-[10px] font-semibold leading-none text-slate-600 md:inline-flex">+{selectedTags.length - 2}</span>}
+              </> : variant === "business-card-summary" ? <>
+                {selectedTags.slice(0, 1).map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} compact className="max-w-none shrink-0 sm:hidden" />)}
+                {selectedTags.slice(0, 2).map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} compact className="hidden max-w-none shrink-0 sm:inline-flex" />)}
+                {selectedTags.length > 1 && <span title={`Additional tags: ${selectedTags.slice(1).map((tag) => tag.name).join(", ")}`} className="inline-flex shrink-0 items-center rounded-md bg-slate-100 px-1.5 py-1 text-[10px] font-semibold leading-none text-slate-600 sm:hidden">+{selectedTags.length - 1}</span>}
+                {selectedTags.length > 2 && <span title={`Additional tags: ${selectedTags.slice(2).map((tag) => tag.name).join(", ")}`} className="hidden shrink-0 items-center rounded-md bg-slate-100 px-1.5 py-1 text-[10px] font-semibold leading-none text-slate-600 sm:inline-flex">+{selectedTags.length - 2}</span>}
+              </> : variant === "calendar-card-summary" ? <>
+                {selectedTags.slice(0, 2).map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} compact className="max-w-none shrink-0" />)}
+                {selectedTags.length > 2 && <span title={`Additional tags: ${selectedTags.slice(2).map((tag) => tag.name).join(", ")}`} className="inline-flex shrink-0 items-center rounded-md bg-slate-100 px-1.5 py-1 text-[10px] font-semibold leading-none text-slate-600">+{selectedTags.length - 2}</span>}
+              </> : <>
+                <span className="flex min-w-0 flex-1 overflow-hidden text-left"><TagBadge name={selectedTags[0].name} color={selectedTags[0].color} compact className="max-w-none shrink-0" /></span>
+                {triggerOverflowCount > 0 && <span title={`Additional tags: ${selectedTags.slice(1).map((tag) => tag.name).join(", ")}`} className="inline-flex shrink-0 items-center rounded-md bg-slate-100 px-1.5 py-1 text-[10px] font-semibold leading-none text-slate-600">+{triggerOverflowCount}</span>}
+              </>}
               <ChevronDown className="size-3.5 shrink-0 text-slate-500" />
-            </> : <><Tag className="size-3.5 shrink-0 text-slate-500" /><span className="min-w-0 flex-1 truncate text-left text-xs font-medium text-slate-500">Add tag</span><ChevronDown className="size-3.5 shrink-0 text-slate-500" /></>}
+            </> : <><Tag className="size-3.5 shrink-0 text-slate-500" /><span className="min-w-0 flex-1 truncate text-left text-xs font-medium text-slate-500">Add tag</span><ChevronDown className="size-3.5 shrink-0 text-slate-500" />
+            </>}
           </Button> : <Button type="button" variant="outline" size="icon-sm" aria-label={`Manage tags${selectedTags.length ? `, ${selectedTags.length} assigned` : ", none assigned"}`} aria-haspopup="dialog" className="border-slate-200 bg-white text-slate-600 hover:border-slate-300 hover:bg-slate-50 hover:text-slate-900"><Tag className="size-4" /></Button>}
         </PopoverTrigger>
         <PopoverContent align="start" side="bottom" className="w-[min(17rem,calc(100vw-2rem))] overflow-hidden p-0">
