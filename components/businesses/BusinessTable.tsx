@@ -296,7 +296,7 @@ export default function BusinessTable({
                   onClick={(event) =>
                     handleRowClick(event, item.id, item.status === "Active")
                   }
-                   className={`grid grid-cols-1 gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-x-6 md:gap-y-2 md:p-4 ${
+                   className={`relative grid grid-cols-1 gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 md:p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-x-6 lg:gap-y-2 ${
                     isBusinessHighlighted(item.id)
                       ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20"
                       : "border-[#eaf0f6]"
@@ -307,7 +307,7 @@ export default function BusinessTable({
                   }`}
                 >
                   {/* Left Side: Avatar + Business Info */}
-                  <div className="flex min-w-0 items-start gap-3 md:col-start-1 md:row-start-1">
+                  <div className="flex min-w-0 items-start gap-3 lg:col-start-1 lg:row-start-1">
                     <Avatar
                       className="hidden size-11 shrink-0 rounded-full bg-primary/10 text-sm font-bold text-primary sm:flex"
                     >
@@ -315,37 +315,41 @@ export default function BusinessTable({
                         {item.initials}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="min-w-0">
+                    <div className="min-w-0 pr-20 sm:pr-24 lg:pr-0">
                       <h3 className="max-w-48 truncate text-sm font-bold text-slate-900 sm:max-w-64 sm:text-base" title={item.name}>
                         {item.name}
                       </h3>
                       <p className="mt-0.5 text-xs text-[#64748b]">
                         {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
                       </p>
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-[#64748b]">
-                        <span>Lead status:</span>
+                      <div className="mt-1 md:hidden">
+                        <ActivityStateText active={item.status === "Active"} />
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* Right Side: Status Badge, Follow-up, Actions */}
+                  <div className="order-3 flex w-full items-center justify-between gap-3 lg:contents">
+                    {/* Lead Status */}
+                    <div className="absolute right-3 top-3 lg:static lg:col-start-2 lg:row-start-1 lg:justify-self-end">
+                      <div className="md:hidden">
                         {formatLeadStatusWithStatusOptions(item.leadStatus) !== "-" ? (
                           <StatusBadge status={item.leadStatus || formatLeadStatusWithStatusOptions(item.leadStatus)} label={formatLeadStatusWithStatusOptions(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-[10px]" />
                         ) : (
                           <span className="text-[#94a3b8]">-</span>
                         )}
                       </div>
-                      <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
-                        <UserRound className="size-3.5 shrink-0" />
-                        <span className="truncate">{item.assignedToName || "Not assigned"}</span>
-                      </p>
-                    </div>
-                  </div>
-
-                  {/* Right Side: Status Badge, Follow-up, Actions */}
-                  <div className="order-3 flex w-full items-center justify-between gap-3 md:contents">
-                    {/* Status Badge */}
-                    <div className="md:col-start-2 md:row-start-1 md:justify-self-end">
-                      <ActivityStateText active={item.status === "Active"} />
+                      <div className="hidden md:block">
+                        <ActivityStateText active={item.status === "Active"} />
+                      </div>
                     </div>
 
                     {/* Action Icons (Phone + WhatsApp + More) */}
-                    <div className="flex items-center gap-2 md:col-start-2 md:row-start-2 md:justify-self-end" onClick={(e) => e.stopPropagation()}>
+                    <p className="min-w-0 flex items-center gap-1.5 text-xs text-slate-500">
+                      <UserRound className="size-3.5 shrink-0" />
+                      <span className="truncate">{item.assignedToName || "Not assigned"}</span>
+                    </p>
+                    <div className="flex shrink-0 items-center gap-2 lg:col-start-2 lg:row-start-2 lg:justify-self-end" onClick={(e) => e.stopPropagation()}>
                       {item.status === "Active" && <>
                       <PhoneActionMenu numbers={item.phoneNumbers} fallback={item.phone} className="size-7" onAction={() => highlightBusiness(item.id)} />
 
@@ -419,7 +423,7 @@ export default function BusinessTable({
                       </DropdownMenu>
                     </div>
                   </div>
-                  <div className="order-2 flex w-full items-center justify-start gap-3 md:col-start-1 md:row-start-2 sm:pl-[3.5rem]" onClick={(event) => event.stopPropagation()}>
+                  <div className="order-2 flex w-full items-center justify-start gap-3 lg:col-start-1 lg:row-start-2" onClick={(event) => event.stopPropagation()}>
                     <span className="text-[11px] font-medium text-slate-500">Tags</span>
                     <TagAssignmentPicker entity="BUSINESS" entityId={String(item.id)} tags={item.tags} variant="business-card-summary" />
                   </div>

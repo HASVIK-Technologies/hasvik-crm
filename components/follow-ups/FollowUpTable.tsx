@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import {
   CalendarClock,
@@ -10,6 +10,8 @@ import {
   MoreVertical,
   Pencil,
   Plus,
+  Bell,
+  UserRound,
   Trash2,
 } from "lucide-react";
 import Link from "next/link";
@@ -149,7 +151,7 @@ export default function FollowUpTable({
   return (
     <>
     <TooltipProvider>
-      <div className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
+      <div className="follow-up-card-layout overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_2px_12px_rgba(20,40,60,0.03)]">
         <div className="flex flex-col gap-3.5 border-b border-[#f1f5f9] p-3 sm:flex-row sm:items-center sm:justify-between md:p-4">
           <h2 className="text-lg font-bold tracking-tight text-[#0f172a]">
             Follow-ups{" "}
@@ -178,38 +180,49 @@ export default function FollowUpTable({
                   aria-label={`Open follow-up details for ${item.businessName}`}
                   onClick={(event) => handleRowClick(event, item.id)}
                   onKeyDown={(event) => handleRowKeyDown(event, item.id)}
-                  className={`grid grid-cols-1 gap-2 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 md:grid-cols-[minmax(0,1fr)_auto] md:items-center md:gap-x-6 md:gap-y-1 md:p-4 ${isFollowUpHighlighted(item.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}
+                  className={`grid grid-cols-1 gap-2 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 hover:border-primary/40 hover:shadow-md focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-primary/40 ${isFollowUpHighlighted(item.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-[#eaf0f6]"}`}
                 >
-                  <div className="flex w-full min-w-0 items-start gap-3 md:col-start-1 md:row-start-1">
-                    <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="shrink-0">
+                  <div className="flex w-full min-w-0 items-start gap-3">
+                    <Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="hidden shrink-0 sm:block">
                       <span className="flex size-11 items-center justify-center rounded-full border border-emerald-200 bg-emerald-50 text-emerald-700 transition-transform hover:scale-105">
                         <CalendarClock className="size-5" />
                       </span>
                     </Link>
-                    <div className="min-w-0">
+                    <div className="min-w-0 flex-1">
                       <RecordLink href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)} className="block max-w-52 truncate text-sm" title={item.businessName}>
                         {item.businessName}
                       </RecordLink>
                       <p className="mt-2 flex items-center gap-1.5 text-xs font-medium text-[#475569]">
                         <span>{formatDate(item.scheduledAt)} at {formatTime(item.scheduledAt)}</span>
                       </p>
-                      <p className="mt-1 text-xs text-[#64748b]">
-                        {formatFollowUpType(item.type)} Â· {item.assignedToName}
-                        {item.reminder ? ` Â· ðŸ”” ${item.reminder}` : ""}
-                      </p>
+                      <div className="mt-1 flex flex-wrap items-center gap-x-3 gap-y-1 text-xs text-[#64748b]">
+                        <span>{formatFollowUpType(item.type)}</span>
+                        {item.reminder && (
+                          <span className="flex items-center gap-1.5">
+                            <Bell className="size-3.5 shrink-0" />
+                            <span>{item.reminder}</span>
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  </div>
-                  <div
-                    className="order-3 flex w-full items-center justify-between gap-3 md:contents"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <div className="md:col-start-2 md:row-start-1 md:justify-self-end">
+                    <div className="shrink-0">
                       <StatusBadge
                         status={item.status}
                         className="rounded-md px-2.5 py-0.5 text-[10px]"
                       />
                     </div>
-                    <div className="flex items-center gap-1.5 md:col-start-2 md:row-start-2 md:justify-self-end" onClick={(e) => e.stopPropagation()}>
+                  </div>
+                  <div
+                    className="order-3 flex w-full items-center justify-between gap-3"
+                    onClick={(e) => e.stopPropagation()}
+                  >
+                    <div className="hidden">
+                      <StatusBadge
+                        status={item.status}
+                        className="rounded-md px-2.5 py-0.5 text-[10px]"
+                      />
+                    </div>
+                    <div className="order-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
                       <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
                       <Tooltip>
                         <TooltipTrigger asChild>
@@ -273,8 +286,12 @@ export default function FollowUpTable({
                         </DropdownMenuContent>
                       </DropdownMenu>
                     </div>
+                    <div className="order-1 flex min-w-0 items-center gap-1.5 text-xs text-slate-600">
+                      <UserRound className="size-3.5 shrink-0 text-slate-400" />
+                      <span className="truncate">{item.assignedToName || "Unassigned"}</span>
+                    </div>
                   </div>
-                  <div className="order-2 flex w-full items-center justify-start gap-3 pl-[3.25rem] md:col-start-1 md:row-start-2" onClick={(event) => event.stopPropagation()}>
+                  <div className="order-2 flex w-full items-center justify-start gap-3" onClick={(event) => event.stopPropagation()}>
                     <span className="text-[11px] font-medium text-slate-500">Tags</span>
                     <TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="business-card-summary" />
                   </div>

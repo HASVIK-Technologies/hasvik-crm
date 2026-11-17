@@ -340,7 +340,8 @@ export default function TenantManagementPage() {
   return (
     <>
       <ListPageLayout
-        breadcrumb={<Breadcrumb items={[{ label: "Tenant management" }]} />}
+        compactHeader
+        breadcrumb={<Breadcrumb truncate items={[{ label: "Tenant management" }]} />}
         searchValue={search}
         onSearchChange={(value) => {
           setSearch(value);

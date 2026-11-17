@@ -157,7 +157,8 @@ export default function BusinessCategoriesPage() {
 
   return (
     <ListPageLayout
-      breadcrumb={<Breadcrumb items={[{ label: "Business categories" }]} />}
+      compactHeader
+      breadcrumb={<Breadcrumb truncate items={[{ label: "Business categories" }]} />}
       searchValue={search}
       onSearchChange={(value) => {
         setSearch(value);

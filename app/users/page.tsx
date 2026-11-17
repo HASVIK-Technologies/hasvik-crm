@@ -198,7 +198,8 @@ export default function UsersPage() {
   return (
     <>
       <ListPageLayout
-        breadcrumb={<Breadcrumb items={[{ label: "User management" }]} />}
+        compactHeader
+        breadcrumb={<Breadcrumb truncate items={[{ label: "User management" }]} />}
         searchValue={search}
         onSearchChange={(value) => {
           setSearch(value);

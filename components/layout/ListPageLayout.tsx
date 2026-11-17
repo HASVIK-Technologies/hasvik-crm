@@ -26,6 +26,7 @@ interface LayoutProps {
   content?: React.ReactNode;
   footer?: React.ReactNode;
   className?: string;
+  compactHeader?: boolean;
 }
 
 export default function ListPageLayout({
@@ -46,6 +47,7 @@ export default function ListPageLayout({
   content,
   footer,
   className,
+  compactHeader = false,
 }: LayoutProps) {
   const [internalShowFilters, setInternalShowFilters] = useState(true);
   const [filterDrawerOpen, setFilterDrawerOpen] = useState(false);
@@ -85,9 +87,9 @@ export default function ListPageLayout({
 
   return (
     <PageContainer className={`flex flex-col gap-4 sm:gap-6 lg:gap-7 ${className ?? ""}`}>
-      <section className="flex flex-col gap-2 sm:flex-row sm:items-center sm:justify-between sm:gap-4">
-        {breadcrumb}
-        <div className="flex w-full min-w-0 flex-wrap items-center justify-between gap-2 sm:w-auto sm:justify-end">
+      <section className={`flex gap-2 sm:items-center sm:justify-between sm:gap-4 ${compactHeader ? "flex-row items-center justify-between" : "flex-col sm:flex-row"}`}>
+        <div className={compactHeader ? "min-w-0 flex-1" : ""}>{breadcrumb}</div>
+        <div className={`flex min-w-0 flex-wrap items-center gap-2 sm:w-auto sm:justify-end ${compactHeader ? "w-auto shrink-0 justify-end" : "w-full justify-between sm:w-auto"}`}>
           {viewSwitcher && <div className="shrink-0">{viewSwitcher}</div>}
           <div className="flex min-w-0 flex-wrap items-center justify-end gap-2">
             {filters && (

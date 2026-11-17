@@ -664,7 +664,8 @@ export default function SubscriptionsPage() {
 
   return (
     <ListPageLayout
-      breadcrumb={<Breadcrumb items={[{ label: "Subscriptions" }]} />}
+      compactHeader
+      breadcrumb={<Breadcrumb truncate items={[{ label: "Subscriptions" }]} />}
       filters={tenantAdmin || hasvikAdmin ? <ResponsiveFilters onReset={() => { setStatusFilter("ALL"); setPage(1); }} fields={[{ key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <Select
               value={statusFilter}
               onValueChange={(value) => { setStatusFilter(value as SubscriptionFilter); setPage(1); }}

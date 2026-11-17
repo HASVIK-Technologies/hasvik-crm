@@ -316,7 +316,7 @@ export default function BusinessKanban({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-slate-100 pt-2 text-xs text-slate-600">
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-slate-600">
                   <div onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} variant="business-card-summary" /></div>
                   {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
                 </div>
@@ -445,7 +445,7 @@ export default function BusinessKanban({
                           </DropdownMenu>
                         </div>
 
-                        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 border-t border-slate-100 pt-2 text-xs text-slate-600">
+                        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-slate-600">
                           <div onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onDragStart={(event) => { event.preventDefault(); event.stopPropagation(); }}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} variant="business-card-summary" /></div>
                           {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
                         </div>
