@@ -1,5 +1,5 @@
 import type { BusinessItem } from "@/types/business";
-import { normalizeAssignedTags } from "@/types/tag";
+import { normalizeAssignedTags } from "../../types/tag.ts";
 import type {
   ApiBusiness,
   CreateBusinessPayload,
