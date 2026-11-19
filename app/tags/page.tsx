@@ -33,7 +33,12 @@ import {
   useTagsQuery,
   useUpdateTag,
 } from "@/hooks/use-tags";
-import type { TagEntity, TagEntityDisplay, TagItem, TagPayload } from "@/types/tag";
+import type {
+  TagEntity,
+  TagEntityDisplay,
+  TagItem,
+  TagPayload,
+} from "@/types/tag";
 
 type TabOption = "ALL" | "BUSINESS" | "FOLLOW_UP";
 
@@ -77,7 +82,7 @@ export default function TagsPage() {
       sortBy,
       sortOrder,
     }),
-    [debouncedSearch, entityFilter, page, limit, sortBy, sortOrder],
+    [debouncedSearch, entityFilter, page, limit, sortBy, sortOrder]
   );
 
   const { data, isLoading } = useTagsQuery(queryParams);
@@ -238,12 +243,15 @@ export default function TagsPage() {
                 {activeTab === "ALL"
                   ? "All Entities"
                   : activeTab === "BUSINESS"
-                    ? "Business"
-                    : "Follow-up"}
+                  ? "Business"
+                  : "Follow-up"}
               </span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44 bg-white rounded-none shadow-lg">
+          <DropdownMenuContent
+            align="end"
+            className="w-44 bg-white rounded-none shadow-lg"
+          >
             <DropdownMenuItem
               onClick={() => handleEntityFilterSelect("ALL")}
               className="text-xs cursor-pointer"
@@ -279,7 +287,10 @@ export default function TagsPage() {
               <span>Columns</span>
             </Button>
           </DropdownMenuTrigger>
-          <DropdownMenuContent align="end" className="w-44 bg-white rounded-none shadow-lg">
+          <DropdownMenuContent
+            align="end"
+            className="w-44 bg-white rounded-none shadow-lg"
+          >
             <DropdownMenuLabel className="text-xs font-semibold text-slate-700">
               Toggle Columns
             </DropdownMenuLabel>
@@ -287,7 +298,10 @@ export default function TagsPage() {
             <DropdownMenuCheckboxItem
               checked={visibleColumns.name}
               onCheckedChange={(checked) =>
-                setVisibleColumns((prev) => ({ ...prev, name: Boolean(checked) }))
+                setVisibleColumns((prev) => ({
+                  ...prev,
+                  name: Boolean(checked),
+                }))
               }
               className="text-xs cursor-pointer"
             >
@@ -296,7 +310,10 @@ export default function TagsPage() {
             <DropdownMenuCheckboxItem
               checked={visibleColumns.color}
               onCheckedChange={(checked) =>
-                setVisibleColumns((prev) => ({ ...prev, color: Boolean(checked) }))
+                setVisibleColumns((prev) => ({
+                  ...prev,
+                  color: Boolean(checked),
+                }))
               }
               className="text-xs cursor-pointer"
             >
@@ -305,7 +322,10 @@ export default function TagsPage() {
             <DropdownMenuCheckboxItem
               checked={visibleColumns.entity}
               onCheckedChange={(checked) =>
-                setVisibleColumns((prev) => ({ ...prev, entity: Boolean(checked) }))
+                setVisibleColumns((prev) => ({
+                  ...prev,
+                  entity: Boolean(checked),
+                }))
               }
               className="text-xs cursor-pointer"
             >
@@ -314,7 +334,10 @@ export default function TagsPage() {
             <DropdownMenuCheckboxItem
               checked={visibleColumns.description}
               onCheckedChange={(checked) =>
-                setVisibleColumns((prev) => ({ ...prev, description: Boolean(checked) }))
+                setVisibleColumns((prev) => ({
+                  ...prev,
+                  description: Boolean(checked),
+                }))
               }
               className="text-xs cursor-pointer"
             >
@@ -323,7 +346,10 @@ export default function TagsPage() {
             <DropdownMenuCheckboxItem
               checked={visibleColumns.actions}
               onCheckedChange={(checked) =>
-                setVisibleColumns((prev) => ({ ...prev, actions: Boolean(checked) }))
+                setVisibleColumns((prev) => ({
+                  ...prev,
+                  actions: Boolean(checked),
+                }))
               }
               className="text-xs cursor-pointer"
             >
@@ -350,11 +376,12 @@ export default function TagsPage() {
         onAddTag={handleOpenAdd}
       />
 
-      {/* Add / Edit Tag Dialog */}
+      {/* Add / Edit Tag Drawer */}
       <TagFormDialog
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         tagToEdit={tagToEdit}
+        existingTags={tags}
         onSubmit={handleFormSubmit}
         isSubmitting={createMutation.isPending || updateMutation.isPending}
       />
@@ -370,4 +397,3 @@ export default function TagsPage() {
     </PageContainer>
   );
 }
-

@@ -4,6 +4,15 @@ import type {
   TagItem,
 } from "../../types/tag.ts";
 
+export function toBackendEntityType(entity?: string): "BUSINESS" | "FOLLOWUP" {
+  if (!entity) return "BUSINESS";
+  const upper = entity.toUpperCase();
+  if (upper.includes("FOLLOW")) {
+    return "FOLLOWUP";
+  }
+  return "BUSINESS";
+}
+
 export const INITIAL_DEFAULT_TAGS: TagItem[] = [
   {
     id: "tag-1",
@@ -306,4 +315,66 @@ export function removeDeletedTagAssociations(
   }
 
   return { businessesUpdated, followUpsUpdated };
+}
+
+export interface TagColorDef {
+  color: string;
+  code: string;
+}
+
+export const TAG_COLORS: TagColorDef[] = [
+  { color: "Blue", code: "#0870C9" },   // Hasvik Brand Blue
+  { color: "Green", code: "#18A849" },  // Hasvik Brand Green
+  { color: "Red", code: "#EF4444" },    // Theme Red
+  { color: "Orange", code: "#FFA500" }, // Theme Orange
+  { color: "Violet", code: "#8B5CF6" }, // Theme Violet
+  { color: "Grey", code: "#64748B" },   // Hasvik Slate / Theme Grey
+];
+
+export function getColorName(colorOrCode?: string): string {
+  if (!colorOrCode) return "Blue";
+  const clean = colorOrCode.trim();
+  const lower = clean.toLowerCase();
+
+  // Support both "grey" and "gray"
+  if (lower === "gray" || lower === "grey") return "Grey";
+
+  // Match by direct name
+  const byName = TAG_COLORS.find((c) => c.color.toLowerCase() === lower);
+  if (byName) return byName.color;
+
+  // Match by exact code
+  const hex = clean.startsWith("#") ? clean.toUpperCase() : `#${clean.toUpperCase()}`;
+  const byCode = TAG_COLORS.find((c) => c.code.toUpperCase() === hex);
+  if (byCode) return byCode.color;
+
+  // Extended mapping for all theme variants
+  if (["#0870C9", "#0876D1", "#08A9E6", "#2563EB", "#0000FF", "#1D4ED8"].includes(hex)) return "Blue";
+  if (["#18A849", "#20B83F", "#117A35", "#16A34A", "#22C55E", "#008000", "#63D329"].includes(hex)) return "Green";
+  if (["#EF4444", "#DC2626", "#B91C1C", "#FF0000"].includes(hex)) return "Red";
+  if (["#FFA500", "#F97316", "#EA580C"].includes(hex)) return "Orange";
+  if (["#8B5CF6", "#8A2BE2", "#7C3AED", "#9333EA"].includes(hex)) return "Violet";
+  if (["#64748B", "#6B7280", "#94A3B8", "#475569", "#71717A"].includes(hex)) return "Grey";
+
+  return clean;
+}
+
+export function getColorCode(colorOrCode?: string): string {
+  if (!colorOrCode) return "#0870C9";
+  const clean = colorOrCode.trim();
+  const lower = clean.toLowerCase();
+
+  if (lower === "gray" || lower === "grey") return "#64748B";
+
+  const byName = TAG_COLORS.find((c) => c.color.toLowerCase() === lower);
+  if (byName) return byName.code;
+
+  if (clean.startsWith("#")) return clean.toUpperCase();
+  return `#${clean.toUpperCase()}`;
+}
+
+export function getColorByColorName(nameOrCode?: string): TagColorDef {
+  const name = getColorName(nameOrCode);
+  const found = TAG_COLORS.find((c) => c.color.toLowerCase() === name.toLowerCase());
+  return found ?? { color: name, code: getColorCode(nameOrCode) };
 }

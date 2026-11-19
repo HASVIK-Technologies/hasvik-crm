@@ -10,7 +10,11 @@ import type {
 } from "@/types/tag";
 import {
   INITIAL_DEFAULT_TAGS,
+  TAG_COLORS,
   filterTags,
+  getColorByColorName,
+  getColorCode,
+  getColorName,
   getTagAssociations,
   normalizeHexColor,
   normalizeTagEntity,
@@ -21,7 +25,11 @@ import {
 
 export {
   INITIAL_DEFAULT_TAGS,
+  TAG_COLORS,
   filterTags,
+  getColorByColorName,
+  getColorCode,
+  getColorName,
   getTagAssociations,
   normalizeHexColor,
   normalizeTagEntity,
@@ -30,6 +38,14 @@ export {
   toTagEntityEnum,
 };
 
+export function toBackendEntityType(entity?: string): "BUSINESS" | "FOLLOWUP" {
+  if (!entity) return "BUSINESS";
+  const upper = entity.toUpperCase();
+  if (upper.includes("FOLLOW")) {
+    return "FOLLOWUP";
+  }
+  return "BUSINESS";
+}
 const LOCAL_STORAGE_KEY = "hasvik_crm_tags_store_v1";
 
 let memoryTags: TagItem[] = [...INITIAL_DEFAULT_TAGS];
@@ -73,13 +89,20 @@ function parseTag(raw: unknown): TagItem {
   }
   const id = String(raw.id ?? raw._id ?? "");
   const name = String(raw.name ?? "");
-  const color = normalizeHexColor(typeof raw.color === "string" ? raw.color : "#20B83F");
+  const color = normalizeHexColor(
+    typeof raw.color === "string" ? raw.color : "#20B83F"
+  );
   const rawEntity = String(raw.entity ?? raw.entityType ?? "BUSINESS");
-  const description = typeof raw.description === "string" ? raw.description : "";
-  const leadsCount = typeof raw.leadsCount === "number" ? raw.leadsCount : undefined;
-  const followUpsCount = typeof raw.followUpsCount === "number" ? raw.followUpsCount : undefined;
-  const createdAt = typeof raw.createdAt === "string" ? raw.createdAt : undefined;
-  const updatedAt = typeof raw.updatedAt === "string" ? raw.updatedAt : undefined;
+  const description =
+    typeof raw.description === "string" ? raw.description : "";
+  const leadsCount =
+    typeof raw.leadsCount === "number" ? raw.leadsCount : undefined;
+  const followUpsCount =
+    typeof raw.followUpsCount === "number" ? raw.followUpsCount : undefined;
+  const createdAt =
+    typeof raw.createdAt === "string" ? raw.createdAt : undefined;
+  const updatedAt =
+    typeof raw.updatedAt === "string" ? raw.updatedAt : undefined;
 
   return {
     id,
@@ -97,7 +120,7 @@ function parseTag(raw: unknown): TagItem {
 
 export async function getTags(
   query: TagListQuery = {},
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<TagListResult> {
   const page = query.page ?? 1;
   const limit = query.limit ?? 10;
@@ -115,7 +138,7 @@ export async function getTags(
         sortOrder,
         ...(search ? { search } : {}),
         ...(entityFilter && entityFilter !== "ALL"
-          ? { entity: toTagEntityEnum(entityFilter) }
+          ? { entityType: toBackendEntityType(entityFilter) }
           : {}),
       },
       signal,
@@ -172,7 +195,7 @@ export async function getTags(
 
 export async function getTagAutocomplete(
   query: TagAutocompleteQuery,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ): Promise<TagItem[]> {
   const response = await apiClient.get("/tags/autocomplete", {
     params: {
@@ -187,41 +210,62 @@ export async function getTagAutocomplete(
   const rows = Array.isArray(payload)
     ? payload
     : isRecord(payload) && Array.isArray(payload.items)
-      ? payload.items
-      : isRecord(payload) && Array.isArray(payload.data)
-        ? payload.data
-        : [];
+    ? payload.items
+    : isRecord(payload) && Array.isArray(payload.data)
+    ? payload.data
+    : [];
   return rows.map(parseTag);
 }
 
 export async function createTag(payload: TagPayload): Promise<TagItem> {
-  const normalizedColor = normalizeHexColor(payload.color);
-  const normalizedEntity = toTagEntityEnum(payload.entity);
+  const colorHex = getColorCode(payload.color); // Sends valid hex code: "#0000FF"
+  const backendEntity = toBackendEntityType(payload.entity); // Sends "BUSINESS" | "FOLLOWUP"
+
+  // Duplicate check
+  const current = getStoredTags();
+  const duplicate = current.find(
+    (t) =>
+      t.name.trim().toLowerCase() === payload.name.trim().toLowerCase() &&
+      toBackendEntityType(t.entity) === backendEntity,
+  );
+  if (duplicate) {
+    throw new Error(
+      `A tag with the name "${payload.name.trim()}" already exists for ${normalizeTagEntity(
+        payload.entity,
+      )}.`,
+    );
+  }
 
   try {
     const response = await apiClient.post("/tags", {
       name: payload.name.trim(),
-      color: normalizedColor,
-      entity: normalizedEntity,
+      color: colorHex, // Passes "color must be a hexadecimal color"
+      entityType: backendEntity, // Passes "entityType must be one of: BUSINESS, FOLLOWUP..."
+      entity: backendEntity,
       description: payload.description?.trim() || "",
     });
 
     const parsed = parseTag(response.data?.data ?? response.data);
     if (parsed.id) {
-      const current = getStoredTags();
       saveStoredTags([parsed, ...current]);
       return parsed;
     }
-  } catch {
-    // Continue with local creation
+  } catch (err: unknown) {
+    if (err && typeof err === "object" && "response" in err) {
+      const resp = (err as { response?: { data?: { message?: string } } }).response;
+      if (resp?.data?.message) {
+        throw new Error(resp.data.message);
+      }
+    }
+    throw err;
   }
 
   const newTag: TagItem = {
     id: `tag-${Date.now()}`,
     _id: `tag-${Date.now()}`,
     name: payload.name.trim(),
-    color: normalizedColor,
-    entity: normalizedEntity,
+    color: colorHex,
+    entity: backendEntity,
     description: payload.description?.trim() || "",
     leadsCount: 0,
     followUpsCount: 0,
@@ -229,24 +273,29 @@ export async function createTag(payload: TagPayload): Promise<TagItem> {
     updatedAt: new Date().toISOString(),
   };
 
-  const current = getStoredTags();
   saveStoredTags([newTag, ...current]);
   return newTag;
 }
-
 export async function updateTag(
   id: string,
   payload: Partial<TagPayload>,
 ): Promise<TagItem> {
-  const updateData: Partial<TagItem> = {};
+  const updateData: Record<string, unknown> = {};
   if (payload.name !== undefined) updateData.name = payload.name.trim();
-  if (payload.color !== undefined) updateData.color = normalizeHexColor(payload.color);
-  if (payload.entity !== undefined) updateData.entity = toTagEntityEnum(payload.entity);
-  if (payload.description !== undefined) updateData.description = payload.description.trim();
+  if (payload.color !== undefined) updateData.color = getColorCode(payload.color);
+  if (payload.entity !== undefined) {
+    const ent = toBackendEntityType(payload.entity);
+    updateData.entityType = ent;
+    updateData.entity = ent;
+  }
+  if (payload.description !== undefined) {
+    updateData.description = payload.description.trim();
+  }
   updateData.updatedAt = new Date().toISOString();
 
   try {
-    const response = await apiClient.put(`/tags/${id}`, updateData);
+    // Uses PATCH as shown in your curl
+    const response = await apiClient.patch(`/tags/${id}`, updateData);
     const parsed = parseTag(response.data?.data ?? response.data);
     if (parsed.id) {
       const current = getStoredTags();
@@ -254,8 +303,14 @@ export async function updateTag(
       saveStoredTags(updated);
       return parsed;
     }
-  } catch {
-    // Local update fallback
+  } catch (err: unknown) {
+    if (err && typeof err === "object" && "response" in err) {
+      const resp = (err as { response?: { data?: { message?: string } } }).response;
+      if (resp?.data?.message) {
+        throw new Error(resp.data.message);
+      }
+    }
+    throw err;
   }
 
   const current = getStoredTags();
@@ -276,9 +331,10 @@ export async function updateTag(
   return found;
 }
 
-export async function deleteTag(
-  id: string,
-): Promise<{ success: boolean; associationsCleaned: { businessesUpdated: number; followUpsUpdated: number } }> {
+export async function deleteTag(id: string): Promise<{
+  success: boolean;
+  associationsCleaned: { businessesUpdated: number; followUpsUpdated: number };
+}> {
   const current = getStoredTags();
   const targetTag = current.find((t) => t.id === id || t._id === id);
 

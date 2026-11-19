@@ -18,6 +18,7 @@ import TagEntityBadge from "./TagEntityBadge";
 import type { TagItem } from "@/types/tag";
 import { normalizeHexColor } from "@/lib/tags/api";
 import { Button } from "@/components/ui/button";
+import { getColorCode, getColorName } from "@/lib/tags/api";
 
 export interface TagColumnsConfig {
   name: boolean;
@@ -83,7 +84,7 @@ export default function TagTable({
 
   const allSelected = useMemo(
     () => tags.length > 0 && tags.every((t) => selectedIds.has(t.id)),
-    [tags, selectedIds],
+    [tags, selectedIds]
   );
 
   const toggleSelectAll = () => {
@@ -190,7 +191,10 @@ export default function TagTable({
           <tbody className="divide-y divide-slate-100">
             {isLoading ? (
               <tr>
-                <td colSpan={activeColSpan} className="py-12 text-center text-slate-500">
+                <td
+                  colSpan={activeColSpan}
+                  className="py-12 text-center text-slate-500"
+                >
                   <div className="flex flex-col items-center justify-center gap-2">
                     <div className="size-6 border-2 border-emerald-600 border-t-transparent animate-spin rounded-full" />
                     <span className="text-xs">Loading tags...</span>
@@ -199,14 +203,20 @@ export default function TagTable({
               </tr>
             ) : tags.length === 0 ? (
               <tr>
-                <td colSpan={activeColSpan} className="py-12 text-center text-slate-500">
+                <td
+                  colSpan={activeColSpan}
+                  className="py-12 text-center text-slate-500"
+                >
                   <div className="flex flex-col items-center justify-center gap-2 max-w-sm mx-auto">
                     <div className="size-12 bg-slate-100 rounded-none flex items-center justify-center text-slate-400 mb-1">
                       <TagIcon className="size-6" />
                     </div>
-                    <p className="text-sm font-semibold text-slate-800">No tags found</p>
+                    <p className="text-sm font-semibold text-slate-800">
+                      No tags found
+                    </p>
                     <p className="text-xs text-slate-500">
-                      No tags matched your current search or entity filters. You can create a new tag to organize your data.
+                      No tags matched your current search or entity filters. You
+                      can create a new tag to organize your data.
                     </p>
                     {onAddTag && (
                       <Button
@@ -250,16 +260,16 @@ export default function TagTable({
                       </td>
                     )}
 
-                    {/* Color Swatch & HEX */}
+                    {/* Color Box + Color Name (e.g. Red, Blue) */}
                     {columns.color && (
                       <td className="px-4 py-3 whitespace-nowrap">
                         <div className="inline-flex items-center gap-2">
                           <span
                             className="size-3.5 border border-black/10 rounded-none shrink-0"
-                            style={{ backgroundColor: hexColor }}
+                            style={{ backgroundColor: getColorCode(tag.color) }}
                           />
-                          <span className="font-mono text-xs text-slate-600 uppercase font-medium">
-                            {hexColor}
+                          <span className="text-xs text-slate-700 font-medium">
+                            {getColorName(tag.color)}
                           </span>
                         </div>
                       </td>
@@ -275,7 +285,9 @@ export default function TagTable({
                     {/* Description */}
                     {columns.description && (
                       <td className="px-4 py-3 text-slate-600 max-w-md truncate">
-                        {tag.description || <span className="text-slate-300 italic">—</span>}
+                        {tag.description || (
+                          <span className="text-slate-300 italic">—</span>
+                        )}
                       </td>
                     )}
 

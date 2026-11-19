@@ -2,6 +2,7 @@
 
 import { Tag } from "lucide-react";
 import { cn } from "@/lib/utils";
+import { getColorCode } from "@/lib/tags/api";
 
 interface TagBadgeProps {
   name: string;
@@ -29,7 +30,7 @@ export function hexToRgba(hex: string, alpha: number): string {
 }
 
 export default function TagBadge({ name, color, className, compact = false }: TagBadgeProps) {
-  const safeColor = color.startsWith("#") ? color : `#${color}`;
+  const safeColor = getColorCode(color);
   const backgroundColor = hexToRgba(safeColor, 0.12);
   const borderColor = hexToRgba(safeColor, 0.3);
 
