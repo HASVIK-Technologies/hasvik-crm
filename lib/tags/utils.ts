@@ -323,12 +323,12 @@ export interface TagColorDef {
 }
 
 export const TAG_COLORS: TagColorDef[] = [
-  { color: "Blue", code: "#0870C9" },   // Hasvik Brand Blue
-  { color: "Green", code: "#18A849" },  // Hasvik Brand Green
-  { color: "Red", code: "#EF4444" },    // Theme Red
-  { color: "Orange", code: "#FFA500" }, // Theme Orange
-  { color: "Violet", code: "#8B5CF6" }, // Theme Violet
-  { color: "Grey", code: "#64748B" },   // Hasvik Slate / Theme Grey
+  { color: "Blue", code: "#0870C9" },   
+  { color: "Green", code: "#18A849" },  
+  { color: "Red", code: "#EF4444" },    
+  { color: "Orange", code: "#FFA500" }, 
+  { color: "Violet", code: "#8B5CF6" }, 
+  { color: "Grey", code: "#64748B" },   
 ];
 
 export function getColorName(colorOrCode?: string): string {
@@ -336,19 +336,17 @@ export function getColorName(colorOrCode?: string): string {
   const clean = colorOrCode.trim();
   const lower = clean.toLowerCase();
 
-  // Support both "grey" and "gray"
+  
   if (lower === "gray" || lower === "grey") return "Grey";
 
-  // Match by direct name
+  
   const byName = TAG_COLORS.find((c) => c.color.toLowerCase() === lower);
   if (byName) return byName.color;
 
-  // Match by exact code
+  
   const hex = clean.startsWith("#") ? clean.toUpperCase() : `#${clean.toUpperCase()}`;
   const byCode = TAG_COLORS.find((c) => c.code.toUpperCase() === hex);
   if (byCode) return byCode.color;
-
-  // Extended mapping for all theme variants
   if (["#0870C9", "#0876D1", "#08A9E6", "#2563EB", "#0000FF", "#1D4ED8"].includes(hex)) return "Blue";
   if (["#18A849", "#20B83F", "#117A35", "#16A34A", "#22C55E", "#008000", "#63D329"].includes(hex)) return "Green";
   if (["#EF4444", "#DC2626", "#B91C1C", "#FF0000"].includes(hex)) return "Red";
