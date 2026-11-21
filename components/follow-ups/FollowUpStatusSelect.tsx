@@ -11,14 +11,38 @@ interface FollowUpStatusSelectProps {
   className?: string;
 }
 
+const DEFAULT_FOLLOW_UP_STATUSES: Record<string, string> = {
+  SCHEDULED: "Scheduled",
+  COMPLETED: "Completed",
+  CANCELLED: "Cancelled",
+  OVERDUE: "Overdue",
+};
+
 export default function FollowUpStatusSelect({ value = "", onChange, className }: FollowUpStatusSelectProps) {
   const { data: statuses = {} } = useFollowUpStatusesQuery();
+  const hasStatuses = Object.keys(statuses).length > 0;
+  const statusEntries = hasStatuses ? Object.entries(statuses) : Object.entries(DEFAULT_FOLLOW_UP_STATUSES);
+
   return (
     <Select value={value || "ALL"} onValueChange={(next) => onChange?.(next === "ALL" ? "" : next)}>
       <SelectTrigger className={`h-10 w-full bg-white text-xs font-medium ${className ?? ""}`}>
-        <div className="flex min-w-0 flex-1 items-center gap-2"><Activity className="size-3.5 shrink-0 text-[#64748b]" /><span className="truncate text-left">{value ? formatFollowUpStatus(statuses[value] ?? value) : "All Follow-up Statuses"}</span></div>
+        <div className="flex min-w-0 flex-1 items-center gap-2">
+          <Activity className="size-3.5 shrink-0 text-[#64748b]" />
+          <span className="truncate text-left">
+            {value ? formatFollowUpStatus(statuses[value] ?? value) : "All Follow-up Statuses"}
+          </span>
+        </div>
       </SelectTrigger>
-      <SelectContent className="bg-white"><SelectItem value="ALL" className="text-xs">All Follow-up Statuses</SelectItem>{Object.entries(statuses).map(([key, label]) => <SelectItem key={key} value={key} className="text-xs">{formatFollowUpStatus(label || key)}</SelectItem>)}</SelectContent>
+      <SelectContent className="bg-white">
+        <SelectItem value="ALL" className="text-xs">
+          All Follow-up Statuses
+        </SelectItem>
+        {statusEntries.map(([key, label]) => (
+          <SelectItem key={key} value={key} className="text-xs">
+            {formatFollowUpStatus(label || key)}
+          </SelectItem>
+        ))}
+      </SelectContent>
     </Select>
   );
 }

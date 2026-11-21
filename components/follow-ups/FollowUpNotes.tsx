@@ -56,7 +56,7 @@ function NoteEntry({ note }: { note: FollowUpNote }) {
   );
 }
 
-function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: string; readOnly?: boolean }) {
+function FollowUpNotesPanel({ followUpId, readOnly = false, businessContext }: { followUpId: string; readOnly?: boolean; businessContext?: { businessId: string; scheduledAt: string; status: string } }) {
   const [page, setPage] = useState(1);
   const [content, setContent] = useState("");
   const notesQuery = useFollowUpNotesQuery(followUpId, page);
@@ -77,6 +77,7 @@ function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: stri
       await createMutation.mutateAsync({
         followUpId,
         content: trimmedContent,
+        businessContext,
       });
       setContent("");
       setPage(1);
@@ -214,8 +215,8 @@ function FollowUpNotesPanel({ followUpId, readOnly = false }: { followUpId: stri
   );
 }
 
-export function FollowUpNotes({ followUpId, readOnly = false }: { followUpId: string; readOnly?: boolean }) {
-  return <FollowUpNotesPanel followUpId={followUpId} readOnly={readOnly} />;
+export function FollowUpNotes({ followUpId, readOnly = false, businessContext }: { followUpId: string; readOnly?: boolean; businessContext?: { businessId: string; scheduledAt: string; status: string } }) {
+  return <FollowUpNotesPanel followUpId={followUpId} readOnly={readOnly} businessContext={businessContext} />;
 }
 
 export function FollowUpNotesDialog({

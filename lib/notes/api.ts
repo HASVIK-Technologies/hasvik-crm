@@ -1,8 +1,73 @@
 import { apiClient } from "@/lib/api/api-client";
 import { assertFollowUpWritable } from "@/lib/follow-ups/api";
-import type { FollowUpNote, FollowUpNotesPage } from "@/types/follow-up";
+import type { BusinessFollowUpNote, BusinessFollowUpNotesPage, FollowUpNote, FollowUpNotesPage } from "@/types/follow-up";
 
 const NOTES_PAGE_SIZE = 10;
+
+function findNoteRows(value: unknown, depth = 0): unknown[] | undefined {
+  if (Array.isArray(value)) return value;
+  if (!isRecord(value) || depth > 5) return undefined;
+  for (const key of ["notes", "items", "results", "data"]) {
+    const result = findNoteRows(value[key], depth + 1);
+    if (result) return result;
+  }
+  return undefined;
+}
+
+export async function getBusinessFollowUpNotes(
+  businessId: string,
+  page = 1,
+  limit = NOTES_PAGE_SIZE,
+  signal?: AbortSignal,
+): Promise<BusinessFollowUpNotesPage> {
+  const response = await apiClient.get(`/notes/business/${encodeURIComponent(businessId)}/followups`, {
+    params: { page, limit, sortBy: "createdAt", sortOrder: "desc" },
+    signal,
+  });
+  const rows = findNoteRows(response.data);
+  if (!rows) throw new Error("The notes service returned an invalid business notes list.");
+
+  const items = rows.flatMap((value) => {
+    if (!isRecord(value)) return [];
+    const entityId = isRecord(value.entityId) ? value.entityId : undefined;
+    const entity = isRecord(value.entity) ? value.entity : undefined;
+    const createdBy = isRecord(value.createdBy) ? value.createdBy : undefined;
+    const id = String(value._id ?? value.id ?? value.noteId ?? "");
+    const followUpId = String(entity?._id ?? entity?.id ?? entityId?._id ?? entityId?.id ?? value.entityId ?? "");
+    const scheduledAt = String(entity?.scheduledAt ?? entityId?.scheduledAt ?? "");
+    const status = String(entity?.status ?? entityId?.status ?? "");
+    const content = value.content;
+    const createdAt = String(value.createdAt ?? value.created_at ?? "");
+    if (!id || !followUpId || typeof content !== "string") return [];
+    return [{
+      id,
+      businessId,
+      followUpId,
+      scheduledAt,
+      status,
+      content,
+      createdByName: String(createdBy?.fullName ?? createdBy?.name ?? createdBy?.email ?? "Unknown user"),
+      createdAt,
+    }];
+  }).sort((a, b) => (Date.parse(b.createdAt) || 0) - (Date.parse(a.createdAt) || 0));
+  const root = isRecord(response.data) ? response.data : undefined;
+  const payload = isRecord(root?.data) ? root.data : undefined;
+  const metadata = isRecord(root?.meta) ? root.meta
+    : isRecord(payload?.meta) ? payload.meta
+      : isRecord(root?.pagination) ? root.pagination
+        : isRecord(payload?.pagination) ? payload.pagination
+          : undefined;
+  const total = findNumber([root, payload, metadata], ["total", "totalCount", "count"]) ?? items.length;
+  const totalPages = findNumber([root, payload, metadata], ["totalPages", "pages"]) ?? Math.ceil(total / limit);
+
+  return {
+    items,
+    page: findNumber([root, payload, metadata], ["page", "currentPage"]) ?? page,
+    limit: findNumber([root, payload, metadata], ["limit", "pageSize"]) ?? limit,
+    total,
+    totalPages: totalPages > 0 ? totalPages : undefined,
+  };
+}
 
 function isRecord(value: unknown): value is Record<string, unknown> {
   return Boolean(value && typeof value === "object" && !Array.isArray(value));
@@ -177,4 +242,28 @@ export async function createFollowUpNote(
     payload = wrapped;
   }
   return parseNote(payload);
+}
+
+export async function updateFollowUpNote(
+  noteId: string,
+  content: string,
+): Promise<FollowUpNote> {
+  let response;
+  try {
+    response = await apiClient.patch(`/notes/${noteId}`, { content });
+  } catch {
+    response = await apiClient.put(`/notes/${noteId}`, { content });
+  }
+
+  let payload: unknown = response.data;
+  for (let depth = 0; depth < 4 && isRecord(payload); depth += 1) {
+    const wrapped = payload.note ?? payload.data;
+    if (wrapped === undefined) break;
+    payload = wrapped;
+  }
+  return parseNote(payload);
+}
+
+export async function deleteFollowUpNote(noteId: string): Promise<void> {
+  await apiClient.delete(`/notes/${noteId}`);
 }

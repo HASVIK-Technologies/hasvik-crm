@@ -180,6 +180,7 @@ function isBusinessFormValues(value: unknown): value is BusinessFormValues {
 
   return (
     stringFields.every((field) => typeof values[field] === "string") &&
+    (values.tagIds === undefined || (Array.isArray(values.tagIds) && values.tagIds.every((id) => typeof id === "string"))) &&
     (values.categoryName === undefined ||
       typeof values.categoryName === "string") &&
     (values.assignToName === undefined ||
@@ -265,6 +266,8 @@ function hasBusinessFormChanged(
     followUpAssignTo: formValues.followUpAssignTo,
     followUpAssignToName: formValues.followUpAssignToName ?? "",
     nextFollowupDate: formValues.nextFollowupDate,
+    reminder: formValues.reminder,
+    tagIds: [...(formValues.tagIds ?? [])].sort(),
   });
 
   return (
@@ -481,6 +484,7 @@ export default function BusinessForm({
         }
 
         const loadedValues: BusinessFormValues = {
+          tagIds: Array.isArray(data.tags) ? data.tags.map((tag) => String((tag as Record<string, unknown>)._id ?? (tag as Record<string, unknown>).id ?? "")).filter(Boolean) : [],
           businessName: data.name || "",
           category: categoryId || "",
           categoryName: categoryObj?.name || "",
@@ -776,6 +780,7 @@ export default function BusinessForm({
         .filter((w) => w.value.trim())
         .map((w, idx) => ({ number: w.value.trim(), isPrimary: idx === 0 })),
     };
+    payload.tagIds = values.tagIds ?? [];
 
     if (values.category) {
       payload.category = values.category;

@@ -15,15 +15,15 @@ import {
   Settings2,
   UserRound,
   UserRoundCog,
+  MessageSquareText,
 } from "lucide-react";
-import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import OutlinedButton from "@/components/common/OutlinedButton";
 import PlainButton from "@/components/common/PlainButton";
 import PrimaryButton from "@/components/common/PrimaryButton";
 import RecordLink from "@/components/common/RecordLink";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { ActivityStateText } from "@/components/common/ActivityStateText";
-import { PhoneActionMenu } from "@/components/common/ContactActionMenu";
+import { PhoneActionMenu, WhatsAppActionMenu } from "@/components/common/ContactActionMenu";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import {
   Table,
@@ -56,24 +56,22 @@ import {
 import { cn } from "@/lib/utils";
 import { BusinessItem } from "@/types/business";
 import { useUpdateBusinessStatus } from "@/hooks/use-businesses";
-import { getLeadStatusLabel } from "@/lib/business/form-options";
-import { getWhatsAppNumbers, formatWhatsAppUrl } from "@/lib/business/mappers";
+import { getLeadStatusLabel, STATUS_OPTIONS } from "@/lib/business/form-options";
 import { ChangeBusinessStatusModal } from "./ChangeBusinessStatusModal";
 import { useBusinessHighlight } from "@/hooks/use-business-highlight";
 import AssignBusinessDialog from "./AssignBusinessDialog";
+import BusinessConversationHistoryDrawer from "@/components/business-details/BusinessConversationHistoryDrawer";
 import {
   useBusinessListStore,
   type BusinessTableColumn,
 } from "@/store/business-list-store";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 
 const TABLE_COLUMN_OPTIONS: Array<{ value: BusinessTableColumn; label: string }> = [
-  { value: "category", label: "Category" },
   { value: "city", label: "City" },
   { value: "responsible", label: "Responsible person" },
   { value: "leadStatus", label: "Lead status" },
   { value: "activity", label: "Activity status" },
-  { value: "lastFollowUp", label: "Last follow-up" },
-  { value: "nextFollowUp", label: "Next follow-up" },
 ];
 
 function formatDisplayString(val: unknown, fallback: string = "-"): string {
@@ -89,99 +87,15 @@ function formatDisplayString(val: unknown, fallback: string = "-"): string {
   return String(val);
 }
 
-function RowWhatsAppButton({
-  item,
-  size = "md",
-  onAction,
-}: {
-  item: BusinessItem;
-  size?: "sm" | "md";
-  onAction?: () => void;
-}) {
-  const whatsappNumbers = getWhatsAppNumbers(item);
-  const buttonSizeClass = size === "sm" ? "size-7" : "size-8.5";
-  const iconSizeClass = size === "sm" ? "size-4" : "size-4.5";
-
-  if (whatsappNumbers.length === 0) {
-    return (
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <button
-            type="button"
-            disabled
-            onClick={(e) => e.stopPropagation()}
-            aria-label={`No WhatsApp or phone numbers for ${item.name}`}
-            className={cn(
-              "flex items-center justify-center border border-transparent text-slate-400 opacity-40 cursor-not-allowed",
-              buttonSizeClass,
-            )}
-          >
-            <WhatsAppIcon className={iconSizeClass} />
-          </button>
-        </TooltipTrigger>
-        <TooltipContent>No numbers available</TooltipContent>
-      </Tooltip>
-    );
-  }
-
-  return (
-    <DropdownMenu>
-      <Tooltip>
-        <TooltipTrigger asChild>
-          <DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-            <button
-              type="button"
-              aria-label={`WhatsApp numbers for ${item.name}`}
-              className={cn(
-                "flex items-center justify-center border border-transparent text-emerald-700 transition-colors hover:bg-emerald-50 hover:text-emerald-800 focus:outline-none focus-visible:border-brand-blue focus-visible:ring-2 focus-visible:ring-brand-blue/20",
-                buttonSizeClass,
-              )}
-            >
-              <WhatsAppIcon className={iconSizeClass} />
-            </button>
-          </DropdownMenuTrigger>
-        </TooltipTrigger>
-        <TooltipContent>WhatsApp {item.name}</TooltipContent>
-      </Tooltip>
-      <DropdownMenuContent
-        align="end"
-        className="w-64 max-w-[calc(100vw-2rem)] rounded-xl border border-[#e4ecf2] bg-white p-1.5 shadow-lg"
-        onClick={(e) => e.stopPropagation()}
-      >
-        <div className="px-2.5 py-1.5 text-[11px] font-semibold text-[#64748b]">
-          WhatsApp / Phone Numbers
-        </div>
-        <div className="flex flex-col gap-0.5">
-          {whatsappNumbers.map((entry, idx) => (
-            <DropdownMenuItem
-              key={`${entry.number}-${idx}`}
-              asChild
-              className="cursor-pointer rounded-lg p-0"
-            >
-              <a
-                href={formatWhatsAppUrl(entry.number)}
-                target="_blank"
-                rel="noopener noreferrer"
-                onClick={(e) => e.stopPropagation()}
-                onPointerDown={onAction}
-                className="flex w-full items-center justify-between gap-2.5 rounded-lg px-2.5 py-2 text-xs transition-colors hover:bg-[#f8fafc]"
-              >
-                <div className="flex items-center gap-2 min-w-0">
-                  <WhatsAppIcon className="size-3.5 shrink-0 text-brand-green-strong" />
-                  <span className="font-semibold text-[#0f172a] truncate">
-                    {entry.number}
-                  </span>
-                </div>
-                <span className="shrink-0 rounded bg-[#f1f5f9] px-1.5 py-0.5 text-[10px] font-medium text-[#64748b]">
-                  {entry.label}
-                </span>
-              </a>
-            </DropdownMenuItem>
-          ))}
-        </div>
-      </DropdownMenuContent>
-    </DropdownMenu>
+export function formatLeadStatusWithStatusOptions(status?: string | null): string {
+  if (!status || status === "-") return "-";
+  const trimmed = status.trim();
+  const upper = trimmed.toUpperCase();
+  const option = STATUS_OPTIONS.find(
+    (opt) => opt.value.toUpperCase() === upper || opt.label.toUpperCase() === upper,
   );
+  if (option) return option.label;
+  return getLeadStatusLabel(status);
 }
 
 interface BusinessTableProps {
@@ -214,12 +128,15 @@ export default function BusinessTable({
   const router = useRouter();
   const [statusModalBusiness, setStatusModalBusiness] = useState<BusinessItem | null>(null);
   const [assignmentBusiness, setAssignmentBusiness] = useState<BusinessItem | null>(null);
+  const [conversationBusiness, setConversationBusiness] = useState<BusinessItem | null>(null);
   const updateStatusMutation = useUpdateBusinessStatus();
   const { highlightBusiness, isBusinessHighlighted } = useBusinessHighlight();
   const visibleTableColumns = useBusinessListStore((state) => state.visibleTableColumns);
   const toggleTableColumn = useBusinessListStore((state) => state.toggleTableColumn);
   const columnVisible = (column: BusinessTableColumn) => visibleTableColumns.includes(column);
-  const visibleColumnCount = visibleTableColumns.length + 2;
+  const visibleColumnCount = visibleTableColumns.filter((column) =>
+    ["city", "responsible", "leadStatus", "activity"].includes(column),
+  ).length + 3;
   const rowPadding = "py-4.5";
 
   const isLatest = sortOrder === "-createdAt" || sortOrder === "Latest First";
@@ -379,7 +296,7 @@ export default function BusinessTable({
                   onClick={(event) =>
                     handleRowClick(event, item.id, item.status === "Active")
                   }
-                  className={`flex items-start justify-between gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 md:gap-4 md:p-4 ${
+                   className={`relative grid grid-cols-1 gap-3 border bg-white p-3 shadow-[0_2px_8px_rgba(20,40,60,0.02)] transition-all duration-500 md:p-4 lg:grid-cols-[minmax(0,1fr)_auto] lg:items-center lg:gap-x-6 lg:gap-y-2 ${
                     isBusinessHighlighted(item.id)
                       ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20"
                       : "border-[#eaf0f6]"
@@ -390,7 +307,7 @@ export default function BusinessTable({
                   }`}
                 >
                   {/* Left Side: Avatar + Business Info */}
-                  <div className="flex items-start gap-3 min-w-0">
+                  <div className="flex min-w-0 items-start gap-3 lg:col-start-1 lg:row-start-1">
                     <Avatar
                       className="hidden size-11 shrink-0 rounded-full bg-primary/10 text-sm font-bold text-primary sm:flex"
                     >
@@ -398,49 +315,45 @@ export default function BusinessTable({
                         {item.initials}
                       </AvatarFallback>
                     </Avatar>
-                    <div className="min-w-0">
+                    <div className="min-w-0 pr-20 sm:pr-24 lg:pr-0">
                       <h3 className="max-w-48 truncate text-sm font-bold text-slate-900 sm:max-w-64 sm:text-base" title={item.name}>
                         {item.name}
                       </h3>
                       <p className="mt-0.5 text-xs text-[#64748b]">
                         {formatDisplayString(item.category, "Uncategorized")} • {formatDisplayString(item.city, "-")}
                       </p>
-                      <div className="mt-1 flex items-center gap-1.5 text-xs text-[#64748b]">
-                        <span>Lead status:</span>
-                        {getLeadStatusLabel(item.leadStatus) !== "-" ? (
-                          <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-[10px]" />
-                        ) : (
-                          <span className="text-[#94a3b8]">-</span>
-                        )}
+                      <div className="mt-1 md:hidden">
+                        <ActivityStateText active={item.status === "Active"} />
                       </div>
-                      <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
-                      <p className="mt-1 flex min-w-0 items-center gap-1.5 text-xs text-slate-500">
-                        <UserRound className="size-3.5 shrink-0" />
-                        <span className="truncate">{item.assignedToName || "Not assigned"}</span>
-                      </p>
                     </div>
                   </div>
 
                   {/* Right Side: Status Badge, Follow-up, Actions */}
-                  <div className="flex flex-col items-end justify-between self-stretch shrink-0 gap-2.5">
-                    {/* Status Badge */}
-                    <div>
-                      <ActivityStateText active={item.status === "Active"} />
-                    </div>
-
-                    {/* Follow-up text */}
-                    <div className="text-[11px] font-medium text-[#64748b]">
-                      {item.nextFollowUpType !== "none" ? (
-                        item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-slate-600">{item.nextFollowUp}</span>
-                      ) : <span>-</span>}
+                  <div className="order-3 flex w-full items-center justify-between gap-3 lg:contents">
+                    {/* Lead Status */}
+                    <div className="absolute right-3 top-3 lg:static lg:col-start-2 lg:row-start-1 lg:justify-self-end">
+                      <div className="md:hidden">
+                        {formatLeadStatusWithStatusOptions(item.leadStatus) !== "-" ? (
+                          <StatusBadge status={item.leadStatus || formatLeadStatusWithStatusOptions(item.leadStatus)} label={formatLeadStatusWithStatusOptions(item.leadStatus)} className="max-w-44 rounded-md px-2.5 py-0.5 text-[10px]" />
+                        ) : (
+                          <span className="text-[#94a3b8]">-</span>
+                        )}
+                      </div>
+                      <div className="hidden md:block">
+                        <ActivityStateText active={item.status === "Active"} />
+                      </div>
                     </div>
 
                     {/* Action Icons (Phone + WhatsApp + More) */}
-                    <div className="flex items-center gap-2" onClick={(e) => e.stopPropagation()}>
+                    <p className="min-w-0 flex items-center gap-1.5 text-xs text-slate-500">
+                      <UserRound className="size-3.5 shrink-0" />
+                      <span className="truncate">{item.assignedToName || "Not assigned"}</span>
+                    </p>
+                    <div className="flex shrink-0 items-center gap-2 lg:col-start-2 lg:row-start-2 lg:justify-self-end" onClick={(e) => e.stopPropagation()}>
                       {item.status === "Active" && <>
                       <PhoneActionMenu numbers={item.phoneNumbers} fallback={item.phone} className="size-7" onAction={() => highlightBusiness(item.id)} />
 
-                      <RowWhatsAppButton item={item} size="sm" onAction={() => highlightBusiness(item.id)} />
+                      <WhatsAppActionMenu numbers={item.whatsappNumbers} fallback={item.alternatePhone || item.phone} className="size-7" onAction={() => highlightBusiness(item.id)} />
                       </>}
 
                       <DropdownMenu>
@@ -460,6 +373,7 @@ export default function BusinessTable({
                           <TooltipContent>More actions</TooltipContent>
                         </Tooltip>
                         <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenuItem onSelect={() => setConversationBusiness(item)} className="cursor-pointer gap-2 text-xs"><MessageSquareText className="size-3.5" /><span>Conversation history</span></DropdownMenuItem>
                           {item.status === "Active" && (
                             <>
                               <DropdownMenuItem
@@ -509,6 +423,10 @@ export default function BusinessTable({
                       </DropdownMenu>
                     </div>
                   </div>
+                  <div className="order-2 flex w-full items-center justify-start gap-3 lg:col-start-1 lg:row-start-2" onClick={(event) => event.stopPropagation()}>
+                    <span className="text-[11px] font-medium text-slate-500">Tags</span>
+                    <TagAssignmentPicker entity="BUSINESS" entityId={String(item.id)} tags={item.tags} variant="business-card-summary" />
+                  </div>
                 </div>
               ))}
             </div>
@@ -520,14 +438,12 @@ export default function BusinessTable({
           <Table className="w-full min-w-max text-left">
             <TableHeader className="text-[13px] font-semibold">
               <TableRow className="border-b border-[#f1f5f9] hover:bg-transparent">
-                <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Business Name</TableHead>
-                {columnVisible("category") && <TableHead className="px-4 py-4 font-semibold">Category</TableHead>}
+                <TableHead className="min-w-60 py-4 pl-6 pr-4 font-semibold">Business</TableHead>
+                {columnVisible("leadStatus") && <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>}
                 {columnVisible("city") && <TableHead className="px-4 py-4 font-semibold">City</TableHead>}
                 {columnVisible("responsible") && <TableHead className="min-w-44 px-4 py-4 font-semibold">Responsible Person</TableHead>}
-                {columnVisible("leadStatus") && <TableHead className="px-4 py-4 font-semibold">Lead Status</TableHead>}
+                <TableHead className="min-w-40 px-4 py-4 font-semibold">Tags</TableHead>
                 {columnVisible("activity") && <TableHead className="px-4 py-4 font-semibold">Status</TableHead>}
-                {columnVisible("lastFollowUp") && <TableHead className="px-4 py-4 font-semibold">Last Follow-up</TableHead>}
-                {columnVisible("nextFollowUp") && <TableHead className="px-4 py-4 font-semibold">Next Follow-up</TableHead>}
                 <TableHead className="sticky right-0 z-10 min-w-32 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">Actions</TableHead>
               </TableRow>
             </TableHeader>
@@ -545,8 +461,8 @@ export default function BusinessTable({
                         </div>
                       </div>
                     </TableCell>
-                    {columnVisible("category") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                    {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
+                      <div className="h-6 w-16 rounded-full bg-[#f1f5f9] animate-pulse" />
                     </TableCell>}
                     {columnVisible("city") && <TableCell className={cn("px-4", rowPadding)}>
                       <div className="h-3.5 w-20 rounded bg-[#f1f5f9] animate-pulse" />
@@ -554,17 +470,11 @@ export default function BusinessTable({
                     {columnVisible("responsible") && <TableCell className={cn("px-4", rowPadding)}>
                       <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
                     </TableCell>}
-                    {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-6 w-16 rounded-full bg-[#f1f5f9] animate-pulse" />
-                    </TableCell>}
+                    <TableCell className={cn("px-4", rowPadding)}>
+                      <div className="h-7 w-24 rounded bg-[#f1f5f9] animate-pulse" />
+                    </TableCell>
                     {columnVisible("activity") && <TableCell className={cn("px-4", rowPadding)}>
                       <div className="h-3.5 w-24 rounded bg-[#f1f5f9] animate-pulse" />
-                    </TableCell>}
-                    {columnVisible("lastFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-28 rounded bg-[#f1f5f9] animate-pulse" />
-                    </TableCell>}
-                    {columnVisible("nextFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
-                      <div className="h-3.5 w-20 rounded bg-[#f1f5f9] animate-pulse" />
                     </TableCell>}
                     <TableCell className={cn("sticky right-0 z-10 bg-white pl-4 pr-6 text-right", rowPadding)}>
                       <div className="flex justify-end gap-2 animate-pulse">
@@ -615,7 +525,7 @@ export default function BusinessTable({
                         : ""
                     }`}
                   >
-                    {/* Business Name + Avatar + Phone */}
+                    {/* Business name and category */}
                     <TableCell className={cn("pl-6 pr-4", rowPadding)}>
                       <div className="flex items-center gap-3.5">
                         <Avatar
@@ -627,14 +537,18 @@ export default function BusinessTable({
                         </Avatar>
                         <div className="min-w-0 max-w-44">
                           <p className="truncate text-sm font-bold text-slate-900" title={item.name}>{item.name}</p>
-                          <p className="mt-0.5 text-xs text-[#64748b]">{item.phone}</p>
+                          <p className="mt-0.5 truncate text-xs text-[#64748b]">{formatDisplayString(item.category, "Uncategorized")}</p>
                         </div>
                       </div>
                     </TableCell>
 
-                    {/* Category */}
-                    {columnVisible("category") && <TableCell className={cn("px-4 text-sm", rowPadding)}>
-                      {formatDisplayString(item.category, "Uncategorized")}
+                    {/* Lead Status */}
+                    {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
+                      {formatLeadStatusWithStatusOptions(item.leadStatus) !== "-" ? (
+                        <StatusBadge status={item.leadStatus || formatLeadStatusWithStatusOptions(item.leadStatus)} label={formatLeadStatusWithStatusOptions(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={formatLeadStatusWithStatusOptions(item.leadStatus)} />
+                      ) : (
+                        <span className="text-[#94a3b8]">-</span>
+                      )}
                     </TableCell>}
 
                     {/* City */}
@@ -650,36 +564,14 @@ export default function BusinessTable({
                         </span>
                       </div>
                     </TableCell>}
-
-                    {/* Lead Status */}
-                    {columnVisible("leadStatus") && <TableCell className={cn("px-4", rowPadding)}>
-                      {getLeadStatusLabel(item.leadStatus) !== "-" ? (
-                        <StatusBadge status={item.leadStatus || getLeadStatusLabel(item.leadStatus)} label={getLeadStatusLabel(item.leadStatus)} className="max-w-48 rounded-md px-2.5 py-0.5 text-[10px]" title={getLeadStatusLabel(item.leadStatus)} />
-                      ) : (
-                        <span className="text-[#94a3b8]">-</span>
-                      )}
-                    </TableCell>}
+                    <TableCell className={cn("px-4", rowPadding)}><TagAssignmentPicker entity="BUSINESS" entityId={String(item.id)} tags={item.tags} variant="business-card-summary" /></TableCell>
 
                     {/* Status */}
                     {columnVisible("activity") && <TableCell className={cn("px-4", rowPadding)}><ActivityStateText active={item.status === "Active"} /></TableCell>}
 
-                    {/* Last Follow-up */}
-                    {columnVisible("lastFollowUp") && <TableCell className={cn("px-4 text-sm", rowPadding)}>
-                      {item.status === "Active" && item.lastFollowUpId ? <RecordLink href={`/follow-ups/${item.lastFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.lastFollowUp}</RecordLink> : item.lastFollowUp}
-                    </TableCell>}
-
-                    {/* Next Follow-up */}
-                    {columnVisible("nextFollowUp") && <TableCell className={cn("px-4", rowPadding)}>
-                      {item.nextFollowUpType !== "none" ? (
-                        item.status === "Active" && item.nextFollowUpId ? <RecordLink href={`/follow-ups/${item.nextFollowUpId}`} onClick={(event) => event.stopPropagation()}>{item.nextFollowUp}</RecordLink> : <span className="font-medium text-slate-700">{item.nextFollowUp}</span>
-                      ) : (
-                        <span className="text-[#94a3b8]">-</span>
-                      )}
-                    </TableCell>}
-
                     {/* Actions (Call, WhatsApp, 3 dots) */}
                     <TableCell
-                      className={cn("sticky right-0 z-10 pl-4 pr-6 text-right shadow-[-1px_0_0_#f1f5f9] group-hover:bg-slate-50", rowPadding, isBusinessHighlighted(item.id) ? "bg-blue-50" : "bg-white")}
+                      className={cn("sticky right-0 z-10 pl-4 pr-6 text-right shadow-[-1px_0_0_#f1f5f9] group-hover:bg-[#f8fafc]/80", rowPadding, isBusinessHighlighted(item.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white")}
                       onClick={(e) => e.stopPropagation()}
                     >
                       <div className="flex items-center justify-end gap-2.5">
@@ -688,7 +580,7 @@ export default function BusinessTable({
                         <PhoneActionMenu numbers={item.phoneNumbers} fallback={item.phone} onAction={() => highlightBusiness(item.id)} />
 
                         {/* WhatsApp / Message */}
-                        <RowWhatsAppButton item={item} size="md" onAction={() => highlightBusiness(item.id)} />
+                        <WhatsAppActionMenu numbers={item.whatsappNumbers} fallback={item.alternatePhone || item.phone} onAction={() => highlightBusiness(item.id)} />
                         </>}
 
                         {/* 3 Dots Menu */}
@@ -708,6 +600,7 @@ export default function BusinessTable({
                             <TooltipContent>More actions</TooltipContent>
                           </Tooltip>
                           <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
+                            <DropdownMenuItem onSelect={() => setConversationBusiness(item)} className="cursor-pointer gap-2 text-xs"><MessageSquareText className="size-3.5" /><span>Conversation history</span></DropdownMenuItem>
                             {item.status === "Active" && (
                               <>
                                 <DropdownMenuItem
@@ -866,6 +759,12 @@ export default function BusinessTable({
         onOpenChange={(open) => {
           if (!open) setAssignmentBusiness(null);
         }}
+      />
+      <BusinessConversationHistoryDrawer
+        businessId={String(conversationBusiness?.id ?? "")}
+        businessName={conversationBusiness?.name ?? "Business"}
+        open={conversationBusiness !== null}
+        onOpenChange={(open) => { if (!open) setConversationBusiness(null); }}
       />
     </TooltipProvider>
   );

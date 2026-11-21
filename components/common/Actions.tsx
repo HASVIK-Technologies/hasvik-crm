@@ -71,13 +71,21 @@ function ActionButton({ action }: { action: ActionItem }) {
   const content = (
     <>
       {action.icon}
-      {action.label}
+      <span className={action.icon ? "hidden sm:inline" : undefined}>
+        {action.label}
+      </span>
     </>
   );
+  const compactClassName = action.icon ? "size-10 px-0 sm:h-10 sm:w-auto sm:px-4" : undefined;
 
   if (action.disabled) {
     return (
-      <PrimaryButton disabled className="opacity-50 pointer-events-none">
+      <PrimaryButton
+        aria-label={action.label}
+        title={action.label}
+        disabled
+        className={cn(compactClassName, "opacity-50 pointer-events-none")}
+      >
         {content}
       </PrimaryButton>
     );
@@ -85,13 +93,13 @@ function ActionButton({ action }: { action: ActionItem }) {
 
   if (action.href) {
     return (
-      <PrimaryButton asChild>
-        <Link href={action.href}>{content}</Link>
+      <PrimaryButton asChild className={compactClassName}>
+        <Link href={action.href} aria-label={action.label} title={action.label}>{content}</Link>
       </PrimaryButton>
     );
   }
 
-  return <PrimaryButton onClick={action.onSelect}>{content}</PrimaryButton>;
+  return <PrimaryButton aria-label={action.label} title={action.label} onClick={action.onSelect} className={compactClassName}>{content}</PrimaryButton>;
 }
 
 export default function Actions({

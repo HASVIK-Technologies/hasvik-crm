@@ -13,6 +13,7 @@ import type {
   UpdateFollowUpStatusPayload,
 } from "@/types/follow-up";
 import { formatFollowUpStatus } from "@/lib/follow-ups/status";
+import { normalizeAssignedTags } from "@/types/tag";
 
 export type FollowUpStatusOption = Record<string, string>;
 
@@ -247,6 +248,8 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
 
   return {
     id: String(value._id ?? value.id ?? ""),
+    tags: normalizeAssignedTags(value.tags),
+    tagIds: Array.isArray(value.tags) ? value.tags.map((tag) => typeof tag === "string" ? tag : tag && typeof tag === "object" ? String((tag as Record<string, unknown>)._id ?? (tag as Record<string, unknown>).id ?? "") : "").filter(Boolean) : [],
     isActive: typeof value.isActive === "boolean" ? value.isActive : undefined,
     businessIsActive: typeof business.isActive === "boolean" ? business.isActive : typeof value.businessIsActive === "boolean" ? value.businessIsActive : undefined,
     tenantIsActive: typeof value.tenantIsActive === "boolean" ? value.tenantIsActive : undefined,
@@ -357,6 +360,7 @@ export async function createFollowUp(payload: CreateFollowUpPayload) {
     type: payload.type,
     scheduledAt: payload.scheduledAt,
   };
+  if (payload.tagIds?.length) body.tagIds = payload.tagIds;
 
   if (reminderMinutes !== undefined) {
     body.reminderInMinutes = reminderMinutes;
@@ -391,6 +395,7 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
       : parseReminderToMinutes(payload.reminder);
 
   const body: Record<string, unknown> = {};
+  if (payload.tagIds !== undefined) body.tagIds = payload.tagIds;
   if (payload.businessId) body.businessId = payload.businessId;
   if (payload.assignedTo) body.assignedTo = payload.assignedTo;
   if (payload.type) body.type = payload.type;

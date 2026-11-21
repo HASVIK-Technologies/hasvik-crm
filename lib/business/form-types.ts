@@ -33,6 +33,7 @@ export type BusinessFormValues = {
   followUpAssignToName?: string;
   nextFollowupDate: string;
   reminder: string;
+  tagIds: string[];
 };
 
 export const defaultBusinessFormValues: BusinessFormValues = {
@@ -58,6 +59,7 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   followUpAssignToName: "",
   nextFollowupDate: "",
   reminder: "",
+  tagIds: [],
   addAnother: false,
 };
 

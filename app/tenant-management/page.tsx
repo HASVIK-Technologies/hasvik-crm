@@ -340,7 +340,8 @@ export default function TenantManagementPage() {
   return (
     <>
       <ListPageLayout
-        breadcrumb={<Breadcrumb items={[{ label: "Tenant management" }]} />}
+        compactHeader
+        breadcrumb={<Breadcrumb truncate items={[{ label: "Tenant management" }]} />}
         searchValue={search}
         onSearchChange={(value) => {
           setSearch(value);
@@ -535,7 +536,7 @@ export default function TenantManagementPage() {
                             />
                           </TableCell>
                           <TableCell className="px-4 py-4"><StatusBadge active={tenant.isActive} /></TableCell>
-                          <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
+                          <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${isItemHighlighted(tenant.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white group-hover:bg-[#f8fafc]/80"}`}>
                             <TenantActions
                               tenant={tenant}
                               canManageTenants={hasvikAdmin || tenantAdmin}

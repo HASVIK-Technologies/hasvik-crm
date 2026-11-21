@@ -7,7 +7,19 @@ export interface ColumnPoint {
   key: string;
   label: string;
   value: number;
+  tone?: "brand" | "green" | "amber" | "red" | "orange" | "cyan" | "violet" | "slate";
 }
+
+const TONE_FILL = {
+  brand: "bg-brand-strong group-hover:bg-brand",
+  green: "bg-emerald-500 group-hover:bg-emerald-600",
+  amber: "bg-amber-500 group-hover:bg-amber-600",
+  red: "bg-red-500 group-hover:bg-red-600",
+  orange: "bg-orange-500 group-hover:bg-orange-600",
+  cyan: "bg-cyan-500 group-hover:bg-cyan-600",
+  violet: "bg-violet-500 group-hover:bg-violet-600",
+  slate: "bg-slate-500 group-hover:bg-slate-600",
+} as const;
 
 /**
  * Vertical columns for a time series. Each column is a button: tapping (or focusing) shows its exact value in the
@@ -43,7 +55,7 @@ export default function ColumnChart({ points, ariaLabel, unit = "", className, o
               className="group relative flex h-full min-w-0 flex-1 items-end px-px outline-none focus-visible:ring-2 focus-visible:ring-(--ring)"
             >
               <span
-                className={cn("block w-full transition-colors duration-200", point.value ? "bg-brand-strong group-hover:bg-brand" : "bg-line", active === point.key && "bg-brand")}
+                className={cn("block w-full transition-colors duration-200", point.value ? TONE_FILL[point.tone ?? "brand"] : "bg-line", active === point.key && "brightness-110")}
                 style={{ height: `${height}%` }}
               />
             </button>

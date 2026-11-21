@@ -2,7 +2,6 @@
 
 import type { ReactNode } from "react";
 import { Bell, CalendarClock, FileText, UserRound } from "lucide-react";
-import { Avatar, AvatarFallback } from "@/components/ui/avatar";
 import { PhoneActionMenu, WhatsAppActionMenu, EmailAction, MeetingJoinAction } from "@/components/common/ContactActionMenu";
 import BusinessDetailsMap from "@/components/business-details/BusinessDetailsMap";
 import { getLocationData } from "@/lib/business/location";
@@ -11,10 +10,14 @@ import EntityActivity from "@/components/common/EntityActivity";
 import { isFollowUpReadOnly } from "@/lib/follow-ups/actions";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import BusinessDetailsContacts from "@/components/business-details/BusinessDetailsContacts";
-import { FollowUpNotes } from "@/components/follow-ups/FollowUpNotes";
+import BusinessFollowUpNotesTimeline from "@/components/business-details/BusinessFollowUpNotesTimeline";
 import { useBusinessQuery } from "@/hooks/use-businesses";
 import { formatFollowUpType } from "@/lib/business/form-options";
 import type { FollowUpItem } from "@/types/follow-up";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
+import { Tag } from "lucide-react";
+import { FollowUpNotes } from "@/components/follow-ups/FollowUpNotes";
+import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
 
 function dateTime(value: string) {
   const date = new Date(value);
@@ -38,7 +41,6 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
   };
   const city = businessData?.city || followUp.businessCity;
   const businessName = businessData?.name || followUp.businessName || "Business";
-  const initials = businessName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   const isInactive = businessData?.isActive === false || businessData?.status === "Inactive";
   const locationAvailable = getLocationData(businessData ?? {}).isAvailable;
   const reminder = followUp.reminder || (followUp.reminderInMinutes != null
@@ -50,13 +52,15 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
       <section aria-labelledby="follow-up-heading" className="overflow-hidden border border-[#e4ecf2] bg-white shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
         <div className="flex flex-col justify-between gap-4 border-b border-[#e8eef4] p-4 sm:flex-row sm:items-center sm:p-6 sm:px-7">
           <div className="flex min-w-0 items-start gap-3 sm:gap-4">
-            <Avatar aria-hidden="true" className="size-13 shrink-0 rounded-xl sm:size-16 sm:rounded-2xl"><AvatarFallback className="bg-primary/10 text-base font-semibold text-primary sm:text-xl">{initials}</AvatarFallback></Avatar>
+            <span className="flex size-13 shrink-0 items-center justify-center rounded-xl border border-emerald-200 bg-emerald-50 text-emerald-700 sm:size-16 sm:rounded-2xl">
+              <CalendarClock className="size-7 sm:size-8" />
+            </span>
             <div className="min-w-0">
               <div className="flex flex-wrap items-center gap-2 sm:gap-3">
                 <h1 id="follow-up-heading" className="break-words text-lg font-bold tracking-tight text-slate-900 sm:text-2xl [overflow-wrap:anywhere]">{businessName}</h1>
                 <StatusBadge status={followUp.status} />
               </div>
-              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 sm:text-sm"><CalendarClock className="size-4 shrink-0 text-slate-400" /><span>{formatFollowUpType(followUp.type)} follow-up</span>{city && <><span aria-hidden="true">?</span><span>{city}</span></>}</p>
+              <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 sm:text-sm"><span>{formatFollowUpType(followUp.type)}</span>{city && <><span aria-hidden="true">·</span><span>{city}</span></>}</p>
               {followUp.businessId && <RecordLink href={`/businesses/${followUp.businessId}`} className="mt-2 inline-block text-xs font-semibold">View business details</RecordLink>}
             </div>
           </div>
@@ -74,12 +78,34 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
           <SummaryItem icon={<UserRound className="size-4" />} label="Assigned to">{followUp.assignedToName || "Unassigned"}</SummaryItem>
           <SummaryItem icon={<Bell className="size-4" />} label="Reminder">{reminder}</SummaryItem>
           <SummaryItem icon={<FileText className="size-4" />} label="Follow-up type">{formatFollowUpType(followUp.type)}</SummaryItem>
+          <div className="min-w-0 rounded-xl bg-slate-50/80 p-3.5 sm:col-span-2 lg:col-span-4">
+            <dt className="flex items-center gap-2 text-xs text-slate-500"><span aria-hidden="true" className="text-slate-400"><Tag className="size-4" /></span>Tags</dt>
+            <dd className="mt-3"><TagAssignmentPicker entity="FOLLOW_UP" entityId={followUp.id} tags={followUp.tags ?? []} tagIds={followUp.tagIds} variant="details" /></dd>
+          </div>
         </dl>
       </section>
 
       <section aria-label="Follow-up workspace" className="grid grid-cols-1 items-start gap-6 xl:grid-cols-[minmax(0,1fr)_22rem]">
         <div className="min-w-0 space-y-6">
-          <div className="[&>section]:rounded-none [&>section]:border-[#e4ecf2] [&>section]:shadow-[0_4px_20px_rgba(20,40,60,0.03)]"><FollowUpNotes key={followUp.id} followUpId={followUp.id} readOnly={!businessData || isInactive || isFollowUpReadOnly(followUp)} /></div>
+          <Tabs defaultValue="notes" className="min-w-0">
+            <TabsList aria-label="Follow-up notes views" className="w-full justify-start">
+              <TabsTrigger value="notes">Notes</TabsTrigger>
+              <TabsTrigger value="history">Conversation History</TabsTrigger>
+            </TabsList>
+            <TabsContent value="notes" className="mt-0">
+              <FollowUpNotes
+                followUpId={followUp.id}
+                readOnly={isInactive || isFollowUpReadOnly(followUp)}
+                businessContext={{ businessId: followUp.businessId, scheduledAt: followUp.scheduledAt, status: followUp.status }}
+              />
+            </TabsContent>
+            <TabsContent value="history" className="mt-0">
+              {followUp.businessId && <BusinessFollowUpNotesTimeline
+                businessId={followUp.businessId}
+                activeFollowUp={{ id: followUp.id, scheduledAt: followUp.scheduledAt, status: followUp.status, readOnly: true }}
+              />}
+            </TabsContent>
+          </Tabs>
           <EntityActivity entityType="FOLLOWUP" entityId={followUp.id} />
         </div>
         <aside aria-label="Follow-up reference information" className="min-w-0 space-y-6">

@@ -4,6 +4,7 @@ import { Controller, useFormContext, useWatch } from "react-hook-form";
 import AssigneeAutocomplete from "@/components/common/AssigneeAutocomplete";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import type { BusinessFormValues } from "@/lib/business/form-types";
+import TagSelectionField from "@/components/tags/TagSelectionField";
 
 export default function BusinessOwnershipSection() {
   const { control, setValue } = useFormContext<BusinessFormValues>();
@@ -14,7 +15,8 @@ export default function BusinessOwnershipSection() {
       control={control}
       name="assignTo"
       render={({ field, fieldState }) => (
-        <div className="max-w-xl">
+        <div className="max-w-xl space-y-6">
+          <Controller control={control} name="tagIds" render={({ field: tagField }) => <div><FieldLabel optional>Tags</FieldLabel><TagSelectionField entity="BUSINESS" value={tagField.value ?? []} onChange={(value) => tagField.onChange(value)} /><p className="mt-1.5 text-xs text-slate-500">Add tags to organize this business independently of its lead status.</p></div>} />
           <FieldLabel optional invalid={Boolean(fieldState.error)}>
             Responsible person
           </FieldLabel>

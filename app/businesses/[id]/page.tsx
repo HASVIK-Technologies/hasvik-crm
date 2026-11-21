@@ -390,7 +390,11 @@ export default function BusinessDetails() {
                     <div className="mt-1 flex flex-wrap items-center gap-2">
                       {nextFollowUp && !isInactive ? (
                         <RecordLink href={`/follow-ups/${nextFollowUp.id}`} className="text-sm">
-                          {dateFmt.format(new Date(nextFollowUp.scheduledAt))}
+                          {(() => {
+                            const raw = nextFollowUp.scheduledAt || (nextFollowUp as any).followUpDate || (nextFollowUp as any).date;
+                            const d = raw ? new Date(String(raw).replace(/\s+at\s+/i, " ")) : null;
+                            return d && !Number.isNaN(d.getTime()) ? dateFmt.format(d) : raw || "-";
+                          })()}
                         </RecordLink>
                       ) : business?.nextFollowUp && business.nextFollowUp !== "-" ? (
                         business.nextFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="text-sm">{business.nextFollowUp}</RecordLink> : <p className="text-sm font-semibold text-slate-800">{business.nextFollowUp}</p>
@@ -407,7 +411,18 @@ export default function BusinessDetails() {
                   <div className="min-w-0">
                     <p className="text-xs font-medium text-slate-500">Last follow-up</p>
                     <div className="mt-1 truncate text-sm font-semibold text-slate-800">
-                      {lastFollowUpItem ? (!isInactive ? <RecordLink href={`/follow-ups/${lastFollowUpItem.id}`}>{dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))}</RecordLink> : dateFmt.format(new Date((lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt))) : business?.lastFollowUp && business.lastFollowUp !== "-" ? (business.lastFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`}>{business.lastFollowUp}</RecordLink> : business.lastFollowUp) : "-"}
+                      {lastFollowUpItem ? (
+                        (() => {
+                          const raw = (lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt ?? (lastFollowUpItem as any).date ?? (lastFollowUpItem as any).followUpDate;
+                          const d = raw ? new Date(String(raw).replace(/\s+at\s+/i, " ")) : null;
+                          const formatted = d && !Number.isNaN(d.getTime()) ? dateFmt.format(d) : raw || "-";
+                          return !isInactive ? <RecordLink href={`/follow-ups/${lastFollowUpItem.id}`}>{formatted}</RecordLink> : formatted;
+                        })()
+                      ) : business?.lastFollowUp && business.lastFollowUp !== "-" ? (
+                        business.lastFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`}>{business.lastFollowUp}</RecordLink> : business.lastFollowUp
+                      ) : (
+                        "-"
+                      )}
                     </div>
                   </div>
                 </div>
@@ -430,6 +445,7 @@ export default function BusinessDetails() {
             <div className="min-w-0 space-y-6">
               <BusinessDetailsFollowups
                 businessId={String(business.id)}
+                business={business}
                 readOnly={isInactive}
               />
               <BusinessDetailsActivity businessId={String(business.id)} />

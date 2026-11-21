@@ -17,6 +17,7 @@ import {
   PanelLeftOpen,
   ShieldCheck,
   Settings2,
+  Tag,
   UserRound,
   X,
   Users,
@@ -47,6 +48,7 @@ const navigation = [
   { label: "Businesses", href: "/businesses", icon: Building2 },
   { label: "Follow-ups", href: "/follow-ups", icon: CalendarCheck2 },
   { label: "User management", href: "/users", icon: Users },
+  { label: "Tags", href: "/tags", icon: Tag },
   { label: "Business categories", href: "/business-categories", icon: FolderKanban },
   { label: "Tenant management", href: "/tenant-management", icon: Landmark },
   { label: "Subscriptions", href: "/subscriptions", icon: CreditCard },
@@ -64,7 +66,11 @@ function isNavigationItemVisible(
   if (hasvikAdmin) return true;
   if (item.href === "/subscriptions") return tenantAdmin;
   if (item.href === "/tenant-management") return tenantAdmin;
-  if (item.href === "/users" || item.href === "/business-categories") {
+  if (
+    item.href === "/users" ||
+    item.href === "/tags" ||
+    item.href === "/business-categories"
+  ) {
     return tenantAdmin;
   }
   return true;
@@ -77,6 +83,9 @@ const pageDetails: Record<string, { title: string }> = {
   "/businesses": {
     title: "All Businesses",
   },
+  "/tags": {
+    title: "Tags",
+  },
 };
 
 function isActivePath(pathname: string, href: string) {
@@ -85,6 +94,7 @@ function isActivePath(pathname: string, href: string) {
     basePath === "/businesses" ||
     basePath === "/follow-ups" ||
     basePath === "/users" ||
+    basePath === "/tags" ||
     basePath === "/business-categories"
   ) {
     return pathname === basePath || pathname.startsWith(`${basePath}/`);
@@ -95,6 +105,10 @@ function isActivePath(pathname: string, href: string) {
 function getPageDetails(pathname: string) {
   if (pathname === "/follow-ups") {
     return { title: "Follow-ups" };
+  }
+
+  if (pathname === "/tags") {
+    return { title: "Tags" };
   }
 
   if (pathname === "/subscriptions") {

@@ -9,6 +9,8 @@ export const businessQueryKeys = {
   detail: (id?: string) => [...businessQueryKeys.all, "detail", id] as const,
   activities: () => [...businessQueryKeys.all, "activity"] as const,
   activity: (id: string) => [...businessQueryKeys.activities(), id] as const,
+  followUpNotes: () => [...businessQueryKeys.all, "follow-up-notes"] as const,
+  followUpNotesForBusiness: (id: string, page = 1) => [...businessQueryKeys.followUpNotes(), id, page] as const,
   kpis: (params: BusinessKpiParams) =>
     [...businessQueryKeys.all, "kpis", params] as const,
   statuses: () => [...businessQueryKeys.all, "statuses"] as const,

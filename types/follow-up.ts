@@ -18,6 +18,8 @@ export interface FollowUpOption {
 }
 
 export interface FollowUpItem {
+  tags?: import("@/types/tag").AssignedTag[];
+  tagIds?: string[];
   isActive?: boolean;
   businessIsActive?: boolean;
   tenantIsActive?: boolean;
@@ -51,6 +53,25 @@ export interface FollowUpNote {
   createdByName?: string;
   createdAt: string;
   updatedAt: string;
+}
+
+export interface BusinessFollowUpNote {
+  id: string;
+  businessId: string;
+  followUpId: string;
+  scheduledAt: string;
+  status: string;
+  content: string;
+  createdByName: string;
+  createdAt: string;
+}
+
+export interface BusinessFollowUpNotesPage {
+  items: BusinessFollowUpNote[];
+  page: number;
+  limit: number;
+  total: number;
+  totalPages?: number;
 }
 
 export interface FollowUpNotesPage {
@@ -96,6 +117,7 @@ export interface CreateFollowUpPayload {
   notes?: string;
   reminder?: string;
   reminderInMinutes?: number;
+  tagIds?: string[];
 }
 
 export interface UpdateFollowUpPayload {
@@ -111,6 +133,7 @@ export interface UpdateFollowUpPayload {
   notes?: string;
   reminder?: string;
   reminderInMinutes?: number;
+  tagIds?: string[];
 }
 
 export interface UpdateFollowUpStatusPayload {

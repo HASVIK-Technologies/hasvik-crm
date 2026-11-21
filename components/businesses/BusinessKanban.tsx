@@ -3,7 +3,7 @@
 import { useCallback, useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import RecordLink from "@/components/common/RecordLink";
-import { ArrowDownUp, CalendarClock, ChevronDown, ChevronLeft, ChevronRight, Eye, MoreVertical, Power, Pencil, UserRound, UserRoundCog } from "lucide-react";
+import { ArrowDownUp, ChevronDown, ChevronLeft, ChevronRight, Eye, MessageSquareText, MoreVertical, Power, Pencil, UserRound, UserRoundCog } from "lucide-react";
 import ManagementConfirmDialog from "@/components/common/ManagementConfirmDialog";
 import ListPagination from "@/components/common/ListPagination";
 import PlainButton from "@/components/common/PlainButton";
@@ -18,13 +18,15 @@ import {
   DropdownMenuTrigger,
 } from "@/components/ui/dropdown-menu";
 import { Tooltip, TooltipContent, TooltipTrigger } from "@/components/ui/tooltip";
-import { getLeadStatusVisual, STATUS_OPTIONS } from "@/lib/business/form-options";
+import { getLeadStatusLabel, getLeadStatusVisual, STATUS_OPTIONS } from "@/lib/business/form-options";
 import { cn } from "@/lib/utils";
 import type { BusinessItem } from "@/types/business";
 import { useUpdateBusinessLeadStatus, useUpdateBusinessStatus } from "@/hooks/use-businesses";
 import { useBusinessHighlight } from "@/hooks/use-business-highlight";
 import { useBusinessListStore } from "@/store/business-list-store";
 import AssignBusinessDialog from "./AssignBusinessDialog";
+import BusinessConversationHistoryDrawer from "@/components/business-details/BusinessConversationHistoryDrawer";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 
 export default function BusinessKanban({
   businesses,
@@ -53,6 +55,7 @@ export default function BusinessKanban({
   const mutation = useUpdateBusinessLeadStatus();
   const activationMutation = useUpdateBusinessStatus();
   const [activatingBusiness, setActivatingBusiness] = useState<BusinessItem | null>(null);
+  const [conversationBusiness, setConversationBusiness] = useState<BusinessItem | null>(null);
   const { highlightBusiness, isBusinessHighlighted } = useBusinessHighlight();
   const setKanbanScrollLeft = useBusinessListStore(
     (state) => state.setKanbanScrollLeft,
@@ -286,7 +289,7 @@ export default function BusinessKanban({
                   router.push(`/businesses/${business.id}`);
                 }}
                 className={cn(
-                  "border bg-white p-4 shadow-[0_1px_3px_rgba(15,23,42,0.06)] transition-all duration-500",
+                  "border bg-white p-3 shadow-[0_1px_3px_rgba(15,23,42,0.06)] transition-all duration-500",
                   isBusinessHighlighted(business.id) ? "border-brand-blue bg-blue-50/80 ring-2 ring-brand-blue/20" : "border-slate-200",
                   business.status === "Active" ? "cursor-pointer" : "opacity-60",
                   mutation.isPending && String(mutation.variables?.id) === String(business.id) && "pointer-events-none opacity-70",
@@ -299,11 +302,13 @@ export default function BusinessKanban({
                   </Avatar>
                   <div className="min-w-0 flex-1">
                     <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-sm" title={business.name}>{business.name}</RecordLink>
-                    <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
+                    <p className="mt-0.5 truncate text-xs text-slate-500">{business.category || "Uncategorized"} · {business.city || "—"}</p>
+                    <span className={cn("mt-1 inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold", getLeadStatusVisual(business.leadStatus).badge)}>{getLeadStatusLabel(business.leadStatus)}</span>
                   </div>
                   <DropdownMenu>
                     <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(event) => event.stopPropagation()}><PlainButton size="icon-sm" aria-label={`More actions for ${business.name}`} className="size-8 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                     <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(event) => event.stopPropagation()}>
+                      <DropdownMenuItem onSelect={() => setConversationBusiness(business)} className="gap-2"><MessageSquareText className="size-4" />Conversation history</DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
                       {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
                       <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
@@ -311,14 +316,15 @@ export default function BusinessKanban({
                     </DropdownMenuContent>
                   </DropdownMenu>
                 </div>
-                <div className="mt-3 space-y-2 border-t border-slate-100 pt-3 text-xs text-slate-600">
+                <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-slate-600">
+                  <div onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} variant="business-card-summary" /></div>
                   {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
-                  <div className={cn("flex min-w-0 items-center gap-2", business.owner ? "" : "font-semibold text-amber-700")}><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
-                  {business.lastFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
-                  {business.nextFollowUp !== "-" && <div className="flex min-w-0 items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="truncate">{business.nextFollowUp}</RecordLink> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
                 </div>
-                <div className="mt-3 flex items-center justify-between gap-3" onClick={(event) => event.stopPropagation()}>
-                  {business.status === "Inactive" ? <ActivityStateText active={false} /> : <div className="flex items-center gap-1"><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
+                <div className="mt-2 flex flex-col gap-2" onClick={(event) => event.stopPropagation()}>
+                  <div className="flex min-w-0 items-center justify-between gap-3">
+                    <div className="flex min-w-0 items-center gap-1.5 text-xs text-slate-600"><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
+                    {business.status === "Inactive" ? <ActivityStateText active={false} /> : <div className="flex shrink-0 items-center gap-1"><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
+                  </div>
                   {business.status === "Active" && (
                     <select
                       value={business.leadStatus?.toUpperCase() || "NEW"}
@@ -330,7 +336,7 @@ export default function BusinessKanban({
                         mutation.mutate({ id: business.id, status });
                       }}
                       aria-label={`Move ${business.name} to stage`}
-                      className="h-9 min-w-0 flex-1 border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 outline-none focus:border-brand-blue"
+                      className="h-9 w-full border border-slate-300 bg-white px-2 text-xs font-semibold text-slate-700 outline-none focus:border-brand-blue"
                     >
                       {STATUS_OPTIONS.map((stage) => <option key={stage.value} value={stage.value}>{stage.label}</option>)}
                     </select>
@@ -417,7 +423,8 @@ export default function BusinessKanban({
                           </Avatar>
                           <div className="min-w-0 flex-1">
                             <RecordLink href={`/businesses/${business.id}`} onClick={(event) => { event.stopPropagation(); highlightBusiness(business.id, true); }} className="block truncate text-base text-slate-700 hover:text-brand-blue" title={business.name}>{business.name}</RecordLink>
-                            <p className="mt-0.5 truncate text-xs text-slate-500">{business.category}</p>
+                            <p className="mt-0.5 truncate text-xs text-slate-500">{business.category || "Uncategorized"} · {business.city || "—"}</p>
+                            <span className={cn("mt-1 inline-flex rounded-md border px-2 py-0.5 text-[10px] font-semibold", getLeadStatusVisual(business.leadStatus).badge)}>{getLeadStatusLabel(business.leadStatus)}</span>
                           </div>
                           <DropdownMenu>
                             <Tooltip>
@@ -429,6 +436,7 @@ export default function BusinessKanban({
                               <TooltipContent>More actions</TooltipContent>
                             </Tooltip>
                             <DropdownMenuContent align="end" className="w-40 bg-white" onClick={(event) => event.stopPropagation()}>
+                              <DropdownMenuItem onSelect={() => setConversationBusiness(business)} className="gap-2"><MessageSquareText className="size-4" />Conversation history</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/${business.id}`); }} className="gap-2"><Eye className="size-4" />View details</DropdownMenuItem>
                               {business.status === "Active" && <><DropdownMenuItem onSelect={() => { highlightBusiness(business.id, true); router.push(`/businesses/form/${business.id}`); }} className="gap-2"><Pencil className="size-4" />Edit business</DropdownMenuItem>
                               <DropdownMenuItem onSelect={() => setAssignmentBusiness(business)} className="gap-2"><UserRoundCog className="size-4" />{business.assignedToId ? "Reassign owner" : "Assign owner"}</DropdownMenuItem></>}
@@ -437,13 +445,14 @@ export default function BusinessKanban({
                           </DropdownMenu>
                         </div>
 
-                        <div className="mt-3 space-y-2 border-t border-slate-100 pt-2.5 text-xs text-slate-600">
+                        <div className="mt-2 flex flex-wrap items-center justify-between gap-x-2 gap-y-1 text-xs text-slate-600">
+                          <div onClick={(event) => event.stopPropagation()} onMouseDown={(event) => event.stopPropagation()} onDragStart={(event) => { event.preventDefault(); event.stopPropagation(); }}><TagAssignmentPicker entity="BUSINESS" entityId={String(business.id)} tags={business.tags} variant="business-card-summary" /></div>
                           {mutation.isPending && String(mutation.variables?.id) === String(business.id) && <p className="font-semibold text-brand-blue">Updating lead stage...</p>}
-                          <div className={cn("flex items-center gap-2", business.owner ? "" : "text-slate-400")}><UserRound className="size-3.5 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
-                          {business.lastFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Last:</span>{business.lastFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`} className="truncate">{business.lastFollowUp}</RecordLink> : <span className="truncate">{business.lastFollowUp}</span>}</div>}
-                          {business.nextFollowUp !== "-" && <div className="flex items-center gap-2"><CalendarClock className="size-3.5 shrink-0 text-slate-400" /><span className="shrink-0 text-slate-500">Next:</span>{business.nextFollowUpId && business.status === "Active" ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="truncate">{business.nextFollowUp}</RecordLink> : <span className="truncate">{business.nextFollowUp}</span>}</div>}
                         </div>
-                        {business.status === "Inactive" ? <ActivityStateText active={false} className="mt-3" /> : <div className="mt-3 flex items-center gap-1 border-t border-slate-100 pt-2" onClick={(event) => event.stopPropagation()}><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
+                        <div className="mt-2 flex items-center justify-between gap-2" onClick={(event) => event.stopPropagation()}>
+                          <div className={cn("flex min-w-0 items-center gap-2 text-xs", business.owner ? "text-slate-600" : "text-slate-400")}><UserRound className="size-3.5 shrink-0 text-slate-400" /><span className="truncate">{business.owner || "Unassigned"}</span></div>
+                          {business.status === "Inactive" ? <ActivityStateText active={false} /> : <div className="flex shrink-0 items-center gap-1"><PhoneActionMenu numbers={business.phoneNumbers} fallback={business.phone} onAction={() => highlightBusiness(business.id)} /><WhatsAppActionMenu numbers={business.whatsappNumbers} fallback={business.alternatePhone} onAction={() => highlightBusiness(business.id)} /></div>}
+                        </div>
                       </article>
                     ))
                   )}
@@ -463,6 +472,12 @@ export default function BusinessKanban({
         onOpenChange={(open) => {
           if (!open) setAssignmentBusiness(null);
         }}
+      />
+      <BusinessConversationHistoryDrawer
+        businessId={String(conversationBusiness?.id ?? "")}
+        businessName={conversationBusiness?.name ?? "Business"}
+        open={conversationBusiness !== null}
+        onOpenChange={(open) => { if (!open) setConversationBusiness(null); }}
       />
     </div>
   );
