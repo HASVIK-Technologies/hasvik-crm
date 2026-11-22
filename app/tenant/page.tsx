@@ -5,6 +5,7 @@ import { Eye, EyeOff } from "lucide-react";
 import { useState, type FormEvent } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import MobileInput, { cleanDisplayDigits } from "@/components/common/MobileInput";
 import { useCreateTenant } from "@/hooks/use-tenants";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import BrandLogo from "@/components/auth/BrandLogo";
@@ -32,11 +33,13 @@ export default function TenantSignupPage() {
 
     const form = event.currentTarget;
     const formData = new FormData(form);
+    const rawContact = String(formData.get("contactNumber") ?? "").trim();
+    const contactPhone = cleanDisplayDigits(rawContact) || rawContact;
     try {
       await createTenantMutation.mutateAsync({
         name: String(formData.get("organizationName") ?? "").trim(),
         fullName: String(formData.get("fullName") ?? "").trim(),
-        contactPhone: String(formData.get("contactNumber") ?? "").trim(),
+        contactPhone,
         contactEmail: String(formData.get("email") ?? "").trim(),
         password,
       });
@@ -118,14 +121,12 @@ export default function TenantSignupPage() {
               >
                 Contact Number <span className="text-red-600">*</span>
               </label>
-              <Input
+              <MobileInput
                 id="contact-number"
                 name="contactNumber"
-                type="tel"
-                autoComplete="tel"
                 required
-                placeholder="+91 98765 43210"
-                className="h-10 rounded-none border-input bg-card text-base shadow-xs placeholder:text-muted-foreground hover:border-muted-foreground focus-visible:border-brand-blue focus-visible:ring-4 focus-visible:ring-brand-blue/25 sm:h-12"
+                placeholder="10-digit mobile number"
+                className="h-10 rounded-none border-input bg-card text-base shadow-xs hover:border-muted-foreground focus-within:border-brand-blue focus-within:ring-4 focus-within:ring-brand-blue/25 sm:h-12"
               />
             </div>
 

@@ -473,7 +473,7 @@ describe("Business Follow-up & Date Validation", () => {
   describe("toFollowUpPayload & Date-only Protection", () => {
     test("rejects date-only value (without time) and prevents 12:00 AM UTC", () => {
       const values = {
-        assignTo: "user-1",
+        followUpAssignTo: "user-1",
         followUpType: "Call",
         nextFollowupDate: "2026-10-25",
         reminder: "15",
@@ -491,7 +491,7 @@ describe("Business Follow-up & Date Validation", () => {
 
     test("accepts valid date and time string", () => {
       const values = {
-        assignTo: "user-1",
+        followUpAssignTo: "user-1",
         followUpType: "Call",
         nextFollowupDate: "2026-10-25T14:30",
         reminder: "15",

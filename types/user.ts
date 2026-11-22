@@ -27,6 +27,7 @@ export interface CreateUserPayload {
   fullName: string;
   password: string;
   role: UserRole;
+  phoneNumber?: string;
 }
 
 export interface UpdateUserPayload {
