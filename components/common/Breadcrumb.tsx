@@ -16,25 +16,43 @@ export default function Breadcrumb({
   if (!items || items.length === 0) return null;
 
   return (
-    <nav className={`flex min-w-0 items-center gap-1.5 text-base sm:text-base md:text-lg ${truncate ? "overflow-hidden whitespace-nowrap" : "flex-wrap"}`}>
+    <nav
+      aria-label="Breadcrumb"
+      className={`flex min-w-0 items-center gap-1.5 text-sm ${
+        truncate ? "overflow-hidden whitespace-nowrap" : "flex-wrap"
+      }`}
+    >
       {items.map((item, index) => {
         const isLast = index === items.length - 1;
         return (
-          <span key={index} className={`flex min-w-0 flex-1 items-center gap-1.5 ${truncate ? "overflow-hidden" : ""}`}>
-            {index > 0 && <ChevronRight className="size-4 sm:size-4.5 md:size-5 text-gray-300" />}
-            {item.href ? (
+          <span
+            key={index}
+            className={`inline-flex min-w-0 items-center gap-1.5 ${
+              truncate && isLast ? "overflow-hidden" : "shrink-0"
+            }`}
+          >
+            {/* Separator Chevron */}
+            {index > 0 && (
+              <ChevronRight className="size-4 shrink-0 text-slate-400" />
+            )}
+
+            {/* Link if not the last item and href is provided */}
+            {item.href && !isLast ? (
               <Link
                 href={item.href}
-                className={
-                  isLast
-                    ? "font-semibold text-secondary hover:underline"
-                    : "font-medium text-secondary hover:underline"
-                }
+                className="font-medium text-slate-500 transition-colors hover:text-slate-800 hover:underline"
               >
                 {item.label}
               </Link>
             ) : (
-              <span className={`font-semibold ${truncate && isLast ? "truncate" : ""}`}>{item.label}</span>
+              /* Current page (active item) */
+              <span
+                className={`font-semibold text-slate-900 ${
+                  truncate && isLast ? "truncate" : ""
+                }`}
+              >
+                {item.label}
+              </span>
             )}
           </span>
         );
