@@ -80,7 +80,8 @@ const FIELD_LABELS: Partial<Record<keyof BusinessFormValues, string>> = {
   website: "Website",
   locationUrl: "Location URL",
   followUpType: "Follow-up Type",
-  assignTo: "Assignee",
+  assignTo: "Responsible Person",
+  followUpAssignTo: "Follow-up Assignee",
   nextFollowupDate: "Follow-up Date & Time",
   phoneNumbers: "Phone Number",
   whatsappNumbers: "WhatsApp Number",
@@ -107,13 +108,13 @@ const isBusinessInfoComplete = (values: BusinessFormValues) =>
 const isContactInfoComplete = (values: BusinessFormValues) =>
   isNumberListComplete(values.phoneNumbers) &&
   values.whatsappNumbers.every(
-    (number) => !number.value.trim() || /^\d{10}$/.test(number.value.trim()),
+    (number) => !number.value.trim() || /^\d{10}$/.test(number.value.trim())
   );
 
 const isNumberListComplete = (numbers: BusinessFormValues["phoneNumbers"]) =>
   numbers.some((number) => /^\d{10}$/.test(number.value.trim())) &&
   numbers.every(
-    (number) => !number.value.trim() || /^\d{10}$/.test(number.value.trim()),
+    (number) => !number.value.trim() || /^\d{10}$/.test(number.value.trim())
   );
 
 function OptionalFollowUp({ idPrefix }: { idPrefix: string }) {
@@ -131,7 +132,11 @@ function OptionalFollowUp({ idPrefix }: { idPrefix: string }) {
           </label>
         )}
       />
-      {enabled && <div className="border-t border-slate-200 bg-white p-4"><FollowUpSection idPrefix={idPrefix} /></div>}
+      {enabled && (
+        <div className="border-t border-slate-200 bg-white p-4">
+          <FollowUpSection idPrefix={idPrefix} />
+        </div>
+      )}
     </div>
   );
 }
@@ -158,16 +163,20 @@ function isBusinessFormValues(value: unknown): value is BusinessFormValues {
     "description",
     "followUpType",
     "assignTo",
+    "followUpAssignTo",
     "nextFollowupDate",
     "reminder",
   ];
 
   return (
     stringFields.every((field) => typeof values[field] === "string") &&
+    (values.tagIds === undefined || (Array.isArray(values.tagIds) && values.tagIds.every((id) => typeof id === "string"))) &&
     (values.categoryName === undefined ||
       typeof values.categoryName === "string") &&
     (values.assignToName === undefined ||
       typeof values.assignToName === "string") &&
+    (values.followUpAssignToName === undefined ||
+      typeof values.followUpAssignToName === "string") &&
     typeof values.addAnother === "boolean" &&
     typeof values.scheduleFollowUp === "boolean" &&
     ["phoneNumbers", "whatsappNumbers"].every(
@@ -177,8 +186,8 @@ function isBusinessFormValues(value: unknown): value is BusinessFormValues {
           (entry) =>
             Boolean(entry) &&
             typeof entry === "object" &&
-            typeof (entry as Record<string, unknown>).value === "string",
-        ),
+            typeof (entry as Record<string, unknown>).value === "string"
+        )
     )
   );
 }
@@ -222,7 +231,7 @@ function clearBusinessFormDraft(key: string) {
 
 function hasBusinessFormChanged(
   values: BusinessFormValues,
-  baseline: BusinessFormValues,
+  baseline: BusinessFormValues
 ) {
   const normalize = (formValues: BusinessFormValues) => ({
     addAnother: formValues.addAnother,
@@ -244,11 +253,16 @@ function hasBusinessFormChanged(
     followUpType: formValues.followUpType,
     assignTo: formValues.assignTo,
     assignToName: formValues.assignToName ?? "",
+    followUpAssignTo: formValues.followUpAssignTo,
+    followUpAssignToName: formValues.followUpAssignToName ?? "",
     nextFollowupDate: formValues.nextFollowupDate,
     reminder: formValues.reminder,
+    tagIds: [...(formValues.tagIds ?? [])].sort(),
   });
 
-  return JSON.stringify(normalize(values)) !== JSON.stringify(normalize(baseline));
+  return (
+    JSON.stringify(normalize(values)) !== JSON.stringify(normalize(baseline))
+  );
 }
 
 export default function BusinessForm({
@@ -268,17 +282,21 @@ export default function BusinessForm({
   const targetId = businessId || searchParams.get("id") || undefined;
   const isEditMode = Boolean(targetId);
   const draftUserId = useAuthStore((state) => state.user?.userId);
-  const draftKey = `hasvik-crm:business-form:${draftUserId ?? "anonymous"}:${targetId ?? "new"}`;
+  const draftKey = `hasvik-crm:business-form:${draftUserId ?? "anonymous"}:${
+    targetId ?? "new"
+  }`;
 
   useEffect(() => {
-    if (targetId) useBusinessListStore.getState().highlightBusiness(targetId, true);
+    if (targetId)
+      useBusinessListStore.getState().highlightBusiness(targetId, true);
   }, [targetId]);
 
   // Captured once on mount - this is the snapshot Reset restores to,
   // independent of anything the person types afterward.
-  const [initialSnapshot] = useState<BusinessFormValues>(
-    () => ({ ...defaultBusinessFormValues, ...initialValues }),
-  );
+  const [initialSnapshot] = useState<BusinessFormValues>(() => ({
+    ...defaultBusinessFormValues,
+    ...initialValues,
+  }));
   const [draftBaseline, setDraftBaseline] =
     useState<BusinessFormValues>(initialSnapshot);
 
@@ -311,7 +329,8 @@ export default function BusinessForm({
   // In edit mode this holds the values loaded from the API, so "Reset"
   // can restore them instead of clearing the form.
   const savedValuesRef = useRef<BusinessFormValues | null>(null);
-  const [suppressDraftPersistence, setSuppressDraftPersistence] = useState(false);
+  const [suppressDraftPersistence, setSuppressDraftPersistence] =
+    useState(false);
   const historyGuardRef = useRef<{
     state: Record<string, unknown>;
     url: string;
@@ -323,8 +342,7 @@ export default function BusinessForm({
   >(null);
   const watchedValues = useWatch({ control }) as BusinessFormValues;
   const hasUnsavedChanges =
-    isDraftReady &&
-    hasBusinessFormChanged(watchedValues, draftBaseline);
+    isDraftReady && hasBusinessFormChanged(watchedValues, draftBaseline);
   const hasUnsavedChangesRef = useRef(hasUnsavedChanges);
   useEffect(() => {
     hasUnsavedChangesRef.current = hasUnsavedChanges;
@@ -342,7 +360,7 @@ export default function BusinessForm({
       // Hydrate the form from browser storage after the client mounts.
       // eslint-disable-next-line react-hooks/set-state-in-effect
       setCurrentStep(
-        Math.max(0, Math.min(draft.currentStep, MAX_FORM_STEP_INDEX)),
+        Math.max(0, Math.min(draft.currentStep, MAX_FORM_STEP_INDEX))
       );
     }
     setIsDraftReady(true);
@@ -395,7 +413,10 @@ export default function BusinessForm({
           return;
         }
 
-        if (data.isActive === false || data.status?.toUpperCase() === "INACTIVE") {
+        if (
+          data.isActive === false ||
+          data.status?.toUpperCase() === "INACTIVE"
+        ) {
           router.replace(`/businesses/${targetId}`);
           return;
         }
@@ -436,7 +457,7 @@ export default function BusinessForm({
                 .join(" ") ||
                 undefined) ??
               obj.name ??
-              "",
+              ""
           );
         } else if (typeof rawAssignedTo === "string") {
           assignedToId = rawAssignedTo;
@@ -453,6 +474,7 @@ export default function BusinessForm({
         }
 
         const loadedValues: BusinessFormValues = {
+          tagIds: Array.isArray(data.tags) ? data.tags.map((tag) => String((tag as Record<string, unknown>)._id ?? (tag as Record<string, unknown>).id ?? "")).filter(Boolean) : [],
           businessName: data.name || "",
           category: categoryId || "",
           categoryName: categoryObj?.name || "",
@@ -460,8 +482,7 @@ export default function BusinessForm({
           state: data.state || "",
           pincode: data.pincode || "",
           address: data.address || "",
-          status:
-            data.status || "Active",
+          status: data.status || "Active",
           locationUrl: data.location?.url || "",
           phoneNumbers,
           whatsappNumbers,
@@ -472,16 +493,14 @@ export default function BusinessForm({
           followUpType: (data.followUp?.type as FollowUpType) || "",
           assignTo: assignedToId || "",
           assignToName: assignedToName || "",
-          nextFollowupDate: toDateTimeLocalValue(
-            data.followUp?.scheduledAt || data.nextFollowupDate,
-          ),
+          followUpAssignTo: "",
+          followUpAssignToName: "",
+          nextFollowupDate: toDateTimeLocalValue(),
           reminder:
             data.followUp?.reminderInMinutes === undefined &&
             (data.reminder === undefined || data.reminder === null)
               ? ""
-              : String(
-                  data.followUp?.reminderInMinutes ?? data.reminder,
-                ),
+              : String(data.followUp?.reminderInMinutes ?? data.reminder),
           addAnother: false,
         };
 
@@ -494,7 +513,7 @@ export default function BusinessForm({
         }
         if (draft) {
           setCurrentStep(
-            Math.max(0, Math.min(draft.currentStep, MAX_FORM_STEP_INDEX)),
+            Math.max(0, Math.min(draft.currentStep, MAX_FORM_STEP_INDEX))
           );
         }
         setIsDraftReady(true);
@@ -506,7 +525,7 @@ export default function BusinessForm({
         setLoadError(
           `Unable to load lead details: ${
             err instanceof Error ? err.message : "Not found"
-          }`,
+          }`
         );
         setIsDraftReady(true);
         setIsLoadingBusiness(false);
@@ -535,8 +554,7 @@ export default function BusinessForm({
     if (!guard || guard.url !== window.location.href) {
       guard = {
         state: {
-          ...(window.history.state &&
-          typeof window.history.state === "object"
+          ...(window.history.state && typeof window.history.state === "object"
             ? window.history.state
             : {}),
           businessFormHistoryGuard: true,
@@ -672,8 +690,14 @@ export default function BusinessForm({
       title: "Contact & Details",
       render: (idPrefix: string) => (
         <div className="space-y-6">
-          <ContactInfoSection idPrefix={idPrefix} phoneArray={phoneArray} whatsappArray={whatsappArray} />
-          {SHOW_ADDITIONAL_INFORMATION && <AdditionalInfoSection idPrefix={idPrefix} />}
+          <ContactInfoSection
+            idPrefix={idPrefix}
+            phoneArray={phoneArray}
+            whatsappArray={whatsappArray}
+          />
+          {SHOW_ADDITIONAL_INFORMATION && (
+            <AdditionalInfoSection idPrefix={idPrefix} />
+          )}
         </div>
       ),
     },
@@ -713,8 +737,12 @@ export default function BusinessForm({
     setCurrentStep((step) => Math.max(step - 1, 0));
   };
 
-  const onValid = async (values: BusinessFormValues, event?: React.BaseSyntheticEvent) => {
-    const submitter = (event?.nativeEvent as SubmitEvent | undefined)?.submitter as HTMLButtonElement | null;
+  const onValid = async (
+    values: BusinessFormValues,
+    event?: React.BaseSyntheticEvent
+  ) => {
+    const submitter = (event?.nativeEvent as SubmitEvent | undefined)
+      ?.submitter as HTMLButtonElement | null;
     const shouldCloseAfterCreate = submitter?.value === "close";
     setSubmitError(null);
     setIsSubmitting(true);
@@ -746,6 +774,7 @@ export default function BusinessForm({
         .filter((w) => w.value.trim())
         .map((w, idx) => ({ number: w.value.trim(), isPrimary: idx === 0 })),
     };
+    payload.tagIds = values.tagIds ?? [];
 
     if (values.category) {
       payload.category = values.category;
@@ -767,7 +796,10 @@ export default function BusinessForm({
       if (isEditMode && targetId) {
         const updatedValues = toBusinessUpdatePayload(values, draftBaseline);
         if (Object.keys(updatedValues).length > 0) {
-          await updateMutation.mutateAsync({ id: targetId, payload: updatedValues });
+          await updateMutation.mutateAsync({
+            id: targetId,
+            payload: updatedValues,
+          });
         }
         setDraftBaseline(values);
         setSuppressDraftPersistence(true);
@@ -817,7 +849,7 @@ export default function BusinessForm({
     setSubmitError(
       missing.length > 0
         ? `Please fill in the required fields: ${missing.join(", ")}`
-        : "Please fix the highlighted fields before saving.",
+        : "Please fix the highlighted fields before saving."
     );
   };
 
@@ -899,7 +931,15 @@ export default function BusinessForm({
                 <BusinessOwnershipSection />
               </FormSection>
 
-              {!isEditMode && <FormSection icon={CalendarPlus} title="First Follow-up" optional><OptionalFollowUp idPrefix="desktop-" /></FormSection>}
+              {!isEditMode && (
+                <FormSection
+                  icon={CalendarPlus}
+                  title="First Follow-up"
+                  optional
+                >
+                  <OptionalFollowUp idPrefix="desktop-" />
+                </FormSection>
+              )}
 
               {!isEditMode && (
                 <div className="sticky bottom-0 z-20 -mx-4 mt-6 flex flex-col-reverse gap-3 border-t border-slate-200 bg-white/95 px-4 py-4 shadow-[0_-8px_24px_rgba(15,23,42,0.06)] backdrop-blur sm:-mx-7 sm:flex-row sm:items-center sm:justify-between sm:px-7 lg:-mx-8 lg:px-8">
@@ -927,7 +967,9 @@ export default function BusinessForm({
                       type="submit"
                       size="lg"
                       disabled={
-                        !isFormComplete || (isEditMode && !isDirty) || isSubmitting
+                        !isFormComplete ||
+                        (isEditMode && !isDirty) ||
+                        isSubmitting
                       }
                       className="w-full sm:w-auto"
                       value="stay"
@@ -935,7 +977,15 @@ export default function BusinessForm({
                       <Save className="size-4" />
                       {isSubmitting ? "Saving..." : "Save & add another"}
                     </SaveButton>
-                    <OutlinedButton type="submit" size="lg" value="close" disabled={!isFormComplete || isSubmitting} className="w-full sm:w-auto">Save & close</OutlinedButton>
+                    <OutlinedButton
+                      type="submit"
+                      size="lg"
+                      value="close"
+                      disabled={!isFormComplete || isSubmitting}
+                      className="w-full sm:w-auto"
+                    >
+                      Save & close
+                    </OutlinedButton>
                   </div>
                 </div>
               )}
@@ -964,10 +1014,11 @@ export default function BusinessForm({
                           "flex size-8 shrink-0 items-center justify-center rounded-full border-2 text-sm font-semibold transition-colors disabled:cursor-not-allowed",
                           isCompleted &&
                             "border-brand-green bg-brand-green text-secondary-foreground",
-                          isActive && "border-brand-green text-brand-green-strong",
+                          isActive &&
+                            "border-brand-green text-brand-green-strong",
                           !isActive &&
                             !isCompleted &&
-                            "border-[#dce8ee] text-[#8a9eaa] disabled:opacity-50",
+                            "border-[#dce8ee] text-[#8a9eaa] disabled:opacity-50"
                         )}
                       >
                         {isCompleted ? <Check className="size-4" /> : index + 1}
@@ -976,7 +1027,7 @@ export default function BusinessForm({
                         <div
                           className={cn(
                             "mx-2 h-0.5 flex-1 rounded-full transition-colors",
-                            isCompleted ? "bg-brand-green" : "bg-[#dce8ee]",
+                            isCompleted ? "bg-brand-green" : "bg-[#dce8ee]"
                           )}
                         />
                       )}
@@ -1026,9 +1077,22 @@ export default function BusinessForm({
                         value="stay"
                       >
                         <Save className="size-4" />
-                        {isSubmitting ? "Saving..." : isEditMode ? "Save changes" : "Save & add another"}
+                        {isSubmitting
+                          ? "Saving..."
+                          : isEditMode
+                          ? "Save changes"
+                          : "Save & add another"}
                       </SaveButton>
-                      {!isEditMode && <OutlinedButton type="submit" value="close" disabled={!isFormComplete || isSubmitting} className="w-full sm:w-auto">Save & close</OutlinedButton>}
+                      {!isEditMode && (
+                        <OutlinedButton
+                          type="submit"
+                          value="close"
+                          disabled={!isFormComplete || isSubmitting}
+                          className="w-full sm:w-auto"
+                        >
+                          Save & close
+                        </OutlinedButton>
+                      )}
                     </div>
                   ) : (
                     <div className="flex flex-col items-stretch gap-2 sm:items-end">

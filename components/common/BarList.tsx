@@ -1,10 +1,11 @@
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 
-export type BarTone = "brand-strong" | "brand" | "accent" | "growth" | "muted" | "warn" | "bad";
+export type BarTone = "brand-strong" | "brand" | "accent" | "growth" | "muted" | "warn" | "bad" | "blue" | "cyan" | "amber" | "violet" | "green" | "red" | "orange";
 
 const FILL: Record<BarTone, string> = {
   "brand-strong": "bg-brand-strong", brand: "bg-brand", accent: "bg-accent", growth: "bg-growth", muted: "bg-slate-400", warn: "bg-warn", bad: "bg-bad",
+  blue: "bg-blue-500", cyan: "bg-cyan-500", amber: "bg-amber-500", violet: "bg-violet-500", green: "bg-emerald-500", red: "bg-rose-500", orange: "bg-orange-500",
 };
 
 export interface BarRow {

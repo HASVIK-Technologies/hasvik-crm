@@ -50,7 +50,7 @@ import { cn } from "@/lib/utils";
 const STALE_DAYS = 14;
 const TYPE_ICON: Record<string, LucideIcon> = { CALL: Phone, MEETING: Video, EMAIL: Mail, WHATSAPP: MessageCircle };
 // Same colours as the pipeline board: one stage, one colour, everywhere.
-const STAGE_TONE = { NEW: "brand", CONTACTED: "brand-strong", INTERESTED: "warn", PROPOSAL_AND_NEGOTIATION: "muted", WON: "accent", LOST: "bad" } as const;
+const STAGE_TONE = { NEW: "blue", CONTACTED: "cyan", INTERESTED: "amber", PROPOSAL_AND_NEGOTIATION: "violet", WON: "green", LOST: "red" } as const;
 
 type Scope = "mine" | "team";
 
@@ -219,9 +219,14 @@ export default function WorkspaceDashboard({ user, viewSwitcher }: { user: AuthU
 
       <div className="grid items-start gap-4 lg:grid-cols-2 lg:gap-5">
         <div className="min-w-0 space-y-4 lg:space-y-5">
-          <DashboardSection title="Pipeline" description="Active leads by stage. Select a stage to explore." href={leadsHref({ isActive: true, ...owner })} loading={loading} error={failed} onRetry={retry}>
-            {data.leads.length ? <BarList ariaLabel="Active leads by stage" rows={stageRows} /> : <SectionEmpty title="No leads yet" hint="Add your first business and it will appear here, stage by stage." />}
-          </DashboardSection>
+          <ChartFrame
+            title="Pipeline"
+            description="Active leads by stage. Select a stage to explore."
+            action={<Link href={leadsHref({ isActive: true, ...owner })} className="inline-flex min-h-8 items-center gap-1 text-xs font-semibold text-brand-strong hover:underline">View leads <TrendingUp className="size-3.5" aria-hidden /></Link>}
+            table={{ columns: ["Stage", "Active leads"], rows: stageRows.map((row) => [row.label, row.value]) }}
+          >
+            {loading ? <div className="skeleton h-40" /> : data.leads.length ? <BarList ariaLabel="Active leads by stage" rows={stageRows} /> : <SectionEmpty title="No leads yet" hint="Add your first business and it will appear here, stage by stage." />}
+          </ChartFrame>
 
           <ChartFrame
             title="New leads over time"
@@ -261,11 +266,15 @@ export default function WorkspaceDashboard({ user, viewSwitcher }: { user: AuthU
             <AttentionList overdue={data.overdue} stale={data.stale} unassigned={mine ? [] : data.unassigned} now={now} />
           </DashboardSection>
 
-          {!personalOnly && <DashboardSection title="Top owners" description={`Leads won, ${range.label.toLowerCase()}.`} loading={loading} error={failed} onRetry={retry}>
-            {leaderboard.length ? (
-              <BarList ariaLabel="Leads won by owner" rows={leaderboard.map((row) => ({ key: row.ownerId, label: row.ownerName, value: row.won, tone: "accent", href: leadsHref({ status: "WON", updatedFrom: range.from, updatedTo: range.to, isActive: true, owner: row.ownerId }) }))} />
+          {!personalOnly && <ChartFrame
+            title="Top owners"
+            description={`Leads won, ${range.label.toLowerCase()}.`}
+            table={{ columns: ["Owner", "Won"], rows: leaderboard.map((row) => [row.ownerName, row.won]) }}
+          >
+            {loading ? <div className="skeleton h-40" /> : leaderboard.length ? (
+              <BarList ariaLabel="Leads won by owner" rows={leaderboard.map((row) => ({ key: row.ownerId, label: row.ownerName, value: row.won, tone: "growth", href: leadsHref({ status: "WON", updatedFrom: range.from, updatedTo: range.to, isActive: true, owner: row.ownerId }) }))} />
             ) : <SectionEmpty title="No wins in this period" hint="When leads are marked Won, the people who closed them are ranked here." />}
-          </DashboardSection>}
+          </ChartFrame>}
 
           <ForecastTile loading={loading} forecast={forecast} />
         </div>

@@ -8,7 +8,7 @@ import { DropdownMenu, DropdownMenuTrigger, DropdownMenuContent, DropdownMenuIte
 
 import { useListActionHighlight } from "@/hooks/use-list-action-highlight";
 
-import { useMemo, useState, type FormEvent } from "react";
+import { useEffect, useMemo, useRef, useState, type FormEvent } from "react";
 import { Dialog as DialogPrimitive } from "radix-ui";
 import {
   ArrowRight,
@@ -207,7 +207,7 @@ function PlanCard({
         {plan.limits && (
           <ul className="mb-5 space-y-2.5 rounded-xl border border-slate-100 p-3.5">
             <LimitLine icon={Users} label="Team members" value={plan.limits.maxUsers} />
-            <LimitLine icon={Building2} label="Businesses" value={plan.limits.maxBusinesses} />
+            <LimitLine icon={Building2} label="Leads / businesses" value={plan.limits.maxBusinesses} />
             <LimitLine icon={CalendarDays} label="Follow-ups" value={plan.limits.maxFollowUps} />
             <LimitLine icon={FileText} label="Notes" value={plan.limits.maxNotes} />
           </ul>
@@ -341,13 +341,13 @@ function SubscriptionRow({
 
   return <>
     {activity}
-    <TableRow className={`group ${highlighted ? "bg-blue-50/80 ring-2 ring-inset ring-brand-blue/20" : ""}`}>
+    <TableRow className={`group transition-colors hover:bg-[#f8fafc]/80 ${highlighted ? "bg-blue-50/80 ring-2 ring-inset ring-brand-blue/20" : ""}`}>
       <TableCell className="py-4 pl-6 pr-4">{planSummary}</TableCell>
       <TableCell className="max-w-56 px-4 py-4 text-xs font-medium text-slate-600"><p className="truncate" title={tenantName}>{tenantName}</p>{readOnlyMessage}</TableCell>
       <TableCell className="px-4 py-4"><StatusBadge status={status} /></TableCell>
       <TableCell className="px-4 py-4">{term}</TableCell>
       <TableCell className="px-4 py-4 text-xs text-slate-500">{subscription.autoRenew ? "On" : "Off"}</TableCell>
-      <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${highlighted ? "bg-blue-50" : "bg-white group-hover:bg-slate-50"}`}>{actions}</TableCell>
+      <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${highlighted ? "bg-blue-50/80 ring-2 ring-inset ring-brand-blue/20" : "bg-white group-hover:bg-[#f8fafc]/80"}`}>{actions}</TableCell>
     </TableRow>
   </>;
 }
@@ -408,6 +408,7 @@ export default function SubscriptionsPage() {
   } | null>(null);
   const [manualVerificationConfirmed, setManualVerificationConfirmed] =
     useState(false);
+  const freeActivationAttempted = useRef(false);
 
   const [page, setPage] = useState(1);
   const [limit, setLimit] = useState(10);
@@ -439,6 +440,46 @@ export default function SubscriptionsPage() {
     !eligibilityQuery.isPending &&
     !eligibilityQuery.isError &&
     !ownTenantQuery.isError;
+
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const cameFromFreeSignup = new URLSearchParams(window.location.search).get("welcome") === "free";
+    if (
+      !cameFromFreeSignup ||
+      !tenantAdmin ||
+      !createTenantId ||
+      !canChoosePlan ||
+      createMutation.isPending ||
+      freeActivationAttempted.current
+    ) return;
+
+    const freePlan = plans.find((plan) => plan.code.toUpperCase() === "FREE");
+    if (!freePlan || !getPlanId(freePlan)) return;
+
+    freeActivationAttempted.current = true;
+    void createMutation.mutateAsync({
+      tenantId: createTenantId,
+      planId: getPlanId(freePlan),
+      autoRenew: false,
+    }).then((subscription) => {
+      const status = subscription.status?.trim().toUpperCase();
+      setNotice(status === "PENDING"
+        ? "Your Free plan request was submitted and is awaiting HASVIK admin approval."
+        : "Your Free plan has been activated for this workspace.");
+      void eligibilityQuery.refetch();
+      void subscriptionsQuery.refetch();
+    }).catch((error: unknown) => {
+      setOperationError(getApiErrorMessage(error));
+    });
+  }, [
+    canChoosePlan,
+    createMutation,
+    createTenantId,
+    eligibilityQuery,
+    plans,
+    subscriptionsQuery,
+    tenantAdmin,
+  ]);
 
   const visiblePlans = plans;
 
@@ -623,7 +664,8 @@ export default function SubscriptionsPage() {
 
   return (
     <ListPageLayout
-      breadcrumb={<Breadcrumb items={[{ label: "Subscriptions" }]} />}
+      compactHeader
+      breadcrumb={<Breadcrumb truncate items={[{ label: "Subscriptions" }]} />}
       filters={tenantAdmin || hasvikAdmin ? <ResponsiveFilters onReset={() => { setStatusFilter("ALL"); setPage(1); }} fields={[{ key: "status", label: "Status", active: statusFilter !== "ALL", reset: () => { setStatusFilter("ALL"); setPage(1); }, control: <Select
               value={statusFilter}
               onValueChange={(value) => { setStatusFilter(value as SubscriptionFilter); setPage(1); }}

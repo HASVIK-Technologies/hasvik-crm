@@ -29,8 +29,11 @@ export type BusinessFormValues = {
   assignTo: string;
   /** Display name for the selected assignee; never sent to the API. */
   assignToName?: string;
+  followUpAssignTo: string;
+  followUpAssignToName?: string;
   nextFollowupDate: string;
   reminder: string;
+  tagIds: string[];
 };
 
 export const defaultBusinessFormValues: BusinessFormValues = {
@@ -52,8 +55,11 @@ export const defaultBusinessFormValues: BusinessFormValues = {
   followUpType: "",
   assignTo: "",
   assignToName: "",
+  followUpAssignTo: "",
+  followUpAssignToName: "",
   nextFollowupDate: "",
   reminder: "",
+  tagIds: [],
   addAnother: false,
 };
 
@@ -73,16 +79,18 @@ export const STEP_FIELD_NAMES = {
   additional: ["website", "description"] as const,
   followup: [
     "followUpType",
-    "assignTo",
+    "followUpAssignTo",
     "nextFollowupDate",
     "reminder",
   ] as const,
 };
 
-export function toFollowUpPayload(
-  values: BusinessFormValues,
-): FollowUpPayload {
-  if (!values.assignTo || !values.followUpType || !values.nextFollowupDate) {
+export function toFollowUpPayload(values: BusinessFormValues): FollowUpPayload {
+  if (
+    !values.followUpAssignTo ||
+    !values.followUpType ||
+    !values.nextFollowupDate
+  ) {
     throw new Error("Follow-up type, assignee, and date/time are required.");
   }
 
@@ -103,11 +111,9 @@ export function toFollowUpPayload(
   }
 
   return {
-    assignedTo: values.assignTo,
+    assignedTo: values.followUpAssignTo,
     type: values.followUpType,
     scheduledAt,
-    ...(values.reminder
-      ? { reminderInMinutes: Number(values.reminder) }
-      : {}),
+    ...(values.reminder ? { reminderInMinutes: Number(values.reminder) } : {}),
   };
 }

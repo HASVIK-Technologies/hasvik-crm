@@ -17,6 +17,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import MobileInput from "@/components/common/MobileInput";
 import { authQueryKeys } from "@/hooks/use-auth";
 import { getApiErrorMessage } from "@/lib/api/api-error";
 import { updateUser } from "@/lib/users/api";
@@ -141,10 +142,14 @@ export default function ProfilePage() {
 
             <div className="space-y-1.5">
               <label htmlFor="profile-phone" className="text-xs font-semibold text-slate-700">Contact number</label>
-              <div className="relative">
-                <Phone className="pointer-events-none absolute left-3 top-1/2 size-4 -translate-y-1/2 text-slate-400" />
-                <Input id="profile-phone" type="tel" value={phoneNumber} onChange={(event) => setPhoneNumber(event.target.value)} autoComplete="tel" placeholder="Add a contact number" className="h-11 rounded-xl pl-10" />
-              </div>
+              <MobileInput
+                id="profile-phone"
+                value={phoneNumber}
+                onChange={setPhoneNumber}
+                autoComplete="tel"
+                placeholder="Enter 10-digit mobile number"
+                className="h-11 rounded-xl"
+              />
             </div>
 
             <div className="border-t border-slate-100 pt-5">

@@ -24,6 +24,7 @@ import {
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import MobileInput, { cleanDisplayDigits } from "@/components/common/MobileInput";
 import Actions from "@/components/common/Actions";
 import KpiCards from "@/components/common/KpiCards";
 import Breadcrumb from "@/components/common/Breadcrumb";
@@ -155,6 +156,8 @@ export default function UsersPage() {
     const formData = new FormData(event.currentTarget);
     const fullName = String(formData.get("fullName") ?? "").trim();
     const email = String(formData.get("email") ?? "").trim();
+    const rawPhone = String(formData.get("phoneNumber") ?? "").trim();
+    const phoneNumber = cleanDisplayDigits(rawPhone);
     const role = String(formData.get("role") ?? "USER") as UserRole;
     const password = String(formData.get("password") ?? "");
 
@@ -165,13 +168,13 @@ export default function UsersPage() {
         if (isRecordInactive(latest) || getUserTenant(latest, tenants).isActive === false) throw new Error("Inactive records are read-only. Activate the user or tenant before editing.");
         const id = userId(editingUser);
         if (!id) throw new Error("This user record has no ID and cannot be updated.");
-        const payload = changedFields({ fullName, email, role, ...(password ? { password } : {}) }, {
-          fullName: editingUser.fullName.trim(), email: editingUser.email.trim(), role: editingUser.role,
+        const payload = changedFields({ fullName, email, role, phoneNumber, ...(password ? { password } : {}) }, {
+          fullName: editingUser.fullName.trim(), email: editingUser.email.trim(), role: editingUser.role, phoneNumber: (editingUser.phoneNumber ?? "").trim(),
         });
         if (Object.keys(payload).length) await updateMutation.mutateAsync({ id, payload });
         highlightItem(id);
       } else {
-        const payload: CreateUserPayload = { fullName, email, role, password };
+        const payload: CreateUserPayload = { fullName, email, role, password, ...(phoneNumber ? { phoneNumber } : {}) };
         await createMutation.mutateAsync(payload);
       }
       setDialogOpen(false);
@@ -198,7 +201,8 @@ export default function UsersPage() {
   return (
     <>
       <ListPageLayout
-        breadcrumb={<Breadcrumb items={[{ label: "User management" }]} />}
+        compactHeader
+        breadcrumb={<Breadcrumb truncate items={[{ label: "User management" }]} />}
         searchValue={search}
         onSearchChange={(value) => {
           setSearch(value);
@@ -361,7 +365,7 @@ export default function UsersPage() {
                             {superAdmin && <TableCell className="px-4 py-4">{getUserTenant(user, tenants).name}</TableCell>}
                             <TableCell className="px-4 py-4"><RoleBadge role={user.role} /></TableCell>
                             <TableCell className="px-4 py-4"><ActivityStateText active={!isRecordInactive(user)} />{getUserTenant(user, tenants).isActive === false && <p className="mt-1 text-[10px] text-slate-400">Tenant inactive. Activate the tenant first.</p>}</TableCell>
-                            <TableCell className="sticky right-0 bg-white py-4 pl-4 pr-6 group-hover:bg-slate-50">
+                            <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${isItemHighlighted(id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white group-hover:bg-[#f8fafc]/80"}`}>
                               <ManagementRowActions
                                 activity={{ entityType: "USER", entityId: userId(user), name: user.fullName }}
                                 editLabel={`Edit ${user.fullName}`}
@@ -407,14 +411,15 @@ export default function UsersPage() {
               <DialogPrimitive.Close aria-label="Close" className="rounded-lg p-2 text-slate-500 hover:bg-slate-100"><X className="size-4" /></DialogPrimitive.Close>
             </div>
             <form onSubmit={(event) => void submitUser(event)} className="space-y-4">
-              <div className="space-y-1.5"><label htmlFor="user-full-name" className="text-xs font-semibold text-slate-700">Full name</label><Input id="user-full-name" name="fullName" required defaultValue={editingUser?.fullName ?? ""} autoComplete="name" className="h-11 rounded-xl" /></div>
-              <div className="space-y-1.5"><label htmlFor="user-email" className="text-xs font-semibold text-slate-700">Email</label><Input id="user-email" name="email" type="email" required defaultValue={editingUser?.email ?? ""} autoComplete="email" className="h-11 rounded-xl" /></div>
-              <div className="space-y-1.5"><label htmlFor="user-role" className="text-xs font-semibold text-slate-700">Role</label><select id="user-role" name="role" defaultValue={editingUser?.role ?? "USER"} className="h-11 w-full rounded-xl border border-slate-200 bg-white px-3 text-sm text-slate-700 outline-none focus:border-primary">{roles.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}</select></div>
-              <div className="space-y-1.5"><label htmlFor="user-password" className="text-xs font-semibold text-slate-700">Password {editingUser && <span className="font-normal text-slate-400">(leave blank to keep current)</span>}</label><Input id="user-password" name="password" type="password" autoComplete={editingUser ? "new-password" : "new-password"} required={!editingUser} minLength={8} className="h-11 rounded-xl" /></div>
-              {formError && <p role="alert" className="rounded-lg bg-rose-50 p-3 text-xs text-rose-700">{formError}</p>}
+              <div className="space-y-1.5"><label htmlFor="user-full-name" className="text-xs font-semibold text-slate-700">Full name</label><Input id="user-full-name" name="fullName" required defaultValue={editingUser?.fullName ?? ""} autoComplete="name" className="h-11 rounded-none" /></div>
+              <div className="space-y-1.5"><label htmlFor="user-email" className="text-xs font-semibold text-slate-700">Email</label><Input id="user-email" name="email" type="email" required defaultValue={editingUser?.email ?? ""} autoComplete="email" className="h-11 rounded-none" /></div>
+              <div className="space-y-1.5"><label htmlFor="user-phone" className="text-xs font-semibold text-slate-700">Phone number</label><MobileInput id="user-phone" name="phoneNumber" defaultValue={editingUser?.phoneNumber ?? ""} placeholder="Enter 10-digit mobile number" className="h-11 rounded-none" /></div>
+              <div className="space-y-1.5"><label htmlFor="user-role" className="text-xs font-semibold text-slate-700">Role</label><select id="user-role" name="role" defaultValue={editingUser?.role ?? "USER"} className="h-11 w-full rounded-none border border-slate-300 bg-white px-3 text-sm text-slate-700 shadow-[0_1px_2px_rgba(15,23,42,0.05)] outline-none hover:border-slate-400 focus:border-brand-blue focus:ring-2 focus:ring-brand-blue/15">{roles.map((role) => <option key={role} value={role}>{roleLabel(role)}</option>)}</select></div>
+              <div className="space-y-1.5"><label htmlFor="user-password" className="text-xs font-semibold text-slate-700">Password {editingUser && <span className="font-normal text-slate-400">(leave blank to keep current)</span>}</label><Input id="user-password" name="password" type="password" autoComplete={editingUser ? "new-password" : "new-password"} required={!editingUser} minLength={8} className="h-11 rounded-none" /></div>
+              {formError && <p role="alert" className="rounded-none bg-rose-50 p-3 text-xs text-rose-700 border border-rose-200">{formError}</p>}
               <div className="flex justify-end gap-2 border-t border-slate-100 pt-4">
-                <Button type="button" variant="outline" disabled={mutationPending} onClick={() => setDialogOpen(false)} className="rounded-xl">Cancel</Button>
-                <Button type="submit" disabled={mutationPending} className="rounded-xl">{mutationPending && <LoaderCircle className="size-4 animate-spin" />}{editingUser ? "Save changes" : "Create user"}</Button>
+                <Button type="button" variant="outline" disabled={mutationPending} onClick={() => setDialogOpen(false)} className="rounded-none">Cancel</Button>
+                <Button type="submit" disabled={mutationPending} className="rounded-none">{mutationPending && <LoaderCircle className="size-4 animate-spin" />}{editingUser ? "Save changes" : "Create user"}</Button>
               </div>
             </form>
           </DialogPrimitive.Content>

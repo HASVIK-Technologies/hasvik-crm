@@ -96,7 +96,7 @@ export default function KpiCards({
           <article
             className={cn(
               "relative isolate flex min-h-20 items-center gap-2.5 overflow-hidden border px-3 py-3 sm:gap-4 sm:px-5 sm:py-4",
-              variant === "dashboard" && "h-full items-start rounded-none py-2.5 sm:py-3",
+              variant === "dashboard" && "grid h-full grid-cols-[2.75rem_minmax(0,1fr)] items-start gap-x-3 gap-y-2 rounded-none py-2.5 sm:py-3",
               variant === "solid"
                 ? cn("border-l-4 text-white shadow-[0_2px_8px_rgba(15,38,61,0.1)] [&_[aria-label=Loading]]:bg-white/20", solidStyles[tone])
                 : branded
@@ -110,25 +110,47 @@ export default function KpiCards({
             )}
           >
             {variant === "brand" && <span aria-hidden="true" className="pointer-events-none absolute -right-9 -top-12 -z-10 size-36 rounded-full border border-white/5 bg-white/3" />}
-            <span className={cn("flex size-9 shrink-0 items-center justify-center sm:size-11", branded ? cn("bg-white/10 ring-1 ring-inset ring-white/15", brandIconStyles[tone]) : toneStyles[tone])}>
-              <Icon className="size-5" strokeWidth={1.9} />
-            </span>
-            <span className="min-w-0">
+            {variant === "dashboard" ? (
+              <>
+                <span className={cn("flex size-9 shrink-0 items-center justify-center sm:size-11", toneStyles[tone])}>
+                  <Icon className="size-5" strokeWidth={1.9} />
+                </span>
+                <span className="min-w-0">
+                  {loading ? (
+                    <span className="mb-1.5 block h-7 w-14 animate-pulse bg-slate-100" />
+                  ) : (
+                    <span className="block text-xl font-bold tracking-tight text-ink sm:text-2xl">{value}</span>
+                  )}
+                  <span className="mt-0.5 block text-[10px] font-medium leading-tight text-ink-soft sm:text-xs">{label}</span>
+                </span>
+                <span className="col-span-2 min-w-0">
+                  {!loading && hint && <span className="block text-xs text-ink-soft">{hint}</span>}
+                  {!loading && delta && <KpiDeltaLabel delta={delta} branded={false} />}
+                </span>
+              </>
+            ) : (
+              <>
+                <span className={cn("flex size-9 shrink-0 items-center justify-center sm:size-11", branded ? cn("bg-white/10 ring-1 ring-inset ring-white/15", brandIconStyles[tone]) : toneStyles[tone])}>
+                  <Icon className="size-5" strokeWidth={1.9} />
+                </span>
+                <span className="min-w-0">
               {loading ? (
                 <span className={cn("mb-1.5 block h-7 w-14 animate-pulse", branded ? "bg-white/20" : "bg-slate-100")} />
               ) : (
-                <span className={cn("block text-xl font-bold tracking-tight sm:text-2xl", branded ? "text-white" : variant === "dashboard" ? "text-ink" : "text-slate-900", variant === "brand" && "sm:text-3xl")}>
+                <span className={cn("block text-xl font-bold tracking-tight sm:text-2xl", branded ? "text-white" : "text-slate-900", variant === "brand" && "sm:text-3xl")}>
                   {value}
                 </span>
               )}
-              <span className={cn("mt-0.5 block text-[10px] font-medium leading-tight sm:text-xs", branded ? "text-white" : variant === "dashboard" ? "text-ink-soft" : "text-slate-500")}>
+              <span className={cn("mt-0.5 block text-[10px] font-medium leading-tight sm:text-xs", branded ? "text-white" : "text-slate-500")}>
                 {label}
               </span>
-              {!loading && hint && <span className={cn("mt-1 block text-xs", branded ? "text-white/90" : variant === "dashboard" ? "text-ink-soft" : "text-slate-500")}>{hint}</span>}
+              {!loading && hint && <span className={cn("mt-1 block text-xs", branded ? "text-white/90" : "text-slate-500")}>{hint}</span>}
               {!loading && delta && (
                 <KpiDeltaLabel delta={delta} branded={branded} />
               )}
-            </span>
+                </span>
+              </>
+            )}
           </article>
         );
         const wrapper = "block h-full w-full text-left focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-brand-blue";
