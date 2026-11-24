@@ -28,7 +28,7 @@ export default function BusinessDetailsQuickActions({
 
       <div className="flex flex-col gap-2.5">
         {!isInactive && <>
-        {/* Edit Business */}
+        {/* Edit Lead */}
         <Link
           href={`/businesses/form/${business?.id}`}
           className="group flex items-center justify-between rounded-xl border border-slate-200/90 bg-white p-3 transition-all hover:border-primary/30 hover:bg-primary/5"
@@ -39,10 +39,10 @@ export default function BusinessDetailsQuickActions({
             </div>
             <div>
               <p className="text-xs font-semibold text-slate-800 group-hover:text-primary">
-                Edit Business
+                Edit Lead
               </p>
               <p className="text-[11px] text-slate-400">
-                Update business details
+                Update lead details
               </p>
             </div>
           </div>
@@ -91,12 +91,12 @@ export default function BusinessDetailsQuickActions({
                     : "text-slate-800 group-hover:text-red-600"
                 }`}
               >
-                {isInactive ? "Activate Business" : "Deactivate Business"}
+                {isInactive ? "Activate Lead" : "Deactivate Lead"}
               </p>
               <p className="text-[11px] text-slate-400">
                 {isInactive
                   ? "Restore full access & status"
-                  : "Pause operations for this business"}
+                  : "Pause operations for this lead"}
               </p>
             </div>
           </div>

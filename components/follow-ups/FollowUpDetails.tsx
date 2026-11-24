@@ -40,7 +40,8 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
     whatsappNumbers: businessData?.whatsappNumbers?.length ? businessData.whatsappNumbers : followUp.businessWhatsappNumbers,
   };
   const city = businessData?.city || followUp.businessCity;
-  const businessName = businessData?.name || followUp.businessName || "Business";
+  const businessName = businessData?.name || followUp.businessName || "Lead";
+  const initials = businessName.split(/\s+/).filter(Boolean).slice(0, 2).map((part) => part[0]).join("").toUpperCase();
   const isInactive = businessData?.isActive === false || businessData?.status === "Inactive";
   const locationAvailable = getLocationData(businessData ?? {}).isAvailable;
   const reminder = followUp.reminder || (followUp.reminderInMinutes != null
@@ -61,7 +62,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
                 <StatusBadge status={followUp.status} />
               </div>
               <p className="mt-2 flex flex-wrap items-center gap-x-2 gap-y-1 text-xs text-slate-500 sm:text-sm"><span>{formatFollowUpType(followUp.type)}</span>{city && <><span aria-hidden="true">·</span><span>{city}</span></>}</p>
-              {followUp.businessId && <RecordLink href={`/businesses/${followUp.businessId}`} className="mt-2 inline-block text-xs font-semibold">View business details</RecordLink>}
+              {followUp.businessId && <RecordLink href={`/businesses/${followUp.businessId}`} className="mt-2 inline-block text-xs font-semibold">View lead details</RecordLink>}
             </div>
           </div>
           {!isInactive && !isFollowUpReadOnly(followUp) && <div aria-label="Quick contact actions" className="flex items-center gap-2 self-end sm:self-auto">
@@ -110,7 +111,7 @@ export default function FollowUpDetails({ followUp }: FollowUpDetailsProps) {
         </div>
         <aside aria-label="Follow-up reference information" className="min-w-0 space-y-6">
           <BusinessDetailsContacts business={{ ...contactBusiness, isActive: isInactive || isFollowUpReadOnly(followUp) ? false : contactBusiness.isActive }} />
-          {locationAvailable && <section aria-label="Business location"><BusinessDetailsMap business={businessData} /></section>}
+          {locationAvailable && <section aria-label="Lead location"><BusinessDetailsMap business={businessData} /></section>}
         </aside>
       </section>
     </div>

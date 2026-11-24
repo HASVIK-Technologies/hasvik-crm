@@ -10,10 +10,7 @@ import { Card, CardHeader, CardTitle, CardContent } from "@/components/ui/card";
 import { StatusBadge } from "@/components/common/StatusBadge";
 import { ActivityStateText } from "@/components/common/ActivityStateText";
 import { Avatar, AvatarFallback } from "@/components/ui/avatar";
-import businessData from "@/data/businessData.json";
 import BusinessDetailsMap from "../../../components/business-details/BusinessDetailsMap";
-import BusinessDetailsOverview from "../../../components/business-details/BusinessDetailsOverview";
-import BusinessDetailsContacts from "../../../components/business-details/BusinessDetailsContacts";
 import { useBusinessFollowUpsQuery } from "@/hooks/use-business-get-follow-ups";
 import { useModalStore } from "@/store/business-modal-store";
 import { AddFollowUpModal } from "@/components/business-details/AddFollowUpModal";
@@ -33,6 +30,9 @@ import {
   AlertCircle,
   Plus,
   UserRoundCog,
+  Globe,
+  Mail,
+  FileText,
 } from "lucide-react";
 import { WhatsAppIcon } from "@/components/common/WhatsAppIcon";
 import { useBusinessQuery } from "@/hooks/use-businesses";
@@ -51,6 +51,8 @@ import BusinessDetailsActivity from "@/components/business-details/BusinessDetai
 import { DeactivateBusinessModal } from "@/components/business-details/DeactivateBusinessModal";
 import { useBusinessListStore } from "@/store/business-list-store";
 import AssignBusinessDialog from "@/components/businesses/AssignBusinessDialog";
+import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
+import { normalizeHttpUrl } from "@/lib/business/url-validation";
 
 export default function BusinessDetails() {
   const cleanNumber = (num: string) => num.replace(/\D/g, "");
@@ -115,7 +117,7 @@ export default function BusinessDetails() {
   if (isError) {
     return (
       <div className="mx-auto max-w-6xl py-12 text-center text-sm text-red-600">
-        Unable to load this business. Please try again.
+        Unable to load this lead. Please try again.
       </div>
     );
   }
@@ -123,7 +125,7 @@ export default function BusinessDetails() {
   if (isLoading) {
     return (
       <div className="mx-auto max-w-6xl py-12 text-center text-sm text-[#64748b]">
-        Loading business details...
+        Loading lead details...
       </div>
     );
   }
@@ -135,14 +137,14 @@ export default function BusinessDetails() {
           <AlertCircle className="size-7" />
         </div>
         <h1 className="text-2xl font-bold tracking-tight text-[#334155]">
-          Business not found
+          Lead not found
         </h1>
         <p className="mt-2 max-w-sm text-sm leading-6 text-[#64748b]">
-          The business with ID #{rawId} does not exist or has been removed.
+          The lead with ID #{rawId} does not exist or has been removed.
         </p>
         <OutlinedButton asChild className="mt-6 gap-2">
           <Link href="/businesses">
-            <ArrowLeft className="size-4" /> Back to Businesses
+            <ArrowLeft className="size-4" /> Back to Leads
           </Link>
         </OutlinedButton>
       </div>
@@ -161,21 +163,24 @@ export default function BusinessDetails() {
     business?.leadStatus;
 
   const leadStatusDisplay = formatLeadStatus(rawLeadStatus);
+  const websiteUrl = business.website
+    ? normalizeHttpUrl(business.website)
+    : "";
 
   return (
     <DetailsPageLayout
       breadcrumb={
         <Breadcrumb
           items={[
-            { label: "Businesses", href: "/businesses" },
-            { label: "Business Details" },
+            { label: "Leads", href: "/businesses" },
+            { label: "Lead Details" },
           ]}
         />
       }
       actions={
         <Actions
           primary={isInactive ? {
-            label: "Activate Business",
+            label: "Activate Lead",
             onSelect: () => openDeactivateModal(String(business?.id)),
           } : {
             label: "Add Follow-up",
@@ -184,7 +189,7 @@ export default function BusinessDetails() {
           }}
           secondary={isInactive ? [] : [
             {
-              label: "Edit Business",
+              label: "Edit Lead",
               icon: <Edit2 className="size-4" />,
               href: `/businesses/form/${business.id}`,
             },
@@ -208,51 +213,55 @@ export default function BusinessDetails() {
         <>
           {/* 2. SINGLE MERGED CARD (Full Width) */}
           <Card className="w-full overflow-hidden border-[#e4ecf2] shadow-[0_4px_20px_rgba(20,40,60,0.04)]">
-            <CardHeader className="flex flex-col gap-4 border-b border-[#e8eef4] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
+            <CardHeader className="flex flex-col gap-3 border-b border-slate-200/80 bg-white p-4 sm:flex-row sm:items-start sm:justify-between sm:gap-5 sm:px-6 sm:py-4">
               <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">
-                <Avatar className="size-13 sm:size-16 rounded-xl sm:rounded-2xl shrink-0">
-                  <AvatarFallback className="bg-primary/10 text-base sm:text-xl font-semibold text-primary">
+                <Avatar className="size-12 shrink-0 rounded-xl border border-primary/10 sm:size-14">
+                  <AvatarFallback className="rounded-2xl bg-primary/10 text-lg font-bold text-primary sm:text-xl">
                     {business.initials}
                   </AvatarFallback>
                 </Avatar>
-                <div className="mt-0.5 flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
-                  <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-                    <CardTitle className="min-w-0 max-w-full truncate text-lg font-bold tracking-tight text-[#0f172a] sm:text-2xl" title={business.name}>
+                <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
+                    <CardTitle className="min-w-0 max-w-full text-lg font-bold leading-tight tracking-tight text-slate-900 sm:text-xl" title={business.name}>
                       {business.name}
                     </CardTitle>
-                    <div className="flex flex-wrap items-center gap-1.5 shrink-0">
-                      <ActivityStateText active={!isInactive} />
-                      {leadStatusDisplay && leadStatusDisplay !== "-" && (
+                  </div>
+                  <div className="flex min-w-0 flex-wrap items-center gap-x-2 gap-y-1.5">
+                    <ActivityStateText active={!isInactive} />
+                    {leadStatusDisplay && leadStatusDisplay !== "-" && (
+                      <>
+                        <span aria-hidden="true" className="text-slate-300">·</span>
                         <StatusBadge
                           status={rawLeadStatus || leadStatusDisplay}
                           label={leadStatusDisplay}
                         />
-                      )}
-                    </div>
-                  </div>
-                  <p className="flex flex-wrap items-center gap-x-2 gap-y-1 text-xs sm:text-sm text-[#64748b]">
-                    <Building2 className="size-3.5 sm:size-4 shrink-0 text-[#94a3b8]" />
-                    <span>{business.category || "Uncategorized"}</span>
-                    {business.city && (
-                      <>
-                        <span aria-hidden="true" className="text-[#cbd5e1]">
-                          ·
-                        </span>
-                        <span>{business.city}</span>
                       </>
                     )}
-                  </p>
+                    <span aria-hidden="true" className="text-slate-300">·</span>
+                    <p className="flex items-center gap-1.5 text-sm font-medium text-slate-500">
+                      <Building2 className="size-4 shrink-0 text-slate-400" />
+                      <span>{business.category || "Uncategorized"}</span>
+                    </p>
+                  </div>
+                  <div className="min-w-0 [&>div]:!mt-0">
+                    <TagAssignmentPicker
+                      entity="BUSINESS"
+                      entityId={String(business.id)}
+                      tags={business.tags ?? []}
+                      variant="details"
+                    />
+                  </div>
                 </div>
               </div>
 
-              {!isInactive && <div className="flex items-center gap-2 self-end sm:self-auto">
+              {!isInactive && <div className="flex shrink-0 items-center gap-2 self-start">
                 {/* Phone Dropdown / Single Button */}
                 {headerPhones.length > 1 ? (
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <OutlinedButton
-                        aria-label="Call business"
-                        title="Call business"
+                        aria-label="Call lead"
+                        title="Call lead"
                         className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                       >
                         <Phone className="h-4 w-4" />
@@ -279,7 +288,7 @@ export default function BusinessDetails() {
                 ) : headerPhones.length === 1 ? (
                   <OutlinedButton
                     asChild
-                    aria-label="Call business"
+                    aria-label="Call lead"
                     className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                   >
                     <a href={`tel:${cleanNumber(headerPhones[0].number)}`}>
@@ -293,8 +302,8 @@ export default function BusinessDetails() {
                   <DropdownMenu>
                     <DropdownMenuTrigger asChild>
                       <OutlinedButton
-                        aria-label="Message business on WhatsApp"
-                        title="Message business on WhatsApp"
+                        aria-label="Message lead on WhatsApp"
+                        title="Message lead on WhatsApp"
                         className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                       >
                         <WhatsAppIcon className="h-4 w-4" />
@@ -323,7 +332,7 @@ export default function BusinessDetails() {
                 ) : headerWhatsapps.length === 1 ? (
                   <OutlinedButton
                     asChild
-                    aria-label="Message business on WhatsApp"
+                    aria-label="Message lead on WhatsApp"
                     className="h-9 w-9 p-0 flex items-center justify-center text-brand-green-strong border-gray-200 hover:bg-brand-green/10"
                   >
                     <a
@@ -341,8 +350,8 @@ export default function BusinessDetails() {
                 {locationData.isAvailable ? (
                   <OutlinedButton
                     asChild
-                    aria-label="View business location on Google Maps"
-                    title="View business location on Google Maps"
+                    aria-label="View lead location on Google Maps"
+                    title="View lead location on Google Maps"
                     className="h-9 w-9 p-0 flex items-center justify-center text-primary border-gray-200 hover:bg-primary/10 cursor-pointer"
                   >
                     <a
@@ -368,76 +377,113 @@ export default function BusinessDetails() {
               </div>}
             </CardHeader>
 
-            <CardContent className="p-4 sm:p-6">
-              <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 lg:grid-cols-4">
-                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
-                  <Users className="mt-0.5 size-4 shrink-0 text-slate-400" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">
-                      Assigned to
-                    </p>
-                    <p className="mt-1 truncate text-sm font-semibold text-slate-800">
-                      {business.assignedToName || business.assignedTo || "Unassigned"}
-                    </p>
+            <CardContent className="p-0">
+              <div className="px-5 py-5 sm:px-7">
+                <div className="grid grid-cols-1 divide-y divide-slate-100 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                  <div className="flex min-w-0 items-start gap-3 py-1 pb-4 sm:py-0 sm:pr-5">
+                    <MapPin className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500">Address</p>
+                      <p className="mt-1 text-sm font-semibold leading-5 text-slate-800">
+                        {business.address || (business.city ? business.city : "Location not available")}
+                      </p>
+                    </div>
                   </div>
-                </div>
-                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
-                  <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">
-                      Next follow-up
-                    </p>
-                    <div className="mt-1 flex flex-wrap items-center gap-2">
-                      {nextFollowUp && !isInactive ? (
-                        <RecordLink href={`/follow-ups/${nextFollowUp.id}`} className="text-sm">
-                          {(() => {
-                            const raw = nextFollowUp.scheduledAt || (nextFollowUp as any).followUpDate || (nextFollowUp as any).date;
-                            const d = raw ? new Date(String(raw).replace(/\s+at\s+/i, " ")) : null;
-                            return d && !Number.isNaN(d.getTime()) ? dateFmt.format(d) : raw || "-";
-                          })()}
-                        </RecordLink>
-                      ) : business?.nextFollowUp && business.nextFollowUp !== "-" ? (
-                        business.nextFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="text-sm">{business.nextFollowUp}</RecordLink> : <p className="text-sm font-semibold text-slate-800">{business.nextFollowUp}</p>
+                  <div className="flex min-w-0 items-start gap-3 py-4 sm:px-5 sm:py-0">
+                    <Globe className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500">Website</p>
+                      {websiteUrl ? (
+                        <a href={websiteUrl} target="_blank" rel="noopener noreferrer" className="mt-1 block break-all text-sm font-semibold text-primary hover:underline">
+                          {websiteUrl}
+                        </a>
                       ) : (
-                        <p className="text-sm font-semibold text-slate-800">
-                          -
-                        </p>
+                        <p className="mt-1 text-sm font-semibold text-slate-800">-</p>
                       )}
                     </div>
                   </div>
-                </div>
-                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
-                  <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">Last follow-up</p>
-                    <div className="mt-1 truncate text-sm font-semibold text-slate-800">
-                      {lastFollowUpItem ? (
-                        (() => {
-                          const raw = (lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt ?? (lastFollowUpItem as any).date ?? (lastFollowUpItem as any).followUpDate;
-                          const d = raw ? new Date(String(raw).replace(/\s+at\s+/i, " ")) : null;
-                          const formatted = d && !Number.isNaN(d.getTime()) ? dateFmt.format(d) : raw || "-";
-                          return !isInactive ? <RecordLink href={`/follow-ups/${lastFollowUpItem.id}`}>{formatted}</RecordLink> : formatted;
-                        })()
-                      ) : business?.lastFollowUp && business.lastFollowUp !== "-" ? (
-                        business.lastFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`}>{business.lastFollowUp}</RecordLink> : business.lastFollowUp
+                  <div className="flex min-w-0 items-start gap-3 pt-4 sm:px-5 sm:pt-0">
+                    <Mail className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500">Email</p>
+                      {business.email ? (
+                        <a href={`mailto:${business.email}`} className="mt-1 block break-all text-sm font-semibold text-primary hover:underline">
+                          {business.email}
+                        </a>
                       ) : (
-                        "-"
+                        <p className="mt-1 text-sm font-semibold text-slate-800">-</p>
                       )}
                     </div>
-                  </div>
-                </div>
-                <div className="flex min-w-0 items-start gap-3 rounded-xl bg-slate-50/80 p-3.5">
-                  <MapPin className="mt-0.5 size-4 shrink-0 text-slate-400" />
-                  <div className="min-w-0">
-                    <p className="text-xs font-medium text-slate-500">
-                      Address
-                    </p>
-                    <p className="mt-1 text-sm font-semibold leading-5 text-slate-800">
-                      {business.address || (business.city ? business.city : "Location not available")}
-                    </p>
                   </div>
                 </div>
               </div>
+
+              <div className="border-t border-slate-100 bg-slate-50/55 px-5 py-5 sm:px-7">
+                <div className="grid grid-cols-1 divide-y divide-slate-200/70 sm:grid-cols-3 sm:divide-x sm:divide-y-0">
+                  <div className="flex min-w-0 items-start gap-3 pb-4 sm:pb-0 sm:pr-5">
+                    <Users className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500">Assigned to</p>
+                      <p className="mt-1 truncate text-sm font-semibold text-slate-800">
+                        {business.assignedToName || business.assignedTo || "Unassigned"}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="flex min-w-0 items-start gap-3 py-4 sm:px-5 sm:py-0">
+                    <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500">Next follow-up</p>
+                      <div className="mt-1">
+                        {nextFollowUp && !isInactive ? (
+                          <RecordLink href={`/follow-ups/${nextFollowUp.id}`} className="text-sm">
+                            {(() => {
+                              const raw = nextFollowUp.scheduledAt || (nextFollowUp as any).followUpDate || (nextFollowUp as any).date;
+                              const d = raw ? new Date(String(raw).replace(/\s+at\s+/i, " ")) : null;
+                              return d && !Number.isNaN(d.getTime()) ? dateFmt.format(d) : raw || "-";
+                            })()}
+                          </RecordLink>
+                        ) : business?.nextFollowUp && business.nextFollowUp !== "-" ? (
+                          business.nextFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.nextFollowUpId}`} className="text-sm">{business.nextFollowUp}</RecordLink> : <p className="text-sm font-semibold text-slate-800">{business.nextFollowUp}</p>
+                        ) : (
+                          <p className="text-sm font-semibold text-slate-800">-</p>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                  <div className="flex min-w-0 items-start gap-3 pt-4 sm:px-5 sm:pt-0">
+                    <Calendar className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                    <div className="min-w-0">
+                      <p className="text-xs font-medium text-slate-500">Last follow-up</p>
+                      <div className="mt-1 truncate text-sm font-semibold text-slate-800">
+                        {lastFollowUpItem ? (
+                          (() => {
+                            const raw = (lastFollowUpItem as { completedAt?: string }).completedAt ?? lastFollowUpItem.scheduledAt ?? (lastFollowUpItem as any).date ?? (lastFollowUpItem as any).followUpDate;
+                            const d = raw ? new Date(String(raw).replace(/\s+at\s+/i, " ")) : null;
+                            const formatted = d && !Number.isNaN(d.getTime()) ? dateFmt.format(d) : raw || "-";
+                            return !isInactive ? <RecordLink href={`/follow-ups/${lastFollowUpItem.id}`}>{formatted}</RecordLink> : formatted;
+                          })()
+                        ) : business?.lastFollowUp && business.lastFollowUp !== "-" ? (
+                          business.lastFollowUpId && !isInactive ? <RecordLink href={`/follow-ups/${business.lastFollowUpId}`}>{business.lastFollowUp}</RecordLink> : business.lastFollowUp
+                        ) : (
+                          "-"
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {business.description && (
+                <div className="flex items-start gap-3 border-t border-slate-100 px-5 py-4 sm:px-7">
+                  <FileText className="mt-0.5 size-4 shrink-0 text-slate-400" />
+                  <div className="min-w-0">
+                    <p className="text-xs font-medium text-slate-500">Description</p>
+                    <p className="mt-1 whitespace-pre-line text-sm leading-6 text-slate-700">
+                      {business.description}
+                    </p>
+                  </div>
+                </div>
+              )}
             </CardContent>
           </Card>
 
@@ -448,20 +494,15 @@ export default function BusinessDetails() {
                 business={business}
                 readOnly={isInactive}
               />
-              <BusinessDetailsActivity businessId={String(business.id)} />
+              <BusinessDetailsActivity businessId={String(business.id)} categoryName={business.category} />
             </div>
 
             <aside className="space-y-6 xl:sticky xl:top-28">
-              <BusinessDetailsOverview
-                business={business}
-                businessData={businessData}
-              />
-              <BusinessDetailsContacts business={business} />
               <BusinessDetailsMap business={business} />
             </aside>
           </section>
           {/* New Follow-up Modal */}
-          <AddFollowUpModal businessName={business?.name || "Business"} />
+          <AddFollowUpModal businessName={business?.name || "Lead"} />
           {/* Deactivate Business Modal */}
           <DeactivateBusinessModal
             businessName={business?.name || ""}

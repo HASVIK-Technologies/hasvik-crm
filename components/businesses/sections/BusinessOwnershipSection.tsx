@@ -51,7 +51,7 @@ export default function BusinessOwnershipSection() {
               invalid={Boolean(fieldState.error)}
             />
             <p className="mt-1.5 text-xs text-slate-500">
-              Assign the team member who will own and manage this business.
+              Assign the team member who will own and manage this lead.
             </p>
             {fieldState.error && (
               <p role="alert" className="mt-1 text-xs text-red-600">

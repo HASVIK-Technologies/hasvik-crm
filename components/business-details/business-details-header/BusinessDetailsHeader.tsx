@@ -31,19 +31,19 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
   const leadStatusDisplay = formatLeadStatus(rawLeadStatus);
 
   return (
-    <CardHeader className="flex flex-col gap-4 border-b border-[#eef2f6] bg-[#fbfdff] p-4 sm:flex-row sm:items-center sm:justify-between sm:p-6 sm:px-7">
+    <CardHeader className="flex flex-col gap-3 border-b border-[#eef2f6] bg-white p-4 sm:flex-row sm:items-center sm:justify-between sm:gap-5 sm:px-6 sm:py-4">
 
       {/* LEFT SIDE: Avatar & Name */}
-      <div className="flex min-w-0 w-full flex-1 items-start gap-3 sm:gap-4">
-        <Avatar className="size-13 sm:size-16 rounded-xl sm:rounded-2xl shrink-0">
-          <AvatarFallback className="bg-primary/10 text-base sm:text-xl font-semibold text-primary">
+      <div className="flex min-w-0 w-full flex-1 items-center gap-3 sm:gap-4">
+        <Avatar className="size-12 shrink-0 rounded-xl sm:size-14">
+          <AvatarFallback className="bg-primary/10 text-base font-semibold text-primary sm:text-lg">
             {business.initials}
           </AvatarFallback>
         </Avatar>
-        <div className="mt-0.5 flex min-w-0 flex-1 flex-col gap-1.5 sm:gap-2">
-          <div className="flex flex-wrap items-center gap-2 sm:gap-3">
-            <CardTitle className="min-w-0 max-w-full truncate text-lg font-bold tracking-tight text-[#334155] sm:text-2xl" title={business.name}>{business.name}</CardTitle>
-            <div className="flex flex-wrap items-center gap-1.5 shrink-0">
+        <div className="flex min-w-0 flex-1 flex-col gap-1.5">
+          <div className="flex min-w-0 flex-wrap items-center gap-x-3 gap-y-1.5">
+            <CardTitle className="min-w-0 max-w-full text-lg font-bold leading-tight tracking-tight text-slate-800 sm:text-xl" title={business.name}>{business.name}</CardTitle>
+            <div className="flex shrink-0 flex-wrap items-center gap-1.5">
               <ActivityStateText active={business.status === "Active"} />
               {leadStatusDisplay && leadStatusDisplay !== "-" && (
                 <StatusBadge
@@ -67,7 +67,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
       </div>
 
       {/* RIGHT SIDE: Action Buttons */}
-      <div className="flex items-center gap-2 self-end sm:self-auto shrink-0">
+        <div className="flex shrink-0 items-center gap-2 self-center">
 
         {/* Phone Component */}
         <PhoneButton phones={businessData.contactInfo.phones} />
@@ -79,7 +79,7 @@ export default function BusinessDetailsHeader({ business, businessData }: Header
               href={locationData.mapLink || "#"}
               target="_blank"
               rel="noopener noreferrer"
-              aria-label="View business location on Google Maps"
+              aria-label="View lead location on Google Maps"
               title="Open in Maps"
               onClick={(e) => openGoogleMapsOnce(e, locationData.mapLink)}
             >

@@ -11,7 +11,8 @@ interface FormCategoryAutocompleteProps {
   label: string;
   value?: string;
   valueLabel?: string;
-  onChange: (id: string) => void;
+  /** Called with the chosen category's id and name (both empty when cleared). */
+  onChange: (id: string, name?: string) => void;
   placeholder?: string;
   required?: boolean;
   invalid?: boolean;
@@ -42,7 +43,7 @@ export default function FormCategoryAutocomplete({
       value={value}
       valueLabel={valueLabel}
       onChange={(categoryId, categoryName) => {
-        onChange(categoryId);
+        onChange(categoryId, categoryName);
         if (categoryId || !categoryName) setSearch("");
       }}
       options={categories.map((category) => ({

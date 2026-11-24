@@ -10,6 +10,7 @@ import FormLeadStatusSelect from "@/components/common/form-controls/FormLeadStat
 import StateAutocomplete from "@/components/common/StateAutocomplete";
 import { STATE_OPTIONS } from "@/lib/business/form-options";
 import { isValidHttpUrl } from "@/lib/business/url-validation";
+import { getLeadKind, getLeadNameLabel } from "@/lib/business/lead-type";
 import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function BusinessInfoSection({
@@ -20,10 +21,14 @@ export default function BusinessInfoSection({
   const {
     control,
     register,
+    setValue,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
 
   const categoryName = useWatch({ control, name: "categoryName" });
+  // A person has a full name, a company a business name; until a category is chosen it is just "Name".
+  const kind = getLeadKind(categoryName);
+  const nameLabel = getLeadNameLabel(kind);
 
   return (
     <div className="grid grid-cols-1 gap-x-6 gap-y-5 sm:grid-cols-2">
@@ -33,14 +38,14 @@ export default function BusinessInfoSection({
           required
           invalid={!!errors.businessName}
         >
-          Business Name
+          {nameLabel}
         </FieldLabel>
         <Input
           id={`${idPrefix}businessName`}
-          placeholder="Enter business name"
+          placeholder={`Enter ${nameLabel.toLowerCase()}`}
           aria-invalid={!!errors.businessName}
           {...register("businessName", {
-            required: "Business Name is required",
+            required: `${nameLabel} is required`,
           })}
         />
       </div>
@@ -55,7 +60,10 @@ export default function BusinessInfoSection({
             label="Category"
             value={field.value}
             valueLabel={categoryName}
-            onChange={(categoryId) => field.onChange(categoryId)}
+            onChange={(categoryId, name) => {
+              field.onChange(categoryId);
+              setValue("categoryName", name ?? "");
+            }}
             placeholder="Select a category"
             required
             invalid={!!fieldState.error}

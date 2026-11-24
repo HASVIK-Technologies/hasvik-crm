@@ -1,10 +1,11 @@
 "use client";
 
-import { useFormContext } from "react-hook-form";
+import { useFormContext, useWatch } from "react-hook-form";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
 import FieldLabel from "@/components/businesses/FieldLabel";
 import { isValidHttpUrl } from "@/lib/business/url-validation";
+import { hasBusinessProfileFields } from "@/lib/business/lead-type";
 import type { BusinessFormValues } from "@/lib/business/form-types";
 
 export default function AdditionalInfoSection({
@@ -13,9 +14,14 @@ export default function AdditionalInfoSection({
   idPrefix?: string;
 }) {
   const {
+    control,
     register,
     formState: { errors },
   } = useFormContext<BusinessFormValues>();
+  const categoryName = useWatch({ control, name: "categoryName" });
+
+  // Individuals (B2C leads) have no website or business description.
+  if (!hasBusinessProfileFields(categoryName)) return null;
 
   return (
     <div className="grid grid-cols-1 gap-x-5 gap-y-4 lg:grid-cols-3">
@@ -42,7 +48,7 @@ export default function AdditionalInfoSection({
         <FieldLabel htmlFor={`${idPrefix}description`}>Description</FieldLabel>
         <Textarea
           id={`${idPrefix}description`}
-          placeholder="Enter business description..."
+          placeholder="Enter a short description..."
           {...register("description")}
         />
       </div>

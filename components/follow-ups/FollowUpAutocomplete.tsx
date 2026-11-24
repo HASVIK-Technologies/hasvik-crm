@@ -124,7 +124,7 @@ export default function FollowUpAutocomplete({
               autoFocus
               value={search}
               onChange={(event) => setSearch(event.target.value)}
-              placeholder={`Search ${kind === "business" ? "businesses" : "team members"}...`}
+              placeholder={`Search ${kind === "business" ? "leads" : "team members"}...`}
               className="h-8.5 w-full rounded-lg border border-[#e2e8f0] bg-[#f8fafc] pl-8 text-xs outline-none"
             />
           </div>
@@ -138,7 +138,7 @@ export default function FollowUpAutocomplete({
             }}
             className="flex w-full items-center justify-between rounded-lg px-2.5 py-2 text-left text-xs hover:bg-[#f8fafc]"
           >
-            Any {kind === "business" ? "business" : "team member"}
+            Any {kind === "business" ? "lead" : "team member"}
             {!value && <Check className="size-3.5 text-primary" />}
           </button>
           {isLoading ? (

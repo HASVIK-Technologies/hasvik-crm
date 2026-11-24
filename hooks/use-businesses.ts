@@ -164,7 +164,7 @@ export function useAssignBusiness() {
             : business,
       );
       queryClient.invalidateQueries({ queryKey: businessQueryKeys.all });
-      toast.success(`${variables.assigneeName} is now responsible for this business.`);
+      toast.success(`${variables.assigneeName} is now responsible for this lead.`);
     },
     onError: (error) => {
       const message = axios.isAxiosError<{ message?: string }>(error)
@@ -251,8 +251,8 @@ export function useUpdateBusinessStatus() {
 
       toast.success(
         variables.status === "Active"
-          ? "Business activated successfully."
-          : "Business deactivated successfully.",
+          ? "Lead activated successfully."
+          : "Lead deactivated successfully.",
       );
     },
     onError: (error) => {
@@ -260,7 +260,7 @@ export function useUpdateBusinessStatus() {
         toast.error(
           error instanceof Error
             ? error.message
-            : "Failed to update business status.",
+            : "Failed to update lead status.",
         );
       }
     },
@@ -280,12 +280,12 @@ export function useUpdateBusinessMutation() {
       queryClient.invalidateQueries({
         queryKey: businessQueryKeys.detail(String(variables.id)),
       });
-      toast.success("Business updated successfully.");
+      toast.success("Lead updated successfully.");
     },
     onError: (error) => {
       if (!axios.isAxiosError(error)) {
         toast.error(
-          error instanceof Error ? error.message : "Failed to update business.",
+          error instanceof Error ? error.message : "Failed to update lead.",
         );
       }
     },
@@ -299,12 +299,12 @@ export function useCreateBusinessMutation() {
     mutationFn: (payload: BusinessMutationPayload) => createBusinessData(payload),
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: businessQueryKeys.all });
-      toast.success("Business created successfully.");
+      toast.success("Lead created successfully.");
     },
     onError: (error) => {
       if (!axios.isAxiosError(error)) {
         toast.error(
-          error instanceof Error ? error.message : "Failed to create business.",
+          error instanceof Error ? error.message : "Failed to create lead.",
         );
       }
     },
@@ -324,7 +324,7 @@ export function useCreateBusiness() {
     onError: (error) => {
       if (!axios.isAxiosError(error)) {
         toast.error(
-          error instanceof Error ? error.message : "Failed to create business.",
+          error instanceof Error ? error.message : "Failed to create lead.",
         );
       }
     },

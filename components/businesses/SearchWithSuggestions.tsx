@@ -16,7 +16,7 @@ interface SearchWithSuggestionsProps {
 export default function SearchWithSuggestions({
   searchTerm,
   onSearchTermChange,
-  placeholder = "Search by business name or phone number...",
+  placeholder = "Search by name or phone number...",
   wrapperClassName,
   className,
   isSearching = false,
