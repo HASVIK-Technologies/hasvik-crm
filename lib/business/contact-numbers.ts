@@ -21,6 +21,20 @@ export function canonicalDigits(raw: string): string {
   return digits;
 }
 
+export function cleanDisplayDigits(val?: string): string {
+  if (!val) return "";
+  let digits = val.replace(/\D/g, "");
+  // Strip country code 91 if present at start and followed by 10+ digits
+  if (digits.length >= 11 && digits.startsWith("91")) {
+    digits = digits.slice(2);
+  }
+  // Strip leading 0 (STD / trunk prefix)
+  if (digits.startsWith("0")) {
+    digits = digits.replace(/^0+/, "");
+  }
+  return digits.slice(0, 10);
+}
+
 export function normalizeNumbers(
   values?: Array<ContactNumber | string>,
   fallback?: string,

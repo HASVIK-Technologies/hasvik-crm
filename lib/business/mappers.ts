@@ -333,15 +333,12 @@ export function extractLatestCompletedFollowUpDate(
         obj.isCompleted === true ||
         Boolean(obj.completedAt);
 
+      if (status && !isCompleted) {
+        continue;
+      }
+
       const rawDate = extractDateFromFollowUpEntry(obj);
       if (rawDate) {
-        const cleaned = rawDate.replace(/\s+at\s+/i, " ");
-        const time = new Date(cleaned).getTime();
-        const isFuture = !Number.isNaN(time) && time > Date.now();
-        // Ignore non-completed follow-ups scheduled in the future in lastFollowup (test 219)
-        if (status === "SCHEDULED" && isFuture && !isCompleted) {
-          continue;
-        }
         return formatFollowUpDate(rawDate);
       }
     }

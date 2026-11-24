@@ -29,6 +29,7 @@ import ResponsiveFilters from "@/components/common/ResponsiveFilters";
 import ListPageLayout from "@/components/layout/ListPageLayout";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
+import MobileInput from "@/components/common/MobileInput";
 import {
   Select,
   SelectContent,
@@ -185,17 +186,16 @@ function TenantEditor({
           className="h-10 rounded-lg"
         />
       </label>
-      <label className="block space-y-1.5">
-        <span className="text-xs font-semibold text-slate-700">Contact phone</span>
-        <Input
-          type="tel"
+      <div className="block space-y-1.5">
+        <label htmlFor="tenant-contact-phone" className="text-xs font-semibold text-slate-700">Contact phone</label>
+        <MobileInput
+          id="tenant-contact-phone"
           value={draft.contactPhone}
-          onChange={(event) =>
-            onChange({ ...draft, contactPhone: event.target.value })
-          }
+          onChange={(val) => onChange({ ...draft, contactPhone: val })}
           className="h-10 rounded-lg"
+          placeholder="Enter 10-digit mobile number"
         />
-      </label>
+      </div>
       {error && (
         <p role="alert" className="rounded-lg border border-rose-200 bg-rose-50 p-3 text-xs text-rose-800">
           {error}
