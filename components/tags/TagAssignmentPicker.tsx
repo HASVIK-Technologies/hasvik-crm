@@ -60,7 +60,7 @@ export default function TagAssignmentPicker({ entity, entityId, tags = [], tagId
     <div className={isCompactStrip ? "inline-flex min-w-0 max-w-full" : variant === "details" ? "flex min-w-0 flex-wrap items-center gap-2" : variant === "table" ? "flex min-w-0 max-w-64 flex-wrap items-center gap-1" : "flex min-w-0 flex-nowrap items-center gap-1.5 whitespace-nowrap"}>
       {isCompactStrip ? null : variant === "details" || variant === "table" ? <>
         {visibleTags.map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} compact={variant === "table"} className={variant === "table" ? "max-w-full" : "px-2 py-1 text-[11px]"} />)}
-        {!selectedTags.length && <span className="text-sm text-slate-500">No tags assigned</span>}
+        {!selectedTags.length && <span className="text-sm text-slate-500">Add tags</span>}
       </> : selectedTags.length ? <>
           {visibleTags.map((tag) => <TagBadge key={tag.id} name={tag.name} color={tag.color} className="max-w-28 truncate px-1.5 py-0.5 text-[10px]" />)}
         </> : <span className="text-xs font-medium text-slate-500">Add tag</span>}
