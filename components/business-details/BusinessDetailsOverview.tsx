@@ -6,6 +6,7 @@ import { ActivityStateText } from "@/components/common/ActivityStateText";
 import { normalizeHttpUrl } from "@/lib/business/url-validation";
 import { useBusinessStatuses } from "@/hooks/use-filter-options";
 import { formatLeadStatus } from "@/lib/business/form-options";
+import { getLeadKind } from "@/lib/business/lead-type";
 import TagAssignmentPicker from "@/components/tags/TagAssignmentPicker";
 
 interface OverviewProps {
@@ -74,34 +75,35 @@ export default function BusinessDetailsOverview({ business, businessData }: Over
           <div aria-label="Website" className="flex min-w-0 items-start gap-3 text-sm">
             <Globe aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-slate-400" />
             <div className="min-w-0">
-            {websiteUrl ? (
+              {websiteUrl ? (
+                <a
+                  href={websiteUrl}
+                  target="_blank"
+                  rel="noopener noreferrer"
+                  className="break-all font-medium text-primary hover:underline"
+                >
+                  {websiteUrl}
+                </a>
+              ) : (
+                <span className="font-medium text-slate-700">-</span>
+              )}
+            </div>
+          </div>
+        )}
+        <div aria-label="Email" className="flex min-w-0 items-start gap-3 text-sm">
+          <Mail aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-slate-400" />
+          <div className="min-w-0">
+            {business.email ? (
               <a
-                href={websiteUrl}
-                target="_blank"
-                rel="noopener noreferrer"
+                href={`mailto:${business.email}`}
                 className="break-all font-medium text-primary hover:underline"
               >
-                {websiteUrl}
+                {business.email}
               </a>
             ) : (
               <span className="font-medium text-slate-700">-</span>
             )}
-            </div>
-        )}
-        </div>
-        <div aria-label="Email" className="flex min-w-0 items-start gap-3 text-sm">
-          <Mail aria-hidden="true" className="mt-0.5 size-4 shrink-0 text-slate-400" />
-          <div className="min-w-0">
-          {business.email ? (
-            <a
-              href={`mailto:${business.email}`}
-              className="break-all font-medium text-primary hover:underline"
-            >
-              {business.email}
-            </a>
-          ) : (
-            <span className="font-medium text-slate-700">-</span>
-          )}
+          </div>
         </div>
         {!isIndividual && (
           <div className="flex items-start min-w-0 gap-3 text-sm">
