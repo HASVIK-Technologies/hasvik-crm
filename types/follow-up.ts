@@ -91,6 +91,8 @@ export interface FollowUpFilters {
   assignedToName: string;
   status: string;
   type: string;
+  tagId: string; // Add
+  tagName: string; // Add
   fromDate: string;
   toDate: string;
   tab: "all" | "today" | "upcoming" | "overdue";
@@ -100,6 +102,7 @@ export type FollowUpQueryFilters = Omit<FollowUpFilters, "page" | "limit"> & {
   page?: number;
   limit?: number;
   isCalendarView?: boolean;
+  tagIds?: string; // Add
 };
 
 export interface FollowUpKpis {

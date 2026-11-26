@@ -182,6 +182,7 @@ export type BusinessQueryParams = {
   businessType?: string;
   assignedTo?: string;
   state?: string;
+  tagIds?: string; 
 };
 
 export type BusinessKpiParams = {
@@ -190,6 +191,7 @@ export type BusinessKpiParams = {
   categoryId?: string;
   city?: string;
   isActive?: boolean;
+  tagIds?: string; 
 };
 
 export type BusinessKpisResponse = {

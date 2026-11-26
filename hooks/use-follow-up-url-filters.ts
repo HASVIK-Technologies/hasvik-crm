@@ -4,7 +4,16 @@ import { useEffect, useRef, useState } from "react";
 import { useSearchParams } from "next/navigation";
 import { useFollowUpListStore } from "@/store/follow-up-list-store";
 
-const KEYS = ["status", "fromDate", "toDate", "assignedTo", "assignedToName", "type"] as const;
+const KEYS = [
+  "status",
+  "fromDate",
+  "toDate",
+  "assignedTo",
+  "assignedToName",
+  "type",
+  "tagId",
+  "tagName",
+] as const;
 type Key = (typeof KEYS)[number];
 
 export function useFollowUpUrlFilters() {
@@ -17,6 +26,8 @@ export function useFollowUpUrlFilters() {
   const assignedTo = useFollowUpListStore((state) => state.assignedTo);
   const assignedToName = useFollowUpListStore((state) => state.assignedToName);
   const type = useFollowUpListStore((state) => state.type);
+  const tagId = useFollowUpListStore((state) => state.tagId);       // Top level
+  const tagName = useFollowUpListStore((state) => state.tagName);   // Top level
 
   useEffect(() => {
     if (initialised.current) return;
@@ -40,7 +51,10 @@ export function useFollowUpUrlFilters() {
       assignedTo,
       assignedToName,
       type,
+      tagId,   // Included in current
+      tagName, // Included in current
     };
+
     const next = new URLSearchParams(window.location.search);
     for (const key of KEYS) {
       if (current[key]) next.set(key, current[key]);
@@ -53,5 +67,5 @@ export function useFollowUpUrlFilters() {
     if (target !== `${window.location.pathname}${window.location.search}`) {
       window.history.replaceState(null, "", target);
     }
-  }, [ready, status, fromDate, toDate, assignedTo, assignedToName, type]);
+  }, [ready, status, fromDate, toDate, assignedTo, assignedToName, type, tagId, tagName]);
 }

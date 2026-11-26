@@ -23,7 +23,7 @@ function unwrap<T>(payload: unknown): T {
 }
 
 export function parseReminderToMinutes(
-  reminder?: string | number,
+  reminder?: string | number
 ): number | undefined {
   if (typeof reminder === "number") {
     return reminder >= 0 ? reminder : undefined;
@@ -39,9 +39,10 @@ export function parseReminderToMinutes(
 }
 
 export function minutesToReminder(
-  minutes?: number | string,
+  minutes?: number | string
 ): string | undefined {
-  if (minutes === undefined || minutes === null || minutes === "") return undefined;
+  if (minutes === undefined || minutes === null || minutes === "")
+    return undefined;
   const mins = Number(minutes);
   if (isNaN(mins) || mins <= 0) return undefined;
   if (mins === 60) return "1 hour";
@@ -50,16 +51,16 @@ export function minutesToReminder(
 
 function optionFromApi(value: Record<string, unknown>): FollowUpOption {
   const id = String(
-    value._id ?? value.id ?? value.userId ?? value.businessId ?? "",
+    value._id ?? value.id ?? value.userId ?? value.businessId ?? ""
   );
   const resolvedName =
     (value.fullName && String(value.fullName).trim()) ||
-    ([value.firstName, value.lastName]
+    [value.firstName, value.lastName]
       .filter(Boolean)
       .map(String)
       .join(" ")
       .trim() ||
-      undefined) ||
+    undefined ||
     (value.name && String(value.name).trim()) ||
     (value.businessName && String(value.businessName).trim()) ||
     (value.userName && String(value.userName).trim()) ||
@@ -73,24 +74,24 @@ function optionFromApi(value: Record<string, unknown>): FollowUpOption {
     subtitle: value.email
       ? String(value.email)
       : value.city
-        ? String(value.city)
-        : undefined,
+      ? String(value.city)
+      : undefined,
   };
 }
 
 export async function getFollowUpOptions(
   path: string,
   search: string,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ) {
   const response = await apiClient.get(path, { params: { search }, signal });
   const payload = unwrap<unknown>(response.data);
   const rows = Array.isArray(payload)
     ? payload
-    : ((payload as { data?: unknown[] })?.data ?? []);
+    : (payload as { data?: unknown[] })?.data ?? [];
   return rows
     .filter((item): item is Record<string, unknown> =>
-      Boolean(item && typeof item === "object"),
+      Boolean(item && typeof item === "object")
     )
     .map(optionFromApi);
 }
@@ -138,9 +139,7 @@ function parseNotes(value: unknown): string | undefined {
     const textValues = Object.entries(obj)
       .filter(
         ([k, v]) =>
-          !k.startsWith("_") &&
-          typeof v === "string" &&
-          v !== "[object Object]",
+          !k.startsWith("_") && typeof v === "string" && v !== "[object Object]"
       )
       .map(([, v]) => v as string);
     if (textValues.length > 0) {
@@ -156,16 +155,23 @@ function extractPhoneNumber(raw: unknown): string | undefined {
   if (typeof raw === "string" && raw.trim()) return raw.trim();
   if (Array.isArray(raw) && raw.length > 0) {
     const primary = raw.find(
-      (item) => typeof item === "object" && item !== null && (item as { isPrimary?: boolean }).isPrimary,
+      (item) =>
+        typeof item === "object" &&
+        item !== null &&
+        (item as { isPrimary?: boolean }).isPrimary
     ) as { number?: string; value?: string } | undefined;
-    if (primary?.number && String(primary.number).trim()) return String(primary.number).trim();
-    if (primary?.value && String(primary.value).trim()) return String(primary.value).trim();
+    if (primary?.number && String(primary.number).trim())
+      return String(primary.number).trim();
+    if (primary?.value && String(primary.value).trim())
+      return String(primary.value).trim();
     const first = raw[0];
     if (typeof first === "string" && first.trim()) return first.trim();
     if (typeof first === "object" && first !== null) {
       const obj = first as { number?: string; value?: string };
-      if (obj.number && String(obj.number).trim()) return String(obj.number).trim();
-      if (obj.value && String(obj.value).trim()) return String(obj.value).trim();
+      if (obj.number && String(obj.number).trim())
+        return String(obj.number).trim();
+      if (obj.value && String(obj.value).trim())
+        return String(obj.value).trim();
     }
   }
   return undefined;
@@ -175,32 +181,46 @@ function extractNumberEntries(raw: unknown) {
   if (!raw) return [];
   const values = Array.isArray(raw) ? raw : [raw];
   return values.flatMap((value) => {
-    if (typeof value === "string" && value.trim()) return [{ number: value.trim() }];
+    if (typeof value === "string" && value.trim())
+      return [{ number: value.trim() }];
     if (!value || typeof value !== "object") return [];
     const entry = value as Record<string, unknown>;
     const number = String(entry.number ?? entry.value ?? "").trim();
     if (!number) return [];
-    return [{
-      number,
-      name: entry.name ? String(entry.name) : undefined,
-      type: entry.type ? String(entry.type) : undefined,
-      isPrimary: entry.isPrimary === true,
-    }];
+    return [
+      {
+        number,
+        name: entry.name ? String(entry.name) : undefined,
+        type: entry.type ? String(entry.type) : undefined,
+        isPrimary: entry.isPrimary === true,
+      },
+    ];
   });
 }
 
 function extractMeetingLink(value: Record<string, unknown>) {
-  const meeting = value.meeting && typeof value.meeting === "object"
-    ? value.meeting as Record<string, unknown>
-    : {};
-  const candidate = value.meetingLink ?? value.meetingUrl ?? value.meetingURL ?? value.joinUrl ?? value.joinLink ?? meeting.url ?? meeting.link ?? meeting.joinUrl;
+  const meeting =
+    value.meeting && typeof value.meeting === "object"
+      ? (value.meeting as Record<string, unknown>)
+      : {};
+  const candidate =
+    value.meetingLink ??
+    value.meetingUrl ??
+    value.meetingURL ??
+    value.joinUrl ??
+    value.joinLink ??
+    meeting.url ??
+    meeting.link ??
+    meeting.joinUrl;
   if (typeof candidate !== "string") return undefined;
   const trimmed = candidate.trim();
   return /^https?:\/\//i.test(trimmed) ? trimmed : undefined;
 }
 
 export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
-  const business = (value.business ?? (typeof value.businessId === "object" ? value.businessId : {}) ?? {}) as Record<string, unknown>;
+  const business = (value.business ??
+    (typeof value.businessId === "object" ? value.businessId : {}) ??
+    {}) as Record<string, unknown>;
   const assignee = (value.assignee ?? value.assignedTo ?? {}) as Record<
     string,
     unknown
@@ -217,8 +237,8 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
     rawMinutes !== undefined
       ? minutesToReminder(rawMinutes)
       : value.reminder
-        ? String(value.reminder)
-        : undefined;
+      ? String(value.reminder)
+      : undefined;
 
   const callingNumber =
     extractPhoneNumber(business.phoneNumbers) ||
@@ -237,8 +257,12 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
     (value.whatsapp ? String(value.whatsapp) : undefined) ||
     (value.whatsappNumber ? String(value.whatsappNumber) : undefined);
 
-  const phoneNumbers = extractNumberEntries(business.phoneNumbers ?? value.phoneNumbers);
-  const whatsappNumbers = extractNumberEntries(business.whatsappNumbers ?? value.whatsappNumbers);
+  const phoneNumbers = extractNumberEntries(
+    business.phoneNumbers ?? value.phoneNumbers
+  );
+  const whatsappNumbers = extractNumberEntries(
+    business.whatsappNumbers ?? value.whatsappNumbers
+  );
 
   const email =
     (business.email ? String(business.email) : undefined) ||
@@ -249,36 +273,71 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
   return {
     id: String(value._id ?? value.id ?? ""),
     tags: normalizeAssignedTags(value.tags),
-    tagIds: Array.isArray(value.tags) ? value.tags.map((tag) => typeof tag === "string" ? tag : tag && typeof tag === "object" ? String((tag as Record<string, unknown>)._id ?? (tag as Record<string, unknown>).id ?? "") : "").filter(Boolean) : [],
+    tagIds: Array.isArray(value.tags)
+      ? value.tags
+          .map((tag) =>
+            typeof tag === "string"
+              ? tag
+              : tag && typeof tag === "object"
+              ? String(
+                  (tag as Record<string, unknown>)._id ??
+                    (tag as Record<string, unknown>).id ??
+                    ""
+                )
+              : ""
+          )
+          .filter(Boolean)
+      : [],
     isActive: typeof value.isActive === "boolean" ? value.isActive : undefined,
-    businessIsActive: typeof business.isActive === "boolean" ? business.isActive : typeof value.businessIsActive === "boolean" ? value.businessIsActive : undefined,
-    tenantIsActive: typeof value.tenantIsActive === "boolean" ? value.tenantIsActive : undefined,
-    businessId: String(typeof value.businessId === "string" ? value.businessId : business._id ?? business.id ?? ""),
-    businessName: String(
-      value.businessName ?? business.name ?? "Unknown business",
+    businessIsActive:
+      typeof business.isActive === "boolean"
+        ? business.isActive
+        : typeof value.businessIsActive === "boolean"
+        ? value.businessIsActive
+        : undefined,
+    tenantIsActive:
+      typeof value.tenantIsActive === "boolean"
+        ? value.tenantIsActive
+        : undefined,
+    businessId: String(
+      typeof value.businessId === "string"
+        ? value.businessId
+        : business._id ?? business.id ?? ""
     ),
-    businessCity: (value.businessCity || business.city)
-      ? String(value.businessCity || business.city)
-      : undefined,
+    businessName: String(
+      value.businessName ?? business.name ?? "Unknown business"
+    ),
+    businessCity:
+      value.businessCity || business.city
+        ? String(value.businessCity || business.city)
+        : undefined,
     businessPhone: callingNumber || whatsappNumber || "",
     businessCallingNumber: callingNumber,
     businessWhatsappNumber: whatsappNumber,
-    businessPhoneNumbers: phoneNumbers.length ? phoneNumbers : callingNumber ? [{ number: callingNumber }] : [],
-    businessWhatsappNumbers: whatsappNumbers.length ? whatsappNumbers : whatsappNumber ? [{ number: whatsappNumber }] : [],
+    businessPhoneNumbers: phoneNumbers.length
+      ? phoneNumbers
+      : callingNumber
+      ? [{ number: callingNumber }]
+      : [],
+    businessWhatsappNumbers: whatsappNumbers.length
+      ? whatsappNumbers
+      : whatsappNumber
+      ? [{ number: whatsappNumber }]
+      : [],
     businessEmail: email,
     meetingLink: extractMeetingLink(value),
     assignedToId:
       assignee._id || assignee.id
         ? String(assignee._id ?? assignee.id)
         : typeof value.assignedTo === "string"
-          ? value.assignedTo
-          : undefined,
+        ? value.assignedTo
+        : undefined,
     assignedToName: String(
       assignee.fullName ??
         assignee.name ??
         value.assignedToName ??
         (typeof value.assignedTo === "string" ? value.assignedTo : null) ??
-        "Unassigned",
+        "Unassigned"
     ),
     type: String(value.type ?? "CALL"),
     status: String(value.status ?? "SCHEDULED"),
@@ -295,7 +354,7 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
  */
 export async function getFollowUps(
   filters: FollowUpQueryFilters,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ) {
   const params: Record<string, string | number | boolean> = {};
   if (filters.page !== undefined) params.page = filters.page;
@@ -309,6 +368,8 @@ export async function getFollowUps(
   if (filters.isCalendarView !== undefined) {
     params.isCalendarView = filters.isCalendarView;
   }
+  if (filters.tagId) params.tagIds = filters.tagId;
+  else if (filters.tagIds) params.tagIds = filters.tagIds;
 
   const response = await apiClient.get("/follow-ups", { params, signal });
   const root = response.data as {
@@ -323,10 +384,10 @@ export async function getFollowUps(
   const rows = Array.isArray(nested)
     ? nested
     : Array.isArray(nested?.data)
-      ? nested.data
-      : Array.isArray(root.data)
-        ? root.data
-        : [];
+    ? nested.data
+    : Array.isArray(root.data)
+    ? root.data
+    : [];
   const total =
     root.total ??
     (!Array.isArray(nested) ? nested?.total : undefined) ??
@@ -415,8 +476,12 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
   }
 
   if (payload.status === "COMPLETED" || payload.status === "CANCELLED") {
-    const statusResponse = await updateFollowUpStatus({ id, status: payload.status });
-    if (payload.notes !== undefined) statusResponse.notes = payload.notes.trim();
+    const statusResponse = await updateFollowUpStatus({
+      id,
+      status: payload.status,
+    });
+    if (payload.notes !== undefined)
+      statusResponse.notes = payload.notes.trim();
     return statusResponse;
   }
 
@@ -447,15 +512,15 @@ export async function updateFollowUp(payload: UpdateFollowUpPayload) {
  * Body: UpdateFollowUpStatusDto { status: "COMPLETED" | "CANCELLED" }
  */
 export async function updateFollowUpStatus(
-  payload: UpdateFollowUpStatusPayload,
+  payload: UpdateFollowUpStatusPayload
 ): Promise<ReturnType<typeof toFollowUpItem>>;
 export async function updateFollowUpStatus(
   id: string,
-  status: UpdateFollowUpStatusPayload["status"],
+  status: UpdateFollowUpStatusPayload["status"]
 ): Promise<ReturnType<typeof toFollowUpItem>>;
 export async function updateFollowUpStatus(
   payloadOrId: UpdateFollowUpStatusPayload | string,
-  status?: UpdateFollowUpStatusPayload["status"],
+  status?: UpdateFollowUpStatusPayload["status"]
 ) {
   const payload: UpdateFollowUpStatusPayload =
     typeof payloadOrId === "string"
@@ -490,7 +555,7 @@ export async function completeFollowUp(id: string) {
  */
 export async function getFollowUpKpis(
   params?: Partial<FollowUpFilters>,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ) {
   const queryParams: Record<string, string> = {};
   if (params?.businessId) queryParams.businessId = params.businessId;
@@ -499,6 +564,7 @@ export async function getFollowUpKpis(
   if (params?.type) queryParams.type = params.type;
   if (params?.fromDate) queryParams.fromDate = params.fromDate;
   if (params?.toDate) queryParams.toDate = params.toDate;
+  if (params?.tagId) queryParams.tagIds = params.tagId;
 
   const response = await apiClient.get<FollowUpKpis>("/follow-ups/kpis", {
     params: Object.keys(queryParams).length > 0 ? queryParams : undefined,
@@ -519,16 +585,19 @@ export async function getFollowUpKpis(
 export async function getFollowUpStatuses(signal?: AbortSignal) {
   const response = await apiClient.get<FollowUpStatusOption | string[]>(
     "/follow-ups/statuses",
-    { signal },
+    { signal }
   );
   const payload = unwrap<FollowUpStatusOption | string[]>(response.data);
   if (Array.isArray(payload)) {
     return Object.fromEntries(
-      payload.map((status) => [status, formatFollowUpStatus(status)]),
+      payload.map((status) => [status, formatFollowUpStatus(status)])
     ) as FollowUpStatusOption;
   }
   return Object.fromEntries(
-    Object.entries(payload ?? {}).map(([key, label]) => [key, formatFollowUpStatus(label || key)]),
+    Object.entries(payload ?? {}).map(([key, label]) => [
+      key,
+      formatFollowUpStatus(label || key),
+    ])
   );
 }
 
@@ -539,12 +608,18 @@ export async function getFollowUp(id: string, signal?: AbortSignal) {
 
 async function assertBusinessActive(id: string) {
   if (!id) throw new Error("A business is required to change follow-ups.");
-  if (isRecordInactive(await getBusinessRaw(id))) throw new Error("This business is inactive. Activate it before changing follow-ups.");
+  if (isRecordInactive(await getBusinessRaw(id)))
+    throw new Error(
+      "This business is inactive. Activate it before changing follow-ups."
+    );
 }
 
 export async function assertFollowUpWritable(id: string) {
   const followUp = await getFollowUp(id);
-  if (isFollowUpReadOnly(followUp)) throw new Error("This follow-up is read-only because it or its parent record is inactive.");
+  if (isFollowUpReadOnly(followUp))
+    throw new Error(
+      "This follow-up is read-only because it or its parent record is inactive."
+    );
   await assertBusinessActive(followUp.businessId);
 }
 
@@ -553,33 +628,28 @@ export async function assertFollowUpWritable(id: string) {
  */
 export async function getFollowUpsByBusiness(
   businessId: string,
-  signal?: AbortSignal,
+  signal?: AbortSignal
 ) {
-  const response = await apiClient.get(
-    `/follow-ups/business/${businessId}`,
-    { signal },
-  );
+  const response = await apiClient.get(`/follow-ups/business/${businessId}`, {
+    signal,
+  });
   const payload = unwrap<unknown>(response.data);
   const rows = Array.isArray(payload)
     ? payload
-    : ((payload as { data?: unknown[] })?.data ?? []);
+    : (payload as { data?: unknown[] })?.data ?? [];
   return rows.map((item) => toFollowUpItem(item as Record<string, unknown>));
 }
 
 /**
  * GET /api/follow-ups/assigned/{userId}
  */
-export async function getFollowUpsByUser(
-  userId: string,
-  signal?: AbortSignal,
-) {
-  const response = await apiClient.get(
-    `/follow-ups/assigned/${userId}`,
-    { signal },
-  );
+export async function getFollowUpsByUser(userId: string, signal?: AbortSignal) {
+  const response = await apiClient.get(`/follow-ups/assigned/${userId}`, {
+    signal,
+  });
   const payload = unwrap<unknown>(response.data);
   const rows = Array.isArray(payload)
     ? payload
-    : ((payload as { data?: unknown[] })?.data ?? []);
+    : (payload as { data?: unknown[] })?.data ?? [];
   return rows.map((item) => toFollowUpItem(item as Record<string, unknown>));
 }

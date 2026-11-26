@@ -1,6 +1,6 @@
-export function visibleFilterCount(width: number) {
-  if (width >= 1280) return 3;
-  if (width >= 1024) return 2;
+export function visibleFilterCount(width: number, maxDesktop = 3) {
+  if (width >= 1280) return maxDesktop;
+  if (width >= 1024) return Math.min(2, maxDesktop);
   return 0;
 }
 

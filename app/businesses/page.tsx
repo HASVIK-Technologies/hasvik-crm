@@ -52,6 +52,8 @@ function BusinessesContent() {
     city,
     status,
     isActive,
+    tagId, 
+    tagName, 
     showStats,
     showFilters,
     view,
@@ -63,6 +65,7 @@ function BusinessesContent() {
     setCity,
     setStatus,
     setIsActive,
+    setTag, 
     toggleStats,
     toggleFilters,
     setView,
@@ -101,6 +104,8 @@ function BusinessesContent() {
       city,
       status,
       isActive,
+      tagId,
+      tagName,
     });
     for (const key of CLIENT_FILTER_KEYS) {
       const value = viewFilter[key];
@@ -144,8 +149,9 @@ function BusinessesContent() {
         city,
         status,
         isActive,
+        tagId,
       }),
-    [page, limit, sortBy, search, categoryId, city, status, isActive],
+    [page, limit, sortBy, search, categoryId, city, status, isActive, tagId],
   );
 
   const kpiQueryParams = useMemo(
@@ -156,8 +162,9 @@ function BusinessesContent() {
         city,
         status,
         isActive,
+        tagId,
       }),
-    [search, categoryId, city, status, isActive],
+    [search, categoryId, city, status, isActive, tagId],
   );
 
   const {
@@ -210,6 +217,7 @@ function BusinessesContent() {
       (city && city !== "All Cities") ||
       (status && status !== "All Status") ||
       isActive !== undefined ||
+      tagId ||
       clientMode,
   );
 
@@ -228,6 +236,9 @@ function BusinessesContent() {
       onCategorySelect={setCategory}
       selectedStatus={status}
       onStatusChange={setStatus}
+      selectedTagId={tagId}
+      selectedTagName={tagName}
+      onTagSelect={setTag}
       selectedCity={city}
       onCityChange={setCity}
       isActive={isActive}

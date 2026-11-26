@@ -25,6 +25,7 @@ export interface BusinessListStoreState extends BusinessListStateFilters {
   setCity: (city: string) => void;
   setStatus: (status: string) => void;
   setIsActive: (isActive: boolean | undefined) => void;
+  setTag: (tagId: string, tagName?: string) => void;
   toggleStats: () => void;
   toggleFilters: () => void;
   setView: (view: BusinessListView) => void;
@@ -37,7 +38,14 @@ export interface BusinessListStoreState extends BusinessListStateFilters {
 }
 
 export type BusinessListView = "table" | "kanban";
-export type BusinessTableColumn = "category" | "city" | "responsible" | "leadStatus" | "activity" | "lastFollowUp" | "nextFollowUp";
+export type BusinessTableColumn =
+  | "category"
+  | "city"
+  | "responsible"
+  | "leadStatus"
+  | "activity"
+  | "lastFollowUp"
+  | "nextFollowUp";
 
 const DEFAULT_TABLE_COLUMNS: BusinessTableColumn[] = [
   "category",
@@ -59,6 +67,8 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
   city: DEFAULT_BUSINESS_QUERY.city,
   status: DEFAULT_BUSINESS_QUERY.status,
   isActive: DEFAULT_BUSINESS_QUERY.isActive,
+  tagId: DEFAULT_BUSINESS_QUERY.tagId,
+  tagName: DEFAULT_BUSINESS_QUERY.tagName,
   showStats: true,
   showFilters: true,
   view: "table",
@@ -91,8 +101,17 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
 
   setStatus: (status: string) => set({ status, page: 1 }),
 
-  setIsActive: (isActive: boolean | undefined) =>
-    set({ isActive, page: 1 }),
+  setIsActive: (isActive: boolean | undefined) => set({ isActive, page: 1 }),
+
+  setTag: (
+    tagId: string,
+    tagName?: string // <--- Add this
+  ) =>
+    set({
+      tagId,
+      tagName: tagName ?? (tagId ? tagName : ""),
+      page: 1,
+    }),
 
   toggleStats: () => set((state) => ({ showStats: !state.showStats })),
 
@@ -120,7 +139,7 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
     set((state) =>
       state.highlightRevision === revision
         ? { highlightedBusinessId: null, scrollToHighlightedBusiness: false }
-        : state,
+        : state
     ),
 
   resetAllFilters: () =>
@@ -131,6 +150,8 @@ export const useBusinessListStore = create<BusinessListStoreState>((set) => ({
       city: "",
       status: "",
       isActive: undefined,
+      tagId: "",
+      tagName: "",
       page: 1,
     }),
 

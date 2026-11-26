@@ -13,6 +13,8 @@ const initialFilters: FollowUpFilters = {
   assignedToName: "",
   status: "",
   type: "",
+  tagId: "",
+  tagName: "",
   fromDate: "",
   toDate: "",
   tab: "all",

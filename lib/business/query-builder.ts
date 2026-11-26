@@ -1,4 +1,7 @@
-import type { BusinessQueryParams, BusinessKpiParams } from "@/types/business-api";
+import type {
+  BusinessQueryParams,
+  BusinessKpiParams,
+} from "@/types/business-api";
 
 export interface BusinessListStateFilters {
   page: number;
@@ -10,6 +13,8 @@ export interface BusinessListStateFilters {
   city: string;
   status: string;
   isActive?: boolean; // undefined = All, true = Active, false = Inactive
+  tagId: string;
+  tagName?: string;
 }
 
 export const DEFAULT_BUSINESS_QUERY: BusinessListStateFilters = {
@@ -22,6 +27,8 @@ export const DEFAULT_BUSINESS_QUERY: BusinessListStateFilters = {
   city: "",
   status: "",
   isActive: undefined,
+  tagId: "",
+  tagName: "",
 };
 
 /**
@@ -29,11 +36,17 @@ export const DEFAULT_BUSINESS_QUERY: BusinessListStateFilters = {
  * Preserves: page, limit, sortBy, search, categoryId, city, status, isActive
  */
 export function buildBusinessListParams(
-  filters: Partial<BusinessListStateFilters>,
+  filters: Partial<BusinessListStateFilters>
 ): BusinessQueryParams {
   const params: BusinessQueryParams = {
-    page: filters.page && filters.page > 0 ? filters.page : DEFAULT_BUSINESS_QUERY.page,
-    limit: filters.limit && filters.limit > 0 ? filters.limit : DEFAULT_BUSINESS_QUERY.limit,
+    page:
+      filters.page && filters.page > 0
+        ? filters.page
+        : DEFAULT_BUSINESS_QUERY.page,
+    limit:
+      filters.limit && filters.limit > 0
+        ? filters.limit
+        : DEFAULT_BUSINESS_QUERY.limit,
     sortBy: filters.sortBy || DEFAULT_BUSINESS_QUERY.sortBy,
   };
 
@@ -50,12 +63,19 @@ export function buildBusinessListParams(
     params.city = filters.city.trim();
   }
 
-  if (filters.status && filters.status.trim() && filters.status !== "All Status") {
+  if (
+    filters.status &&
+    filters.status.trim() &&
+    filters.status !== "All Status"
+  ) {
     params.status = filters.status.trim();
   }
 
   if (typeof filters.isActive === "boolean") {
     params.isActive = filters.isActive;
+  }
+  if (filters.tagId && filters.tagId.trim()) {
+    params.tagIds = filters.tagId.trim();
   }
 
   return params;
@@ -66,7 +86,7 @@ export function buildBusinessListParams(
  * Passes current search/filter params: search, status, categoryId, city, isActive
  */
 export function buildBusinessKpiParams(
-  filters: Partial<BusinessListStateFilters>,
+  filters: Partial<BusinessListStateFilters>
 ): BusinessKpiParams {
   const params: BusinessKpiParams = {};
 
@@ -82,12 +102,20 @@ export function buildBusinessKpiParams(
     params.city = filters.city.trim();
   }
 
-  if (filters.status && filters.status.trim() && filters.status !== "All Status") {
+  if (
+    filters.status &&
+    filters.status.trim() &&
+    filters.status !== "All Status"
+  ) {
     params.status = filters.status.trim();
   }
 
   if (typeof filters.isActive === "boolean") {
     params.isActive = filters.isActive;
+  }
+
+  if (filters.tagId && filters.tagId.trim()) {
+    params.tagIds = filters.tagId.trim();
   }
 
   return params;
@@ -97,7 +125,7 @@ export function buildBusinessKpiParams(
  * Serializes current filters into URLSearchParams
  */
 export function filtersToSearchParams(
-  filters: BusinessListStateFilters,
+  filters: BusinessListStateFilters
 ): URLSearchParams {
   const sp = new URLSearchParams();
 
@@ -128,12 +156,23 @@ export function filtersToSearchParams(
     sp.set("city", filters.city.trim());
   }
 
-  if (filters.status && filters.status.trim() && filters.status !== "All Status") {
+  if (
+    filters.status &&
+    filters.status.trim() &&
+    filters.status !== "All Status"
+  ) {
     sp.set("status", filters.status.trim());
   }
 
   if (typeof filters.isActive === "boolean") {
     sp.set("isActive", String(filters.isActive));
+  }
+
+  if (filters.tagId && filters.tagId.trim()) {
+    sp.set("tagId", filters.tagId.trim());
+    if (filters.tagName) {
+      sp.set("tagName", filters.tagName);
+    }
   }
 
   return sp;
@@ -143,7 +182,7 @@ export function filtersToSearchParams(
  * Parses URLSearchParams into BusinessListStateFilters
  */
 export function searchParamsToFilters(
-  sp: URLSearchParams | { [key: string]: string | string[] | undefined },
+  sp: URLSearchParams | { [key: string]: string | string[] | undefined }
 ): BusinessListStateFilters {
   const getParam = (key: string): string | undefined => {
     if (sp instanceof URLSearchParams) {
@@ -152,7 +191,7 @@ export function searchParamsToFilters(
     const val = sp[key];
     return Array.isArray(val) ? val[0] : val;
   };
-
+  
   const pageVal = Number.parseInt(getParam("page") || "", 10);
   const limitVal = Number.parseInt(getParam("limit") || "", 10);
   const isActiveRaw = getParam("isActive");
@@ -162,8 +201,12 @@ export function searchParamsToFilters(
   else if (isActiveRaw === "false") isActive = false;
 
   return {
-    page: !isNaN(pageVal) && pageVal > 0 ? pageVal : DEFAULT_BUSINESS_QUERY.page,
-    limit: !isNaN(limitVal) && limitVal > 0 ? limitVal : DEFAULT_BUSINESS_QUERY.limit,
+    page:
+      !isNaN(pageVal) && pageVal > 0 ? pageVal : DEFAULT_BUSINESS_QUERY.page,
+    limit:
+      !isNaN(limitVal) && limitVal > 0
+        ? limitVal
+        : DEFAULT_BUSINESS_QUERY.limit,
     sortBy: getParam("sortBy") || DEFAULT_BUSINESS_QUERY.sortBy,
     search: getParam("search") || "",
     categoryId: getParam("categoryId") || "",
@@ -171,5 +214,7 @@ export function searchParamsToFilters(
     city: getParam("city") || "",
     status: getParam("status") || "",
     isActive,
+    tagId: getParam("tagId") || getParam("tagIds") || "",
+    tagName: getParam("tagName") || "",
   };
 }

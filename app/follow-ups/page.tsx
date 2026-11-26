@@ -73,6 +73,9 @@ function FollowupsContent() {
       assignedToName: filters.assignedToName,
       status: filters.status,
       type: filters.type,
+      tagId: filters.tagId,
+      tagName: filters.tagName, // <--- Add this line!
+      tagIds: filters.tagId || undefined,
     };
     if (filters.view === "calendar") {
       return {
@@ -89,10 +92,10 @@ function FollowupsContent() {
       filters.tab === "today"
         ? { fromDate: dayBoundary(0), toDate: dayBoundary(0, true) }
         : filters.tab === "upcoming"
-          ? { fromDate: dayBoundary(1), toDate: "" }
-          : filters.tab === "overdue"
-            ? { fromDate: "", toDate: dayBoundary(-1, true) }
-            : { fromDate: filters.fromDate, toDate: filters.toDate };
+        ? { fromDate: dayBoundary(1), toDate: "" }
+        : filters.tab === "overdue"
+        ? { fromDate: "", toDate: dayBoundary(-1, true) }
+        : { fromDate: filters.fromDate, toDate: filters.toDate };
     return {
       ...commonFilters,
       page: filters.page,
@@ -110,6 +113,7 @@ function FollowupsContent() {
     if (filters.status) p.status = filters.status;
     if (filters.fromDate) p.fromDate = filters.fromDate;
     if (filters.toDate) p.toDate = filters.toDate;
+    if (filters.tagId) p.tagId = filters.tagId;
     return p;
   }, [
     filters.businessId,
@@ -138,7 +142,7 @@ function FollowupsContent() {
       filters.type ||
       filters.status ||
       filters.fromDate ||
-      filters.toDate,
+      filters.toDate
   );
   const kpiStats = {
     ...kpiData,
@@ -205,7 +209,9 @@ function FollowupsContent() {
         onToggleFilters={filters.toggleFilters}
         onResetFilters={filters.reset}
         resultCount={listQuery.data?.total ?? 0}
-        viewSwitcher={<FollowUpViewToggle value={filters.view} onChange={filters.setView} />}
+        viewSwitcher={
+          <FollowUpViewToggle value={filters.view} onChange={filters.setView} />
+        }
         actions={
           <Actions
             primary={{
@@ -232,12 +238,7 @@ function FollowupsContent() {
             ]}
           />
         }
-        stats={
-          <FollowUpStats
-            data={kpiStats}
-            loading={kpisQuery.isLoading}
-          />
-        }
+        stats={<FollowUpStats data={kpiStats} loading={kpisQuery.isLoading} />}
         filters={
           <FollowUpFilters
             filters={filters}
@@ -256,7 +257,11 @@ function FollowupsContent() {
                     type="button"
                     key={tab}
                     onClick={() => filters.setTab(tab)}
-                    className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${filters.tab === tab ? "border-primary text-primary" : "border-transparent text-[#64748b] hover:text-[#334155]"}`}
+                    className={`shrink-0 border-b-2 px-4 py-3 text-xs font-semibold capitalize transition-colors ${
+                      filters.tab === tab
+                        ? "border-primary text-primary"
+                        : "border-transparent text-[#64748b] hover:text-[#334155]"
+                    }`}
                   >
                     {tab}
                   </button>
@@ -351,7 +356,13 @@ function FollowupsContent() {
 
 export default function FollowupsPage() {
   return (
-    <Suspense fallback={<div className="h-64 w-full animate-pulse bg-slate-100" role="status">Loading follow-ups...</div>}>
+    <Suspense
+      fallback={
+        <div className="h-64 w-full animate-pulse bg-slate-100" role="status">
+          Loading follow-ups...
+        </div>
+      }
+    >
       <FollowupsContent />
     </Suspense>
   );
