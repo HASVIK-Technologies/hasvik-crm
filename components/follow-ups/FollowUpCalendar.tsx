@@ -284,7 +284,7 @@ export default function FollowUpCalendar({
                                 </TooltipTrigger>
                                 <TooltipContent>View notes</TooltipContent>
                               </Tooltip>
-                              <FollowUpCommunicationActions item={item} className="size-6" onAction={() => highlightFollowUp(item.id)} />
+                              <FollowUpCommunicationActions item={item} variant="icons" className="size-6" onAction={() => highlightFollowUp(item.id)} />
                             </div>
                           </div>
                           <div className="mt-1" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="single-summary" /></div>
@@ -378,7 +378,7 @@ export default function FollowUpCalendar({
                             </TooltipTrigger>
                             <TooltipContent>View notes</TooltipContent>
                           </Tooltip>
-                          <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
+                          <FollowUpCommunicationActions item={item} variant="icons" onAction={() => highlightFollowUp(item.id)} />
                           <DropdownMenu>
                             <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
                             <DropdownMenuContent align="end" className="w-48 bg-white">
@@ -465,7 +465,7 @@ export default function FollowUpCalendar({
                       </TooltipTrigger>
                       <TooltipContent>View notes</TooltipContent>
                     </Tooltip>
-                    <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
+                    <FollowUpCommunicationActions item={item} variant="icons" onAction={() => highlightFollowUp(item.id)} />
                     
                     <DropdownMenu>
                       <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild><PlainButton size="icon-sm" aria-label={`More actions for ${item.businessName}`} className="size-8 shrink-0 text-slate-500"><MoreVertical className="size-4" /></PlainButton></DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>

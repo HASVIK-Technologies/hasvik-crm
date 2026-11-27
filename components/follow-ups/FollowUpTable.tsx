@@ -45,6 +45,9 @@ import PrimaryButton from "@/components/common/PrimaryButton";
 import RecordLink from "@/components/common/RecordLink";
 import type { FollowUpItem } from "@/types/follow-up";
 import { FollowUpNotesDialog } from "@/components/follow-ups/FollowUpNotes";
+import LogFollowUpActivityModal, {
+  type FollowUpActionType,
+} from "@/components/follow-ups/LogFollowUpActivityModal";
 import { formatFollowUpType } from "@/lib/business/form-options";
 import { useState } from "react";
 import { useFollowUpHighlight } from "@/hooks/use-follow-up-highlight";
@@ -107,6 +110,10 @@ export default function FollowUpTable({
 }: FollowUpTableProps) {
   const router = useRouter();
   const [notesFollowUp, setNotesFollowUp] = useState<FollowUpItem | null>(null);
+  const [logActivityModal, setLogActivityModal] = useState<{
+    followUp: FollowUpItem;
+    actionType: FollowUpActionType;
+  } | null>(null);
   const { highlightFollowUp, isFollowUpHighlighted } = useFollowUpHighlight();
   const openFollowUp = (followUpId: string) => {
     highlightFollowUp(followUpId, true);
@@ -222,65 +229,66 @@ export default function FollowUpTable({
                         className="rounded-md px-2.5 py-0.5 text-[10px]"
                       />
                     </div>
-                    <div className="order-2 flex items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
-                      <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
-                      <Tooltip>
-                        <TooltipTrigger asChild>
-                          <button
-                            type="button"
-                            aria-label={`View or add notes for ${item.businessName}`}
+                    <div className="order-2 flex flex-wrap items-center gap-1.5" onClick={(e) => e.stopPropagation()}>
+                      <FollowUpCommunicationActions
+                        item={item}
+                        variant="cards"
+                        onAction={() => highlightFollowUp(item.id)}
+                        onLogActivity={(actionType) =>
+                          setLogActivityModal({ followUp: item, actionType })
+                        }
+                      />
+                      <DropdownMenu>
+                        <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
+                          <PlainButton size="icon" aria-label="More actions" className="size-8 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"><MoreVertical className="size-4" /></PlainButton>
+                        </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
+                        <DropdownMenuContent align="end" className="w-48 bg-white p-1" onClick={(e) => e.stopPropagation()}>
+                          <DropdownMenuItem asChild className="cursor-pointer gap-2 text-xs"><Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)}><Eye className="size-3.5 text-[#64748b]" /><span>View Details</span></Link></DropdownMenuItem>
+                          <DropdownMenuItem
                             onClick={(e) => {
                               e.stopPropagation();
                               highlightFollowUp(item.id);
                               setNotesFollowUp(item);
                             }}
-                            className="flex size-8 items-center justify-center border border-transparent text-brand-blue transition-colors hover:bg-blue-50 focus-visible:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/20"
+                            className="cursor-pointer gap-2 text-xs text-[#344054]"
                           >
-                            <MessageSquareText className="size-4" />
-                          </button>
-                        </TooltipTrigger>
-                        <TooltipContent>View or add notes</TooltipContent>
-                      </Tooltip>
-                      <DropdownMenu>
-                        <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
-                          <PlainButton size="icon" aria-label="More actions" className="size-8 border border-transparent text-slate-500 hover:bg-slate-100 hover:text-slate-800"><MoreVertical className="size-4" /></PlainButton>
-                        </DropdownMenuTrigger></TooltipTrigger><TooltipContent>More actions</TooltipContent></Tooltip>
-                        <DropdownMenuContent align="end" className="w-44 bg-white" onClick={(e) => e.stopPropagation()}>
-                          <DropdownMenuItem asChild className="cursor-pointer gap-2 text-xs"><Link href={`/follow-ups/${item.id}`} onClick={() => highlightFollowUp(item.id, true)}><Eye className="size-3.5" /><span>View Details</span></Link></DropdownMenuItem>
+                            <MessageSquareText className="size-3.5 text-brand-blue" />
+                            <span>View or Add Notes</span>
+                          </DropdownMenuItem>
                           {canEditFollowUp(item) && (
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onEdit(item); }}
-                              className="cursor-pointer text-xs"
+                              className="cursor-pointer gap-2 text-xs"
                             >
-                              <Pencil className="mr-1.5 size-3.5 text-[#64748b]" /> Edit
+                              <Pencil className="size-3.5 text-[#64748b]" /> Edit
                             </DropdownMenuItem>
                           )}
                         {canCreateNextFollowUp(item) && onNextFollowUp && (
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onNextFollowUp(item); }}
-                              className="cursor-pointer text-xs font-semibold text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong"
+                              className="cursor-pointer gap-2 text-xs font-semibold text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong"
                             >
-                              <Plus className="mr-1.5 size-3.5" /> Next Follow-Up
+                              <Plus className="size-3.5" /> Next Follow-Up
                             </DropdownMenuItem>
                           )}
                           {canCompleteFollowUp(item) && (
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onComplete(item); }}
-                              className="cursor-pointer text-xs text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong"
+                              className="cursor-pointer gap-2 text-xs text-brand-green-strong focus:bg-brand-green/10 focus:text-brand-green-strong"
                             >
-                              <CheckCircle2 className="mr-1.5 size-3.5" /> Mark as Completed
+                              <CheckCircle2 className="size-3.5" /> Mark as Completed
                             </DropdownMenuItem>
                           )}
                           {canCancelFollowUp(item) && (
                             <DropdownMenuItem
                               onClick={(e) => e.stopPropagation()}
                               onSelect={() => { highlightFollowUp(item.id); onCancel(item); }}
-                              className="cursor-pointer text-xs text-[#b42318] focus:bg-[#fff1f3] focus:text-[#b42318]"
+                              className="cursor-pointer gap-2 text-xs text-[#b42318] focus:bg-[#fff1f3] focus:text-[#b42318]"
                             >
-                              <Trash2 className="mr-1.5 size-3.5" /> Cancel Follow-up
+                              <Trash2 className="size-3.5" /> Cancel Follow-up
                             </DropdownMenuItem>
                           )}
                         </DropdownMenuContent>
@@ -316,7 +324,19 @@ export default function FollowUpTable({
                 </TableHead>
                 <TableHead className="min-w-40 px-4 py-4 font-semibold">Tags</TableHead>
                 <TableHead className="sticky right-0 bg-slate-50 py-4 pl-4 pr-6 text-right font-semibold">
-                  Actions
+                  <div className="flex items-center justify-end gap-2">
+                    <span>Actions</span>
+                    <Tooltip>
+                      <TooltipTrigger asChild>
+                        <span className="hidden xl:inline-flex cursor-help items-center rounded-full bg-blue-50 px-2 py-0.5 text-[10px] font-semibold text-blue-700 border border-blue-200">
+                          Click Call / Whatsapp / Email to log follow-up
+                        </span>
+                      </TooltipTrigger>
+                      <TooltipContent>
+                        Click any action button to initiate contact and log follow-up activity
+                      </TooltipContent>
+                    </Tooltip>
+                  </div>
                 </TableHead>
               </TableRow>
             </TableHeader>
@@ -398,28 +418,16 @@ export default function FollowUpTable({
                       {item.assignedToName}
                     </TableCell>
                     <TableCell className="px-4 py-4" onClick={(event) => event.stopPropagation()}><TagAssignmentPicker entity="FOLLOW_UP" entityId={item.id} tags={item.tags} tagIds={item.tagIds} variant="business-card-summary" /></TableCell>
-                    <TableCell className={`sticky right-0 py-4 pl-4 pr-6 ${isFollowUpHighlighted(item.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white group-hover:bg-[#f8fafc]/80"}`} onClick={(e) => e.stopPropagation()}>
+                    <TableCell className={`sticky right-0 py-3 pl-4 pr-6 ${isFollowUpHighlighted(item.id) ? "bg-blue-50 ring-2 ring-inset ring-brand-blue/25" : "bg-white group-hover:bg-[#f8fafc]/80"}`} onClick={(e) => e.stopPropagation()}>
                       <div className="flex items-center justify-end gap-2" onClick={(e) => e.stopPropagation()}>
-                        <FollowUpCommunicationActions item={item} onAction={() => highlightFollowUp(item.id)} />
-                        <Tooltip>
-                          <TooltipTrigger asChild>
-                            <button
-                              type="button"
-                              aria-label={`View or add notes for ${item.businessName}`}
-                              onClick={(e) => {
-                                e.stopPropagation();
-                                highlightFollowUp(item.id);
-                                setNotesFollowUp(item);
-                              }}
-                              className="flex size-8 items-center justify-center border border-transparent text-brand-blue transition-colors hover:bg-blue-50 focus-visible:border-brand-blue focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-brand-blue/20"
-                            >
-                              <MessageSquareText className="size-4" />
-                            </button>
-                          </TooltipTrigger>
-                          <TooltipContent>
-                            View or add notes
-                          </TooltipContent>
-                        </Tooltip>
+                        <FollowUpCommunicationActions
+                          item={item}
+                          variant="cards"
+                          onAction={() => highlightFollowUp(item.id)}
+                          onLogActivity={(actionType) =>
+                            setLogActivityModal({ followUp: item, actionType })
+                          }
+                        />
                         <DropdownMenu>
                           <Tooltip><TooltipTrigger asChild><DropdownMenuTrigger asChild onClick={(e) => e.stopPropagation()}>
                             <PlainButton
@@ -444,6 +452,18 @@ export default function FollowUpTable({
                                 <Eye className="size-3.5 text-[#64748b]" />
                                 <span>View Details</span>
                               </Link>
+                            </DropdownMenuItem>
+
+                            <DropdownMenuItem
+                              onClick={(e) => {
+                                e.stopPropagation();
+                                highlightFollowUp(item.id);
+                                setNotesFollowUp(item);
+                              }}
+                              className="cursor-pointer text-xs flex w-full items-center gap-2 px-2.5 py-1.5 font-medium text-[#344054] hover:bg-[#f1f5f9]"
+                            >
+                              <MessageSquareText className="size-3.5 text-brand-blue" />
+                              <span>View or Add Notes</span>
                             </DropdownMenuItem>
 
                             {canEditFollowUp(item) && <DropdownMenuItem
@@ -521,7 +541,7 @@ export default function FollowUpTable({
       followUpId={notesFollowUp?.id}
       followUpName={
         notesFollowUp
-          ? `${notesFollowUp.businessName} Â· ${formatDate(notesFollowUp.scheduledAt)}`
+          ? `${notesFollowUp.businessName} · ${formatDate(notesFollowUp.scheduledAt)}`
           : ""
       }
       open={Boolean(notesFollowUp)}
@@ -529,6 +549,16 @@ export default function FollowUpTable({
         if (!open) setNotesFollowUp(null);
       }}
     />
+    {logActivityModal && (
+      <LogFollowUpActivityModal
+        open={Boolean(logActivityModal)}
+        onOpenChange={(open) => {
+          if (!open) setLogActivityModal(null);
+        }}
+        followUp={logActivityModal.followUp}
+        actionType={logActivityModal.actionType}
+      />
+    )}
     </>
   );
 }

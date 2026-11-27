@@ -280,6 +280,9 @@ export function toFollowUpItem(value: Record<string, unknown>): FollowUpItem {
         (typeof value.assignedTo === "string" ? value.assignedTo : null) ??
         "Unassigned",
     ),
+    businessLeadStatus: (business.status || business.leadStatus || value.businessLeadStatus || value.leadStatus)
+      ? String(business.status || business.leadStatus || value.businessLeadStatus || value.leadStatus)
+      : undefined,
     type: String(value.type ?? "CALL"),
     status: String(value.status ?? "SCHEDULED"),
     scheduledAt: String(value.scheduledAt ?? value.followUpDate ?? ""),
