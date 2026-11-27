@@ -7,7 +7,6 @@ import {
   Ban,
   Calendar,
   Check,
-  ChevronDown,
   Clock,
   Info,
   Loader2,
@@ -42,6 +41,9 @@ export type FollowUpActionType = "CALL" | "WHATSAPP" | "EMAIL";
 interface OutcomeOption {
   id: string;
   label: string;
+  unselectedClass: string;
+  selectedClass: string;
+  hoverClass: string;
   icon: (isSelected: boolean) => React.ReactNode;
 }
 
@@ -49,36 +51,71 @@ const CALL_OUTCOMES: OutcomeOption[] = [
   {
     id: "CONNECTED",
     label: "Connected",
+    unselectedClass: "bg-blue-50 border border-blue-200 text-black",
+    selectedClass: "bg-[#0066ff] text-white border-transparent",
+    hoverClass: "hover:bg-[#0066ff] hover:text-white hover:border-[#0066ff]",
     icon: (selected) => (
-      <Check className={`size-4 stroke-[2.5] ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Check
+        className={`size-4 stroke-[2.5] transition-colors ${
+          selected ? "text-white" : "text-blue-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "NOT_CONNECTED",
     label: "Not Connected",
+    unselectedClass: "bg-slate-100 border border-slate-200 text-black",
+    selectedClass: "bg-slate-700 text-white border-transparent",
+    hoverClass: "hover:bg-slate-700 hover:text-white hover:border-slate-700",
     icon: (selected) => (
-      <Ban className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Ban
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-slate-700 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "BUSY",
     label: "Busy",
+    unselectedClass: "bg-amber-100 border border-amber-200 text-black",
+    selectedClass: "bg-amber-500 text-white border-transparent",
+    hoverClass: "hover:bg-amber-500 hover:text-white hover:border-amber-500",
     icon: (selected) => (
-      <Clock className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Clock
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-amber-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "SWITCH_OFF",
     label: "Switch Off",
+    unselectedClass: "bg-amber-50 border border-amber-200 text-black",
+    selectedClass: "bg-amber-500 text-white border-transparent",
+    hoverClass: "hover:bg-amber-500 hover:text-white hover:border-amber-500",
     icon: (selected) => (
-      <Power className={`size-4 ${selected ? "text-white" : "text-[#f97316]"}`} />
+      <Power
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-amber-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "WRONG_NUMBER",
     label: "Wrong Number",
+    unselectedClass: "bg-red-50 border border-red-200 text-black",
+    selectedClass: "bg-red-600 text-white border-transparent",
+    hoverClass: "hover:bg-red-600 hover:text-white hover:border-red-600",
     icon: (selected) => (
-      <PhoneOff className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <X
+        className={`size-4 stroke-[2.5] transition-colors ${
+          selected ? "text-white" : "text-red-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
 ];
@@ -87,29 +124,57 @@ const WHATSAPP_OUTCOMES: OutcomeOption[] = [
   {
     id: "MESSAGE_SENT",
     label: "Message Sent",
+    unselectedClass: "bg-blue-50 border border-blue-200 text-black",
+    selectedClass: "bg-[#0066ff] text-white border-transparent",
+    hoverClass: "hover:bg-[#0066ff] hover:text-white hover:border-[#0066ff]",
     icon: (selected) => (
-      <Check className={`size-4 stroke-[2.5] ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Check
+        className={`size-4 stroke-[2.5] transition-colors ${
+          selected ? "text-white" : "text-blue-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "CUSTOMER_REPLIED",
     label: "Customer Replied",
+    unselectedClass: "bg-slate-100 border border-slate-200 text-black",
+    selectedClass: "bg-slate-700 text-white border-transparent",
+    hoverClass: "hover:bg-slate-700 hover:text-white hover:border-slate-700",
     icon: (selected) => (
-      <Clock className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Clock
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-slate-700 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "NO_RESPONSE",
     label: "No Response",
+    unselectedClass: "bg-slate-100 border border-slate-200 text-black",
+    selectedClass: "bg-slate-700 text-white border-transparent",
+    hoverClass: "hover:bg-slate-700 hover:text-white hover:border-slate-700",
     icon: (selected) => (
-      <Clock className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Clock
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-slate-700 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "UNABLE_TO_SEND",
     label: "Unable to Send",
+    unselectedClass: "bg-red-50 border border-red-200 text-black",
+    selectedClass: "bg-red-600 text-white border-transparent",
+    hoverClass: "hover:bg-red-600 hover:text-white hover:border-red-600",
     icon: (selected) => (
-      <Power className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Power
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-red-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
 ];
@@ -118,29 +183,57 @@ const EMAIL_OUTCOMES: OutcomeOption[] = [
   {
     id: "EMAIL_SENT",
     label: "Email Sent",
+    unselectedClass: "bg-blue-50 border border-blue-200 text-black",
+    selectedClass: "bg-[#0066ff] text-white border-transparent",
+    hoverClass: "hover:bg-[#0066ff] hover:text-white hover:border-[#0066ff]",
     icon: (selected) => (
-      <Check className={`size-4 stroke-[2.5] ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Check
+        className={`size-4 stroke-[2.5] transition-colors ${
+          selected ? "text-white" : "text-blue-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "REPLY_RECEIVED",
     label: "Reply Received",
+    unselectedClass: "bg-slate-100 border border-slate-200 text-black",
+    selectedClass: "bg-slate-700 text-white border-transparent",
+    hoverClass: "hover:bg-slate-700 hover:text-white hover:border-slate-700",
     icon: (selected) => (
-      <Play className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Play
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-slate-700 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "NO_RESPONSE",
     label: "No Response",
+    unselectedClass: "bg-slate-100 border border-slate-200 text-black",
+    selectedClass: "bg-slate-700 text-white border-transparent",
+    hoverClass: "hover:bg-slate-700 hover:text-white hover:border-slate-700",
     icon: (selected) => (
-      <Clock className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Clock
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-slate-700 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "FAILED",
     label: "Failed",
+    unselectedClass: "bg-red-50 border border-red-200 text-black",
+    selectedClass: "bg-red-600 text-white border-transparent",
+    hoverClass: "hover:bg-red-600 hover:text-white hover:border-red-600",
     icon: (selected) => (
-      <AlertCircle className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <AlertCircle
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-red-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
 ];
@@ -148,6 +241,9 @@ const EMAIL_OUTCOMES: OutcomeOption[] = [
 interface CustomerIntentOption {
   id: string;
   label: string;
+  unselectedClass: string;
+  selectedClass: string;
+  hoverClass: string;
   icon: (isSelected: boolean) => React.ReactNode;
 }
 
@@ -155,29 +251,57 @@ const CUSTOMER_INTENTS: CustomerIntentOption[] = [
   {
     id: "NOT_INTERESTED",
     label: "Not Interested",
+    unselectedClass: "bg-red-50 border border-red-200 text-black",
+    selectedClass: "bg-red-500 text-white border-transparent",
+    hoverClass: "hover:bg-red-500 hover:text-white hover:border-red-500",
     icon: (selected) => (
-      <Ban className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Ban
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-red-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "NEED_MORE_INFO",
     label: "Need More Info",
+    unselectedClass: "bg-purple-50 border border-purple-200 text-black",
+    selectedClass: "bg-purple-600 text-white border-transparent",
+    hoverClass: "hover:bg-purple-600 hover:text-white hover:border-purple-600",
     icon: (selected) => (
-      <Info className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Info
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-purple-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "DEMO_REQUEST",
     label: "Demo Request",
+    unselectedClass: "bg-violet-50 border border-violet-200 text-black",
+    selectedClass: "bg-violet-600 text-white border-transparent",
+    hoverClass: "hover:bg-violet-600 hover:text-white hover:border-violet-600",
     icon: (selected) => (
-      <Play className={`size-4 ${selected ? "text-white" : "text-[#0f172a]"}`} />
+      <Play
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-violet-600 group-hover:text-white"
+        }`}
+      />
     ),
   },
   {
     id: "NEXT_FOLLOW_UP",
     label: "Next Follow-up",
+    unselectedClass: "bg-sky-50 border border-sky-200 text-black",
+    selectedClass: "bg-[#00bcd4] text-white border-transparent",
+    hoverClass: "hover:bg-[#00bcd4] hover:text-white hover:border-[#00bcd4]",
     icon: (selected) => (
-      <Calendar className={`size-4 ${selected ? "text-white" : "text-[#0066ff]"}`} />
+      <Calendar
+        className={`size-4 transition-colors ${
+          selected ? "text-white" : "text-[#00bcd4] group-hover:text-white"
+        }`}
+      />
     ),
   },
 ];
@@ -411,10 +535,10 @@ export default function LogFollowUpActivityModal({
                       key={opt.id}
                       type="button"
                       onClick={() => setOutcome(opt.id)}
-                      className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm transition-all shadow-2xs ${
+                      className={`group flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all shadow-2xs ${
                         isSelected
-                          ? "bg-[#0066ff] text-white font-semibold border border-transparent shadow-xs"
-                          : "border border-[#cbd5e1] bg-white text-[#0f172a] font-medium hover:border-slate-400 hover:bg-slate-50"
+                          ? `${opt.selectedClass} shadow-xs`
+                          : `${opt.unselectedClass} ${opt.hoverClass}`
                       }`}
                     >
                       {opt.icon(isSelected)}
@@ -439,10 +563,10 @@ export default function LogFollowUpActivityModal({
                       key={opt.id}
                       type="button"
                       onClick={() => setIntent(isSelected ? "" : opt.id)}
-                      className={`flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm transition-all shadow-2xs ${
+                      className={`group flex items-center gap-1.5 rounded-xl px-4 py-2 text-sm font-semibold transition-all shadow-2xs ${
                         isSelected
-                          ? "bg-[#0066ff] text-white font-semibold border border-transparent shadow-xs"
-                          : "border border-[#cbd5e1] bg-white text-[#0f172a] font-medium hover:border-slate-400 hover:bg-slate-50"
+                          ? `${opt.selectedClass} shadow-xs`
+                          : `${opt.unselectedClass} ${opt.hoverClass}`
                       }`}
                     >
                       {opt.icon(isSelected)}
@@ -497,7 +621,7 @@ export default function LogFollowUpActivityModal({
               type="button"
               onClick={() => onOpenChange(false)}
               disabled={isSubmitting}
-              className="rounded-xl border border-[#0066ff] bg-white px-6 py-2.5 text-sm font-semibold text-[#0066ff] hover:bg-blue-50 transition-colors shadow-2xs"
+              className="rounded-xl bg-sky-100 text-sky-700 hover:bg-sky-200 px-6 py-2.5 text-sm font-semibold transition-colors shadow-2xs"
             >
               Cancel
             </button>
@@ -505,7 +629,7 @@ export default function LogFollowUpActivityModal({
               type="button"
               onClick={handleSaveActivity}
               disabled={isSubmitting || !outcome}
-              className="flex items-center gap-2 rounded-xl bg-[#16a34a] hover:bg-[#15803d] px-6 py-2.5 text-sm font-semibold text-white shadow-xs transition-colors disabled:opacity-50"
+              className="flex items-center gap-2 rounded-xl bg-[#0066ff] hover:bg-[#0052cc] px-6 py-2.5 text-sm font-semibold text-white shadow-sm transition-colors disabled:opacity-50"
             >
               {isSubmitting ? (
                 <Loader2 className="size-4 animate-spin" />
