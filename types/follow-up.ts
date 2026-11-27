@@ -36,6 +36,7 @@ export interface FollowUpItem {
   meetingLink?: string;
   assignedToId?: string;
   assignedToName: string;
+  businessLeadStatus?: string;
   type: FollowUpType | string;
   status: FollowUpStatus | string;
   scheduledAt: string;
